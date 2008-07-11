@@ -3,15 +3,24 @@
 #include "document.h"
 #include "view.h"
 
+#include <kdebug.h>
+
 #include <QtCore/QListIterator>
 
 namespace Kobby
 {
 
+K_PLUGIN_FACTORY_DEFINITION(PluginFactory,
+    registerPlugin<Plugin>("ktexteditor_kobby");
+    )
+
+K_EXPORT_PLUGIN(PluginFactory("ktexteditor_kobby", "ktexteditor_plugins"))
+
 Plugin::Plugin(QObject *parent, const QVariantList &args)
     : KTextEditor::Plugin(parent)
 {
     Q_UNUSED(args)
+
 }
 
 void Plugin::addDocument(KTextEditor::Document *document)
@@ -25,7 +34,7 @@ void Plugin::removeDocument(KTextEditor::Document *document)
     int i;
 
     // Not using iterator because we need the index to remove
-    for (i = 0; i < m_views.size(); i++)
+    for (i = 0; i < m_documents.size(); i++)
     {
         if (m_documents.at(i)->parentClient() == document)
         {

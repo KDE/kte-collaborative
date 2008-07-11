@@ -27,6 +27,8 @@ private:
 
 }; // class Plugin
 
+K_PLUGIN_FACTORY_DECLARATION(PluginFactory)
+
 } // namespace Kobby
 
 #endif

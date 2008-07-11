@@ -5,4 +5,5 @@ CMakeTmp
 *.files
 lib
 Makefile*
+install_manifest.txt
 
