@@ -1,0 +1,4 @@
+<!DOCTYPE kpartgui>
+<kpartplugin name="ktexteditor_kobby" library="ktexteditor_kobby" version="1">
+</kpartplugin>
+

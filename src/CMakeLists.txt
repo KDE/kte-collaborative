@@ -1,7 +1,7 @@
 FIND_PACKAGE(KDE4 REQUIRED)
 INCLUDE_DIRECTORIES( ${KDE4_INCLUDES} )
 
-set(ktexteditor_kobby_PART_SRCS kobby.cpp)
+set(ktexteditor_kobby_PART_SRCS document.cpp view.cpp plugin.cpp)
 
 kde4_add_plugin(ktexteditor_kobby ${ktexteditor_kobby_PART_SRCS})
 
