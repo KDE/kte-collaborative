@@ -9,7 +9,5 @@ target_link_libraries(ktexteditor_kobby ${KDE4_KDECORE_LIBS} ktexteditor)
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR})
 
-install(FILES kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/ktexteditor_kobby)
-
 install(FILES ktexteditor_kobby.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-
+install(FILES kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/ktexteditor_kobby)

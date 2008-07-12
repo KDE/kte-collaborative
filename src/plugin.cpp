@@ -1,9 +1,8 @@
 #include "plugin.h"
-
 #include "document.h"
 #include "view.h"
 
-#include <kdebug.h>
+#include <KDebug>
 
 #include <QtCore/QListIterator>
 
