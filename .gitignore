@@ -1,9 +1,10 @@
 CMakeCache.txt
 CMakeFiles
 CMakeTmp
-*.cmake
+cmake_*
 *.files
 lib
 Makefile*
 install_manifest.txt
+MissingRequirements.txt
 
