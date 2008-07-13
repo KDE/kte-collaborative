@@ -1,9 +1,9 @@
-# Find libinfinitymm
+# Find sigc++
 #
 # This script will define:
-#	LIBINFINITYMM_FOUND
-#	LIBINFINITYMM_INCLUDES
-#	LIBINFINITYMM_LIBRARY
+#	SIGCPP_FOUND
+#	SIGCPP_INCLUDES
+#	SIGCPP_LIBRARY
 #
 # Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
 #
@@ -22,43 +22,43 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
 
-if( LIBINFINITYMM_LIBRARIES AND LIBINFINITYMM_INCLUDES )
+if( SIGCPP_LIBRARIES AND SIGCPP_INCLUDES )
 	
-	set( LIBINFINITYMM_FOUND true )
-
-else( LIBINFINITYMM_LIBRARIES AND LIBINFINITYMM_INCLUDES )
+	set( SIGCPP_FOUND true )
 	
-	set( LIBINFINITYMM_FOUND false )
+else ( SIGCPP_LIBRARIES AND SIGCPP_INCLUDES )
+	
+	set( SIGCPP_FOUND false )
 	
 	if( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
 		include(UsePkgConfig)
-		pkgconfig(libinfinitymm-1.0
-			_LIBINFINITYMM_INCLUDE_DIR
-			_LIBINFINITYMM_LIBRARY_DIR
-			_LIBINFINITYMM_LINKER_FLAGS
-			_LIBINFINITYMM_COMPILER_FLAGS
+		pkgconfig(sigc++-2.0
+			_SIGCPP_INCLUDE_DIR
+			_SIGCPP_LIBRARY_DIR
+			_SIGCPP_LINKER_FLAGS
+			_SIGCPP_COMPILER_FLAGS
 		)
 	endif( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
 	
-	find_path( LIBINFINITYMM_INCLUDES
+	find_path( SIGCPP_INCLUDES
 		NAMES
-			libinfinitymm/init.h
+			sigc++/sigc++.h
 		PATHS
-			${_LIBINFINITYMM_INCLUDE_DIR}
+			${_SIGCPP_INCLUDE_DIR}
 			/usr/include
 			/usr/local/include
 			/opt/local/include
 		PATH_SUFFIXES
-			libinfinitymm-1.0
+			sigc++-2.0
 	)
 	
-	find_library( LIBINFINITYMM_LIBRARY
+	find_library( SIGCPP_LIBRARY
 		NAMES
-			infinitymm-1.0
+			sigc-2.0
 		PATHS
-			${_LIBINFINITYMM_LIBRARY_DIR}
+			${_SIGCPP_LIBRARY_DIR}
 			/usr/lib
 			/usr/local/lib
 	)
 
-endif( LIBINFINITYMM_LIBRARIES AND LIBINFINITYMM_INCLUDES )
+endif( SIGCPP_LIBRARIES AND SIGCPP_INCLUDES )
