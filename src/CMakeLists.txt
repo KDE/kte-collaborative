@@ -1,20 +1,27 @@
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules )
 
 FIND_PACKAGE(KDE4 REQUIRED)
-INCLUDE_DIRECTORIES( ${KDE4_INCLUDES} )
-
+FIND_PACKAGE(Glibmm REQUIRED)
 FIND_PACKAGE(Libinfinitymm REQUIRED)
 
-message(STATUS "Libinfinitymm includes: ${LIBINFINITYMM_INCLUDES}" )
+set(KOBBY_INCLUDES
+	${KDE4_INCLUDES}
+	${GLIBMM_INCLUDES}
+	${LIBINFINITYMM_INCLUDES}
+	)
 
-macro_log_feature(libinfinitymm_FOUND "libinfinitymm" "libinfinity C++ bindings." "http://libinfinitymm.org" TRUE "0_1" "Needed for collaborative support.")
-INCLUDE_DIRECTORIES( ${LIBINFINITYMM_INCLUDES} )
+set(KOBBY_LIBRARIES
+	${KDE4_KDECORE_LIBS}
+	${GLIBMM_LIBRARY}
+	${LIBINFINITYMM_LIBRARY}
+	)
 
-set(ktexteditor_kobby_PART_SRCS document.cpp view.cpp plugin.cpp)
+set(KOBBY_PART_SRCS document.cpp view.cpp plugin.cpp)
 
-kde4_add_plugin(ktexteditor_kobby ${ktexteditor_kobby_PART_SRCS})
+kde4_add_plugin(ktexteditor_kobby ${KOBBY_PART_SRCS})
 
-target_link_libraries(ktexteditor_kobby ${KDE4_KDECORE_LIBS} ${LIBINFINITYMM_LIBS} ktexteditor)
+INCLUDE_DIRECTORIES(${KOBBY_INCLUDES})
+target_link_libraries(ktexteditor_kobby ${KOBBY_LIBRARIES} ktexteditor)
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR})
 

@@ -6,6 +6,8 @@
 
 #include <QtCore/QListIterator>
 
+#include <sigc++/signal.h>
+
 namespace Kobby
 {
 
