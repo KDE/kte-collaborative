@@ -15,25 +15,24 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 
 FIND_PACKAGE(KDE4 REQUIRED)
-FIND_PACKAGE(Glibmm REQUIRED)
-FIND_PACKAGE(SigC++ REQUIRED)
+FIND_PACKAGE(Glib REQUIRED)
 FIND_PACKAGE(Libinfinitymm REQUIRED)
 
 set(KOBBY_INCLUDES
 	${KDE4_INCLUDES}
-	${GLIBMM_INCLUDES}
-	${SIGCPP_INCLUDES}
 	${LIBINFINITYMM_INCLUDES}
-	)
+)
 
 set(KOBBY_LIBRARIES
 	${KDE4_KDECORE_LIBS}
-	${GLIBMM_LIBRARY}
-	${SIGCPP_LIBRARY}
-	${LIBINFINITYMM_LIBRARY}
-	)
+	${LIBINFINITYMM_LIBRARIES}
+)
 
-set(KOBBY_PART_SRCS document.cpp view.cpp plugin.cpp)
+set(KOBBY_PART_SRCS
+	document.cpp
+	view.cpp
+	plugin.cpp
+)
 
 kde4_add_plugin(ktexteditor_kobby ${KOBBY_PART_SRCS})
 
