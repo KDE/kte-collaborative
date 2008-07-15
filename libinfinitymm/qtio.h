@@ -8,6 +8,10 @@ namespace Infinity
 
 class QtIo : public Io
 {
+
+public:
+    
+
 }; // class QtIo
 
 } // namespace Infinity

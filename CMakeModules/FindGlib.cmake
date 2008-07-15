@@ -8,19 +8,8 @@
 #
 # Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
 #
-# This program is free software; you can redistribute it and/or modify it 
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation; either version 2, or (at your option) any
-# later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.A
 #
 
 if( GLIB_LIBRARIES AND GLIB_INCLUDES )
@@ -53,6 +42,17 @@ else( GLIB_LIBRARIES AND GLIB_INCLUDES )
 			glib-2.0
 	)
 	
+	find_path( GLIB_LIB_INCLUDE_DIR
+		NAMES
+			glibconfig.h
+		PATHS
+			${_GLIB_INCLUDE_DIR}
+			/usr/lib
+			/usr/local/lib
+		PATH_SUFFIXES
+			glib-2.0/include
+	)
+	
 	find_library( GLIB_LIBRARY
 		NAMES
 			glib-2.0
@@ -64,6 +64,7 @@ else( GLIB_LIBRARIES AND GLIB_INCLUDES )
 	
 	set( GLIB_INCLUDES
 		${GLIB_INCLUDE_DIR}
+		${GLIB_LIB_INCLUDE_DIR}
 	)
 	
 	set( GLIB_LIBRARIES

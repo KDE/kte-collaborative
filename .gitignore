@@ -7,4 +7,5 @@ lib
 Makefile*
 install_manifest.txt
 MissingRequirements.txt
+*.a
 
