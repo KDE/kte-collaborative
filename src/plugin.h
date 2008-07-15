@@ -14,10 +14,10 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#include <ktexteditor/plugin.h>
-
 #include <QtCore/QObject>
 #include <QtCore/QList>
+
+#include <ktexteditor/plugin.h>
 
 namespace Kobby
 {
