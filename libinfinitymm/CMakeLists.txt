@@ -4,14 +4,19 @@ FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 FIND_PACKAGE(Libinfinitymm REQUIRED)
-INCLUDE_DIRECTORIES(${LIBINFINITYMM_INCLUDES})
 
 SET(infinitymm_qtio_SRCS
-	ioqsocketnotifier.cpp
 	qtio.cpp
+	ioqsocketnotifier.cpp
 )
 
-ADD_LIBRARY(infinitymm-qtio ${infinitymm_qtio_SRCS})
+QT4_AUTOMOC(${infinitymm_qtio_SRCS})
+
+ADD_LIBRARY(infinitymm-qtio STATIC
+	${infinitymm_qtio_SRCS}
+)
+
+INCLUDE_DIRECTORIES(${LIBINFINITYMM_INCLUDES} ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(infinitymm-qtio
 	${QT_LIBRARIES}

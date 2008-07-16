@@ -1,3 +1,6 @@
+#ifndef IOQSOCKETNOTIFIER_H
+#define IOQSOCKETNOTIFIER_H
+
 #include <libinfinitymm/common/io.h>
 #include <glibmm/object.h>
 
@@ -15,13 +18,8 @@ public:
     static IoEvent convertEventType(QSocketNotifier::Type event);
 
 public:
-    IoQSocketNotifier(int socket,
-        QSocketNotifier::Type type,
-        void *user_data,
-        IoFunction handler_func,
-        Glib::Object::DestroyNotify destroy_notifiy,
-        QObject *parent = 0
-    );
+    IoQSocketNotifier( int socket, QSocketNotifier::Type type, IoFunction handler_func,
+        void *user_data, Glib::Object::DestroyNotify destroy_notifiy, QObject *parent = 0 );
     ~IoQSocketNotifier();
     
     void *getUserData();
@@ -38,3 +36,6 @@ private:
 }; // class SocketNotifier
 
 } // namespace Infinity
+
+#endif
+

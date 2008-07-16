@@ -1,4 +1,6 @@
-#include "ioqsocketnotifier.h"
+#include <ioqsocketnotifier.h>
+
+#include "ioqsocketnotifier.moc"
 
 namespace Infinity
 {
@@ -39,8 +41,8 @@ QSocketNotifier::Type IoQSocketNotifier::convertEventType(IoEvent event)
 
 IoQSocketNotifier::IoQSocketNotifier( int socket,
     QSocketNotifier::Type type,
-    void *user_data,
     IoFunction handler_func,
+    void *user_data,
     Glib::Object::DestroyNotify destroy_notify,
     QObject *parent
 )
