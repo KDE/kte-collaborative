@@ -9,7 +9,7 @@
 # Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.A
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
 if( GLIB_LIBRARIES AND GLIB_INCLUDES )
@@ -70,5 +70,7 @@ else( GLIB_LIBRARIES AND GLIB_INCLUDES )
 	set( GLIB_LIBRARIES
 		${GLIB_LIBRARY}
 	)
+	
+	set( GLIB_FOUND true )
 	
 endif( GLIB_LIBRARIES AND GLIB_INCLUDES )
