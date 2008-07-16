@@ -7,6 +7,7 @@ FIND_PACKAGE(Libinfinitymm REQUIRED)
 INCLUDE_DIRECTORIES(${LIBINFINITYMM_INCLUDES})
 
 SET(libinfinitymm_qtio_SRCS
+	ioqsocketnotifier.cpp
 	qtio.cpp
 	)
 
