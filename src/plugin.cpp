@@ -14,6 +14,7 @@
 #include "plugin.h"
 #include "document.h"
 #include "view.h"
+#include "configdialog.h"
 
 #include <KDebug>
 
@@ -23,8 +24,9 @@ namespace Kobby
 {
 
 K_PLUGIN_FACTORY_DEFINITION(PluginFactory,
+    registerPlugin<ConfigDialog>("ktexteditor_kobby_config");
     registerPlugin<Plugin>("ktexteditor_kobby");
-    )
+)
 
 K_EXPORT_PLUGIN(PluginFactory("ktexteditor_kobby", "ktexteditor_plugins"))
 

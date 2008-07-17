@@ -1,9 +1,10 @@
 #ifndef QTIO_H
 #define QTIO_H
 
-#include <libinfinitymm/common/io.h>
-
 #include <ioqsocketnotifier.h>
+
+#include <glibmm/object.h>
+#include <libinfinitymm/common/io.h>
 
 #include <QList>
 

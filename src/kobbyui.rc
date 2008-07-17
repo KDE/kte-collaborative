@@ -1,10 +1,8 @@
 <!DOCTYPE kpartgui>
 <kpartplugin name="ktexteditor_kobby" library="ktexteditor_kobby" version="1">
 <MenuBar>
-	<Menu name="sessions"><Text>Sess&amp;ions</Text>
-		<Menu name="kobby"><Text>Kobby</Text>
-			<Action name="kobby_join"/>
-		</Menu>
+	<Menu name="tools"><Text>&amp;Tools</Text>
+		<Action name="kobby_config" />
 	</Menu>
 </MenuBar>
 </kpartplugin>

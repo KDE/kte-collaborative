@@ -22,6 +22,7 @@ set(KOBBY_PART_SRCS
 	document.cpp
 	view.cpp
 	plugin.cpp
+	configdialog.cpp
 )
 
 kde4_add_plugin(ktexteditor_kobby ${KOBBY_PART_SRCS})
@@ -31,5 +32,17 @@ target_link_libraries(ktexteditor_kobby ${KOBBY_LIBRARIES} ktexteditor)
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR})
 
-install(FILES ktexteditor_kobby.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-install(FILES kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/ktexteditor_kobby)
+install(
+	FILES
+		ktexteditor_kobby.desktop
+		ktexteditor_kobby_config.desktop
+	DESTINATION
+		${SERVICES_INSTALL_DIR}
+)
+
+install(
+	FILES
+		kobbyui.rc
+	DESTINATION
+		${DATA_INSTALL_DIR}/ktexteditor_kobby
+)

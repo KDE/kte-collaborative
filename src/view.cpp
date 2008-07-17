@@ -22,6 +22,7 @@ namespace Kobby
 View::View(KTextEditor::View *view)
     : QObject(view)
     , KXMLGUIClient(view)
+    , configDialog( 0 )
 {
     setComponentData(PluginFactory::componentData());
     setupActions();
@@ -29,18 +30,33 @@ View::View(KTextEditor::View *view)
 
 void View::setupActions()
 {
-    KAction *joinAction = new KAction(i18n("Join Kobby Session"), this);
-    actionCollection()->addAction("kobby_join", joinAction);
+    KAction *configAction = new KAction(i18n("Kobby"), this);
+    actionCollection()->addAction("kobby_config", configAction);
     
-    connect(joinAction, SIGNAL(triggered()), this, SLOT(slotJoinSession()));
+    connect( configAction, SIGNAL( triggered() ), this, SLOT( slotConfig() ) );
     
     setXMLFile("kobbyui.rc");
 }
 
-void View::slotJoinSession()
+void View::slotConfig()
 {
-    kDebug() << "Trying to join session.";
+    if (configDialog)
+        return;
+    
+    kDebug() << "Creating config dialog.";
+    
+    configDialog = new ConfigDialog();
+    connect( configDialog, SIGNAL( finished() ), this, SLOT( slotConfigFinished() ) );
+    
+    configDialog->setVisible( true );
+}
+
+void View::slotConfigFinished()
+{
+    configDialog = 0;
 }
 
 } // namespace Kobby
+
+#include "view.moc"
 

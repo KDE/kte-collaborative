@@ -7,6 +7,7 @@ namespace Infinity
 {
 
 QtIo::QtIo()
+    : Io()
 {}
 
 QtIo::~QtIo()

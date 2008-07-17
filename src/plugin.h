@@ -11,8 +11,8 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef KOBBY_PLUGIN_H
+#define KOBBY_PLUGIN_H
 
 #include <QtCore/QObject>
 #include <QtCore/QList>

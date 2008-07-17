@@ -11,8 +11,10 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef VIEW_H
-#define VIEW_H
+#ifndef KOBBY_VIEW_H
+#define KOBBY_VIEW_H
+
+#include "configdialog.h"
 
 #include <KXMLGUIClient>
 #include <KTextEditor/View>
@@ -36,7 +38,11 @@ public:
     void setupActions();
 
 private Q_SLOTS:
-    void slotJoinSession();
+    void slotConfig();
+    void slotConfigFinished();
+
+private:
+    ConfigDialog *configDialog;
 
 }; // class View
 
