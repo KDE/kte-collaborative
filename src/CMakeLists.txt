@@ -4,6 +4,8 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
+project(Kobby)
+
 FIND_PACKAGE(KDE4 REQUIRED)
 FIND_PACKAGE(Glib REQUIRED)
 FIND_PACKAGE(Libinfinitymm REQUIRED)
@@ -18,19 +20,28 @@ set(KOBBY_LIBRARIES
 	${LIBINFINITYMM_LIBRARIES}
 )
 
-set(KOBBY_PART_SRCS
+set(KOBBY_SRCS
 	document.cpp
 	view.cpp
 	plugin.cpp
 	configdialog.cpp
+	sessionmanager.cpp
 )
 
-kde4_add_plugin(ktexteditor_kobby ${KOBBY_PART_SRCS})
+kde4_add_ui_files(KOBBY_SRCS sessionmanager.ui)
+
+kde4_add_plugin(ktexteditor_kobby ${KOBBY_SRCS})
 
 INCLUDE_DIRECTORIES(${KOBBY_INCLUDES})
+
 target_link_libraries(ktexteditor_kobby ${KOBBY_LIBRARIES} ktexteditor)
 
-install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR})
+install(
+	TARGETS 
+		ktexteditor_kobby
+	DESTINATION
+		${PLUGIN_INSTALL_DIR}
+)
 
 install(
 	FILES

@@ -19,41 +19,42 @@
 namespace Kobby
 {
 
-View::View(KTextEditor::View *view)
+View::View( KTextEditor::View *view )
     : QObject(view)
-    , KXMLGUIClient(view)
-    , configDialog( 0 )
+    , KXMLGUIClient( view )
+    , sessionManager( 0 )
 {
-    setComponentData(PluginFactory::componentData());
+    setComponentData( PluginFactory::componentData() );
     setupActions();
 }
 
 void View::setupActions()
 {
-    KAction *configAction = new KAction(i18n("Kobby"), this);
-    actionCollection()->addAction("kobby_config", configAction);
+    KAction *manageSessionsAction = new KAction( i18n( "Manage Kobby sessions" ), this );
+    actionCollection()->addAction( "sessions_kobby_manage", manageSessionsAction );
     
-    connect( configAction, SIGNAL( triggered() ), this, SLOT( slotConfig() ) );
+    connect( manageSessionsAction, SIGNAL( triggered() ), this, SLOT( slotManageSessions() ) );
     
-    setXMLFile("kobbyui.rc");
+    setXMLFile( "kobbyui.rc" );
 }
 
-void View::slotConfig()
+void View::slotManageSessions()
 {
-    if (configDialog)
+    if( sessionManager )
+    {
+        kDebug() << "Session manager already open.";
         return;
+    }
     
-    kDebug() << "Creating config dialog.";
+    sessionManager = new SessionManager();
+    sessionManager->setVisible( true );
     
-    configDialog = new ConfigDialog();
-    connect( configDialog, SIGNAL( finished() ), this, SLOT( slotConfigFinished() ) );
-    
-    configDialog->setVisible( true );
+    connect( sessionManager, SIGNAL( destroyed() ), this, SLOT( slotSessionManagerDestroyed() ) );
 }
 
-void View::slotConfigFinished()
+void View::slotSessionManagerDestroyed()
 {
-    configDialog = 0;
+        sessionManager = 0;
 }
 
 } // namespace Kobby

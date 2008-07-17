@@ -1,8 +1,8 @@
 <!DOCTYPE kpartgui>
 <kpartplugin name="ktexteditor_kobby" library="ktexteditor_kobby" version="1">
 <MenuBar>
-	<Menu name="tools"><Text>&amp;Tools</Text>
-		<Action name="kobby_config" />
+	<Menu name="sessions"><Text>Sess&amp;ions</Text>
+		<Action name="sessions_kobby_manage" />
 	</Menu>
 </MenuBar>
 </kpartplugin>

@@ -15,6 +15,7 @@
 #define KOBBY_VIEW_H
 
 #include "configdialog.h"
+#include "sessionmanager.h"
 
 #include <KXMLGUIClient>
 #include <KTextEditor/View>
@@ -28,22 +29,23 @@ namespace Kobby
 {
 
 class View
-    : public QObject, public KXMLGUIClient
+    : public QObject
+    , public KXMLGUIClient
 {
     Q_OBJECT
-
-public:
-    View(KTextEditor::View *view = 0);
     
-    void setupActions();
-
-private Q_SLOTS:
-    void slotConfig();
-    void slotConfigFinished();
-
-private:
-    ConfigDialog *configDialog;
-
+    public:
+        View(KTextEditor::View *view = 0);
+    
+        void setupActions();
+    
+    private Q_SLOTS:
+        void slotManageSessions();
+        void slotSessionManagerDestroyed();
+    
+    private:
+        SessionManager *sessionManager;
+    
 }; // class View
 
 } // namespace Kobby
