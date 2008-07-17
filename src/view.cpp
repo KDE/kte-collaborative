@@ -28,6 +28,12 @@ View::View( KTextEditor::View *view )
     setupActions();
 }
 
+View::~View()
+{
+    if( sessionManager )
+        sessionManager->close();
+}
+
 void View::setupActions()
 {
     KAction *manageSessionsAction = new KAction( i18n( "Manage Kobby sessions" ), this );
@@ -49,10 +55,10 @@ void View::slotManageSessions()
     sessionManager = new SessionManager();
     sessionManager->setVisible( true );
     
-    connect( sessionManager, SIGNAL( destroyed() ), this, SLOT( slotSessionManagerDestroyed() ) );
+    connect( sessionManager, SIGNAL( finished() ), this, SLOT( slotSessionManagerFinished() ) );
 }
 
-void View::slotSessionManagerDestroyed()
+void View::slotSessionManagerFinished()
 {
         sessionManager = 0;
 }

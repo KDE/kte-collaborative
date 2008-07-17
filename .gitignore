@@ -9,5 +9,6 @@ install_manifest.txt
 MissingRequirements.txt
 *.a
 *.moc
+moc_*
 ui_*
 

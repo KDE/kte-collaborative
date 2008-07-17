@@ -11,6 +11,7 @@
 #include <QPushButton>
 
 #include "ui_sessionmanager.h"
+#include "joinsessiondialog.h"
 
 namespace Kobby
 {
@@ -19,10 +20,20 @@ class SessionManager
     : public KDialog
 {
     
+    Q_OBJECT
+    
     public:
         SessionManager( QWidget *parent = 0 );
+        ~SessionManager();
+    
+    public Q_SLOTS:
+        void slotJoinSession();
+        void slotJoinSessionFinished();
     
     private:
+        void setupActions();
+        
+        JoinSessionDialog *joinSessionDialog;
         Ui::SessionManager ui;
     
 }; // class SessionManager

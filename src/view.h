@@ -36,12 +36,13 @@ class View
     
     public:
         View(KTextEditor::View *view = 0);
+        ~View();
     
         void setupActions();
     
     private Q_SLOTS:
         void slotManageSessions();
-        void slotSessionManagerDestroyed();
+        void slotSessionManagerFinished();
     
     private:
         SessionManager *sessionManager;
