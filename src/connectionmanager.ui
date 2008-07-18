@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>SessionManager</class>
- <widget class="QWidget" name="SessionManager" >
+ <class>ConnectionManager</class>
+ <widget class="QWidget" name="ConnectionManager" >
   <property name="geometry" >
    <rect>
     <x>0</x>

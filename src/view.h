@@ -15,7 +15,7 @@
 #define KOBBY_VIEW_H
 
 #include "configdialog.h"
-#include "sessionmanager.h"
+#include "connectionmanager.h"
 
 #include <KXMLGUIClient>
 #include <KTextEditor/View>
@@ -41,11 +41,11 @@ class View
         void setupActions();
     
     private Q_SLOTS:
-        void slotManageSessions();
-        void slotSessionManagerFinished();
+        void slotManageConnections();
+        void slotConnectionManagerFinished();
     
     private:
-        SessionManager *sessionManager;
+        ConnectionManager *connectionManager;
     
 }; // class View
 

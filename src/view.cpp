@@ -22,7 +22,7 @@ namespace Kobby
 View::View( KTextEditor::View *view )
     : QObject(view)
     , KXMLGUIClient( view )
-    , sessionManager( 0 )
+    , connectionManager( 0 )
 {
     setComponentData( PluginFactory::componentData() );
     setupActions();
@@ -30,37 +30,37 @@ View::View( KTextEditor::View *view )
 
 View::~View()
 {
-    if( sessionManager )
-        sessionManager->close();
+    if( connectionManager )
+        connectionManager->close();
 }
 
 void View::setupActions()
 {
-    KAction *manageSessionsAction = new KAction( i18n( "Manage Kobby sessions" ), this );
-    actionCollection()->addAction( "sessions_kobby_manage", manageSessionsAction );
+    KAction *manageConnectionsAction = new KAction( i18n( "Manage Connections" ), this );
+    actionCollection()->addAction( "tools_kobby_manageconnections", manageConnectionsAction );
     
-    connect( manageSessionsAction, SIGNAL( triggered() ), this, SLOT( slotManageSessions() ) );
+    connect( manageConnectionsAction, SIGNAL( triggered() ), this, SLOT( slotManageConnections() ) );
     
     setXMLFile( "kobbyui.rc" );
 }
 
-void View::slotManageSessions()
+void View::slotManageConnections()
 {
-    if( sessionManager )
+    if( connectionManager )
     {
-        kDebug() << "Session manager already open.";
+        kDebug() << "Connection manager already open.";
         return;
     }
     
-    sessionManager = new SessionManager();
-    sessionManager->setVisible( true );
+    connectionManager = new ConnectionManager();
+    connectionManager->setVisible( true );
     
-    connect( sessionManager, SIGNAL( finished() ), this, SLOT( slotSessionManagerFinished() ) );
+    connect( connectionManager, SIGNAL( finished() ), this, SLOT( slotConnectionManagerFinished() ) );
 }
 
-void View::slotSessionManagerFinished()
+void View::slotConnectionManagerFinished()
 {
-        sessionManager = 0;
+        connectionManager = 0;
 }
 
 } // namespace Kobby

@@ -9,7 +9,7 @@
 namespace Kobby
 {
 
-JoinSessionDialog::JoinSessionDialog( QWidget *parent )
+AddConnectionDialog::AddConnectionDialog( QWidget *parent )
     : KDialog( parent )
 {
     QWidget *widget = new QWidget( this );
@@ -23,7 +23,7 @@ JoinSessionDialog::JoinSessionDialog( QWidget *parent )
     setupActions();
 }
 
-void JoinSessionDialog::slotLocationChanged( const QString &text )
+void AddConnectionDialog::slotLocationChanged( const QString &text )
 {
     Q_UNUSED( text )
     
@@ -40,7 +40,7 @@ void JoinSessionDialog::slotLocationChanged( const QString &text )
     }
 }
 
-void JoinSessionDialog::tryConnecting()
+void AddConnectionDialog::tryConnecting()
 {
     QString connectingMsg;
     
@@ -64,7 +64,7 @@ void JoinSessionDialog::tryConnecting()
     Infinity::TcpConnection tcpConnection(io, address, 5223);
 }
 
-void JoinSessionDialog::setupActions()
+void AddConnectionDialog::setupActions()
 {
     connect( this, SIGNAL( tryClicked() ), this, SLOT( tryConnecting() ) );
     connect( ui.hostnameLineEdit, SIGNAL( textChanged( const QString& ) ), this, SLOT( slotLocationChanged( const QString& ) ) );

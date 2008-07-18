@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>JoinSessionDialog</class>
- <widget class="QWidget" name="JoinSessionDialog" >
+ <class>AddConnectionDialog</class>
+ <widget class="QWidget" name="AddConnectionDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>

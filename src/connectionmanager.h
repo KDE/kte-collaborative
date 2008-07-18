@@ -10,33 +10,33 @@
 #include <QListWidget>
 #include <QPushButton>
 
-#include "ui_sessionmanager.h"
-#include "joinsessiondialog.h"
+#include "ui_connectionmanager.h"
+#include "addconnectiondialog.h"
 
 namespace Kobby
 {
 
-class SessionManager
+class ConnectionManager
     : public KDialog
 {
     
     Q_OBJECT
     
     public:
-        SessionManager( QWidget *parent = 0 );
-        ~SessionManager();
+        ConnectionManager( QWidget *parent = 0 );
+        ~ConnectionManager();
     
     public Q_SLOTS:
-        void slotJoinSession();
-        void slotJoinSessionFinished();
+        void slotAddConnection();
+        void slotAddConnectionFinished();
     
     private:
         void setupActions();
         
-        JoinSessionDialog *joinSessionDialog;
-        Ui::SessionManager ui;
+        AddConnectionDialog *addConnectionDialog;
+        Ui::ConnectionManager ui;
     
-}; // class SessionManager
+}; // class ConnectionManager
 
 } // namespace Kobby
 

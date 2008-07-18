@@ -1,23 +1,23 @@
-#ifndef KOBBY_JOINSESSIONDIALOG_H
-#define KOBBY_JOINSESSIONDIALOG_H
+#ifndef KOBBY_ADDCONNECTIONDIALOG_H
+#define KOBBY_ADDCONNECTIONDIALOG_H
 
 #include <KDialog>
 
 #include <QWidget>
 
-#include "ui_joinsessiondialog.h"
+#include "ui_addconnectiondialog.h"
 
 namespace Kobby
 {
 
-class JoinSessionDialog
+class AddConnectionDialog
     : public KDialog
 {
     
     Q_OBJECT
     
     public:
-        JoinSessionDialog( QWidget *parent = 0 );
+        AddConnectionDialog( QWidget *parent = 0 );
     
     private Q_SLOTS:
         void slotLocationChanged( const QString &text );
@@ -26,9 +26,9 @@ class JoinSessionDialog
     private:
         void setupActions();
         
-        Ui::JoinSessionDialog ui;
+        Ui::AddConnectionDialog ui;
     
-}; // class JoinSessionDialog
+}; // class AddConnectionDialog
 
 } // namespace Kobby
 

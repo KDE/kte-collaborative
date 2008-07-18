@@ -25,14 +25,14 @@ set(KOBBY_SRCS
 	view.cpp
 	plugin.cpp
 	configdialog.cpp
-	sessionmanager.cpp
-	joinsessiondialog.cpp
+	addconnectiondialog.cpp
+	connectionmanager.cpp
 	infinotemanager.cpp
 )
 
 kde4_add_ui_files(KOBBY_SRCS
-	sessionmanager.ui
-	joinsessiondialog.ui
+	connectionmanager.ui
+	addconnectiondialog.ui
 )
 
 kde4_add_plugin(ktexteditor_kobby ${KOBBY_SRCS})
