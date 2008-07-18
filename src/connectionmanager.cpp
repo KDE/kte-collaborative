@@ -28,7 +28,7 @@ ConnectionManager::~ConnectionManager()
 
 void ConnectionManager::setupActions()
 {
-    connect( ui.sessionJoinButton, SIGNAL( clicked() ), this, SLOT( slotAddConnection() ) );
+    connect( ui.addConnectionButton, SIGNAL( clicked() ), this, SLOT( slotAddConnection() ) );
 }
 
 void ConnectionManager::slotAddConnection()
