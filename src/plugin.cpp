@@ -11,6 +11,8 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <libinfinitymm/init.h>
+
 #include "plugin.h"
 #include "document.h"
 #include "view.h"
@@ -23,58 +25,59 @@
 namespace Kobby
 {
 
-K_PLUGIN_FACTORY_DEFINITION(PluginFactory,
-    registerPlugin<ConfigDialog>("ktexteditor_kobby_config");
-    registerPlugin<Plugin>("ktexteditor_kobby");
+K_PLUGIN_FACTORY_DEFINITION( PluginFactory,
+    registerPlugin<ConfigDialog>( "ktexteditor_kobby_config" );
+    registerPlugin<Plugin>( "ktexteditor_kobby" );
 )
 
-K_EXPORT_PLUGIN(PluginFactory("ktexteditor_kobby", "ktexteditor_plugins"))
+K_EXPORT_PLUGIN( PluginFactory( "ktexteditor_kobby", "ktexteditor_plugins" ) )
 
-Plugin::Plugin(QObject *parent, const QVariantList &args)
-    : KTextEditor::Plugin(parent)
+Plugin::Plugin( QObject *parent, const QVariantList &args )
+    : KTextEditor::Plugin( parent )
 {
-    Q_UNUSED(args)
-
+    Q_UNUSED( args )
+    
+    Infinity::init();
 }
 
-void Plugin::addDocument(KTextEditor::Document *document)
+void Plugin::addDocument( KTextEditor::Document *document )
 {
-    Document *ndocument = new Document(document);
-    m_documents.append(ndocument);
+    Document *ndocument = new Document( document );
+    m_documents.append( ndocument );
 }
 
-void Plugin::removeDocument(KTextEditor::Document *document)
+void Plugin::removeDocument( KTextEditor::Document *document )
 {
     int i;
 
     // Not using iterator because we need the index to remove
-    for (i = 0; i < m_documents.size(); i++)
+    for( i = 0; i < m_documents.size(); i++ )
     {
-        if (m_documents.at(i)->parentClient() == document)
+        if (m_documents.at( i )->parentClient() == document)
         {
-            Document *ndocument = m_documents.at(i);
-            m_documents.removeAt(i);
+            Document *ndocument = m_documents.at( i );
+            m_documents.removeAt( i );
             delete ndocument;
         }
     }
 }
 
-void Plugin::addView(KTextEditor::View *view)
+void Plugin::addView( KTextEditor::View *view )
 {
     View *nview = new View(view);
     m_views.append(nview);
 }
 
-void Plugin::removeView(KTextEditor::View *view)
+void Plugin::removeView( KTextEditor::View *view )
 {
     int i;
 
-    for (i = 0; i < m_views.size(); i++)
+    for( i = 0; i < m_views.size(); i++ )
     {
-        if (m_views.at(i)->parentClient() == view)
+        if( m_views.at( i )->parentClient() == view )
         {
-            View *nview = m_views.at(i);
-            m_views.removeAt(i);
+            View *nview = m_views.at( i );
+            m_views.removeAt( i );
             delete nview;
         }
     }

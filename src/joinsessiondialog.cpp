@@ -42,8 +42,20 @@ void JoinSessionDialog::slotLocationChanged( const QString &text )
 
 void JoinSessionDialog::tryConnecting()
 {
+    QString connectingMsg;
+    
+    ui.hostnameLineEdit->setEnabled( false );
+    ui.portLineEdit->setEnabled( false );
+    button( KDialog::Try )->setEnabled( false );
+    
+    connectingMsg +=  i18n("Connecting to ");
+    connectingMsg += ui.hostnameLineEdit->text();
+    connectingMsg += ":";
+    connectingMsg += ui.portLineEdit->text();
+    connectingMsg += "\n";
+    
     ui.statusTextView->setEnabled( true );
-    ui.statusTextView->insertPlainText( i18n( "Connecting ...\n" ) );
+    ui.statusTextView->insertPlainText( connectingMsg );
     
     Infinity::init();
     

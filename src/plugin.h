@@ -14,6 +14,8 @@
 #ifndef KOBBY_PLUGIN_H
 #define KOBBY_PLUGIN_H
 
+#include "infinotemanager.h"
+
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
@@ -25,19 +27,21 @@ namespace Kobby
 class Plugin
     : public KTextEditor::Plugin
 {
-public:
-    explicit Plugin(QObject *parent = 0,
-        const QVariantList &args = QVariantList());
+    
+    public:
+        explicit Plugin(QObject *parent = 0,
+            const QVariantList &args = QVariantList());
 
-    void addDocument(KTextEditor::Document *document);
-    void removeDocument(KTextEditor::Document *document);
-    void addView(KTextEditor::View *view);
-    void removeView(KTextEditor::View *view);
-
-private:
-    QList<class View*> m_views;
-    QList<class Document*> m_documents;
-
+        void addDocument(KTextEditor::Document *document);
+        void removeDocument(KTextEditor::Document *document);
+        void addView(KTextEditor::View *view);
+        void removeView(KTextEditor::View *view);
+        
+    private:
+        QList<class View*> m_views;
+        QList<class Document*> m_documents;
+        InfinoteManager infinoteManager;
+        
 }; // class Plugin
 
 K_PLUGIN_FACTORY_DECLARATION(PluginFactory)

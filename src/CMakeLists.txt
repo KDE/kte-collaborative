@@ -27,6 +27,7 @@ set(KOBBY_SRCS
 	configdialog.cpp
 	sessionmanager.cpp
 	joinsessiondialog.cpp
+	infinotemanager.cpp
 )
 
 kde4_add_ui_files(KOBBY_SRCS
