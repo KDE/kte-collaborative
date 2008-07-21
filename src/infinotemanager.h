@@ -14,16 +14,17 @@
 #ifndef KOBBY_INFINOTEMANAGER_H
 #define KOBBY_INFINOTEMANAGER_H
 
+#include <gnutls/gnutls.h>
+#include <gsasl.h>
+
 #include <QObject>
 #include <QList>
 
 namespace Infinity
 {
+    class StandaloneIo;
     class XmppConnection;
-};
-
-typedef int gnutls_certificate_credentials_t;
-typedef struct _Gsasl Gsasl;
+}
 
 namespace Kobby
 {
@@ -45,6 +46,7 @@ class InfinoteManager : public QObject
         );
     
     private:
+        Infinity::StandaloneIo *io;
         QList<Infinity::XmppConnection*> connections;
     
 }; // class InfinoteManager

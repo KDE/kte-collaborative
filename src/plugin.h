@@ -14,8 +14,6 @@
 #ifndef KOBBY_PLUGIN_H
 #define KOBBY_PLUGIN_H
 
-#include "infinotemanager.h"
-
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
@@ -23,6 +21,8 @@
 
 namespace Kobby
 {
+
+class InfinoteManager;
 
 class Plugin
     : public KTextEditor::Plugin
@@ -40,7 +40,7 @@ class Plugin
     private:
         QList<class View*> m_views;
         QList<class Document*> m_documents;
-        InfinoteManager infinoteManager;
+        InfinoteManager *infinoteManager;
         
 }; // class Plugin
 

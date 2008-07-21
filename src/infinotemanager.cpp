@@ -1,5 +1,7 @@
 #include <libinfinitymm/init.h>
+#include <libinfinitymm/common/standaloneio.h>
 #include <libinfinitymm/common/tcpconnection.h>
+#include <libinfinitymm/common/xmppconnection.h>
 
 #include "infinotemanager.h"
 
@@ -9,11 +11,15 @@ namespace Kobby
 InfinoteManager::InfinoteManager()
 {
     Infinity::init();
+    
+    io = new Infinity::StandaloneIo;
 }
 
 InfinoteManager::~InfinoteManager()
 {
     // Release remaining connections
+    
+    delete io;
 }
 
 Infinity::XmppConnection &InfinoteManager::newXmppConnection( const char *host, 
@@ -23,13 +29,17 @@ Infinity::XmppConnection &InfinoteManager::newXmppConnection( const char *host,
     Gsasl *sasl_context
 )
 {
-    Q_UNUSED( host );
-    Q_UNUSED( port );
-    Q_UNUSED( jid );
-    Q_UNUSED( cred );
-    Q_UNUSED( sasl_context );
+    Infinity::IpAddress address(host);
+    
     // Create TcpConnection and XmppConnection
-    // Add XmppConnection to connections
+    Infinity::TcpConnection *tcpConnection = new Infinity::TcpConnection(*io,
+        address, port);
+    Infinity::XmppConnection *xmppConnection = new Infinity::XmppConnection(
+        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, jid, cred, sasl_context);
+    
+    connections.append(xmppConnection);
+    
+    return *xmppConnection;
 }
 
 } // namespace Kobby

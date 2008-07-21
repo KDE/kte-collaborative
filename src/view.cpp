@@ -36,9 +36,9 @@ View::~View()
 
 void View::setupActions()
 {
-    KAction *manageConnectionsAction = new KAction( i18n( "Manage Connections" ), this );
-    actionCollection()->addAction( "tools_kobby_manageconnections", manageConnectionsAction );
+    KAction *manageConnectionsAction = new KAction( KIcon( "network-workgroup.png" ), i18n( "Manage Connections" ), this );
     
+    actionCollection()->addAction( "tools_kobby_manageconnections", manageConnectionsAction );
     connect( manageConnectionsAction, SIGNAL( triggered() ), this, SLOT( slotManageConnections() ) );
     
     setXMLFile( "kobbyui.rc" );

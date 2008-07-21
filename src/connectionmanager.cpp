@@ -28,7 +28,10 @@ ConnectionManager::~ConnectionManager()
 
 void ConnectionManager::setupActions()
 {
+    ui.addConnectionButton->setIcon( KIcon( "list-add.png" ) );
     connect( ui.addConnectionButton, SIGNAL( clicked() ), this, SLOT( slotAddConnection() ) );
+    
+    ui.removeConnectionButton->setIcon( KIcon( "list-remove.png" ) );
 }
 
 void ConnectionManager::slotAddConnection()
