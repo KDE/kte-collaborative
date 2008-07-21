@@ -16,9 +16,9 @@ AddConnectionDialog::AddConnectionDialog( QWidget *parent )
     ui.setupUi( widget );
     setMainWidget( widget );
     
-    setButtons( KDialog::Try | KDialog::Close );
+    setButtons( KDialog::Ok | KDialog::Close );
     
-    button( KDialog::Try )->setEnabled( false );
+    button( KDialog::Ok )->setEnabled( false );
     
     setupActions();
 }
@@ -30,13 +30,13 @@ void AddConnectionDialog::slotLocationChanged( const QString &text )
     // Try should be disabled
     if( ui.hostnameLineEdit->text() == "" || ui.portLineEdit->text() == "" )
     {
-        if( button( KDialog::Try )->isEnabled() )
-            button( KDialog::Try )->setEnabled( false );
+        if( button( KDialog::Ok )->isEnabled() )
+            button( KDialog::Ok )->setEnabled( false );
     }
     else // Try should be enabled
     {
-        if( !button( KDialog::Try )->isEnabled() )
-            button( KDialog::Try )->setEnabled( true );
+        if( !button( KDialog::Ok )->isEnabled() )
+            button( KDialog::Ok )->setEnabled( true );
     }
 }
 
@@ -46,7 +46,7 @@ void AddConnectionDialog::tryConnecting()
     
     ui.hostnameLineEdit->setEnabled( false );
     ui.portLineEdit->setEnabled( false );
-    button( KDialog::Try )->setEnabled( false );
+    button( KDialog::Ok )->setEnabled( false );
     
     connectingMsg +=  i18n("Connecting to ");
     connectingMsg += ui.hostnameLineEdit->text();
@@ -63,7 +63,7 @@ void AddConnectionDialog::tryConnecting()
 
 void AddConnectionDialog::setupActions()
 {
-    connect( this, SIGNAL( tryClicked() ), this, SLOT( tryConnecting() ) );
+    connect( this, SIGNAL( okClicked() ), this, SLOT( tryConnecting() ) );
     connect( ui.hostnameLineEdit, SIGNAL( textChanged( const QString& ) ), this, SLOT( slotLocationChanged( const QString& ) ) );
     connect( ui.portLineEdit, SIGNAL( textChanged( const QString& ) ), this, SLOT( slotLocationChanged( const QString& ) ) );
 }
