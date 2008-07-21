@@ -57,7 +57,7 @@ void AddConnectionDialog::tryConnecting()
     ui.statusTextView->setEnabled( true );
     ui.statusTextView->insertPlainText( connectingMsg );
     
-    
+    emit( addConnection( ui.hostnameLineEdit->text(), ui.portLineEdit->text().toUInt() ) );
     
 }
 

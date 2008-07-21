@@ -17,6 +17,7 @@
 #include "document.h"
 #include "view.h"
 #include "configdialog.h"
+#include "infinotemanager.h"
 
 #include <KDebug>
 
@@ -36,8 +37,8 @@ Plugin::Plugin( QObject *parent, const QVariantList &args )
     : KTextEditor::Plugin( parent )
 {
     Q_UNUSED( args )
-    
-    Infinity::init();
+
+    infinoteManager = new InfinoteManager();
 }
 
 void Plugin::addDocument( KTextEditor::Document *document )
@@ -64,7 +65,7 @@ void Plugin::removeDocument( KTextEditor::Document *document )
 
 void Plugin::addView( KTextEditor::View *view )
 {
-    View *nview = new View(view);
+    View *nview = new View( *infinoteManager, view);
     m_views.append(nview);
 }
 

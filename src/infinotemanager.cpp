@@ -5,6 +5,12 @@
 
 #include "infinotemanager.h"
 
+extern "C"
+{
+    #include <gnutls/gnutls.h>
+    #include <gsasl.h>
+}
+
 namespace Kobby
 {
 
@@ -20,6 +26,16 @@ InfinoteManager::~InfinoteManager()
     // Release remaining connections
     
     delete io;
+}
+
+Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &host, 
+    unsigned int port,
+    const char *jid,
+    gnutls_certificate_credentials_t cred,
+    Gsasl *sasl_context
+)
+{
+    return newXmppConnection( host.toAscii().data(), port, jid, cred, sasl_context );
 }
 
 Infinity::XmppConnection &InfinoteManager::newXmppConnection( const char *host, 

@@ -19,10 +19,11 @@
 namespace Kobby
 {
 
-View::View( KTextEditor::View *view )
+View::View( InfinoteManager &manager, KTextEditor::View *view )
     : QObject(view)
     , KXMLGUIClient( view )
     , connectionManager( 0 )
+    , infinoteManager( &manager )
 {
     setComponentData( PluginFactory::componentData() );
     setupActions();
@@ -52,7 +53,7 @@ void View::slotManageConnections()
         return;
     }
     
-    connectionManager = new ConnectionManager();
+    connectionManager = new ConnectionManager( *infinoteManager );
     connectionManager->setVisible( true );
     
     connect( connectionManager, SIGNAL( finished() ), this, SLOT( slotConnectionManagerFinished() ) );

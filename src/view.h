@@ -16,6 +16,7 @@
 
 #include "configdialog.h"
 #include "connectionmanager.h"
+#include "infinotemanager.h"
 
 #include <KXMLGUIClient>
 #include <KTextEditor/View>
@@ -35,7 +36,7 @@ class View
     Q_OBJECT
     
     public:
-        View(KTextEditor::View *view = 0);
+        View( InfinoteManager &manager, KTextEditor::View *view = 0 );
         ~View();
     
         void setupActions();
@@ -46,6 +47,7 @@ class View
     
     private:
         ConnectionManager *connectionManager;
+        InfinoteManager *infinoteManager;
     
 }; // class View
 

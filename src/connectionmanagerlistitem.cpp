@@ -10,7 +10,7 @@ ConnectionManagerListItem::ConnectionManagerListItem( Infinity::XmppConnection &
     : QListWidgetItem( hostname, parent )
     , connection( &conn )
 {
-    setText( hostname + "\n text" );
+    setText( hostname + QString(":") +  QString::number(conn.property_tcp_connection().get_value()->getRemotePort()) + "\nConnecting..." );
 }
 
 void ConnectionManagerListItem::onConnectionStatusChanged()
