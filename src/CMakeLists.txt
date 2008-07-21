@@ -26,6 +26,7 @@ set(KOBBY_SRCS
 	plugin.cpp
 	configdialog.cpp
 	addconnectiondialog.cpp
+	connectionmanagerlistitem.cpp
 	connectionmanager.cpp
 	infinotemanager.cpp
 )

@@ -1,4 +1,7 @@
+#include <libinfinitymm/common/xmppconnection.h>
+
 #include "connectionmanager.h"
+#include "connectionmanagerlistitem.h"
 
 #include <KDebug>
 
@@ -29,12 +32,12 @@ ConnectionManager::~ConnectionManager()
 void ConnectionManager::setupActions()
 {
     ui.addConnectionButton->setIcon( KIcon( "list-add.png" ) );
-    connect( ui.addConnectionButton, SIGNAL( clicked() ), this, SLOT( slotAddConnection() ) );
+    connect( ui.addConnectionButton, SIGNAL( clicked() ), this, SLOT( slotAddConnectionDialog() ) );
     
     ui.removeConnectionButton->setIcon( KIcon( "list-remove.png" ) );
 }
 
-void ConnectionManager::slotAddConnection()
+void ConnectionManager::slotAddConnectionDialog()
 {
     if( addConnectionDialog )
     {
@@ -43,13 +46,18 @@ void ConnectionManager::slotAddConnection()
     }
     
     addConnectionDialog = new AddConnectionDialog( this );
-    connect( addConnectionDialog, SIGNAL( finished() ), this, SLOT( slotAddConnectionFinished() ) );
+    connect( addConnectionDialog, SIGNAL( finished() ), this, SLOT( slotAddConnectionDialogFinished() ) );
     addConnectionDialog->setVisible( true );
 }
 
-void ConnectionManager::slotAddConnectionFinished()
+void ConnectionManager::slotAddConnectionDialogFinished()
 {
     addConnectionDialog = 0;
+}
+
+void ConnectionManager::slotAddConnection( Infinity::XmppConnection &conn, const QString &hostname )
+{
+    ui.connectionsListWidget->addItem( new ConnectionManagerListItem( conn, hostname ) );
 }
 
 } // namespace Kobby

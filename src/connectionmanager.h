@@ -6,12 +6,18 @@
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QString>
 #include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
 
 #include "ui_connectionmanager.h"
 #include "addconnectiondialog.h"
+
+namespace Infinity
+{
+    class XmppConnection;
+}
 
 namespace Kobby
 {
@@ -27,8 +33,9 @@ class ConnectionManager
         ~ConnectionManager();
     
     public Q_SLOTS:
-        void slotAddConnection();
-        void slotAddConnectionFinished();
+        void slotAddConnectionDialog();
+        void slotAddConnectionDialogFinished();
+        void slotAddConnection( Infinity::XmppConnection &conn, const QString &hostname );
     
     private:
         void setupActions();

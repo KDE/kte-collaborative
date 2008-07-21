@@ -57,11 +57,8 @@ void AddConnectionDialog::tryConnecting()
     ui.statusTextView->setEnabled( true );
     ui.statusTextView->insertPlainText( connectingMsg );
     
-    Infinity::init();
     
-    Infinity::StandaloneIo io;
-    Infinity::IpAddress address(Infinity::IP_ADDRESS_IPV4);
-    Infinity::TcpConnection tcpConnection(io, address, 5223);
+    
 }
 
 void AddConnectionDialog::setupActions()

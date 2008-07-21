@@ -11,46 +11,33 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef KOBBY_ADDCONNECTIONDIALOG_H
-#define KOBBY_ADDCONNECTIONDIALOG_H
+#ifndef KOBBY_CONNECTIONMANAGERLISTITEM_H
+#define KOBBY_CONNECTIONMANAGERLISTITEM_H
 
-#include <KDialog>
-
-#include <QWidget>
 #include <QString>
-
-#include "ui_addconnectiondialog.h"
+#include <QListWidgetItem>
 
 namespace Infinity
 {
     class XmppConnection;
-}
+} // namespace Infinity
 
 namespace Kobby
 {
 
-class AddConnectionDialog
-    : public KDialog
+class ConnectionManagerListItem : public QListWidgetItem
 {
     
-    Q_OBJECT
-    
     public:
-        AddConnectionDialog( QWidget *parent = 0 );
-    
-    Q_SIGNALS:
-        void addConnection( Infinity::XmppConnection &conn, const QString &hostname );
-    
-    private Q_SLOTS:
-        void slotLocationChanged( const QString &text );
-        void tryConnecting();
+        ConnectionManagerListItem( Infinity::XmppConnection &conn, 
+            const QString &hostname, QListWidget *parent = 0 );
     
     private:
-        void setupActions();
+        void onConnectionStatusChanged();
         
-        Ui::AddConnectionDialog ui;
+        Infinity::XmppConnection *connection;
     
-}; // class AddConnectionDialog
+}; // class ConnectionManagerListItem
 
 } // namespace Kobby
 

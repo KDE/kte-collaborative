@@ -20,16 +20,13 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2" >
       <item>
-       <widget class="QListWidget" name="sessionListWidget" >
+       <widget class="QListWidget" name="connectionsListWidget" >
         <property name="sortingEnabled" >
          <bool>true</bool>
         </property>
        </widget>
       </item>
      </layout>
-     <zorder>verticalSpacer</zorder>
-     <zorder>verticalSpacer</zorder>
-     <zorder>sessionListWidget</zorder>
     </widget>
    </item>
    <item>
@@ -67,12 +64,8 @@
     </layout>
    </item>
   </layout>
-  <zorder>label</zorder>
-  <zorder>removeConnectionButton</zorder>
   <zorder>groupBox</zorder>
-  <zorder>verticalSpacer</zorder>
   <zorder></zorder>
-  <zorder>verticalSpacer</zorder>
  </widget>
  <resources/>
  <connections/>
