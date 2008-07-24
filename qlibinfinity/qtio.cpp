@@ -7,7 +7,8 @@ namespace Infinity
 {
 
 QtIo::QtIo()
-    : Io()
+    : Glib::ObjectBase("QtIo")
+    , Io()
 {}
 
 QtIo::~QtIo()
@@ -18,7 +19,7 @@ QtIo::~QtIo()
         delete *itr;
 }
 
-void QtIo::watch( int socket, IoEvent event, IoFunction handler, void *user_data, Glib::Object::DestroyNotify destroy_notify )
+void QtIo::watch_vfunc( int socket, IoEvent event, IoFunction handler, void *user_data, Glib::Object::DestroyNotify destroy_notify )
 {
     IoQSocketNotifier *newWatch;
     
@@ -26,6 +27,14 @@ void QtIo::watch( int socket, IoEvent event, IoFunction handler, void *user_data
         handler, user_data, destroy_notify );
     
     watchedSockets.append( newWatch );
+}
+
+void *QtIo::addTimeout_vfunc( unsigned int timeout_msecs, TimeoutFunction notify, void *user_data, Glib::Object::DestroyNotify destroy_notify )
+{
+}
+
+void QtIo::removeTimeout_vfunc( void *timeout )
+{
 }
 
 } // namespace Infinity

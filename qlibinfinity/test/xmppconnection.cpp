@@ -13,4 +13,9 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     
     Infinity::QtIo io;
+    Infinity::IpAddress address;
+
+    Infinity::TcpConnection conn(io, address, 5223);
+
+    conn.open();
 }
