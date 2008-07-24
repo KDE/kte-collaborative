@@ -22,6 +22,7 @@ namespace Infinity
 {
     class StandaloneIo;
     class XmppConnection;
+    class QtIo;
 }
 
 typedef struct Gsasl Gsasl;
@@ -54,7 +55,7 @@ class InfinoteManager : public QObject
         );
     
     private:
-        Infinity::StandaloneIo *io;
+        Infinity::QtIo *io;
         QList<Infinity::XmppConnection*> connections;
     
 }; // class InfinoteManager

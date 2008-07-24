@@ -17,6 +17,10 @@ ConnectionManagerListItem::ConnectionManagerListItem( Infinity::XmppConnection &
     );
 
     setStatusDisplay();
+
+    conn.property_tcp_connection().get_value()->open();
+
+    conn.property_tcp_connection().get_value()->close();
 }
 
 void ConnectionManagerListItem::onConnectionStatusChanged()

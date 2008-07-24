@@ -13,6 +13,7 @@ FIND_PACKAGE(Libinfinitymm REQUIRED)
 set(KOBBY_INCLUDES
 	${KDE4_INCLUDES}
 	${LIBINFINITYMM_INCLUDES}
+	${CMAKE_SOURCE_DIR}
 )
 
 set(KOBBY_LIBRARIES
@@ -29,6 +30,8 @@ set(KOBBY_SRCS
 	connectionmanagerlistitem.cpp
 	connectionmanager.cpp
 	infinotemanager.cpp
+	${CMAKE_SOURCE_DIR}/qlibinfinitymm/qtio.cpp
+	${CMAKE_SOURCE_DIR}/qlibinfinitymm/ioqsocketnotifier.cpp
 )
 
 kde4_add_ui_files(KOBBY_SRCS

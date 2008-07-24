@@ -8,6 +8,7 @@ Makefile*
 install_manifest.txt
 MissingRequirements.txt
 *.a
+*.so
 *.moc
 moc_*
 ui_*

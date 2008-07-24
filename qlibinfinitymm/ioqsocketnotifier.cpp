@@ -1,6 +1,8 @@
-#include <ioqsocketnotifier.h>
+#include <qlibinfinitymm/ioqsocketnotifier.h>
 
 #include "ioqsocketnotifier.moc"
+
+#include <QDebug>
 
 namespace Infinity
 {
@@ -20,6 +22,8 @@ IoEvent IoQSocketNotifier::convertEventType(QSocketNotifier::Type event)
         case QSocketNotifier::Exception:
             ret = IO_ERROR;
     }
+    
+    return ret;
 }
 
 QSocketNotifier::Type IoQSocketNotifier::convertEventType(IoEvent event)
@@ -37,6 +41,8 @@ QSocketNotifier::Type IoQSocketNotifier::convertEventType(IoEvent event)
         case IO_ERROR:
             ret = QSocketNotifier::Exception;
     }
+    
+    return ret;
 }
 
 IoQSocketNotifier::IoQSocketNotifier( int socket,
@@ -46,12 +52,14 @@ IoQSocketNotifier::IoQSocketNotifier( int socket,
     Glib::Object::DestroyNotify destroy_notify,
     QObject *parent
 )
-    : QSocketNotifier( socket, type, parent ),
-        socket_fd( socket ),
-        user_data( user_data ),
-        handler( handler_func ),
-        destroy_notify( destroy_notify )
-{}
+    : QSocketNotifier( socket, type, parent )
+    , socket_fd( socket )
+    , handler( handler_func )
+    , user_data( user_data )
+    , destroy_notify( destroy_notify )
+{
+    connect( this, SIGNAL(activated( int )), this, SLOT(slotActivated( int )) );
+}
 
 IoQSocketNotifier::~IoQSocketNotifier()
 {
@@ -63,7 +71,7 @@ void *IoQSocketNotifier::getUserData()
     return user_data;
 }
 
-void IoQSocketNotifier::slotActivated()
+void IoQSocketNotifier::slotActivated( int socket )
 {
     this->handler( &socket_fd, IoQSocketNotifier::convertEventType( type() ), user_data );
 }

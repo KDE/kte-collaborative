@@ -1,7 +1,8 @@
 #include <libinfinitymm/init.h>
-#include <libinfinitymm/common/standaloneio.h>
 #include <libinfinitymm/common/tcpconnection.h>
 #include <libinfinitymm/common/xmppconnection.h>
+
+#include <qlibinfinitymm/qtio.h>
 
 #include "infinotemanager.h"
 
@@ -18,7 +19,7 @@ InfinoteManager::InfinoteManager()
 {
     Infinity::init();
     
-    io = new Infinity::StandaloneIo;
+    io = new Infinity::QtIo;
 }
 
 InfinoteManager::~InfinoteManager()

@@ -25,13 +25,13 @@ public:
     void *getUserData();
 
 private Q_SLOTS:
-    void slotActivated();
+    void slotActivated( int socket );
 
 private:
+    int socket_fd; // This is redundant, but inf_io_watch wants a socket pointer.
     IoFunction handler;
     void *user_data;
     Glib::Object::DestroyNotify destroy_notify;
-    int socket_fd; // This is redundant, but inf_io_watch wants a socket pointer.
 
 }; // class SocketNotifier
 

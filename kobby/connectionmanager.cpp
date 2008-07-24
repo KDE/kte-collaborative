@@ -47,7 +47,8 @@ void ConnectionManager::addConnection( const QString hostname, unsigned int port
 
 void ConnectionManager::addConnection( Infinity::XmppConnection &conn, const QString &hostname )
 {
-    ui.connectionsListWidget->addItem( new ConnectionManagerListItem( conn, hostname ) );
+    ConnectionManagerListItem *connectionItem = new ConnectionManagerListItem( conn, hostname );
+    ui.connectionsListWidget->addItem( connectionItem );
 }
 
 void ConnectionManager::slotAddConnectionDialog()

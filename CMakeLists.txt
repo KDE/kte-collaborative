@@ -4,4 +4,4 @@
 
 SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules )
 
-SUBDIRS( qlibinfinitymm src )
+SUBDIRS( qlibinfinitymm kobby )
