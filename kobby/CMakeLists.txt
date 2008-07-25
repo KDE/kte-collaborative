@@ -30,8 +30,8 @@ set(KOBBY_SRCS
 	connectionmanagerlistitem.cpp
 	connectionmanager.cpp
 	infinotemanager.cpp
-	${CMAKE_SOURCE_DIR}/qlibinfinitymm/qtio.cpp
-	${CMAKE_SOURCE_DIR}/qlibinfinitymm/ioqsocketnotifier.cpp
+	${CMAKE_SOURCE_DIR}/qinfinitymm/qtio.cpp
+	${CMAKE_SOURCE_DIR}/qinfinitymm/ioqsocketnotifier.cpp
 )
 
 kde4_add_ui_files(KOBBY_SRCS

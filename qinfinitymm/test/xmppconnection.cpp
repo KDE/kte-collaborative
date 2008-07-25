@@ -1,8 +1,8 @@
 #include <libinfinitymm/init.h>
 #include <libinfinitymm/common/xmppconnection.h>
 
-#include <qlibinfinitymm/qtio.h>
-#include <qlibinfinitymm/ioqsocketnotifier.h>
+#include <qinfinitymm/qtio.h>
+#include <qinfinitymm/ioqsocketnotifier.h>
 
 #include <QCoreApplication>
 

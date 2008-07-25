@@ -1,4 +1,4 @@
-#include <qlibinfinitymm/ioqsocketnotifier.h>
+#include <qinfinitymm/ioqsocketnotifier.h>
 
 #include "ioqsocketnotifier.moc"
 
@@ -21,8 +21,11 @@ IoEvent IoQSocketNotifier::convertEventType(QSocketNotifier::Type event)
             break;
         case QSocketNotifier::Exception:
             ret = IO_ERROR;
+            break;
+        default:
+            qDebug() << "Event type (" << event << ") not found!";
     }
-    
+
     return ret;
 }
 
@@ -40,9 +43,31 @@ QSocketNotifier::Type IoQSocketNotifier::convertEventType(IoEvent event)
             break;
         case IO_ERROR:
             ret = QSocketNotifier::Exception;
+            break;
+        default:
+            qDebug() << "Event type (" << event << ") not found!";
     }
     
     return ret;
+}
+
+const QString IoQSocketNotifier::typeString( QSocketNotifier::Type type )
+{
+    QString typeStr;
+    
+    switch( type )
+    {
+        case QSocketNotifier::Read:
+            typeStr = "read";
+            break;
+        case QSocketNotifier::Write:
+            typeStr = "write";
+            break;
+        case QSocketNotifier::Exception:
+            typeStr = "exception";
+    }
+
+    return typeStr;
 }
 
 IoQSocketNotifier::IoQSocketNotifier( int socket,
@@ -53,7 +78,7 @@ IoQSocketNotifier::IoQSocketNotifier( int socket,
     QObject *parent
 )
     : QSocketNotifier( socket, type, parent )
-    , socket_fd( socket )
+    , socket_desc( socket )
     , handler( handler_func )
     , user_data( user_data )
     , destroy_notify( destroy_notify )
@@ -73,7 +98,13 @@ void *IoQSocketNotifier::getUserData()
 
 void IoQSocketNotifier::slotActivated( int socket )
 {
-    this->handler( &socket_fd, IoQSocketNotifier::convertEventType( type() ), user_data );
+    Q_UNUSED( socket )
+    
+    qDebug() << IoQSocketNotifier::typeString( type() ) << " activated.";
+    
+    this->handler( &this->socket_desc, IoQSocketNotifier::convertEventType( type() ), user_data );
+
+    setEnabled( false );
 }
 
 } // namespace Infinity

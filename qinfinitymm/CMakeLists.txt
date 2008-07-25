@@ -5,12 +5,12 @@ INCLUDE(${QT_USE_FILE})
 
 FIND_PACKAGE(Libinfinitymm REQUIRED)
 
+QT4_AUTOMOC(${qinfinitymm_SRCS})
+
 SET(qinfinitymm_SRCS
 	qtio.cpp
 	ioqsocketnotifier.cpp
 )
-
-QT4_AUTOMOC(${qinfinitymm_SRCS})
 
 ADD_LIBRARY(qinfinitymm SHARED
 	${qinfinitymm_SRCS}

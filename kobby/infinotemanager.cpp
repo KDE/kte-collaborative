@@ -2,7 +2,7 @@
 #include <libinfinitymm/common/tcpconnection.h>
 #include <libinfinitymm/common/xmppconnection.h>
 
-#include <qlibinfinitymm/qtio.h>
+#include <qinfinitymm/qtio.h>
 
 #include "infinotemanager.h"
 
