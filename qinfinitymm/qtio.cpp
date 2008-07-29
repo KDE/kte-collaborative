@@ -28,25 +28,47 @@ What happens when socket notifiers are duplicated?
 Can setEnabled be used? */
 void QtIo::watch_vfunc( int *socket, IoEvent event, IoFunction handler, void *user_data, Glib::Object::DestroyNotify destroy_notify )
 {
-    if( event == (IO_INCOMING | IO_ERROR) )
-    {
-        disableNotifier( *socket, QSocketNotifier::Write );
 
+    // Some debug info before we start destroying the watched sockets.
+    qDebug() << "watch event: ";
+    if( event & IO_INCOMING )
+        qDebug() << "\tenable read.";
+    else
+        qDebug() << "\tdisable read.";
+    if( event & IO_OUTGOING )
+        qDebug() << "\tenable write.";
+    else
+        qDebug() << "\tdisable write.";
+    if( event & IO_ERROR )
+        qDebug() << "\tenable error.";
+    else
+        qDebug() << "\tdisable error.";
+
+    if( event & IO_INCOMING )
+    {
         enableNotifier( *socket, QSocketNotifier::Read, handler, user_data, destroy_notify );
-        enableNotifier( *socket, QSocketNotifier::Exception, handler, user_data, destroy_notify  );
     }
-    else if( event == (IO_OUTGOING | IO_ERROR) )
+    else
     {
         disableNotifier( *socket, QSocketNotifier::Read );
-
-        enableNotifier( *socket, QSocketNotifier::Write, handler, user_data, destroy_notify );
-        enableNotifier( *socket, QSocketNotifier::Exception, handler, user_data, destroy_notify );
     }
-    else if( event == (IO_OUTGOING | IO_INCOMING | IO_ERROR) )
+
+    if( event & IO_OUTGOING )
     {
         enableNotifier( *socket, QSocketNotifier::Write, handler, user_data, destroy_notify );
-        enableNotifier( *socket, QSocketNotifier::Read, handler, user_data, destroy_notify );
+    }
+    else
+    {
+        //disableNotifier( *socket, QSocketNotifier::Write );
+    }
+
+    if( event & IO_ERROR )
+    {
         enableNotifier( *socket, QSocketNotifier::Exception, handler, user_data, destroy_notify );
+    }
+    else
+    {
+        disableNotifier( *socket, QSocketNotifier::Exception );
     }
 }
 
@@ -90,7 +112,7 @@ void QtIo::enableNotifier( int socket,
     IoQSocketNotifier *notifier;
     QAbstractEventDispatcher *eventDispatcher = QAbstractEventDispatcher::instance();
 
-    if( notifier = locateNotifier( socket, type ) )
+    if( (notifier = locateNotifier( socket, type )) )
     {
         qDebug() << "enabling " << IoQSocketNotifier::typeString( type ) << " notifier.";
         notifier->setEnabled( true );
@@ -116,11 +138,9 @@ bool QtIo::disableNotifier( int socket, QSocketNotifier::Type type )
 {
     IoQSocketNotifier *notifier;
 
-    if( notifier = locateNotifier( socket, type ) )
+    if( (notifier = locateNotifier( socket, type )) )
     {
         qDebug() << "disabling " << IoQSocketNotifier::typeString( type ) << " notifier.";
-
-        notifier->setEnabled( false );
 
         if( notifier->isEnabled() )
             qDebug() << "disabled.";

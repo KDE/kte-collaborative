@@ -9,7 +9,7 @@ namespace Infinity
 
 IoEvent IoQSocketNotifier::convertEventType(QSocketNotifier::Type event)
 {
-    IoEvent ret;
+    IoEvent ret = IO_ERROR;
     
     switch (event)
     {
@@ -31,7 +31,7 @@ IoEvent IoQSocketNotifier::convertEventType(QSocketNotifier::Type event)
 
 QSocketNotifier::Type IoQSocketNotifier::convertEventType(IoEvent event)
 {
-    QSocketNotifier::Type ret;
+    QSocketNotifier::Type ret = QSocketNotifier::Exception;
     
     switch (event)
     {
@@ -83,6 +83,7 @@ IoQSocketNotifier::IoQSocketNotifier( int socket,
     , user_data( user_data )
     , destroy_notify( destroy_notify )
 {
+    qDebug() << "creating " << IoQSocketNotifier::typeString( type );
     connect( this, SIGNAL(activated( int )), this, SLOT(slotActivated( int )) );
 }
 
@@ -99,12 +100,18 @@ void *IoQSocketNotifier::getUserData()
 void IoQSocketNotifier::slotActivated( int socket )
 {
     Q_UNUSED( socket )
+
+    if( type() == QSocketNotifier::Write )
+        setEnabled( false );
     
     qDebug() << IoQSocketNotifier::typeString( type() ) << " activated.";
     
     this->handler( &this->socket_desc, IoQSocketNotifier::convertEventType( type() ), user_data );
-
-    setEnabled( false );
+    
+    if( isEnabled() )
+        qDebug() << "Still enabled!";
+    else
+        qDebug() << "disabled.";
 }
 
 } // namespace Infinity
