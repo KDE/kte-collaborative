@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     Infinity::IpAddress address;
     
     Infinity::TcpConnection conn(io, address, 5223);
-    
+
     conn.property_status().signal_changed().connect( sigc::bind( sigc::ptr_fun( &statusChanged ), &conn ) );
     
     if( !conn.open() )

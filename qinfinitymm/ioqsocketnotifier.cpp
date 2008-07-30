@@ -83,7 +83,9 @@ IoQSocketNotifier::IoQSocketNotifier( int socket,
     , user_data( user_data )
     , destroy_notify( destroy_notify )
 {
+#if 0
     qDebug() << "creating " << IoQSocketNotifier::typeString( type );
+#endif
     connect( this, SIGNAL(activated( int )), this, SLOT(slotActivated( int )) );
 }
 
@@ -99,7 +101,9 @@ void *IoQSocketNotifier::getUserData()
 
 void IoQSocketNotifier::slotActivated( int socket )
 {
+#if 0
     qDebug() << IoQSocketNotifier::typeString( type() ) << " activated.";
+#endif
 
     if( isEnabled() )
         this->handler( &this->socket_desc, IoQSocketNotifier::convertEventType( type() ), user_data );

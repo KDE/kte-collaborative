@@ -36,7 +36,9 @@ void QtIo::watch_vfunc( int *socket, IoEvent event, IoFunction handler, void *us
     {
         if( (*itr)->socket() == *socket )
         {
+#if 0
             qDebug() << "deleting " << IoQSocketNotifier::typeString( (*itr)->type() );
+#endif
             (*itr)->setEnabled( false );
             eventDispatcher->unregisterSocketNotifier( *itr );
             watchedSockets.erase( itr );

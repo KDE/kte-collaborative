@@ -2,6 +2,8 @@
 
 #include "connectionmanagerlistitem.h"
 
+#include <QDebug>
+
 namespace Kobby
 {
 
@@ -19,8 +21,12 @@ ConnectionManagerListItem::ConnectionManagerListItem( Infinity::XmppConnection &
     setStatusDisplay();
 
     conn.property_tcp_connection().get_value()->open();
+}
 
-    conn.property_tcp_connection().get_value()->close();
+ConnectionManagerListItem::~ConnectionManagerListItem()
+{
+    qDebug() << "deleting connection.";
+    connection->property_tcp_connection().get_value()->close();
 }
 
 void ConnectionManagerListItem::onConnectionStatusChanged()

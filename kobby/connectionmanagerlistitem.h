@@ -31,6 +31,7 @@ class ConnectionManagerListItem : public QListWidgetItem
     public:
         ConnectionManagerListItem( Infinity::XmppConnection &conn, 
             const QString &hostname, QListWidget *parent = 0 );
+        ~ConnectionManagerListItem();
     
     private:
         void onConnectionStatusChanged();
