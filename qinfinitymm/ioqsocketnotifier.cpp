@@ -99,19 +99,10 @@ void *IoQSocketNotifier::getUserData()
 
 void IoQSocketNotifier::slotActivated( int socket )
 {
-    Q_UNUSED( socket )
-
-    if( type() == QSocketNotifier::Write )
-        setEnabled( false );
-    
     qDebug() << IoQSocketNotifier::typeString( type() ) << " activated.";
-    
-    this->handler( &this->socket_desc, IoQSocketNotifier::convertEventType( type() ), user_data );
-    
+
     if( isEnabled() )
-        qDebug() << "Still enabled!";
-    else
-        qDebug() << "disabled.";
+        this->handler( &this->socket_desc, IoQSocketNotifier::convertEventType( type() ), user_data );
 }
 
 } // namespace Infinity

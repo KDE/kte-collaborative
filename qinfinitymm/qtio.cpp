@@ -9,9 +9,10 @@
 namespace Infinity
 {
 
-QtIo::QtIo()
+QtIo::QtIo( QObject *parent )
     : Glib::ObjectBase("QtIo")
     , Io()
+    , QObject( parent )
 {
 }
 
@@ -28,47 +29,33 @@ What happens when socket notifiers are duplicated?
 Can setEnabled be used? */
 void QtIo::watch_vfunc( int *socket, IoEvent event, IoFunction handler, void *user_data, Glib::Object::DestroyNotify destroy_notify )
 {
+    QAbstractEventDispatcher *eventDispatcher = QAbstractEventDispatcher::instance();
+    QList<IoQSocketNotifier*>::Iterator itr;
 
-    // Some debug info before we start destroying the watched sockets.
-    qDebug() << "watch event: ";
-    if( event & IO_INCOMING )
-        qDebug() << "\tenable read.";
-    else
-        qDebug() << "\tdisable read.";
-    if( event & IO_OUTGOING )
-        qDebug() << "\tenable write.";
-    else
-        qDebug() << "\tdisable write.";
-    if( event & IO_ERROR )
-        qDebug() << "\tenable error.";
-    else
-        qDebug() << "\tdisable error.";
-
-    if( event & IO_INCOMING )
+    for( itr = watchedSockets.begin(); itr != watchedSockets.end(); itr++ )
     {
-        enableNotifier( *socket, QSocketNotifier::Read, handler, user_data, destroy_notify );
+        if( (*itr)->socket() == *socket )
+        {
+            qDebug() << "deleting " << IoQSocketNotifier::typeString( (*itr)->type() );
+            (*itr)->setEnabled( false );
+            eventDispatcher->unregisterSocketNotifier( *itr );
+            watchedSockets.erase( itr );
+        }
     }
-    else
+
+    if( event & IO_INCOMING )
     {
-        disableNotifier( *socket, QSocketNotifier::Read );
+        createNotifier( *socket, QSocketNotifier::Read, handler, user_data, destroy_notify );
     }
 
     if( event & IO_OUTGOING )
     {
-        enableNotifier( *socket, QSocketNotifier::Write, handler, user_data, destroy_notify );
-    }
-    else
-    {
-        //disableNotifier( *socket, QSocketNotifier::Write );
+        createNotifier( *socket, QSocketNotifier::Write, handler, user_data, destroy_notify );
     }
 
     if( event & IO_ERROR )
     {
-        enableNotifier( *socket, QSocketNotifier::Exception, handler, user_data, destroy_notify );
-    }
-    else
-    {
-        disableNotifier( *socket, QSocketNotifier::Exception );
+        createNotifier( *socket, QSocketNotifier::Exception, handler, user_data, destroy_notify );
     }
 }
 
@@ -87,40 +74,16 @@ void QtIo::removeTimeout_vfunc( void *timeout )
     Q_UNUSED( timeout )
 }
 
-IoQSocketNotifier *QtIo::locateNotifier( int socket, QSocketNotifier::Type type )
-{
-    QList<IoQSocketNotifier*>::Iterator itr;
-
-    for( itr = watchedSockets.begin(); itr != watchedSockets.end(); ++itr )
-    {
-        if( (*itr)->socket() == socket && (*itr)->type() == type )
-        {
-            return *itr;
-        }
-    }
-
-    return 0;
-}
-
-void QtIo::enableNotifier( int socket,
+void QtIo::createNotifier( int socket,
     QSocketNotifier::Type type,
     IoFunction handler_func,
     void *user_data,
     Glib::Object::DestroyNotify destroy_notify
 )
 {
-    IoQSocketNotifier *notifier;
     QAbstractEventDispatcher *eventDispatcher = QAbstractEventDispatcher::instance();
+    IoQSocketNotifier *notifier;
 
-    if( (notifier = locateNotifier( socket, type )) )
-    {
-        qDebug() << "enabling " << IoQSocketNotifier::typeString( type ) << " notifier.";
-        notifier->setEnabled( true );
-        return;
-    }
-
-    qDebug() << "creating " << IoQSocketNotifier::typeString( type ) << " notifier.";
-    
     notifier = new IoQSocketNotifier( socket,
         type,
         handler_func, 
@@ -132,25 +95,6 @@ void QtIo::enableNotifier( int socket,
     watchedSockets.append( notifier );
     
     notifier->setEnabled( true );
-}
-
-bool QtIo::disableNotifier( int socket, QSocketNotifier::Type type )
-{
-    IoQSocketNotifier *notifier;
-
-    if( (notifier = locateNotifier( socket, type )) )
-    {
-        qDebug() << "disabling " << IoQSocketNotifier::typeString( type ) << " notifier.";
-
-        if( notifier->isEnabled() )
-            qDebug() << "disabled.";
-        else
-            qDebug() << "still enabled!";
-        
-        return true;
-    }
-
-    return false;
 }
 
 } // namespace Infinity

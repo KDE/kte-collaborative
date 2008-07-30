@@ -34,14 +34,15 @@ int main(int argc, char **argv)
     
     QCoreApplication app(argc, argv);
     
-    Infinity::QtIo io;
+    Infinity::QtIo io( &app );
     Infinity::IpAddress address;
     
     Infinity::TcpConnection conn(io, address, 5223);
     
     conn.property_status().signal_changed().connect( sigc::bind( sigc::ptr_fun( &statusChanged ), &conn ) );
     
-    conn.open();
-
+    if( !conn.open() )
+        return -1;
+    
     app.exec();
 }
