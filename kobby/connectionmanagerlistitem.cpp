@@ -2,6 +2,8 @@
 
 #include "connectionmanagerlistitem.h"
 
+#include <KIcon>
+
 #include <QDebug>
 
 namespace Kobby
@@ -46,10 +48,12 @@ void ConnectionManagerListItem::setStatusDisplay()
     switch( connection->property_tcp_connection().get_value()->property_status() )
     {
         case Infinity::TCP_CONNECTION_CONNECTING:
+            setIcon( KIcon( "network-disconnect.png" ) );
             statusLine = "Connecting...";
             break;
         case Infinity::TCP_CONNECTION_CONNECTED:
             has_connected = true;
+            setIcon( KIcon( "network-connect.png" ) );
             statusLine = "Connected.";
             break;
         case Infinity::TCP_CONNECTION_CLOSED:
@@ -57,6 +61,7 @@ void ConnectionManagerListItem::setStatusDisplay()
                 statusLine = "Could not connect to server.";
             else
                 statusLine = "Closed.";
+            setIcon( KIcon( "network-disconnect.png" ) );
     }
 
     setStatusDisplay( statusLine );

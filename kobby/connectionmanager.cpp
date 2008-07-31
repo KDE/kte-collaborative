@@ -92,7 +92,9 @@ void ConnectionManager::slotRemoveSelectedItems()
     for( itr = items.begin(); itr != items.end(); itr++ )
         delete *itr;
 
-    ui.removeConnectionButton->setEnabled( false );
+    items = ui.connectionsListWidget->selectedItems();
+    if( items.count() == 0 )
+        ui.removeConnectionButton->setEnabled( false );
 }
 
 } // namespace Kobby
