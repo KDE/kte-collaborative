@@ -36,6 +36,7 @@ class ConnectionManagerListItem : public QListWidgetItem
     private:
         void onConnectionStatusChanged();
         void setStatusDisplay();
+        void setStatusDisplay( const QString );
         
         Infinity::XmppConnection *connection;
         QString hostname;

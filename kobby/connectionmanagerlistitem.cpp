@@ -25,8 +25,13 @@ ConnectionManagerListItem::ConnectionManagerListItem( Infinity::XmppConnection &
 
 ConnectionManagerListItem::~ConnectionManagerListItem()
 {
-    qDebug() << "deleting connection.";
-    connection->property_tcp_connection().get_value()->close();
+    if( connection->property_tcp_connection().get_value()->property_status() != Infinity::TCP_CONNECTION_CLOSED )
+    {
+        setStatusDisplay( "Disconnecting..." );
+        connection->property_tcp_connection().get_value()->close();
+    }
+
+    delete connection;
 }
 
 void ConnectionManagerListItem::onConnectionStatusChanged()
@@ -54,7 +59,15 @@ void ConnectionManagerListItem::setStatusDisplay()
                 statusLine = "Closed.";
     }
 
-    setText( hostname + QString( ":" ) + QString::number( connection->property_tcp_connection().get_value()->getRemotePort() ) + "\n" + statusLine );
+    setStatusDisplay( statusLine );
+}
+
+void ConnectionManagerListItem::setStatusDisplay( const QString statusLine )
+{
+    setText( hostname + QString( ":" ) + 
+        QString::number( connection->property_tcp_connection().get_value()->getRemotePort() ) + 
+        "\n" + statusLine
+    );
 }
 
 }

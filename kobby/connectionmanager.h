@@ -55,7 +55,7 @@ class ConnectionManager
         void slotAddConnectionDialog();
         void slotAddConnectionDialogFinished();
         void slotSelectionChanged();
-        void slotRemoveSelectedItem();
+        void slotRemoveSelectedItems();
     
     private:
         void setupActions();

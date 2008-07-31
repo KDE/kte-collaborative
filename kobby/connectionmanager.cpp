@@ -36,7 +36,7 @@ void ConnectionManager::setupActions()
     connect( ui.addConnectionButton, SIGNAL(clicked()), this, SLOT(slotAddConnectionDialog()) );
     
     ui.removeConnectionButton->setIcon( KIcon( "list-remove.png" ) );
-    connect( ui.removeConnectionButton, SIGNAL(clicked()), this, SLOT(slotRemoveSelectedItem()) );
+    connect( ui.removeConnectionButton, SIGNAL(clicked()), this, SLOT(slotRemoveSelectedItems()) );
 
     connect( ui.connectionsListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()) );
 }
@@ -82,9 +82,17 @@ void ConnectionManager::slotSelectionChanged()
         ui.removeConnectionButton->setEnabled( true );
 }
 
-void ConnectionManager::slotRemoveSelectedItem()
+void ConnectionManager::slotRemoveSelectedItems()
 {
-    delete ui.connectionsListWidget->currentItem();
+    QList<QListWidgetItem*> items;
+    QList<QListWidgetItem*>::Iterator itr;
+
+    items = ui.connectionsListWidget->selectedItems();
+
+    for( itr = items.begin(); itr != items.end(); itr++ )
+        delete *itr;
+
+    ui.removeConnectionButton->setEnabled( false );
 }
 
 } // namespace Kobby
