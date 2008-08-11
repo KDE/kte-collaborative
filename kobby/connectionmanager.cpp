@@ -8,6 +8,44 @@
 namespace Kobby
 {
 
+ConnectionListWidgetItem::ConnectionListWidgetItem( Connection &conn, QListWidget *parent )
+    : QListWidgetItem( parent )
+    , connection( &conn )
+    , has_connected( false )
+{
+    setDisplay();
+
+    connection->getTcpConnection().property_status().signal_changed().connect( sigc::mem_fun( this, &ConnectionListWidgetItem::setDisplay ) );
+}
+
+void ConnectionListWidgetItem::setDisplay()
+{
+    QString statusLine;
+
+    switch( connection->getTcpConnection().property_status() )
+    {
+        case Infinity::TCP_CONNECTION_CONNECTING:
+            setIcon( KIcon( "network-disconnect.png" ) );
+            statusLine = "Connecting...";
+            break;
+        case Infinity::TCP_CONNECTION_CONNECTED:
+            has_connected = true;
+            setIcon( KIcon( "network-connect.png" ) );
+            statusLine = "Connected.";
+            break;
+        case Infinity::TCP_CONNECTION_CLOSED:
+            if( !has_connected )
+                statusLine = "Could not connect to server.";
+            else
+                statusLine = "Closed.";
+            setIcon( KIcon( "network-disconnect.png" ) );
+    }
+
+    setText( connection->getName() + "\n" 
+        + statusLine
+    );
+}
+
 ConnectionManager::ConnectionManager( InfinoteManager &manager, QWidget *parent )
     : KDialog( parent )
     , addConnectionDialog( 0 )
@@ -41,18 +79,21 @@ void ConnectionManager::setupActions()
     connect( ui.connectionsListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()) );
 }
 
-void ConnectionManager::addConnection( const QString hostname, unsigned int port )
+void ConnectionManager::addConnection( const QString name, const QString hostname, unsigned int port )
 {
-    Infinity::XmppConnection &connection = infinoteManager->newXmppConnection( hostname, port, "greg@greghaynes.net", 0, 0 );
+    ConnectionListWidgetItem *listItem;
 
-    addConnection( connection, hostname );
+    listItem = new ConnectionListWidgetItem( infinoteManager->connectToHost( name, hostname, port ) );
+    ui.connectionsListWidget->addItem( listItem );
 }
 
+/*
 void ConnectionManager::addConnection( Infinity::XmppConnection &conn, const QString &hostname )
 {
     ConnectionManagerListItem *connectionItem = new ConnectionManagerListItem( conn, hostname );
     ui.connectionsListWidget->addItem( connectionItem );
 }
+*/
 
 void ConnectionManager::slotAddConnectionDialog()
 {
@@ -64,8 +105,8 @@ void ConnectionManager::slotAddConnectionDialog()
     
     addConnectionDialog = new AddConnectionDialog( this );
     
-    connect( addConnectionDialog, SIGNAL( addConnection( const QString, unsigned int ) ),
-        this, SLOT( addConnection( const QString, unsigned int ) ) );
+    connect( addConnectionDialog, SIGNAL( addConnection( const QString, const QString, unsigned int ) ),
+        this, SLOT( addConnection( const QString, const QString, unsigned int ) ) );
     connect( addConnectionDialog, SIGNAL( finished() ), this, SLOT( slotAddConnectionDialogFinished() ) );
     
     addConnectionDialog->setVisible( true );

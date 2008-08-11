@@ -16,6 +16,9 @@ namespace Kobby
 {
 
 InfinoteManager::InfinoteManager()
+    : jid( "anonymous@localhost" )
+    , gnutls_cred( 0 )
+    , gsasl_context( 0 )
 {
     Infinity::init();
     
@@ -29,34 +32,49 @@ InfinoteManager::~InfinoteManager()
     delete io;
 }
 
-Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &host, 
-    unsigned int port,
-    const char *jid,
-    gnutls_certificate_credentials_t cred,
-    Gsasl *sasl_context
-)
+Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
-    return newXmppConnection( host.toAscii().data(), port, jid, cred, sasl_context );
+    Connection *connection;
+
+    connection = new Connection( name, newXmppConnection( host, port ) );
+    connections.append( connection );
+
+    connection->getTcpConnection().open();
+
+    return *connection;
 }
 
-Infinity::XmppConnection &InfinoteManager::newXmppConnection( const char *host, 
-    unsigned int port,
-    const char *jid,
-    gnutls_certificate_credentials_t cred,
-    Gsasl *sasl_context
-)
+Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &host, unsigned int port )
 {
-    Infinity::IpAddress address(host);
+    const char *hostname = host.toAscii();
+
+    Infinity::IpAddress address( hostname );
     
     // Create TcpConnection and XmppConnection
-    Infinity::TcpConnection *tcpConnection = new Infinity::TcpConnection(*io,
-        address, port);
+    Infinity::TcpConnection *tcpConnection = new Infinity::TcpConnection( *io,
+        address, port
+    );
     Infinity::XmppConnection *xmppConnection = new Infinity::XmppConnection(
-        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, jid, cred, sasl_context);
-    
-    connections.append(xmppConnection);
+        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, jid.toAscii(), gnutls_cred, gsasl_context
+    );
     
     return *xmppConnection;
+}
+
+Infinity::QtIo &InfinoteManager::getIo() const
+{
+    return *io;
+}
+
+const QString &InfinoteManager::getJid() const
+{
+    return jid;
+}
+
+void InfinoteManager::setJid( const QString &string )
+{
+    jid = string;
+    emit( jidChanged( jid ) );
 }
 
 } // namespace Kobby

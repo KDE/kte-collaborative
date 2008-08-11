@@ -14,6 +14,8 @@
 #ifndef KOBBY_INFINOTEMANAGER_H
 #define KOBBY_INFINOTEMANAGER_H
 
+#include "connection.h"
+
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -39,24 +41,31 @@ class InfinoteManager : public QObject
     public:
         InfinoteManager();
         ~InfinoteManager();
-    
-        Infinity::XmppConnection &newXmppConnection( const QString &host,
-            unsigned int port,
-            const char *jid,
-            gnutls_certificate_credentials_t cred,
-            Gsasl *sasl_context
-        );
-    
-        Infinity::XmppConnection &newXmppConnection( const char *host, 
-            unsigned int port,
-            const char *jid,
-            gnutls_certificate_credentials_t cred,
-            Gsasl *sasl_context
-        );
-    
+
+        /**
+         * Create a new connection to host which will be managed by the InfinoteManager instance.
+         * 
+         * @param name Label for this connection
+         */
+        Connection &connectToHost( const QString &name, const QString &hostname, unsigned int port );
+
+        Infinity::QtIo &getIo() const;
+        const QString &getJid() const;
+
+    Q_SIGNALS:
+        void jidChanged( const QString &jid );
+
+    public Q_SLOTS:
+        void setJid( const QString &string );
+
     private:
+        Infinity::XmppConnection &newXmppConnection( const QString &host, unsigned int port );
+
+        QString jid;
         Infinity::QtIo *io;
-        QList<Infinity::XmppConnection*> connections;
+        QList<Connection*> connections;
+        gnutls_certificate_credentials_t gnutls_cred;
+        Gsasl *gsasl_context;
     
 }; // class InfinoteManager
 

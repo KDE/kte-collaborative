@@ -22,6 +22,7 @@ set(KOBBY_LIBRARIES
 )
 
 set(KOBBY_SRCS
+	connection.cpp
 	document.cpp
 	view.cpp
 	plugin.cpp

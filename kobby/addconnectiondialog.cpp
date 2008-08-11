@@ -42,23 +42,7 @@ void AddConnectionDialog::slotLocationChanged( const QString &text )
 
 void AddConnectionDialog::tryConnecting()
 {
-    QString connectingMsg;
-    
-    ui.hostnameLineEdit->setEnabled( false );
-    ui.portLineEdit->setEnabled( false );
-    button( KDialog::Ok )->setEnabled( false );
-    
-    connectingMsg +=  i18n("Connecting to ");
-    connectingMsg += ui.hostnameLineEdit->text();
-    connectingMsg += ":";
-    connectingMsg += ui.portLineEdit->text();
-    connectingMsg += "\n";
-    
-    ui.statusTextView->setEnabled( true );
-    ui.statusTextView->insertPlainText( connectingMsg );
-    
-    emit( addConnection( ui.hostnameLineEdit->text(), ui.portLineEdit->text().toUInt() ) );
-    
+    emit( addConnection( ui.labelLineEdit->text(), ui.hostnameLineEdit->text(), ui.portLineEdit->text().toUInt() ) );
 }
 
 void AddConnectionDialog::setupActions()

@@ -39,7 +39,7 @@ class AddConnectionDialog
         AddConnectionDialog( QWidget *parent = 0 );
     
     Q_SIGNALS:
-        void addConnection( const QString &hostname, unsigned int port );
+        void addConnection( const QString &label, const QString &hostname, unsigned int port );
     
     private Q_SLOTS:
         void slotLocationChanged( const QString &text );

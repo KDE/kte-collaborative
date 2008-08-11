@@ -2,6 +2,7 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QSplitter>
 #include <QLabel>
 
 namespace Kobby
@@ -12,9 +13,6 @@ ConfigDialogList::ConfigDialogList()
 {
     userItem.setText( "User" );
     addItem( &userItem );
-    
-    sessionsItem.setText( "Sessions" );
-    addItem( &sessionsItem );
     
     connect(this, SIGNAL( selectionChanged() ), this, SLOT( slotItemSectionChanged() ) );
 }
@@ -32,7 +30,15 @@ void ConfigDialogList::slotItemSelectionChanged()
 ConfigDialog::ConfigDialog( QWidget *parent, const QVariantList &args )
     : KCModule( PluginFactory::componentData(), parent, args )
 {
+    QHBoxLayout *layout = new QHBoxLayout;
+    QSplitter *splitter = new QSplitter( Qt::Horizontal, this );
     
+    splitter->addWidget( new ConfigDialogList );
+    splitter->addWidget( &tabWidget );
+
+    layout->addWidget( splitter );
+
+    setLayout( layout );
 }
 
 } // namespace Kobby

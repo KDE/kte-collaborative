@@ -26,7 +26,8 @@
 namespace Kobby
 {
 
-class ConfigDialogList : public QListWidget
+class ConfigDialogList
+    : public QListWidget
 {
     
     enum Items
@@ -51,7 +52,8 @@ class ConfigDialogList : public QListWidget
         QListWidgetItem sessionsItem;
 };
 
-class ConfigDialog : public KCModule
+class ConfigDialog
+    : public KCModule
 {
     
     Q_OBJECT
@@ -61,6 +63,7 @@ class ConfigDialog : public KCModule
     
     private:
         QSplitter mainSplitter;
+        QTabWidget tabWidget;
     
 };
 

@@ -37,6 +37,22 @@ namespace Infinity
 namespace Kobby
 {
 
+class ConnectionListWidgetItem
+    : public QListWidgetItem
+{
+
+    public:
+        ConnectionListWidgetItem( Connection &conn, QListWidget *parent = 0 );
+
+        void setDisplay();
+
+    private:
+        Connection *connection;
+        Infinity::TcpConnection *tcpConnection;
+        bool has_connected;
+
+};
+
 class ConnectionManager
     : public KDialog
 {
@@ -48,8 +64,8 @@ class ConnectionManager
         ~ConnectionManager();
     
     public Q_SLOTS:
-        void addConnection( Infinity::XmppConnection &conn, const QString &hostname );
-        void addConnection( const QString hostname, unsigned int port );
+        //void addConnection( Infinity::XmppConnection &conn, const QString &hostname );
+        void addConnection( const QString name, const QString hostname, unsigned int port );
     
     private Q_SLOTS:
         void slotAddConnectionDialog();
