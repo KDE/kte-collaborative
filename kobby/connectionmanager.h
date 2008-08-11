@@ -16,6 +16,7 @@
 
 #include "addconnectiondialog.h"
 #include "infinotemanager.h"
+#include "connectionlistwidgetitem.h"
 
 #include <KDialog>
 
@@ -36,22 +37,6 @@ namespace Infinity
 
 namespace Kobby
 {
-
-class ConnectionListWidgetItem
-    : public QListWidgetItem
-{
-
-    public:
-        ConnectionListWidgetItem( Connection &conn, QListWidget *parent = 0 );
-
-        void setDisplay();
-
-    private:
-        Connection *connection;
-        Infinity::TcpConnection *tcpConnection;
-        bool has_connected;
-
-};
 
 class ConnectionManager
     : public KDialog

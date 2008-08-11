@@ -28,7 +28,7 @@ set(KOBBY_SRCS
 	plugin.cpp
 	configdialog.cpp
 	addconnectiondialog.cpp
-	connectionmanagerlistitem.cpp
+	connectionlistwidgetitem.cpp
 	connectionmanager.cpp
 	infinotemanager.cpp
 	${CMAKE_SOURCE_DIR}/qinfinitymm/qtio.cpp

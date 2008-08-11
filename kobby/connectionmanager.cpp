@@ -8,44 +8,6 @@
 namespace Kobby
 {
 
-ConnectionListWidgetItem::ConnectionListWidgetItem( Connection &conn, QListWidget *parent )
-    : QListWidgetItem( parent )
-    , connection( &conn )
-    , has_connected( false )
-{
-    setDisplay();
-
-    connection->getTcpConnection().property_status().signal_changed().connect( sigc::mem_fun( this, &ConnectionListWidgetItem::setDisplay ) );
-}
-
-void ConnectionListWidgetItem::setDisplay()
-{
-    QString statusLine;
-
-    switch( connection->getTcpConnection().property_status() )
-    {
-        case Infinity::TCP_CONNECTION_CONNECTING:
-            setIcon( KIcon( "network-disconnect.png" ) );
-            statusLine = "Connecting...";
-            break;
-        case Infinity::TCP_CONNECTION_CONNECTED:
-            has_connected = true;
-            setIcon( KIcon( "network-connect.png" ) );
-            statusLine = "Connected.";
-            break;
-        case Infinity::TCP_CONNECTION_CLOSED:
-            if( !has_connected )
-                statusLine = "Could not connect to server.";
-            else
-                statusLine = "Closed.";
-            setIcon( KIcon( "network-disconnect.png" ) );
-    }
-
-    setText( connection->getName() + "\n" 
-        + statusLine
-    );
-}
-
 ConnectionManager::ConnectionManager( InfinoteManager &manager, QWidget *parent )
     : KDialog( parent )
     , addConnectionDialog( 0 )
