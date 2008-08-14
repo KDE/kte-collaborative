@@ -1,7 +1,6 @@
 #include <libinfinitymm/common/xmppconnection.h>
 
 #include "connectionmanager.h"
-#include "connectionmanagerlistitem.h"
 
 #include <KDebug>
 
@@ -11,6 +10,7 @@ namespace Kobby
 ConnectionManager::ConnectionManager( InfinoteManager &manager, QWidget *parent )
     : KDialog( parent )
     , addConnectionDialog( 0 )
+    , fileBrowserDialog( 0 )
     , infinoteManager( &manager )
 {
     QWidget *widget = new QWidget( this );
@@ -34,6 +34,9 @@ void ConnectionManager::setupActions()
 {
     ui.addConnectionButton->setIcon( KIcon( "list-add.png" ) );
     connect( ui.addConnectionButton, SIGNAL(clicked()), this, SLOT(slotAddConnectionDialog()) );
+
+    ui.filesButton->setIcon( KIcon( "folder.png" ) );
+    connect( ui.filesButton, SIGNAL(clicked()), this, SLOT(slotFileBrowser()) );
     
     ui.removeConnectionButton->setIcon( KIcon( "list-remove.png" ) );
     connect( ui.removeConnectionButton, SIGNAL(clicked()), this, SLOT(slotRemoveSelectedItems()) );
@@ -48,14 +51,6 @@ void ConnectionManager::addConnection( const QString name, const QString hostnam
     listItem = new ConnectionListWidgetItem( infinoteManager->connectToHost( name, hostname, port ) );
     ui.connectionsListWidget->addItem( listItem );
 }
-
-/*
-void ConnectionManager::addConnection( Infinity::XmppConnection &conn, const QString &hostname )
-{
-    ConnectionManagerListItem *connectionItem = new ConnectionManagerListItem( conn, hostname );
-    ui.connectionsListWidget->addItem( connectionItem );
-}
-*/
 
 void ConnectionManager::slotAddConnectionDialog()
 {
@@ -79,10 +74,28 @@ void ConnectionManager::slotAddConnectionDialogFinished()
     addConnectionDialog = 0;
 }
 
+void ConnectionManager::slotFileBrowser()
+{
+    if( fileBrowserDialog )
+    {
+        kDebug() << "File browser dialog already open.";
+        return;
+    }
+
+    ConnectionListWidgetItem *connection;
+    
+    connection = dynamic_cast<ConnectionListWidgetItem*>( ui.connectionsListWidget->currentItem() );
+
+    fileBrowserDialog = new FileBrowserDialog( *this->infinoteManager, connection->getConnection(), this );
+    fileBrowserDialog->setVisible( true );
+}
+
 void ConnectionManager::slotSelectionChanged()
 {
-    if( !(ui.removeConnectionButton->isEnabled()) )
+    if( !(ui.removeConnectionButton->isEnabled()) ) {
         ui.removeConnectionButton->setEnabled( true );
+        ui.filesButton->setEnabled( true );
+    }
 }
 
 void ConnectionManager::slotRemoveSelectedItems()

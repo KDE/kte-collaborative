@@ -16,42 +16,68 @@
 
 #include "infinotemanager.h"
 
+#include <KDialog>
+
+#include <QStringList>
 #include <QTreeWidget>
+
+#include <glibmm/refptr.h>
 
 namespace Infinity
 {
-
-class XmppConnection;
-class ClientBrowser;
-class ConnectionManager;
-
+    class XmppConnection;
+    class ClientBrowser;
+    class ClientBrowserIter;
+    class ConnectionManager;
+    class ClientExploreRequest;
 }
 
 namespace Kobby
 {
 
 class FileBrowserWidgetItem
-    : public QTreeWidgetItem
+    : public QObject
+    , public QTreeWidgetItem
 {
 
-    public:
-        enum ItemType { Folder = 1, File = 2 };
-        FileBrowserWidgetItem( QStringList &strings, int type );
-
-}
-
-class FileBrowserWidget
-    : public QTreeWidget
-{
+    Q_OBJECT
 
     public:
-        FileBrowserWidget( InfinoteManager &manager, Infinity::XmppConnection &conn, QWidget *parent = 0 );
+        enum ItemType { Folder = 1001, File = 1002 };
+
+        FileBrowserWidgetItem( QStringList &strings, int type, Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+        FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
+        ~FileBrowserWidgetItem();
+
+    public Q_SLOTS:
+        void populateChildren();
 
     private:
+        void setItemIcon();
+        void exploreFinishedCb();
+
+        Infinity::ClientBrowserIter *node;
+        Glib::RefPtr<Infinity::ClientExploreRequest> exploreRequest;
+
+};
+
+class FileBrowserDialog
+    : public KDialog
+{
+
+    public:
+        FileBrowserDialog( InfinoteManager &manager, Connection &conn, QWidget *parent = 0 );
+        ~FileBrowserDialog();
+
+    private:
+        void addRootNodes();
+        void exploreFinishedCb();
+
+        QTreeWidget *nodeTreeWidget;
         InfinoteManager *infinoteManager;
-        Infinity::XmppConnection *xmppConnection;
-        Infinity::ConnectionManager *connectionManager;
-        Infinity::ClientBrowser *clientBrowser;
+        Connection *connection;
+        Infinity::ClientBrowserIter *rootNode;
+        Glib::RefPtr<Infinity::ClientExploreRequest> exploreRequest;
 
 };
 

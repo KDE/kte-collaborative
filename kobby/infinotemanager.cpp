@@ -1,6 +1,7 @@
 #include <libinfinitymm/init.h>
 #include <libinfinitymm/common/tcpconnection.h>
 #include <libinfinitymm/common/xmppconnection.h>
+#include <libinfinitymm/common/connectionmanager.h>
 
 #include <qinfinitymm/qtio.h>
 
@@ -22,6 +23,7 @@ InfinoteManager::InfinoteManager()
 {
     Infinity::init();
     
+    connectionManager = new Infinity::ConnectionManager();
     io = new Infinity::QtIo;
 }
 
@@ -36,12 +38,33 @@ Connection &InfinoteManager::connectToHost( const QString &name, const QString &
 {
     Connection *connection;
 
-    connection = new Connection( name, newXmppConnection( host, port ) );
+    connection = new Connection( *this, name, newXmppConnection( host, port ) );
     connections.append( connection );
 
     connection->getTcpConnection().open();
 
     return *connection;
+}
+
+Infinity::QtIo &InfinoteManager::getIo() const
+{
+    return *io;
+}
+
+const QString &InfinoteManager::getJid() const
+{
+    return jid;
+}
+
+Infinity::ConnectionManager &InfinoteManager::getConnectionManager() const
+{
+    return *connectionManager;
+}
+
+void InfinoteManager::setJid( const QString &string )
+{
+    jid = string;
+    emit( jidChanged( jid ) );
 }
 
 Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &host, unsigned int port )
@@ -59,22 +82,6 @@ Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &hos
     );
     
     return *xmppConnection;
-}
-
-Infinity::QtIo &InfinoteManager::getIo() const
-{
-    return *io;
-}
-
-const QString &InfinoteManager::getJid() const
-{
-    return jid;
-}
-
-void InfinoteManager::setJid( const QString &string )
-{
-    jid = string;
-    emit( jidChanged( jid ) );
 }
 
 } // namespace Kobby

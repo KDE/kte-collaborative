@@ -29,21 +29,26 @@ What happens when socket notifiers are duplicated?
 Can setEnabled be used? */
 void QtIo::watch_vfunc( int *socket, IoEvent event, IoFunction handler, void *user_data, Glib::Object::DestroyNotify destroy_notify )
 {
-    QAbstractEventDispatcher *eventDispatcher = QAbstractEventDispatcher::instance();
     QList<IoQSocketNotifier*>::Iterator itr;
-
-    for( itr = watchedSockets.begin(); itr != watchedSockets.end(); itr++ )
+    bool set;
+    
+    do
     {
-        if( (*itr)->socket() == *socket )
+        set = false;
+
+        for( itr = watchedSockets.begin(); itr != watchedSockets.end(); ++itr )
         {
-#if 0
-            qDebug() << "deleting " << IoQSocketNotifier::typeString( (*itr)->type() );
-#endif
-            (*itr)->setEnabled( false );
-            eventDispatcher->unregisterSocketNotifier( *itr );
-            watchedSockets.erase( itr );
+            if( (*itr)->socket() == *socket )
+            {
+    #if 0
+                qDebug() << "deleting " << IoQSocketNotifier::typeString( (*itr)->type() );
+    #endif
+                removeNotifier( itr );
+                set = true;
+                break;
+            }
         }
-    }
+    } while( set );
 
     if( event & IO_INCOMING )
     {
@@ -97,6 +102,15 @@ void QtIo::createNotifier( int socket,
     watchedSockets.append( notifier );
     
     notifier->setEnabled( true );
+}
+
+void QtIo::removeNotifier( QList<IoQSocketNotifier*>::Iterator itr )
+{
+    QAbstractEventDispatcher *eventDispatcher = QAbstractEventDispatcher::instance();
+
+    (*itr)->setEnabled( false );
+    eventDispatcher->unregisterSocketNotifier( *itr);
+    watchedSockets.erase( itr );
 }
 
 } // namespace Infinity

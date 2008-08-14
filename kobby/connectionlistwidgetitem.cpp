@@ -9,14 +9,14 @@ namespace Kobby
 {
 
 ConnectionListWidgetItem::ConnectionListWidgetItem( Connection &conn, QListWidget *parent )
-    : QObject( parent )
-    , QListWidgetItem( parent )
+    : QObject( parent)
+    , QListWidgetItem( parent, QListWidgetItem::UserType )
     , connection( &conn )
     , has_connected( false )
 {
     setDisplay();
 
-    connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotStatusChanged() ) );
+    connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotStatusChanged( int ) ) );
 }
 
 void ConnectionListWidgetItem::setDisplay()
@@ -45,6 +45,11 @@ void ConnectionListWidgetItem::setDisplay()
     setText( connection->getName() + "\n" 
         + statusLine
     );
+}
+
+Connection &ConnectionListWidgetItem::getConnection()
+{
+    return *connection;
 }
 
 void ConnectionListWidgetItem::slotStatusChanged( int status )

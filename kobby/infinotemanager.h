@@ -25,6 +25,7 @@ namespace Infinity
     class StandaloneIo;
     class XmppConnection;
     class QtIo;
+    class ConnectionManager;
 }
 
 typedef struct Gsasl Gsasl;
@@ -51,6 +52,7 @@ class InfinoteManager : public QObject
 
         Infinity::QtIo &getIo() const;
         const QString &getJid() const;
+        Infinity::ConnectionManager &getConnectionManager() const;
 
     Q_SIGNALS:
         void jidChanged( const QString &jid );
@@ -64,6 +66,7 @@ class InfinoteManager : public QObject
         QString jid;
         Infinity::QtIo *io;
         QList<Connection*> connections;
+        Infinity::ConnectionManager *connectionManager;
         gnutls_certificate_credentials_t gnutls_cred;
         Gsasl *gsasl_context;
     

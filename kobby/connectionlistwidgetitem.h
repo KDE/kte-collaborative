@@ -39,6 +39,7 @@ class ConnectionListWidgetItem
         ConnectionListWidgetItem( Connection &conn, QListWidget *parent = 0 );
 
         void setDisplay();
+        Connection &getConnection();
 
     public Q_SLOTS:
         void slotStatusChanged( int status );

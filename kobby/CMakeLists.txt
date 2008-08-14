@@ -30,6 +30,7 @@ set(KOBBY_SRCS
 	addconnectiondialog.cpp
 	connectionlistwidgetitem.cpp
 	connectionmanager.cpp
+	filebrowser.cpp
 	infinotemanager.cpp
 	${CMAKE_SOURCE_DIR}/qinfinitymm/qtio.cpp
 	${CMAKE_SOURCE_DIR}/qinfinitymm/ioqsocketnotifier.cpp

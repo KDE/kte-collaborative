@@ -32,6 +32,7 @@ private:
         void *user_data,
         Glib::Object::DestroyNotify destroy_notify
     );
+    void removeNotifier( QList<IoQSocketNotifier*>::Iterator itr );
 
     QList<IoQSocketNotifier*>  watchedSockets;
 

@@ -17,6 +17,7 @@
 #include "addconnectiondialog.h"
 #include "infinotemanager.h"
 #include "connectionlistwidgetitem.h"
+#include "filebrowser.h"
 
 #include <KDialog>
 
@@ -55,6 +56,7 @@ class ConnectionManager
     private Q_SLOTS:
         void slotAddConnectionDialog();
         void slotAddConnectionDialogFinished();
+        void slotFileBrowser();
         void slotSelectionChanged();
         void slotRemoveSelectedItems();
     
@@ -62,6 +64,7 @@ class ConnectionManager
         void setupActions();
         
         AddConnectionDialog *addConnectionDialog;
+        FileBrowserDialog *fileBrowserDialog;
         InfinoteManager *infinoteManager;
         Ui::ConnectionManager ui;
     

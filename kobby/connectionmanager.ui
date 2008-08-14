@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>330</height>
+    <width>473</width>
+    <height>376</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -45,6 +45,16 @@
        </property>
        <property name="text" >
         <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="filesButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>Files</string>
        </property>
       </widget>
      </item>
