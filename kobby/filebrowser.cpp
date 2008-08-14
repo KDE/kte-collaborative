@@ -10,6 +10,7 @@
 
 #include <KDebug>
 #include <KIcon>
+#include <KPushButton>
 
 namespace Kobby
 {
@@ -83,6 +84,11 @@ FileBrowserDialog::FileBrowserDialog( InfinoteManager &manager, Connection &conn
     , connection( &conn )
     , rootNode( new Infinity::ClientBrowserIter() )
 {
+    setButtons( KDialog::Ok | KDialog::User1 );
+    button( KDialog::User1 )->setText( "Create" );
+    button( KDialog::User1 )->setIcon( KIcon( "folder-new.png" ) );
+
+    nodeTreeWidget->setHeaderLabel( "Files" );
     setMainWidget( nodeTreeWidget );
 
     addRootNodes();
