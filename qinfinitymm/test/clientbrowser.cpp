@@ -252,7 +252,7 @@ void MyBrowser::onConnectionStatusChanged( )
         case Infinity::TCP_CONNECTION_CONNECTED:
             std::cout << "connected\n";
             has_connected = true;
-            clientBrowser->rootNode( cwd );
+            clientBrowser->setRootNode( cwd );
             break;
         case Infinity::TCP_CONNECTION_CLOSED:
             if( has_connected )

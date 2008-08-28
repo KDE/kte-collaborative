@@ -15,7 +15,7 @@
 namespace Kobby
 {
 
-FileBrowserWidgetItem::FileBrowserWidgetItem( QStringList &strings, int type, Infinity::ClientBrowserIter &iter, QTreeWidget *parent )
+FileBrowserWidgetItem::FileBrowserWidgetItem( QStringList &strings, Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent )
     : QObject( parent ) 
     , QTreeWidgetItem( parent, strings, type )
     , node( new Infinity::ClientBrowserIter() )
@@ -64,7 +64,7 @@ void FileBrowserWidgetItem::exploreFinishedCb()
     {
         name = node->getName();
         nameList += name;
-        addChild( new FileBrowserWidgetItem( nameList, type(), *node ) );
+        addChild( new FileBrowserWidgetItem( nameList, *node, type() ) );
         nameList.clear();
     }
 }
@@ -87,22 +87,38 @@ FileBrowserDialog::FileBrowserDialog( InfinoteManager &manager, Connection &conn
     setButtons( KDialog::Ok | KDialog::User1 );
     button( KDialog::User1 )->setText( "Create" );
     button( KDialog::User1 )->setIcon( KIcon( "folder-new.png" ) );
+    button( KDialog::User1 )->setEnabled( false );
 
     nodeTreeWidget->setHeaderLabel( "Files" );
     setMainWidget( nodeTreeWidget );
+    connect( nodeTreeWidget, SIGNAL(itemClicked( QTreeWidgetItem *, int )), this, SLOT(slotItemClicked( QTreeWidgetItem *, int )) );
 
-    addRootNodes();
+    addRootNode();
 }
 
 FileBrowserDialog::~FileBrowserDialog()
 {
 }
 
-void FileBrowserDialog::addRootNodes()
+void FileBrowserDialog::addRootNode()
 {
-    connection->getClientBrowser().rootNode( *rootNode );
-    exploreRequest = rootNode->explore();
-    exploreRequest->signal_finished().connect( sigc::mem_fun( this, &FileBrowserDialog::exploreFinishedCb ) );
+    QStringList nameList;
+    nameList += "/";
+    connection->getClientBrowser().setRootNode( *rootNode );
+    nodeTreeWidget->addTopLevelItem( new FileBrowserWidgetItem( nameList, *rootNode, FileBrowserWidgetItem::Folder, nodeTreeWidget ) );
+}
+
+void FileBrowserDialog::slotItemClicked( QTreeWidgetItem *item, int column )
+{
+    Q_UNUSED( item )
+    Q_UNUSED( column )
+    if( !button( KDialog::User1 )->isEnabled() )
+        button( KDialog::User1 )->setEnabled( true );
+}
+
+void FileBrowserDialog::slotCreateFolder()
+{
+    
 }
 
 void FileBrowserDialog::exploreFinishedCb()

@@ -45,7 +45,7 @@ class FileBrowserWidgetItem
     public:
         enum ItemType { Folder = 1001, File = 1002 };
 
-        FileBrowserWidgetItem( QStringList &strings, int type, Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+        FileBrowserWidgetItem( QStringList &strings, Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent = 0 );
         FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
         ~FileBrowserWidgetItem();
 
@@ -65,12 +65,18 @@ class FileBrowserDialog
     : public KDialog
 {
 
+    Q_OBJECT
+
     public:
         FileBrowserDialog( InfinoteManager &manager, Connection &conn, QWidget *parent = 0 );
         ~FileBrowserDialog();
 
+    private Q_SLOTS:
+        void slotItemClicked( QTreeWidgetItem *item, int column );
+        void slotCreateFolder();
+
     private:
-        void addRootNodes();
+        void addRootNode();
         void exploreFinishedCb();
 
         QTreeWidget *nodeTreeWidget;

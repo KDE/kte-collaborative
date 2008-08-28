@@ -1,0 +1,8 @@
+/**
+ @mainpage Kobby Documentation
+
+Kobby is a collaborative text editing plug-in for KTextEditor.   Kobby is built using @link http://trac.greghaynes.net/libinfinitymm libinfinitymm@endlink.
+
+For installation related information see the @link install Install@endlink page.
+
+*/

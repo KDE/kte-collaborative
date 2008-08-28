@@ -1,0 +1,28 @@
+/**
+@page install Installation Guide
+
+Kobby depends on the following packages
+	- KDE4 (http://techbase.kde.org/Getting_Started)
+	- libinfinitymm (http://trac.greghaynes.net/libinfinitymm)
+
+After these packages are installed you are ready to build kobby. You
+can obtain a copy of the source at:
+@verbatim
+git://git.greghaynes.net/kobby.git
+@endverbatim
+@note See below for information on how to download from git.
+
+Once you have KDE4 and libinfinitymm installed, installing kobby is fairly simple:
+@note If you use cmakekde to build the KDE packages, you can also use this
+command to build Kobby.
+
+@verbatim
+git clone git://git.greghaynes.net/kobby.git
+cd kobby
+cmake .
+make && make install
+@endverbatim
+
+Now, check the extensions tab in the settings dialog of your favorite KDE4 text editor.
+
+*/
