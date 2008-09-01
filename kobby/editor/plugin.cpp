@@ -16,7 +16,7 @@
 #include <kobby/editor/plugin.h>
 #include <kobby/editor/document.h>
 #include <kobby/editor/view.h>
-#include <kobby/dialogs/configdialog.h>
+#include <kobby/dialogs/settingsdialog.h>
 #include <kobby/infinote/infinotemanager.h>
 
 #include <KDebug>
@@ -27,8 +27,8 @@ namespace Kobby
 {
 
 K_PLUGIN_FACTORY_DEFINITION( PluginFactory,
-    registerPlugin<ConfigDialog>( "ktexteditor_kobby_config" );
     registerPlugin<Plugin>( "ktexteditor_kobby" );
+    registerPlugin<SettingsDialog>( "ktexteditor_kobby_settings" );
 )
 
 K_EXPORT_PLUGIN( PluginFactory( "ktexteditor_kobby", "ktexteditor_plugins" ) )

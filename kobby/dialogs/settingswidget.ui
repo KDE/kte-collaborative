@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>settingsWidget</class>
- <widget class="QWidget" name="settingsWidget" >
+ <class>SettingsWidget</class>
+ <widget class="QWidget" name="SettingsWidget" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -29,19 +29,6 @@
       </property>
       <attribute name="title" >
        <string>User</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="networkTab" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>476</width>
-        <height>346</height>
-       </rect>
-      </property>
-      <attribute name="title" >
-       <string>Network</string>
       </attribute>
      </widget>
     </widget>

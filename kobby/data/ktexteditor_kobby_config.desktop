@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Service
-X-KDE-ServiceTypes=KCModule
-X-KDE-Library=ktexteditor_kobby
-X-KDE-PluginKeyword=ktexteditor_kobby_config
-X-KDE-FactoryName=ktexteditor_kobby
-X-KDE-ParentComponents=ktexteditorkobby
-Name=Settings for collaborative text editing.

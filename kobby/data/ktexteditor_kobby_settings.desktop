@@ -2,7 +2,7 @@
 Type=Service
 X-KDE-ServiceTypes=KCModule
 X-KDE-Library=ktexteditor_kobby
-X-KDE-PluginKeyword=ktexteditor_kobby_config
-X-KDE-FactoryName=ktexteditor_kobby
+X-KDE-PluginKeyword=ktexteditor_kobby_settings
+X-KDE-FactoryName=ktexteditor_kobby_settings
 X-KDE-ParentComponents=ktexteditorkobby
-Name=Settings for collaborative text editing.
+Name=Kobby Settings

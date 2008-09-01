@@ -31,7 +31,7 @@ set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 set( KOBBY_SRCS
 
 	# dialogs
-	dialogs/configdialog.cpp
+	dialogs/settingsdialog.cpp
 	dialogs/addconnectiondialog.cpp
 	dialogs/connectionlistwidgetitem.cpp
 	dialogs/connectionmanager.cpp
@@ -54,6 +54,8 @@ set( KOBBY_SRCS
 kde4_add_ui_files( KOBBY_SRCS
 	dialogs/connectionmanager.ui
 	dialogs/addconnectiondialog.ui
+	dialogs/settingswidget.ui
+	dialogs/usersettingswidget.ui
 )
 
 kde4_add_plugin( ktexteditor_kobby ${KOBBY_SRCS} )

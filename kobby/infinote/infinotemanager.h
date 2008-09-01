@@ -54,13 +54,28 @@ class InfinoteManager : public QObject
          * @param port Remote port
          */
         Connection &connectToHost( const QString &name, const QString &hostname, unsigned int port );
+        /**
+         * @brief Add connection to managed connections.
+         */
+        void addConnection( Connection &connection );
 
         Infinity::QtIo &getIo() const;
         const QString &getJid() const;
         Infinity::ConnectionManager &getConnectionManager() const;
 
     Q_SIGNALS:
+        /**
+         * @brief The Jabber ID has been changed
+         */
         void jidChanged( const QString &jid );
+        /**
+         * @brief A connection has been added.
+         */
+        void connectionAdded( const Connection &connection );
+        /**
+         * @brief A connection has been removed.
+         */
+        void connectionRemoved( Connection &connection );
 
     public Q_SLOTS:
         void setJid( const QString &string );

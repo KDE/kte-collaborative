@@ -2,6 +2,8 @@
 
 #include "connectionmanager.h"
 
+#include <kobby/infinote/infinotemanager.h>
+
 #include <KDebug>
 
 #include "kobby/ui_connectionmanager.h"

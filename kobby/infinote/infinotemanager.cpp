@@ -34,13 +34,19 @@ InfinoteManager::~InfinoteManager()
 Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
-
     connection = new Connection( *this, name, newXmppConnection( host, port ) );
-    connections.append( connection );
+
+    addConnection( *connection );
 
     connection->getTcpConnection().open();
 
     return *connection;
+}
+
+void InfinoteManager::addConnection( Connection &connection )
+{
+    connections.append( &connection );
+    emit( connectionAdded( connection ) );
 }
 
 Infinity::QtIo &InfinoteManager::getIo() const

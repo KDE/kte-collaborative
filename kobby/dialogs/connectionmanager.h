@@ -18,8 +18,6 @@
 #include <kobby/dialogs/connectionlistwidgetitem.h>
 #include <kobby/dialogs/filebrowser.h>
 
-#include <kobby/infinote/infinotemanager.h>
-
 #include <KDialog>
 
 #include <QWidget>
@@ -42,6 +40,8 @@ namespace Ui
 
 namespace Kobby
 {
+
+class InfinoteManager;
 
 class ConnectionManager
     : public KDialog

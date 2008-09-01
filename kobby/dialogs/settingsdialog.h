@@ -11,27 +11,36 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef DOCUMENT_H
-#define DOCUMENT_H
+#ifndef KOBBY_SETTINGSDIALOG_H
+#define KOBBY_SETTINGSDIALOG_H
 
-#include <QtCore/QObject>
+#include <kobby/editor/plugin.h>
 
-#include <ktexteditor/document.h>
-#include <kxmlguiclient.h>
+#include <KDialog>
+#include <KCModule>
+
+namespace Ui
+{
+    class SettingsWidget;
+    class UserSettingsWidget;
+}
 
 namespace Kobby
 {
 
-class Document
-    : public QObject, public KXMLGUIClient
+class SettingsDialog
+    : public KCModule
 {
 
-public:
-    explicit Document(KTextEditor::Document *document = 0);
+    public:
+        SettingsDialog( QWidget *parent = 0, const QVariantList &args = QVariantList() );
+
+    private:
+        Ui::SettingsWidget *settingsWidgetUi;
+        Ui::UserSettingsWidget *userSettingsWidgetUi;
 
 };
 
-} // namespace Kobby
+}
 
 #endif
-
