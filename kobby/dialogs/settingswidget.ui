@@ -1,0 +1,53 @@
+<ui version="4.0" >
+ <class>settingsWidget</class>
+ <widget class="QWidget" name="settingsWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>407</width>
+    <height>321</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout" >
+   <item row="0" column="0" >
+    <widget class="QTabWidget" name="settingsTabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="userTab" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>391</width>
+        <height>279</height>
+       </rect>
+      </property>
+      <attribute name="title" >
+       <string>User</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="networkTab" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>476</width>
+        <height>346</height>
+       </rect>
+      </property>
+      <attribute name="title" >
+       <string>Network</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

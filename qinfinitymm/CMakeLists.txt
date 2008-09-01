@@ -1,26 +1,28 @@
-PROJECT(qinfinitymm)
+project(qinfinitymm)
 
-FIND_PACKAGE(Qt4 REQUIRED)
-INCLUDE(${QT_USE_FILE})
+find_package(Qt4 REQUIRED)
+include(${QT_USE_FILE})
 
-FIND_PACKAGE(Libinfinitymm REQUIRED)
+find_package(Libinfinitymm REQUIRED)
 
-SET(qinfinitymm_SRCS
+SET( qinfinitymm_SRCS
 	qtio.cpp
 	ioqsocketnotifier.cpp
 )
 
-QT4_AUTOMOC(${qinfinitymm_SRCS})
+QT4_AUTOMOC( ${qinfinitymm_SRCS} )
 
-ADD_LIBRARY(qinfinitymm SHARED
+ADD_LIBRARY( qinfinitymm SHARED
 	${qinfinitymm_SRCS}
 )
 
-INCLUDE_DIRECTORIES(${LIBINFINITYMM_INCLUDES} ${CMAKE_SOURCE_DIR})
+INCLUDE_DIRECTORIES( ${LIBINFINITYMM_INCLUDES} ${CMAKE_SOURCE_DIR} )
 
-TARGET_LINK_LIBRARIES(qinfinitymm
+TARGET_LINK_LIBRARIES( qinfinitymm
 	${QT_LIBRARIES}
 	${LIBINFINITYMM_LIBRARIES}
 )
 
-SUBDIRS(test)
+
+
+SUBDIRS( test )

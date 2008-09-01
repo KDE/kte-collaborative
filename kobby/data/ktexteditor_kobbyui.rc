@@ -1,0 +1,10 @@
+<!DOCTYPE kpartgui>
+<kpartplugin name="ktexteditor_kobby" library="ktexteditor_kobby" version="1">
+<MenuBar>
+	<Menu name="tools"><Text>&amp;Tools</Text>
+		<Menu name="tools_kobby"><Text>Kobby</Text>
+			<Action name="tools_kobby_manageconnections" />
+		</Menu>
+	</Menu>
+</MenuBar>
+</kpartplugin>
