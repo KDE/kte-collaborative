@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>473</width>
-    <height>376</height>
+    <width>433</width>
+    <height>329</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,15 +18,7 @@
      <property name="title" >
       <string>Connections</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" >
-      <item>
-       <widget class="QListWidget" name="connectionsListWidget" >
-        <property name="sortingEnabled" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <layout class="QVBoxLayout" name="connectionsVerticalLayout" />
     </widget>
    </item>
    <item>

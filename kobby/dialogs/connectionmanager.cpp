@@ -1,121 +1,123 @@
+#include <libinfinitymm/common/tcpconnection.h>
 #include <libinfinitymm/common/xmppconnection.h>
 
 #include "connectionmanager.h"
 
-#include <kobby/infinote/infinotemanager.h>
+#include "kobby/infinote/infinotemanager.h"
 
-#include <KDebug>
+#include <KIcon>
 
-#include "kobby/ui_connectionmanager.h"
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 namespace Kobby
 {
 
-ConnectionManager::ConnectionManager( InfinoteManager &manager, QWidget *parent )
-    : KDialog( parent )
-    , addConnectionDialog( 0 )
-    , fileBrowserDialog( 0 )
+ConnectionListWidgetItem::ConnectionListWidgetItem( Connection &conn, QListWidget *parent )
+    : QObject( parent)
+    , QListWidgetItem( parent, QListWidgetItem::UserType )
+    , connection( &conn )
+    , has_connected( false )
+{
+    setDisplay();
+
+    connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotStatusChanged( int ) ) );
+}
+
+void ConnectionListWidgetItem::setDisplay()
+{
+    QString statusLine;
+
+    switch( connection->getTcpConnection().property_status() )
+    {
+        case Infinity::TCP_CONNECTION_CONNECTING:
+            setIcon( KIcon( "network-disconnect.png" ) );
+            statusLine = "Connecting...";
+            break;
+        case Infinity::TCP_CONNECTION_CONNECTED:
+            has_connected = true;
+            setIcon( KIcon( "network-connect.png" ) );
+            statusLine = "Connected.";
+            break;
+        case Infinity::TCP_CONNECTION_CLOSED:
+            if( !has_connected )
+                statusLine = "Could not connect to server.";
+            else
+                statusLine = "Closed.";
+            setIcon( KIcon( "network-disconnect.png" ) );
+    }
+
+    setText( connection->getName() + "\n" 
+        + statusLine
+    );
+}
+
+Connection &ConnectionListWidgetItem::getConnection()
+{
+    return *connection;
+}
+
+void ConnectionListWidgetItem::slotStatusChanged( int status )
+{
+    Q_UNUSED( status )
+    setDisplay();
+}
+
+ConnectionListWidget::ConnectionListWidget( InfinoteManager &infinoteManager, QWidget *parent )
+    : QListWidget( parent )
+    , infinoteManager( &infinoteManager )
+{
+}
+
+void ConnectionListWidget::addConnections( QList<Connection*> &connections )
+{
+    QList<Connection*>::iterator itr;
+
+    for( itr = connections.begin(); itr != connections.end(); ++itr )
+        addItem( new ConnectionListWidgetItem( **itr ) );
+}
+
+ConnectionManagerWidget::ConnectionManagerWidget( InfinoteManager &manager,
+    QWidget *parent )
+    : QWidget( parent )
     , infinoteManager( &manager )
-    , ui( new Ui::ConnectionManager )
+    , connectionListWidget( new ConnectionListWidget( manager, this ) )
 {
-    QWidget *widget = new QWidget( this );
-    ui->setupUi( widget );
-    setMainWidget( widget );
-    
-    setCaption( i18n( "Kobby Connection Manager" ) );
-    
+    setupUi();
+}
+
+void ConnectionManagerWidget::setupUi()
+{
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+
+    addButton = new QPushButton( KIcon( "list-add.png" ), "Add", this );
+    removeButton = new QPushButton( KIcon( "list-remove.png" ), "Remove", this );
+
+    buttonLayout->addWidget( addButton );
+    buttonLayout->addWidget( removeButton );
+    buttonLayout->addStretch();
+
+    mainLayout->addWidget( connectionListWidget );
+    mainLayout->addLayout( buttonLayout );
+
+    setLayout( mainLayout );
+
+    adjustSize();
+}
+
+ConnectionManagerDialog::ConnectionManagerDialog( InfinoteManager &manager, QWidget *parent )
+    : KDialog( parent )
+    , infinoteManager( &manager )
+{
+    ConnectionManagerWidget *managerWidget = new ConnectionManagerWidget( manager, this );
+    setMainWidget( managerWidget );
+
+    setCaption( "Connection Manager" );
     setButtons( KDialog::Close );
-    
-    setupActions();
+
+    adjustSize();
 }
 
-ConnectionManager::~ConnectionManager()
-{
-    if( addConnectionDialog )
-        addConnectionDialog->close();
 }
-
-void ConnectionManager::setupActions()
-{
-    ui->addConnectionButton->setIcon( KIcon( "list-add.png" ) );
-    connect( ui->addConnectionButton, SIGNAL(clicked()), this, SLOT(slotAddConnectionDialog()) );
-
-    ui->filesButton->setIcon( KIcon( "folder.png" ) );
-    connect( ui->filesButton, SIGNAL(clicked()), this, SLOT(slotFileBrowser()) );
-    
-    ui->removeConnectionButton->setIcon( KIcon( "list-remove.png" ) );
-    connect( ui->removeConnectionButton, SIGNAL(clicked()), this, SLOT(slotRemoveSelectedItems()) );
-
-    connect( ui->connectionsListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()) );
-}
-
-void ConnectionManager::addConnection( const QString name, const QString hostname, unsigned int port )
-{
-    ConnectionListWidgetItem *listItem;
-
-    listItem = new ConnectionListWidgetItem( infinoteManager->connectToHost( name, hostname, port ) );
-    ui->connectionsListWidget->addItem( listItem );
-}
-
-void ConnectionManager::slotAddConnectionDialog()
-{
-    if( addConnectionDialog )
-    {
-        kDebug() << "Add connection dialog already open.";
-        return;
-    }
-    
-    addConnectionDialog = new AddConnectionDialog( this );
-    
-    connect( addConnectionDialog, SIGNAL( addConnection( const QString, const QString, unsigned int ) ),
-        this, SLOT( addConnection( const QString, const QString, unsigned int ) ) );
-    connect( addConnectionDialog, SIGNAL( finished() ), this, SLOT( slotAddConnectionDialogFinished() ) );
-    
-    addConnectionDialog->setVisible( true );
-}
-
-void ConnectionManager::slotAddConnectionDialogFinished()
-{
-    addConnectionDialog = 0;
-}
-
-void ConnectionManager::slotFileBrowser()
-{
-    if( fileBrowserDialog )
-    {
-        kDebug() << "File browser dialog already open.";
-        return;
-    }
-
-    ConnectionListWidgetItem *connection;
-    
-    connection = dynamic_cast<ConnectionListWidgetItem*>( ui->connectionsListWidget->currentItem() );
-
-    fileBrowserDialog = new FileBrowserDialog( *this->infinoteManager, connection->getConnection(), this );
-    fileBrowserDialog->setVisible( true );
-}
-
-void ConnectionManager::slotSelectionChanged()
-{
-    if( !(ui->removeConnectionButton->isEnabled()) ) {
-        ui->removeConnectionButton->setEnabled( true );
-        ui->filesButton->setEnabled( true );
-    }
-}
-
-void ConnectionManager::slotRemoveSelectedItems()
-{
-    QList<QListWidgetItem*> items;
-    QList<QListWidgetItem*>::Iterator itr;
-
-    items = ui->connectionsListWidget->selectedItems();
-
-    for( itr = items.begin(); itr != items.end(); itr++ )
-        delete *itr;
-
-    items = ui->connectionsListWidget->selectedItems();
-    if( items.count() == 0 )
-        ui->removeConnectionButton->setEnabled( false );
-}
-
-} // namespace Kobby

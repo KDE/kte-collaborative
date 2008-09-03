@@ -14,9 +14,7 @@
 #ifndef KOBBY_VIEW_H
 #define KOBBY_VIEW_H
 
-#include <kobby/dialogs/configdialog.h>
-#include <kobby/dialogs/connectionmanager.h>
-#include <kobby/infinote/infinotemanager.h>
+#include <kobby/dialogs/settingsdialog.h>
 
 #include <KXMLGUIClient>
 #include <KTextEditor/View>
@@ -28,6 +26,9 @@
 
 namespace Kobby
 {
+
+class ConnectionManagerDialog;
+class InfinoteManager;
 
 class View
     : public QObject
@@ -46,7 +47,7 @@ class View
         void slotConnectionManagerFinished();
     
     private:
-        ConnectionManager *connectionManager;
+        ConnectionManagerDialog *connectionManager;
         InfinoteManager *infinoteManager;
     
 }; // class View

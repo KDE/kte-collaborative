@@ -13,6 +13,7 @@ SettingsDialog::SettingsDialog( QWidget *parent, const QVariantList &args )
     , settingsWidgetUi( new Ui::SettingsWidget )
     , userSettingsWidgetUi( new Ui::UserSettingsWidget )
 {
+    // Create UI of settings dialog
     settingsWidgetUi->setupUi( this );
 
     // Create UI of user settings tab

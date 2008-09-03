@@ -11,69 +11,96 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef KOBBY_SESSIONMANAGER_H
-#define KOBBY_SESSIONMANAGER_H
-
-#include <kobby/dialogs/addconnectiondialog.h>
-#include <kobby/dialogs/connectionlistwidgetitem.h>
-#include <kobby/dialogs/filebrowser.h>
+#ifndef KOBBY_CONNECTIONMANAGER_H
+#define KOBBY_CONNECTIONMANAGER_H
 
 #include <KDialog>
 
-#include <QWidget>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QString>
-#include <QLabel>
+#include <QList>
 #include <QListWidget>
-#include <QPushButton>
+#include <QWidget>
 
 namespace Infinity
 {
+    class TcpConnection;
     class XmppConnection;
-}
-
-namespace Ui
-{
-    class ConnectionManager;
 }
 
 namespace Kobby
 {
 
 class InfinoteManager;
+class Connection;
 
-class ConnectionManager
+class ConnectionListWidgetItem
+    : public QObject
+    , public QListWidgetItem
+{
+
+    Q_OBJECT
+
+    public:
+        ConnectionListWidgetItem( Kobby::Connection &conn, QListWidget *parent = 0 );
+
+        void setDisplay();
+        Kobby::Connection &getConnection();
+
+    public Q_SLOTS:
+        void slotStatusChanged( int status );
+
+    private:
+        Kobby::Connection *connection;
+        Infinity::TcpConnection *tcpConnection;
+        bool has_connected;
+
+};
+
+class ConnectionListWidget
+    : public QListWidget
+{
+
+    public:
+        ConnectionListWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+
+    private:
+        void addConnections( QList<Connection*> &connections );
+
+        InfinoteManager *infinoteManager;
+
+};
+
+/**
+ * @brief Widget containing a ConnectionList and add / remove buttons.
+ */
+class ConnectionManagerWidget
+    : public QWidget
+{
+
+    public:
+        ConnectionManagerWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+
+    private:
+        void setupUi();
+
+        InfinoteManager *infinoteManager;
+        ConnectionListWidget *connectionListWidget;
+        QPushButton *addButton;
+        QPushButton *removeButton;
+
+};
+
+class ConnectionManagerDialog
     : public KDialog
 {
-    
-    Q_OBJECT
-    
-    public:
-        ConnectionManager( Kobby::InfinoteManager &manager, QWidget *parent = 0 );
-        ~ConnectionManager();
-    
-    public Q_SLOTS:
-        //void addConnection( Infinity::XmppConnection &conn, const QString &hostname );
-        void addConnection( const QString name, const QString hostname, unsigned int port );
-    
-    private Q_SLOTS:
-        void slotAddConnectionDialog();
-        void slotAddConnectionDialogFinished();
-        void slotFileBrowser();
-        void slotSelectionChanged();
-        void slotRemoveSelectedItems();
-    
-    private:
-        void setupActions();
-        
-        AddConnectionDialog *addConnectionDialog;
-        FileBrowserDialog *fileBrowserDialog;
-        Kobby::InfinoteManager *infinoteManager;
-        Ui::ConnectionManager *ui;
-    
-}; // class ConnectionManager
 
-} // namespace Kobby
+    public:
+        ConnectionManagerDialog( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+
+    private:
+        InfinoteManager *infinoteManager;
+
+};
+
+}
 
 #endif

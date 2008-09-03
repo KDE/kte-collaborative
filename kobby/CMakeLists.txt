@@ -33,7 +33,6 @@ set( KOBBY_SRCS
 	# dialogs
 	dialogs/settingsdialog.cpp
 	dialogs/addconnectiondialog.cpp
-	dialogs/connectionlistwidgetitem.cpp
 	dialogs/connectionmanager.cpp
 	dialogs/filebrowser.cpp
 

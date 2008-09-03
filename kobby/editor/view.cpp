@@ -13,6 +13,8 @@
 
 #include "plugin.h"
 #include "view.h"
+#include "kobby/infinote/infinotemanager.h"
+#include "kobby/dialogs/connectionmanager.h"
 
 #include <KDebug>
 
@@ -53,7 +55,7 @@ void View::slotManageConnections()
         return;
     }
     
-    connectionManager = new ConnectionManager( *infinoteManager );
+    connectionManager = new ConnectionManagerDialog( *infinoteManager );
     connectionManager->setVisible( true );
     
     connect( connectionManager, SIGNAL( finished() ), this, SLOT( slotConnectionManagerFinished() ) );
