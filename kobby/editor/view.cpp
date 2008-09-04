@@ -56,9 +56,8 @@ void View::slotManageConnections()
     }
     
     connectionManager = new ConnectionManagerDialog( *infinoteManager );
-    connectionManager->setVisible( true );
-    
     connect( connectionManager, SIGNAL( finished() ), this, SLOT( slotConnectionManagerFinished() ) );
+    connectionManager->setVisible( true );
 }
 
 void View::slotConnectionManagerFinished()

@@ -40,8 +40,8 @@ class InfinoteManager;
  *
  * We are not inheriting from XmppConnection for several reasons:
  * Including libinfinitymm after a Qt include dies due to libsigc++
- * Subclassing Glib::Objects isnt entirely clean due to GObject's design
-*/
+ * Subclassing Glib::Objects isnt entirely clean at the current time.
+ */
 class Connection
     : public QObject
 {
@@ -50,6 +50,9 @@ class Connection
     public:
         Connection( InfinoteManager &manager, const QString name, Infinity::XmppConnection &conn );
         ~Connection();
+
+        bool operator==( const Connection &connection ) const;
+        bool operator!=( const Connection &connection ) const;
 
         const QString &getName() const;
         Infinity::XmppConnection &getXmppConnection() const;

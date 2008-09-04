@@ -5,6 +5,8 @@
 
 #include "infinotemanager.h"
 
+#include <KDebug>
+
 #include <qinfinitymm/qtio.h>
 
 #include <gnutls/gnutls.h>
@@ -31,6 +33,26 @@ InfinoteManager::~InfinoteManager()
     delete io;
 }
 
+Infinity::QtIo &InfinoteManager::getIo() const
+{
+    return *io;
+}
+
+const QString &InfinoteManager::getJid() const
+{
+    return jid;
+}
+
+Infinity::ConnectionManager &InfinoteManager::getConnectionManager() const
+{
+    return *connectionManager;
+}
+
+const QList<Connection*> &InfinoteManager::getConnections() const
+{
+    return connections;
+}
+
 Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
@@ -49,19 +71,29 @@ void InfinoteManager::addConnection( Connection &connection )
     emit( connectionAdded( connection ) );
 }
 
-Infinity::QtIo &InfinoteManager::getIo() const
+void InfinoteManager::removeConnection( const Connection &connection )
 {
-    return *io;
-}
+    QList<Connection*>::iterator itr;
+    Connection *local_conn = 0;
 
-const QString &InfinoteManager::getJid() const
-{
-    return jid;
-}
+    for( itr = connections.begin(); itr != connections.end(); ++itr )
+    {
+        if( **itr == connection ) {
+            local_conn = *itr;
+            break;
+        }
+    }
 
-Infinity::ConnectionManager &InfinoteManager::getConnectionManager() const
-{
-    return *connectionManager;
+    if( !local_conn )
+    {
+        kDebug() << "Couldnt find connection " << connection.getName();
+        return;
+    }
+
+    connections.removeAll( local_conn );
+    emit( connectionRemoved( connection ) );
+
+    delete local_conn;
 }
 
 void InfinoteManager::setJid( const QString &string )

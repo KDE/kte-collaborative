@@ -26,11 +26,27 @@ Connection::Connection( InfinoteManager &manager, const QString connectionName, 
 
 Connection::~Connection()
 {
+    if( tcpConnection )
+        tcpConnection->close();
+
     DEL_IF_EXISTS( xmppConnection )
     DEL_IF_EXISTS( tcpConnection )
 }
 
 #undef DEL_IF_EXISTS
+
+bool Connection::operator==( const Connection &connection ) const
+{
+    if( ( &connection.getXmppConnection() == xmppConnection ) && ( &connection.getTcpConnection() == tcpConnection ) )
+        return true;
+    else
+        return false;
+}
+
+bool Connection::operator!=( const Connection &connection ) const
+{
+    return !( connection == *this );
+}
 
 const QString &Connection::getName() const
 {

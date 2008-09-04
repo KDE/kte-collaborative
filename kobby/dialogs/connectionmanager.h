@@ -31,6 +31,7 @@ namespace Kobby
 
 class InfinoteManager;
 class Connection;
+class AddConnectionDialog;
 
 class ConnectionListWidgetItem
     : public QObject
@@ -40,30 +41,49 @@ class ConnectionListWidgetItem
     Q_OBJECT
 
     public:
-        ConnectionListWidgetItem( Kobby::Connection &conn, QListWidget *parent = 0 );
+        ConnectionListWidgetItem( const Connection &conn, QListWidget *parent = 0 );
 
         void setDisplay();
-        Kobby::Connection &getConnection();
+        const Connection &getConnection();
 
     public Q_SLOTS:
         void slotStatusChanged( int status );
 
     private:
-        Kobby::Connection *connection;
+        const Connection *connection;
         Infinity::TcpConnection *tcpConnection;
         bool has_connected;
 
 };
 
+/**
+ * @brief A QListWidget of the current connections.
+ */
 class ConnectionListWidget
     : public QListWidget
 {
 
+    Q_OBJECT
+
     public:
         ConnectionListWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
 
+    public Q_SLOTS:
+        /**
+         * @brief Add a connection to the displayed list.
+         */
+        void addConnection( const Connection &connection );
+        /**
+         * @brief Remove a connection from the displayed list.
+         */
+        void removeConnection( const Connection &connection );
+        /**
+         * @brief Add a list of connections to the displayed list.
+         */
+        void addConnections( const QList<Connection*> &connections );
+
     private:
-        void addConnections( QList<Connection*> &connections );
+        void setupActions();
 
         InfinoteManager *infinoteManager;
 
@@ -76,14 +96,24 @@ class ConnectionManagerWidget
     : public QWidget
 {
 
+    Q_OBJECT
+
     public:
         ConnectionManagerWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
 
+    private Q_SLOTS:
+        void slotAddConnection();
+        void slotAddConnectionFinished();
+        void slotRemoveConnection();
+        void slotItemSelectionChanged();
+
     private:
         void setupUi();
+        void setupActions();
 
         InfinoteManager *infinoteManager;
         ConnectionListWidget *connectionListWidget;
+        AddConnectionDialog *addConnectionDialog;
         QPushButton *addButton;
         QPushButton *removeButton;
 
@@ -97,7 +127,10 @@ class ConnectionManagerDialog
         ConnectionManagerDialog( InfinoteManager &infinoteManager, QWidget *parent = 0 );
 
     private:
+        void setupUi();
+
         InfinoteManager *infinoteManager;
+        ConnectionManagerWidget *connectionManagerWidget;
 
 };
 

@@ -46,22 +46,10 @@ class InfinoteManager : public QObject
         InfinoteManager();
         ~InfinoteManager();
 
-        /**
-         * @brief Create a new connection to host which will be managed by the InfinoteManager instance.
-         * 
-         * @param name Label for this connection
-         * @param hostname Remote host
-         * @param port Remote port
-         */
-        Connection &connectToHost( const QString &name, const QString &hostname, unsigned int port );
-        /**
-         * @brief Add connection to managed connections.
-         */
-        void addConnection( Connection &connection );
-
         Infinity::QtIo &getIo() const;
         const QString &getJid() const;
         Infinity::ConnectionManager &getConnectionManager() const;
+        const QList<Connection*> &getConnections() const;
 
     Q_SIGNALS:
         /**
@@ -75,9 +63,22 @@ class InfinoteManager : public QObject
         /**
          * @brief A connection has been removed.
          */
-        void connectionRemoved( Connection &connection );
+        void connectionRemoved( const Connection &connection );
 
     public Q_SLOTS:
+        /**
+         * @brief Create a new connection to host which will be managed by the InfinoteManager instance.
+         * 
+         * @param name Label for this connection
+         * @param hostname Remote host
+         * @param port Remote port
+         */
+        Connection &connectToHost( const QString &name, const QString &hostname, unsigned int port );
+        /**
+         * @brief Add connection to managed connections.
+         */
+        void addConnection( Connection &connection );
+        void removeConnection( const Connection &connection );
         void setJid( const QString &string );
 
     private:
