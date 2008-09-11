@@ -47,6 +47,7 @@ class View
         void slotConnectionManagerFinished();
     
     private:
+        KTextEditor::View *view;
         ConnectionManagerDialog *connectionManager;
         InfinoteManager *infinoteManager;
     

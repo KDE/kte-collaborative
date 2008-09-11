@@ -26,12 +26,18 @@ namespace Infinity
     class XmppConnection;
 }
 
+namespace Ui
+{
+    class AddConnectionDialog;
+}
+
 namespace Kobby
 {
 
 class InfinoteManager;
 class Connection;
 class AddConnectionDialog;
+class FileBrowserDialog;
 
 class ConnectionListWidgetItem
     : public QObject
@@ -89,8 +95,35 @@ class ConnectionListWidget
 
 };
 
+class AddConnectionDialog
+    : public KDialog
+{
+    
+    Q_OBJECT
+    
+    public:
+        AddConnectionDialog( QWidget *parent = 0 );
+    
+    Q_SIGNALS:
+        void addConnection( const QString &label, const QString &hostname, unsigned int port );
+    
+    private Q_SLOTS:
+        void slotLocationChanged( const QString &text );
+        void tryConnecting();
+    
+    private:
+        void setupUi();
+        void setupActions();
+        
+        Ui::AddConnectionDialog *ui;
+    
+}; // class AddConnectionDialog
+
 /**
  * @brief Widget containing a ConnectionList and add / remove buttons.
+ *
+ * You can use several instances of this widget per InfinoteManager instance and
+ * all will be synchronized.
  */
 class ConnectionManagerWidget
     : public QWidget
@@ -105,6 +138,8 @@ class ConnectionManagerWidget
         void slotAddConnection();
         void slotAddConnectionFinished();
         void slotRemoveConnection();
+        void slotBrowseConnection();
+        void slotBrowseConnectionFinished();
         void slotItemSelectionChanged();
 
     private:
@@ -114,8 +149,10 @@ class ConnectionManagerWidget
         InfinoteManager *infinoteManager;
         ConnectionListWidget *connectionListWidget;
         AddConnectionDialog *addConnectionDialog;
+        FileBrowserDialog *fileBrowserDialog;
         QPushButton *addButton;
         QPushButton *removeButton;
+        QPushButton *browseButton;
 
 };
 

@@ -11,8 +11,8 @@
 // or write to the Free Software Foundation, Inc., 
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#ifndef QINFINITYMM_INFINOTEMANAGER_H
-#define QINFINITYMM_INFINOTEMANAGER_H
+#ifndef KOBBY_INFINOTEMANAGER_H
+#define KOBBY_INFINOTEMANAGER_H
 
 #include <kobby/infinote/connection.h>
 
@@ -43,7 +43,7 @@ class InfinoteManager : public QObject
     Q_OBJECT
     
     public:
-        InfinoteManager();
+        InfinoteManager( QObject *parent = 0 );
         ~InfinoteManager();
 
         Infinity::QtIo &getIo() const;

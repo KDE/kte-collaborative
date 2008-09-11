@@ -38,7 +38,7 @@ Plugin::Plugin( QObject *parent, const QVariantList &args )
 {
     Q_UNUSED( args )
 
-    infinoteManager = new InfinoteManager();
+    infinoteManager = new InfinoteManager( this );
 }
 
 void Plugin::addDocument( KTextEditor::Document *document )

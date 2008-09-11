@@ -9,17 +9,21 @@
 #include "connection.h"
 #include "infinotemanager.h"
 
+#include <KDebug>
+
 namespace Kobby
 {
 
-Connection::Connection( InfinoteManager &manager, const QString connectionName, Infinity::XmppConnection &connection )
-    : infinoteManager( &manager )
+Connection::Connection( InfinoteManager &manager, const QString connectionName, Infinity::XmppConnection &connection, QObject *parent  )
+    : QObject( parent )
+    , infinoteManager( &manager )
     , name( connectionName )
     , xmppConnection( &connection )
     , tcpConnection( connection.property_tcp_connection().get_value() )
+    , clientBrowser( new Infinity::ClientBrowser( infinoteManager->getIo(), *xmppConnection, infinoteManager->getConnectionManager() ) )
     , has_connected( false )
 {
-    tcpConnection->property_status().signal_changed().connect( sigc::mem_fun( this, &Connection::slotStatusChanged ) );
+    xmppConnection->property_status().signal_changed().connect( sigc::mem_fun( this, &Connection::statusChangedCb ) );
 }
 
 #define DEL_IF_EXISTS( x ) if( x ) delete x;
@@ -63,28 +67,41 @@ Infinity::TcpConnection &Connection::getTcpConnection() const
     return *tcpConnection;
 }
 
+InfinoteManager &Connection::getInfinoteManager() const
+{
+    return *infinoteManager;
+}
+
+int Connection::getStatus() const
+{
+    return xmppConnection->getStatus();
+}
+
 Infinity::ClientBrowser &Connection::getClientBrowser() const
 {
     return *clientBrowser;
 }
 
-int Connection::getStatus() const
+void Connection::statusChangedCb()
 {
-    return tcpConnection->property_status().get_value();
-}
+    kDebug() << "status changed.";
 
-void Connection::slotStatusChanged()
-{
     switch( getStatus() )
     {
-        case Infinity::TCP_CONNECTION_CONNECTED:
-            if ( !has_connected ) {
+        case Infinity::XML_CONNECTION_OPEN:
+            if ( !has_connected )
                 has_connected = true;
-                clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(), getXmppConnection(), infinoteManager->getConnectionManager() );
-            }
+            /*
+            kDebug() << "exploring";
+            exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
+            clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(), *xmppConnection, infinoteManager->getConnectionManager() );
+            Infinity::ClientBrowserIter *rootNode = new Infinity::ClientBrowserIter;
+            clientBrowser->setRootNode( *rootNode );
+            *exploreRequest = clientBrowser->explore( *rootNode );
+            */
     }
 
-    emit( statusChanged( tcpConnection->property_status().get_value() ) );
+    emit( statusChanged( getStatus() ) );
 }
 
 }

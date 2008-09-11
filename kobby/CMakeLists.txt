@@ -17,8 +17,6 @@ set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
 	${LIBINFINITYMM_INCLUDES}
 	${CMAKE_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/dialogs
-	${CMAKE_CURRENT_SOURCE_DIR}/editor
 )
 
 set( KOBBY_LIBRARIES
@@ -32,7 +30,6 @@ set( KOBBY_SRCS
 
 	# dialogs
 	dialogs/settingsdialog.cpp
-	dialogs/addconnectiondialog.cpp
 	dialogs/connectionmanager.cpp
 	dialogs/filebrowser.cpp
 

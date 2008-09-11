@@ -45,10 +45,11 @@ class InfinoteManager;
 class Connection
     : public QObject
 {
+
     Q_OBJECT
 
     public:
-        Connection( InfinoteManager &manager, const QString name, Infinity::XmppConnection &conn );
+        Connection( InfinoteManager &manager, const QString name, Infinity::XmppConnection &conn, QObject *parent = 0 );
         ~Connection();
 
         bool operator==( const Connection &connection ) const;
@@ -57,8 +58,9 @@ class Connection
         const QString &getName() const;
         Infinity::XmppConnection &getXmppConnection() const;
         Infinity::TcpConnection &getTcpConnection() const;
-        Infinity::ClientBrowser &getClientBrowser() const;
+        InfinoteManager &getInfinoteManager() const;
         int getStatus() const;
+        Infinity::ClientBrowser &getClientBrowser() const;
 
     Q_SIGNALS:
         /**
@@ -69,14 +71,15 @@ class Connection
         void statusChanged( int status );
 
     private:
-        void slotStatusChanged();
+        void statusChangedCb();
 
         InfinoteManager *infinoteManager;
         QString name;
         Infinity::XmppConnection *xmppConnection;
         Infinity::TcpConnection *tcpConnection;
-        bool has_connected;
         Infinity::ClientBrowser *clientBrowser;
+        bool has_connected;
+
 };
 
 }

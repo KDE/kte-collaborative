@@ -5,14 +5,17 @@
 
 #include "kobby/infinote/infinotemanager.h"
 #include "kobby/infinote/connection.h"
-#include "kobby/dialogs/addconnectiondialog.h"
+#include "kobby/dialogs/filebrowser.h"
 
 #include <KDebug>
 #include <KIcon>
+#include <KPushButton>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+
+#include "kobby/ui_addconnectiondialog.h"
 
 namespace Kobby
 {
@@ -32,18 +35,18 @@ void ConnectionListWidgetItem::setDisplay()
 {
     QString statusLine;
 
-    switch( connection->getTcpConnection().property_status() )
+    switch( connection->getStatus() )
     {
-        case Infinity::TCP_CONNECTION_CONNECTING:
+        case Infinity::XML_CONNECTION_OPENING:
             setIcon( KIcon( "network-disconnect.png" ) );
             statusLine = "Connecting...";
             break;
-        case Infinity::TCP_CONNECTION_CONNECTED:
+        case Infinity::XML_CONNECTION_OPEN:
             has_connected = true;
             setIcon( KIcon( "network-connect.png" ) );
             statusLine = "Connected.";
             break;
-        case Infinity::TCP_CONNECTION_CLOSED:
+        case Infinity::XML_CONNECTION_CLOSED:
             if( !has_connected )
                 statusLine = "Could not connect to server.";
             else
@@ -66,6 +69,8 @@ void ConnectionListWidgetItem::slotStatusChanged( int status )
     Q_UNUSED( status )
     setDisplay();
 }
+
+// ConnectionListWidget
 
 ConnectionListWidget::ConnectionListWidget( InfinoteManager &manager, QWidget *parent )
     : QListWidget( parent )
@@ -115,12 +120,65 @@ void ConnectionListWidget::setupActions()
         this, SLOT( removeConnection( const Connection & ) ) );
 }
 
+// AddConnectionDialog
+
+AddConnectionDialog::AddConnectionDialog( QWidget *parent )
+    : KDialog( parent )
+    , ui( new Ui::AddConnectionDialog )
+{
+    setupUi();
+    setupActions();
+}
+
+void AddConnectionDialog::slotLocationChanged( const QString &text )
+{
+    Q_UNUSED( text )
+    
+    // Try should be disabled
+    if( ui->hostnameLineEdit->text() == "" || ui->portLineEdit->text() == "" )
+    {
+        if( button( KDialog::Ok )->isEnabled() )
+            button( KDialog::Ok )->setEnabled( false );
+    }
+    else // Try should be enabled
+    {
+        if( !button( KDialog::Ok )->isEnabled() )
+            button( KDialog::Ok )->setEnabled( true );
+    }
+}
+
+void AddConnectionDialog::tryConnecting()
+{
+    emit( addConnection( ui->labelLineEdit->text(), ui->hostnameLineEdit->text(), ui->portLineEdit->text().toUInt() ) );
+}
+
+void AddConnectionDialog::setupUi()
+{
+    QWidget *widget = new QWidget( this );
+    ui->setupUi( widget );
+    setMainWidget( widget );
+    
+    setButtons( KDialog::Ok | KDialog::Close );
+    
+    button( KDialog::Ok )->setEnabled( false );
+}
+
+void AddConnectionDialog::setupActions()
+{
+    connect( this, SIGNAL( okClicked() ), this, SLOT( tryConnecting() ) );
+    connect( ui->hostnameLineEdit, SIGNAL( textChanged( const QString& ) ), this, SLOT( slotLocationChanged( const QString& ) ) );
+    connect( ui->portLineEdit, SIGNAL( textChanged( const QString& ) ), this, SLOT( slotLocationChanged( const QString& ) ) );
+}
+
+// ConnectionManagerWidget
+
 ConnectionManagerWidget::ConnectionManagerWidget( InfinoteManager &manager,
     QWidget *parent )
     : QWidget( parent )
     , infinoteManager( &manager )
     , connectionListWidget( new ConnectionListWidget( manager, this ) )
     , addConnectionDialog( 0 )
+    , fileBrowserDialog( 0 )
 {
     setupUi();
     setupActions();
@@ -158,14 +216,38 @@ void ConnectionManagerWidget::slotRemoveConnection()
     }
 }
 
+void ConnectionManagerWidget::slotBrowseConnection()
+{
+    if( fileBrowserDialog )
+    {
+        kDebug() << "File browser dialog already open.";
+        return;
+    }
+
+    fileBrowserDialog = new FileBrowserDialog( ((ConnectionListWidgetItem*)connectionListWidget->selectedItems().at( 0 ))->getConnection(), this );
+    connect( fileBrowserDialog, SIGNAL( finished() ), this, SLOT( slotBrowseConnectionFinished() ) );
+    fileBrowserDialog->setVisible( true );
+}
+
+void ConnectionManagerWidget::slotBrowseConnectionFinished()
+{
+    fileBrowserDialog = 0;
+}
+
 void ConnectionManagerWidget::slotItemSelectionChanged()
 {
     QList<QListWidgetItem*> items = connectionListWidget->selectedItems();
 
     if( items.size() )
+    {
         removeButton->setEnabled( true );
+        browseButton->setEnabled( true );
+    }
     else
+    {
         removeButton->setEnabled( false );
+        removeButton->setEnabled( false );
+    }
 }
 
 void ConnectionManagerWidget::setupUi()
@@ -176,9 +258,12 @@ void ConnectionManagerWidget::setupUi()
     addButton = new QPushButton( KIcon( "list-add.png" ), "Add", this );
     removeButton = new QPushButton( KIcon( "list-remove.png" ), "Remove", this );
     removeButton->setEnabled( false );
+    browseButton = new QPushButton( KIcon( "folder.png" ), "Browse", this );
+    browseButton->setEnabled( false );
 
     buttonLayout->addWidget( addButton );
     buttonLayout->addWidget( removeButton );
+    buttonLayout->addWidget( browseButton );
     buttonLayout->addStretch();
 
     mainLayout->addWidget( connectionListWidget );
@@ -193,6 +278,7 @@ void ConnectionManagerWidget::setupActions()
 {
     connect( addButton, SIGNAL( clicked() ), this, SLOT( slotAddConnection() ) );
     connect( removeButton, SIGNAL( clicked() ), this, SLOT( slotRemoveConnection() ) );
+    connect( browseButton, SIGNAL( clicked() ), this, SLOT( slotBrowseConnection() ) );
     connect( connectionListWidget, SIGNAL( itemSelectionChanged() ),
         this, SLOT( slotItemSelectionChanged() ) );
 }
@@ -208,6 +294,7 @@ void ConnectionManagerDialog::setupUi()
 {
     connectionManagerWidget = new ConnectionManagerWidget( *infinoteManager, this );
 
+    setCaption( "Connection Manager" );
     setMainWidget( connectionManagerWidget );
     setButtons( KDialog::Ok );
 

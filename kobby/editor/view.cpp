@@ -22,8 +22,9 @@ namespace Kobby
 {
 
 View::View( InfinoteManager &manager, KTextEditor::View *view )
-    : QObject(view)
+    : QObject( view )
     , KXMLGUIClient( view )
+    , view( view )
     , connectionManager( 0 )
     , infinoteManager( &manager )
 {
@@ -55,7 +56,7 @@ void View::slotManageConnections()
         return;
     }
     
-    connectionManager = new ConnectionManagerDialog( *infinoteManager );
+    connectionManager = new ConnectionManagerDialog( *infinoteManager, view );
     connect( connectionManager, SIGNAL( finished() ), this, SLOT( slotConnectionManagerFinished() ) );
     connectionManager->setVisible( true );
 }
@@ -66,6 +67,3 @@ void View::slotConnectionManagerFinished()
 }
 
 } // namespace Kobby
-
-#include "view.moc"
-

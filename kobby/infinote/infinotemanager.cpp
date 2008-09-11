@@ -15,21 +15,21 @@
 namespace Kobby
 {
 
-InfinoteManager::InfinoteManager()
-    : jid( "anonymous@localhost" )
+InfinoteManager::InfinoteManager( QObject *parent )
+    : QObject( parent )
+    , jid( "anonymous@localhost" )
     , gnutls_cred( 0 )
     , gsasl_context( 0 )
 {
     Infinity::init();
     
-    connectionManager = new Infinity::ConnectionManager();
     io = new Infinity::QtIo;
+    connectionManager = new Infinity::ConnectionManager();
 }
 
 InfinoteManager::~InfinoteManager()
 {
     // Release remaining connections
-    
     delete io;
 }
 
@@ -56,7 +56,7 @@ const QList<Connection*> &InfinoteManager::getConnections() const
 Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
-    connection = new Connection( *this, name, newXmppConnection( host, port ) );
+    connection = new Connection( *this, name, newXmppConnection( host, port ), this );
 
     addConnection( *connection );
 

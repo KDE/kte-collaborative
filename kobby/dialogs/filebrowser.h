@@ -18,6 +18,7 @@
 
 #include <QStringList>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include <glibmm/refptr.h>
 
@@ -33,32 +34,91 @@ namespace Infinity
 namespace Kobby
 {
 
+typedef struct _GError GError;
+
 class InfinoteManager;
 class Connection;
 
 class FileBrowserWidgetItem
-    : public QObject
+    :    public QObject
     , public QTreeWidgetItem
+{
+
+    public:
+        enum ItemType { Folder = 1001, Note = 1002 };
+
+        FileBrowserWidgetItem( QString name, const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent = 0 );
+        FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
+        ~FileBrowserWidgetItem();
+
+    protected:
+        Infinity::ClientBrowserIter *node;
+
+    private:
+        void setItemIcon();
+
+};
+
+/**
+ * @brief A folder item in a FileBrowser.
+ */
+class FileBrowserWidgetFolderItem
+    : public FileBrowserWidgetItem
 {
 
     Q_OBJECT
 
     public:
-        enum ItemType { Folder = 1001, File = 1002 };
-
-        FileBrowserWidgetItem( QStringList &strings, Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent = 0 );
-        FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
-        ~FileBrowserWidgetItem();
+        FileBrowserWidgetFolderItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+        /**
+         * @brief Create using the specified name.
+         *
+         * Use this to crete a folder item without calling getName() on iter.
+         */
+        FileBrowserWidgetFolderItem( QString name, Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+        ~FileBrowserWidgetFolderItem();
 
     public Q_SLOTS:
-        void populateChildren();
+        /**
+         * @brief Populate this folder with child nodes.
+         */
+        void populate( bool expand_when_finished = true );
 
     private:
-        void setItemIcon();
+        void setupUi();
         void exploreFinishedCb();
+        void exploreFailedCb( GError * );
 
-        Infinity::ClientBrowserIter *node;
-        Glib::RefPtr<Infinity::ClientExploreRequest> exploreRequest;
+        Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
+
+};
+
+class FileBrowserWidgetNoteItem
+    : public FileBrowserWidgetItem
+{
+
+    public:
+        FileBrowserWidgetNoteItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+
+};
+
+class FileBrowserWidget
+    : public QTreeWidget
+{
+
+    public:
+        FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
+        ~FileBrowserWidget();
+
+    private:
+        void setupUi();
+        void createRootNodes();
+
+        InfinoteManager *infinoteManager;
+        Infinity::ClientBrowser *clientBrowser;
+        const Connection *connection;
+        Infinity::ClientBrowserIter *rootNode;
+        Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
 
 };
 
@@ -66,26 +126,14 @@ class FileBrowserDialog
     : public KDialog
 {
 
-    Q_OBJECT
-
     public:
-        FileBrowserDialog( Kobby::InfinoteManager &manager, Kobby::Connection &conn, QWidget *parent = 0 );
+        FileBrowserDialog( const Connection &connection, QWidget *parent = 0 );
         ~FileBrowserDialog();
 
-    private Q_SLOTS:
-        void slotItemClicked( QTreeWidgetItem *item, int column );
-        void slotCreateFolder();
-
     private:
-        void addRootNode();
-        void exploreFinishedCb();
+        void setupUi();
 
-        QTreeWidget *nodeTreeWidget;
-        Kobby::InfinoteManager *infinoteManager;
-        Kobby::Connection *connection;
-        Infinity::ClientBrowserIter *rootNode;
-        Glib::RefPtr<Infinity::ClientExploreRequest> exploreRequest;
-
+        FileBrowserWidget *fileBrowserWidget;
 };
 
 }
