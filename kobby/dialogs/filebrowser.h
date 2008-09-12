@@ -49,13 +49,23 @@ class FileBrowserWidgetItem
 
         FileBrowserWidgetItem( QString name, const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent = 0 );
         FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
-        ~FileBrowserWidgetItem();
+
+        Infinity::ClientBrowserIter &getNode() const;
 
     protected:
         Infinity::ClientBrowserIter *node;
 
     private:
-        void setItemIcon();
+        void setupUi();
+
+};
+
+class FileBrowserWidgetNoteItem
+    : public FileBrowserWidgetItem
+{
+
+    public:
+        FileBrowserWidgetNoteItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
 
 };
 
@@ -90,15 +100,7 @@ class FileBrowserWidgetFolderItem
         void exploreFailedCb( GError * );
 
         Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
-
-};
-
-class FileBrowserWidgetNoteItem
-    : public FileBrowserWidgetItem
-{
-
-    public:
-        FileBrowserWidgetNoteItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
+        bool is_populated;
 
 };
 
@@ -106,12 +108,18 @@ class FileBrowserWidget
     : public QTreeWidget
 {
 
+    Q_OBJECT
+
     public:
         FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
         ~FileBrowserWidget();
 
+    private Q_SLOTS:
+        void slotItemExpanded( QTreeWidgetItem *item );
+
     private:
         void setupUi();
+        void setupActions();
         void createRootNodes();
 
         InfinoteManager *infinoteManager;
