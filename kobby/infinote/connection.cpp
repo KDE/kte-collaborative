@@ -91,14 +91,6 @@ void Connection::statusChangedCb()
         case Infinity::XML_CONNECTION_OPEN:
             if ( !has_connected )
                 has_connected = true;
-            /*
-            kDebug() << "exploring";
-            exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
-            clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(), *xmppConnection, infinoteManager->getConnectionManager() );
-            Infinity::ClientBrowserIter *rootNode = new Infinity::ClientBrowserIter;
-            clientBrowser->setRootNode( *rootNode );
-            *exploreRequest = clientBrowser->explore( *rootNode );
-            */
     }
 
     emit( statusChanged( getStatus() ) );

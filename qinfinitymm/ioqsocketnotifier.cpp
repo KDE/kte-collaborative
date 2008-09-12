@@ -91,7 +91,8 @@ IoQSocketNotifier::IoQSocketNotifier( int socket,
 
 IoQSocketNotifier::~IoQSocketNotifier()
 {
-    this->destroy_notify( this->user_data );
+    if( this->destroy_notify )
+        this->destroy_notify( this->user_data );
 }
 
 void *IoQSocketNotifier::getUserData()

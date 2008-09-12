@@ -4,9 +4,9 @@
 #include <libinfinitymm/client/clientbrowseriter.h>
 #include <libinfinitymm/client/clientexplorerequest.h>
 
-#include "filebrowser.h"
-
 #include <qinfinitymm/qtio.h>
+
+#include "filebrowser.h"
 
 #include <kobby/infinote/connection.h>
 #include <kobby/infinote/infinotemanager.h>
@@ -78,6 +78,17 @@ void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
     *exploreRequest = node->explore();
     (*exploreRequest)->signal_finished().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFinishedCb ) );
     (*exploreRequest)->signal_failed().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFailedCb ) );
+    if( (*exploreRequest)->getFinished() )
+    {
+        kDebug() << "Already finished.";
+    }
+
+    bool res;
+
+    for( res = node->child(); res; res = node->next() )
+    {
+        addChild( new FileBrowserWidgetItem( node->getName(), *node, type() ) );
+    }
 }
 
 void FileBrowserWidgetFolderItem::setupUi()
