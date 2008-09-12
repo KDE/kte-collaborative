@@ -123,6 +123,8 @@ void FileBrowserWidgetFolderItem::exploreFinishedCb()
         else
             addChild( new FileBrowserWidgetNoteItem( *node ) );
     }
+
+    setChildIndicatorPolicy( QTreeWidgetItem::DontShowIndicatorWhenChildless );
 }
 
 void FileBrowserWidgetFolderItem::exploreFailedCb( GError *value )
