@@ -79,7 +79,6 @@ class Connection
         Infinity::TcpConnection *tcpConnection;
         Infinity::ClientBrowser *clientBrowser;
         bool has_connected;
-        Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
 
 };
 

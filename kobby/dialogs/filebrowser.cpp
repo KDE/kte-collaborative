@@ -74,21 +74,17 @@ FileBrowserWidgetFolderItem::~FileBrowserWidgetFolderItem()
 
 void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
 {
-    kDebug() << "Exploring";
     *exploreRequest = node->explore();
     (*exploreRequest)->signal_finished().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFinishedCb ) );
     (*exploreRequest)->signal_failed().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFailedCb ) );
+
     if( (*exploreRequest)->getFinished() )
-    {
-        kDebug() << "Already finished.";
-    }
+        kDebug() << "explore finished before signal_finished.";
 
     bool res;
 
     for( res = node->child(); res; res = node->next() )
-    {
         addChild( new FileBrowserWidgetItem( node->getName(), *node, type() ) );
-    }
 }
 
 void FileBrowserWidgetFolderItem::setupUi()
@@ -138,13 +134,11 @@ void FileBrowserWidget::createRootNodes()
 {
     FileBrowserWidgetFolderItem *rootNodeItem;
 
-    rootNode = new Infinity::ClientBrowserIter();
+    rootNode = new Infinity::ClientBrowserIter;
     clientBrowser->setRootNode( *rootNode );
-    exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>();
-    *exploreRequest = clientBrowser->explore( *rootNode );
-    //rootNodeItem = new FileBrowserWidgetFolderItem( "/", *rootNode, this );
-    //addTopLevelItem( rootNodeItem );
-    //rootNodeItem->populate( true );
+    rootNodeItem = new FileBrowserWidgetFolderItem( "/", *rootNode, this );
+    addTopLevelItem( rootNodeItem );
+    rootNodeItem->populate( true );
 }
 
 FileBrowserDialog::FileBrowserDialog( const Connection &conn, QWidget *parent )
