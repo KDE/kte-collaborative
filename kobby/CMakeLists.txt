@@ -49,7 +49,6 @@ set( KOBBY_SRCS
 )
 
 kde4_add_ui_files( KOBBY_SRCS
-	dialogs/connectionmanager.ui
 	dialogs/connectioneditor.ui
 	dialogs/addconnectiondialog.ui
 	dialogs/controlwidget.ui

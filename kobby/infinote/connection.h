@@ -38,6 +38,13 @@ class InfinoteManager;
 /**
  * @brief Wrapper for libinfinitymm connection objects
  *
+ * This class manages a connection to an infinote server.  It is
+ * meant to provide convinience over controlling the underlying
+ * libinfinitymm objects individually.  Using the libinfinitymm
+ * objects directly can and likely will cause errors with manager
+ * widgets.
+ */
+/*
  * We are not inheriting from XmppConnection for several reasons:
  * Including libinfinitymm after a Qt include dies due to libsigc++
  * Subclassing Glib::Objects isnt entirely clean at the current time.
@@ -49,6 +56,14 @@ class Connection
     Q_OBJECT
 
     public:
+        /**
+         * @brief Create Connection object.
+         * @param manager InfinoteManager instance.
+         * @param name Name of connection.  This functions only as a label and must be unique.
+         * @param jid Jabber ID to connect as.
+         * @param hostname Hostname to connect to.
+         * @param port Port on Hostname to connect to.
+         */
         Connection( InfinoteManager &manager,
             const QString &name,
             const QString &jid,
@@ -60,16 +75,55 @@ class Connection
         bool operator==( const Connection &connection ) const;
         bool operator!=( const Connection &connection ) const;
 
+        /**
+         * @brief Get name for this connection.
+         * @return Current name of connection.
+         */
         const QString &getName() const;
+        /**
+         * @brief Set name for this connection.
+         * @param name New name for the connection.
+         *
+         * The name functions purely as a label, and it must me unique.
+         */
         void setName( const QString &name );
+        /**
+         * @brief Get the underlying XmppConnection.
+         * @return XmppConnection for this Connection.
+         */
         Infinity::XmppConnection &getXmppConnection() const;
+        /**
+         * @brief Get the underlying TcpConnection.
+         * @return TcpConnection for this Connection.
+         */
         Infinity::TcpConnection &getTcpConnection() const;
+        /**
+         * @brief Get the InfinoteManager instance this connection belongs to.
+         * @return InfinoteManager instance for this Connection.
+         */
         InfinoteManager &getInfinoteManager() const;
-        int getStatus() const;
-        bool isConnected() const;
-        void open();
-        void close();
+        /**
+         * @brief Get the ClientBrowser for this connection.
+         */
         Infinity::ClientBrowser &getClientBrowser() const;
+        /**
+         * @brief Status of XmppConnection
+         * @return Status of type Infinity::XmlConnectionStatus.
+         */
+        int getStatus() const;
+        /**
+         * @brief Is the XML portion of this connection connected.
+         * @return Is this connection fully connected.
+         */
+        bool isConnected() const;
+        /**
+         * @brief Open this connection if it is closed.
+         */
+        void open();
+        /**
+         * @brief Close this connection if it is open.
+         */
+        void close();
 
     Q_SIGNALS:
         /**
