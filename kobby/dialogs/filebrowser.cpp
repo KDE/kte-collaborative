@@ -132,6 +132,19 @@ void FileBrowserWidgetFolderItem::exploreFailedCb( GError *value )
     kDebug() << "failed.";
 }
 
+// FileBrowserWidget
+
+FileBrowserWidget::FileBrowserWidget( QWidget *parent )
+    : QTreeWidget( parent )
+    , infinoteManager( 0 )
+    , clientBrowser( 0 )
+    , connection( 0 )
+    , rootNode( 0 )
+{
+    setupUi();
+    setupActions();
+}
+
 FileBrowserWidget::FileBrowserWidget( const Connection &conn, QWidget *parent )
     : QTreeWidget( parent )
     , infinoteManager( &conn.getInfinoteManager() )
@@ -159,6 +172,11 @@ void FileBrowserWidget::slotItemExpanded( QTreeWidgetItem *item )
 void FileBrowserWidget::setupUi()
 {
     setHeaderLabel( "Nodes" );
+
+    if( clientBrowser )
+        setEnabled( true );
+    else
+        setEnabled( false );
 }
 
 void FileBrowserWidget::setupActions()
@@ -174,7 +192,6 @@ void FileBrowserWidget::createRootNodes()
     clientBrowser->setRootNode( *rootNode );
     rootNodeItem = new FileBrowserWidgetFolderItem( "/", *rootNode, this );
     addTopLevelItem( rootNodeItem );
-    rootNodeItem->populate( true );
 }
 
 FileBrowserDialog::FileBrowserDialog( const Connection &conn, QWidget *parent )

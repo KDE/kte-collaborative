@@ -15,6 +15,7 @@
 #include "view.h"
 #include "kobby/infinote/infinotemanager.h"
 #include "kobby/dialogs/connectionmanager.h"
+#include "kobby/dialogs/controldialog.h"
 
 #include <KDebug>
 
@@ -26,6 +27,7 @@ View::View( InfinoteManager &manager, KTextEditor::View *view )
     , KXMLGUIClient( view )
     , view( view )
     , connectionManager( 0 )
+    , controlDialog( 0 )
     , infinoteManager( &manager )
 {
     setComponentData( PluginFactory::componentData() );
@@ -41,9 +43,12 @@ View::~View()
 void View::setupActions()
 {
     KAction *manageConnectionsAction = new KAction( KIcon( "network-workgroup.png" ), i18n( "Manage Connections" ), this );
-    
     actionCollection()->addAction( "tools_kobby_manageconnections", manageConnectionsAction );
     connect( manageConnectionsAction, SIGNAL( triggered() ), this, SLOT( slotManageConnections() ) );
+
+    KAction *controlAction = new KAction( i18n( "Control" ), this );
+    actionCollection()->addAction( "tools_kobby_control", controlAction );
+    connect( controlAction, SIGNAL( triggered() ), this, SLOT( slotControlDialog() ) );
     
     setXMLFile( "kobbyui.rc" );
 }
@@ -64,6 +69,24 @@ void View::slotManageConnections()
 void View::slotConnectionManagerFinished()
 {
         connectionManager = 0;
+}
+
+void View::slotControlDialog()
+{
+    if( controlDialog )
+    {
+        kDebug() << "Control Dialog already open.";
+        return;
+    }
+
+    controlDialog = new ControlDialog( *infinoteManager, view );
+    connect( controlDialog, SIGNAL( finished() ), this, SLOT( slotControlDialogFinished() ) );
+    controlDialog->setVisible( true );
+}
+
+void View::slotControlDialogFinished()
+{
+    controlDialog = 0;
 }
 
 } // namespace Kobby

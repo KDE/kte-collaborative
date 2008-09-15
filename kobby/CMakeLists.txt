@@ -32,6 +32,7 @@ set( KOBBY_SRCS
 	dialogs/settingsdialog.cpp
 	dialogs/connectionmanager.cpp
 	dialogs/filebrowser.cpp
+	dialogs/controldialog.cpp
 
 	# editor components
 	editor/document.cpp
@@ -49,7 +50,9 @@ set( KOBBY_SRCS
 
 kde4_add_ui_files( KOBBY_SRCS
 	dialogs/connectionmanager.ui
+	dialogs/connectioneditor.ui
 	dialogs/addconnectiondialog.ui
+	dialogs/controlwidget.ui
 	dialogs/settingswidget.ui
 	dialogs/usersettingswidget.ui
 )

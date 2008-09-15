@@ -4,6 +4,7 @@
 	<Menu name="tools"><Text>&amp;Tools</Text>
 		<Menu name="tools_kobby"><Text>Kobby</Text>
 			<Action name="tools_kobby_manageconnections" />
+			<Action name="tools_kobby_control" />
 		</Menu>
 	</Menu>
 </MenuBar>

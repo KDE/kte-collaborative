@@ -14,15 +14,21 @@
 namespace Kobby
 {
 
-Connection::Connection( InfinoteManager &manager, const QString connectionName, Infinity::XmppConnection &connection, QObject *parent  )
+Connection::Connection( InfinoteManager &cmanager,
+    const QString &cname,
+    const QString &cjid,
+    const QString &chostname,
+    unsigned int cport,
+    QObject *parent )
     : QObject( parent )
-    , infinoteManager( &manager )
-    , name( connectionName )
-    , xmppConnection( &connection )
-    , tcpConnection( connection.property_tcp_connection().get_value() )
-    , clientBrowser( new Infinity::ClientBrowser( infinoteManager->getIo(), *xmppConnection, infinoteManager->getConnectionManager() ) )
-    , has_connected( false )
+    , infinoteManager( &cmanager )
+    , name( cname )
+    , jid( cjid )
+    , hostname( chostname )
+    , port( cport )
 {
+    init();
+
     xmppConnection->property_status().signal_changed().connect( sigc::mem_fun( this, &Connection::statusChangedCb ) );
 }
 
@@ -30,7 +36,7 @@ Connection::Connection( InfinoteManager &manager, const QString connectionName, 
 
 Connection::~Connection()
 {
-    if( tcpConnection )
+    if( tcpConnection && tcpConnection->getStatus() == Infinity::TCP_CONNECTION_CONNECTED )
         tcpConnection->close();
 
     DEL_IF_EXISTS( xmppConnection )
@@ -57,6 +63,12 @@ const QString &Connection::getName() const
     return name;
 }
 
+void Connection::setName( const QString &string )
+{
+    name = string;
+    emit( nameChanged( string ) );
+}
+
 Infinity::XmppConnection &Connection::getXmppConnection() const
 {
     return *xmppConnection;
@@ -77,9 +89,41 @@ int Connection::getStatus() const
     return xmppConnection->getStatus();
 }
 
+bool Connection::isConnected() const
+{
+    if( xmppConnection->getStatus() == Infinity::XML_CONNECTION_OPEN )
+        return true;
+    
+    return false;
+}
+
+void Connection::open()
+{
+    tcpConnection->open();
+}
+
+void Connection::close()
+{
+    if( clientBrowser )
+    {
+        delete clientBrowser;
+        clientBrowser = 0;
+    }
+    tcpConnection->close();
+}
+
 Infinity::ClientBrowser &Connection::getClientBrowser() const
 {
     return *clientBrowser;
+}
+
+void Connection::init()
+{
+    xmppConnection = &infinoteManager->createXmppConnection( jid, hostname, port );
+    tcpConnection = &xmppConnection->getTcpConnection();
+    clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(),
+        *xmppConnection,
+        infinoteManager->getConnectionManager() );
 }
 
 void Connection::statusChangedCb()

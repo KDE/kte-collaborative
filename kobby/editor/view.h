@@ -28,6 +28,7 @@ namespace Kobby
 {
 
 class ConnectionManagerDialog;
+class ControlDialog;
 class InfinoteManager;
 
 class View
@@ -45,10 +46,13 @@ class View
     private Q_SLOTS:
         void slotManageConnections();
         void slotConnectionManagerFinished();
+        void slotControlDialog();
+        void slotControlDialogFinished();
     
     private:
         KTextEditor::View *view;
         ConnectionManagerDialog *connectionManager;
+        ControlDialog *controlDialog;
         InfinoteManager *infinoteManager;
     
 }; // class View

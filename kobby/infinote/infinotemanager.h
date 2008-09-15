@@ -35,7 +35,11 @@ namespace Kobby
 {
 
 /**
- * @brief A manager class for Qt libinfinitymm objects.
+ * @brief A manager class for libinfinitymm objects.
+ *
+ * This class contains various helper functions to make working with libinfinitymm and
+ * qinfinitymm easier.  It also contains instances for libinfinitymm which are
+ * needed in several other classes.
  */
 class InfinoteManager : public QObject
 {
@@ -46,24 +50,39 @@ class InfinoteManager : public QObject
         InfinoteManager( QObject *parent = 0 );
         ~InfinoteManager();
 
+        /**
+         * @brief Get QtIo instance
+         * @return Current QtIo Instance
+         */
         Infinity::QtIo &getIo() const;
-        const QString &getJid() const;
+        /**
+         * @brief Get ConnectionManager for connections
+         * @return Current ConnectionManager
+         */
         Infinity::ConnectionManager &getConnectionManager() const;
-        const QList<Connection*> &getConnections() const;
+        /**
+         * @brief Get current connections
+         * @return List of current connections
+         */
+        QList<Connection*> &getConnections();
+        /**
+         * @brief Create an XmppConnection and TcpConnection, without connecting
+         * @param jid Jabber ID used for connection
+         * @param host Hostname to connect to
+         * @param port Port to connect to on Hostname
+         * @return Unconnected XmppConnection
+         */
+        Infinity::XmppConnection &createXmppConnection( const QString &jid, const QString &host, unsigned int port );
 
     Q_SIGNALS:
         /**
-         * @brief The Jabber ID has been changed
-         */
-        void jidChanged( const QString &jid );
-        /**
          * @brief A connection has been added.
          */
-        void connectionAdded( const Connection &connection );
+        void connectionAdded( Connection &connection );
         /**
          * @brief A connection has been removed.
          */
-        void connectionRemoved( const Connection &connection );
+        void connectionRemoved( Connection &connection );
 
     public Q_SLOTS:
         /**
@@ -73,18 +92,15 @@ class InfinoteManager : public QObject
          * @param hostname Remote host
          * @param port Remote port
          */
-        Connection &connectToHost( const QString &name, const QString &hostname, unsigned int port );
+        Connection &connectToHost( const QString &name, const QString &jid, const QString &hostname, unsigned int port );
         /**
          * @brief Add connection to managed connections.
          */
         void addConnection( Connection &connection );
-        void removeConnection( const Connection &connection );
-        void setJid( const QString &string );
+        void removeConnection( Connection &connection );
 
     private:
-        Infinity::XmppConnection &newXmppConnection( const QString &host, unsigned int port );
 
-        QString jid;
         Infinity::QtIo *io;
         QList<Connection*> connections;
         Infinity::ConnectionManager *connectionManager;

@@ -81,7 +81,7 @@ class FileBrowserWidgetFolderItem
     public:
         FileBrowserWidgetFolderItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
         /**
-         * @brief Create using the specified name.
+         * @brief Create using the specified name instead of calling getName() on ClientBrowserIter
          *
          * Use this to crete a folder item without calling getName() on iter.
          */
@@ -104,6 +104,9 @@ class FileBrowserWidgetFolderItem
 
 };
 
+/**
+ * @brief FileBrowser for a connection.
+ */
 class FileBrowserWidget
     : public QTreeWidget
 {
@@ -111,6 +114,7 @@ class FileBrowserWidget
     Q_OBJECT
 
     public:
+        FileBrowserWidget( QWidget *parent = 0 );
         FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
         ~FileBrowserWidget();
 
@@ -130,6 +134,9 @@ class FileBrowserWidget
 
 };
 
+/**
+ * @brief Dialog containing FileBrowserWidget
+ */
 class FileBrowserDialog
     : public KDialog
 {

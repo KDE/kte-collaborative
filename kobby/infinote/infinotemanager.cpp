@@ -17,7 +17,6 @@ namespace Kobby
 
 InfinoteManager::InfinoteManager( QObject *parent )
     : QObject( parent )
-    , jid( "anonymous@localhost" )
     , gnutls_cred( 0 )
     , gsasl_context( 0 )
 {
@@ -38,25 +37,20 @@ Infinity::QtIo &InfinoteManager::getIo() const
     return *io;
 }
 
-const QString &InfinoteManager::getJid() const
-{
-    return jid;
-}
-
 Infinity::ConnectionManager &InfinoteManager::getConnectionManager() const
 {
     return *connectionManager;
 }
 
-const QList<Connection*> &InfinoteManager::getConnections() const
+QList<Connection*> &InfinoteManager::getConnections()
 {
     return connections;
 }
 
-Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
+Connection &InfinoteManager::connectToHost( const QString &jid, const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
-    connection = new Connection( *this, name, newXmppConnection( host, port ), this );
+    connection = new Connection( *this, name, jid, host, port, this );
 
     addConnection( *connection );
 
@@ -71,7 +65,7 @@ void InfinoteManager::addConnection( Connection &connection )
     emit( connectionAdded( connection ) );
 }
 
-void InfinoteManager::removeConnection( const Connection &connection )
+void InfinoteManager::removeConnection( Connection &connection )
 {
     QList<Connection*>::iterator itr;
     Connection *local_conn = 0;
@@ -96,13 +90,7 @@ void InfinoteManager::removeConnection( const Connection &connection )
     delete local_conn;
 }
 
-void InfinoteManager::setJid( const QString &string )
-{
-    jid = string;
-    emit( jidChanged( jid ) );
-}
-
-Infinity::XmppConnection &InfinoteManager::newXmppConnection( const QString &host, unsigned int port )
+Infinity::XmppConnection &InfinoteManager::createXmppConnection( const QString &jid, const QString &host, unsigned int port )
 {
     const char *hostname = host.toAscii();
 

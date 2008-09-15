@@ -20,6 +20,8 @@
 #include <QListWidget>
 #include <QWidget>
 
+class QLineEdit;
+
 namespace Infinity
 {
     class TcpConnection;
@@ -28,6 +30,7 @@ namespace Infinity
 
 namespace Ui
 {
+    class ConnectionEditor;
     class AddConnectionDialog;
 }
 
@@ -37,8 +40,10 @@ namespace Kobby
 class InfinoteManager;
 class Connection;
 class AddConnectionDialog;
-class FileBrowserDialog;
 
+/**
+ * @brief A connection item in the ConnectionListWidget.
+ */
 class ConnectionListWidgetItem
     : public QObject
     , public QListWidgetItem
@@ -47,16 +52,16 @@ class ConnectionListWidgetItem
     Q_OBJECT
 
     public:
-        ConnectionListWidgetItem( const Connection &conn, QListWidget *parent = 0 );
+        ConnectionListWidgetItem( Connection &conn, QListWidget *parent = 0 );
 
         void setDisplay();
-        const Connection &getConnection();
+        Connection &getConnection();
 
     public Q_SLOTS:
         void slotStatusChanged( int status );
 
     private:
-        const Connection *connection;
+        Connection *connection;
         Infinity::TcpConnection *tcpConnection;
         bool has_connected;
 
@@ -78,20 +83,63 @@ class ConnectionListWidget
         /**
          * @brief Add a connection to the displayed list.
          */
-        void addConnection( const Connection &connection );
+        void addConnection( Connection &connection );
         /**
          * @brief Remove a connection from the displayed list.
          */
-        void removeConnection( const Connection &connection );
+        void removeConnection( Connection &connection );
         /**
          * @brief Add a list of connections to the displayed list.
          */
-        void addConnections( const QList<Connection*> &connections );
+        void addConnections( QList<Connection*> &connections );
 
     private:
         void setupActions();
 
         InfinoteManager *infinoteManager;
+
+};
+
+/**
+ * @brief Widget to edit and control a connection.
+ */
+class ConnectionEditorWidget
+    : public QWidget
+{
+
+    Q_OBJECT
+
+    public:
+        ConnectionEditorWidget( QWidget *parent = 0 );
+        ConnectionEditorWidget( Connection &connection, QWidget *parent = 0 );
+
+        /**
+         * @brief Get connection being edited.
+         * @return Connection being edited.  Returns if no connection is set.
+         */
+        Connection *getConnection() const;
+
+    public Q_SLOTS:
+        /**
+         * @brief Set the connection being edited.
+         * @param connection New connection to edit
+         */
+        void setConnection( Connection &connection );
+        /**
+         * @brief Clear connecting being editing, disables editing.
+         */
+        void unsetConnection();
+        /**
+         * @brief Save changes made to connection.
+         */
+        void saveChanges();
+
+    private:
+        void setEditable( bool );
+
+        Connection *connection;
+        Ui::ConnectionEditor *ui;
+        bool is_editable;
 
 };
 
@@ -105,7 +153,7 @@ class AddConnectionDialog
         AddConnectionDialog( QWidget *parent = 0 );
     
     Q_SIGNALS:
-        void addConnection( const QString &label, const QString &hostname, unsigned int port );
+        void addConnection( const QString &jid, const QString &label, const QString &hostname, unsigned int port );
     
     private Q_SLOTS:
         void slotLocationChanged( const QString &text );
@@ -138,8 +186,7 @@ class ConnectionManagerWidget
         void slotAddConnection();
         void slotAddConnectionFinished();
         void slotRemoveConnection();
-        void slotBrowseConnection();
-        void slotBrowseConnectionFinished();
+        void slotControlConnection();
         void slotItemSelectionChanged();
 
     private:
@@ -149,10 +196,9 @@ class ConnectionManagerWidget
         InfinoteManager *infinoteManager;
         ConnectionListWidget *connectionListWidget;
         AddConnectionDialog *addConnectionDialog;
-        FileBrowserDialog *fileBrowserDialog;
         QPushButton *addButton;
         QPushButton *removeButton;
-        QPushButton *browseButton;
+        QPushButton *controlButton;
 
 };
 

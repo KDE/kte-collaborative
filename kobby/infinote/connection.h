@@ -36,7 +36,7 @@ namespace Kobby
 class InfinoteManager;
 
 /**
- * @brief A Qt wrapper for Infinity::XmppConnection
+ * @brief Wrapper for libinfinitymm connection objects
  *
  * We are not inheriting from XmppConnection for several reasons:
  * Including libinfinitymm after a Qt include dies due to libsigc++
@@ -49,32 +49,52 @@ class Connection
     Q_OBJECT
 
     public:
-        Connection( InfinoteManager &manager, const QString name, Infinity::XmppConnection &conn, QObject *parent = 0 );
+        Connection( InfinoteManager &manager,
+            const QString &name,
+            const QString &jid,
+            const QString &hostname,
+            unsigned int port,
+            QObject *parent = 0 );
         ~Connection();
 
         bool operator==( const Connection &connection ) const;
         bool operator!=( const Connection &connection ) const;
 
         const QString &getName() const;
+        void setName( const QString &name );
         Infinity::XmppConnection &getXmppConnection() const;
         Infinity::TcpConnection &getTcpConnection() const;
         InfinoteManager &getInfinoteManager() const;
         int getStatus() const;
+        bool isConnected() const;
+        void open();
+        void close();
         Infinity::ClientBrowser &getClientBrowser() const;
 
     Q_SIGNALS:
         /**
-         * The status of the TcpConnection has changed.  See Infinity::TcpConnection.
+         * @brief The status of the underlying XmppConnection has changed.
+         * @param status New status of this connection
+         *
          * It is suggested to use this rather than the underlying TcpConnection signals
          * to ensure any underlying structures are initialized before the signal is emitted.
          */
         void statusChanged( int status );
+        /**
+         * @brief The name of this connection has been changed.
+         * @param name New name for this connectin
+         */
+        void nameChanged( const QString &name );
 
     private:
+        void init();
         void statusChangedCb();
 
         InfinoteManager *infinoteManager;
         QString name;
+        QString jid;
+        QString hostname;
+        unsigned int port;
         Infinity::XmppConnection *xmppConnection;
         Infinity::TcpConnection *tcpConnection;
         Infinity::ClientBrowser *clientBrowser;

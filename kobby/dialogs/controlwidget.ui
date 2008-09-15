@@ -1,0 +1,79 @@
+<ui version="4.0" >
+ <class>ControlWidget</class>
+ <widget class="QWidget" name="ControlWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>577</width>
+    <height>381</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout" >
+   <item>
+    <widget class="QSplitter" name="mainSplitter" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QGroupBox" name="connectionsGroupBox" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title" >
+       <string>Connections</string>
+      </property>
+     </widget>
+     <widget class="QTabWidget" name="controlTabWidget" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Ignored" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex" >
+       <number>1</number>
+      </property>
+      <widget class="Kobby::ConnectionEditorWidget" name="propertiesTab" >
+       <attribute name="title" >
+        <string>Properties</string>
+       </attribute>
+      </widget>
+      <widget class="Kobby::FileBrowserWidget" name="browseTab" >
+       <attribute name="title" >
+        <string>Browse</string>
+       </attribute>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Kobby::ConnectionEditorWidget</class>
+   <extends>QWidget</extends>
+   <header>kobby/dialogs/connectionmanager.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Kobby::FileBrowserWidget</class>
+   <extends>QWidget</extends>
+   <header>kobby/dialogs/filebrowser.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
