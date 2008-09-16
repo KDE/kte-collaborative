@@ -32,6 +32,9 @@ class InfinoteManager;
 class ConnectionListWidget;
 class ConnectionManagerWidget;
 
+/**
+ * @brief A control interface for managing the kobby connections.
+ */
 class ControlWidget
     : public QWidget
 {
@@ -41,6 +44,7 @@ class ControlWidget
 
     private:
         void setupUi();
+        void setupActions();
 
         InfinoteManager *infinoteManager;
         ConnectionManagerWidget *connectionManagerWidget;
@@ -50,6 +54,9 @@ class ControlWidget
 
 };
 
+/**
+ * @brief A dialog containing a ControlWidget.
+ */
 class ControlDialog
     : public KDialog
 {

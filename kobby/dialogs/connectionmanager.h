@@ -54,7 +54,13 @@ class ConnectionListWidgetItem
     public:
         ConnectionListWidgetItem( Connection &conn, QListWidget *parent = 0 );
 
+        /**
+         * @brief Redraw the displayed text.
+         */
         void setDisplay();
+        /**
+         * @brief Get the connection represented by this item.
+         */
         Connection &getConnection();
 
     public Q_SLOTS:
@@ -79,6 +85,12 @@ class ConnectionListWidget
     public:
         ConnectionListWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
 
+    Q_SIGNALS:
+        /**
+         * @brief The selected connection has been changed.
+         */
+        void connectionSelectionChanged( Connection *connection );
+
     public Q_SLOTS:
         /**
          * @brief Add a connection to the displayed list.
@@ -93,7 +105,11 @@ class ConnectionListWidget
          */
         void addConnections( QList<Connection*> &connections );
 
+    private Q_SLOTS:
+        void slotSelectionChanged();
+
     private:
+        void setupUi();
         void setupActions();
 
         InfinoteManager *infinoteManager;
@@ -143,6 +159,12 @@ class ConnectionEditorWidget
 
 };
 
+/**
+ * @brief A dialog to add a new connection.
+ *
+ * This dialog emits the signal addConnection when the user selects Ok.  It does not
+ * actually handle the adding or creating of a connection in any way.
+ */
 class AddConnectionDialog
     : public KDialog
 {
@@ -153,6 +175,9 @@ class AddConnectionDialog
         AddConnectionDialog( QWidget *parent = 0 );
     
     Q_SIGNALS:
+        /**
+         * @brief The user is attempting to add a connection.
+         */
         void addConnection( const QString &jid, const QString &label, const QString &hostname, unsigned int port );
     
     private Q_SLOTS:
@@ -182,6 +207,11 @@ class ConnectionManagerWidget
     public:
         ConnectionManagerWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
 
+        /**
+         * @brief Get the ConnectionListWidget this manager represents.
+         */
+        ConnectionListWidget &getConnectionListWidget() const;
+
     private Q_SLOTS:
         void slotAddConnection();
         void slotAddConnectionFinished();
@@ -202,6 +232,9 @@ class ConnectionManagerWidget
 
 };
 
+/**
+ * @brief A dialog to manage the active connections.
+ */
 class ConnectionManagerDialog
     : public KDialog
 {

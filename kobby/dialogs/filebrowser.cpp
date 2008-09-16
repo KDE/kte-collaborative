@@ -162,11 +162,41 @@ FileBrowserWidget::~FileBrowserWidget()
     delete rootNode;
 }
 
+void FileBrowserWidget::unsetConnection()
+{
+    clear();
+    setEnabled( false );
+    connection = 0;
+    clientBrowser = 0;
+    infinoteManager = 0;
+}
+
+void FileBrowserWidget::setConnection( Connection *conn )
+{
+    if( !conn )
+        return unsetConnection();
+    clear();
+    connection = conn;
+    clientBrowser = &conn->getClientBrowser();
+    infinoteManager = &conn->getInfinoteManager();
+    createRootNodes();
+    setupConnectionActions();
+    setEnabled( true );
+}
+
 void FileBrowserWidget::slotItemExpanded( QTreeWidgetItem *item )
 {
     FileBrowserWidgetFolderItem *folderItem;
     folderItem = dynamic_cast<FileBrowserWidgetFolderItem*>(item);
     folderItem->populate();
+}
+
+void FileBrowserWidget::slotConnectionStatusChanged( int status )
+{
+    if( status == Infinity::XML_CONNECTION_OPEN )
+        setEnabled( true );
+    else
+        setEnabled( false );
 }
 
 void FileBrowserWidget::setupUi()
@@ -182,6 +212,13 @@ void FileBrowserWidget::setupUi()
 void FileBrowserWidget::setupActions()
 {
     connect( this, SIGNAL( itemExpanded( QTreeWidgetItem* ) ), this, SLOT( slotItemExpanded( QTreeWidgetItem* ) ) );
+    setupConnectionActions();
+}
+
+void FileBrowserWidget::setupConnectionActions()
+{
+    if( connection )
+        connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotConnectionStatusChanged( int ) ) );
 }
 
 void FileBrowserWidget::createRootNodes()

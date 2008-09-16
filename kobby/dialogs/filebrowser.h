@@ -39,6 +39,9 @@ typedef struct _GError GError;
 class InfinoteManager;
 class Connection;
 
+/**
+ * @brief An item of a FileBrowserWidget tree
+ */
 class FileBrowserWidgetItem
     :    public QObject
     , public QTreeWidgetItem
@@ -60,6 +63,9 @@ class FileBrowserWidgetItem
 
 };
 
+/**
+ * @brief A note item in a FileBrowserWidget.
+ */
 class FileBrowserWidgetNoteItem
     : public FileBrowserWidgetItem
 {
@@ -70,7 +76,7 @@ class FileBrowserWidgetNoteItem
 };
 
 /**
- * @brief A folder item in a FileBrowser.
+ * @brief A folder item in a FileBrowserWidget.
  */
 class FileBrowserWidgetFolderItem
     : public FileBrowserWidgetItem
@@ -83,7 +89,7 @@ class FileBrowserWidgetFolderItem
         /**
          * @brief Create using the specified name instead of calling getName() on ClientBrowserIter
          *
-         * Use this to crete a folder item without calling getName() on iter.
+         * Use this to crete a folder item without calling getName() on the ClientBrowserIter.
          */
         FileBrowserWidgetFolderItem( QString name, Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
         ~FileBrowserWidgetFolderItem();
@@ -118,12 +124,24 @@ class FileBrowserWidget
         FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
         ~FileBrowserWidget();
 
+    public Q_SLOTS:
+        /**
+         * @brief Unset the current connection, leaving the browser disabled.
+         */
+        void unsetConnection();
+        /**
+         * @brief Set the current Connection, enabling the browser.
+         */
+        void setConnection( Connection *connection );
+
     private Q_SLOTS:
         void slotItemExpanded( QTreeWidgetItem *item );
+        void slotConnectionStatusChanged( int );
 
     private:
         void setupUi();
         void setupActions();
+        void setupConnectionActions();
         void createRootNodes();
 
         InfinoteManager *infinoteManager;

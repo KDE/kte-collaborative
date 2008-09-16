@@ -21,6 +21,7 @@ ControlWidget::ControlWidget( InfinoteManager &manager, QWidget *parent )
 {
     ui->setupUi( this );
     setupUi();
+    setupActions();
 }
 
 void ControlWidget::setupUi()
@@ -30,6 +31,12 @@ void ControlWidget::setupUi()
     QVBoxLayout *connectionsGroupLayout = new QVBoxLayout( ui->connectionsGroupBox );
     
     connectionsGroupLayout->addWidget(connectionManagerWidget);
+}
+
+void ControlWidget::setupActions()
+{
+    connect( &connectionManagerWidget->getConnectionListWidget(), SIGNAL( connectionSelectionChanged( Connection* ) ),
+        ui->browseTab, SLOT( setConnection( Connection* ) ) );
 }
 
 ControlDialog::ControlDialog( InfinoteManager &manager, QWidget *parent )

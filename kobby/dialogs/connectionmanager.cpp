@@ -80,6 +80,7 @@ ConnectionListWidget::ConnectionListWidget( InfinoteManager &manager, QWidget *p
     , infinoteManager( &manager )
 {
     addConnections( infinoteManager->getConnections() );
+    setupUi();
     setupActions();
 }
 
@@ -115,12 +116,27 @@ void ConnectionListWidget::addConnections( QList<Connection*> &connections )
         addItem( new ConnectionListWidgetItem( **itr ) );
 }
 
+void ConnectionListWidget::slotSelectionChanged()
+{
+    ConnectionListWidgetItem *selected = dynamic_cast<ConnectionListWidgetItem*>(currentItem());
+    if( selected )
+        emit( connectionSelectionChanged( &selected->getConnection() ) );
+    else
+        emit( connectionSelectionChanged( 0 ) );
+}
+
+void ConnectionListWidget::setupUi()
+{
+    setSelectionMode( QAbstractItemView::SingleSelection );
+}
+
 void ConnectionListWidget::setupActions()
 {
     connect( infinoteManager, SIGNAL( connectionAdded( Connection & ) ),
         this, SLOT( addConnection( Connection & ) ) );
     connect( infinoteManager, SIGNAL( connectionRemoved( Connection & ) ),
         this, SLOT( removeConnection( Connection & ) ) );
+    connect( this, SIGNAL( itemSelectionChanged() ), this, SLOT( slotSelectionChanged() ) );
 }
 
 // ConnectionEditorWidget
@@ -238,6 +254,11 @@ ConnectionManagerWidget::ConnectionManagerWidget( InfinoteManager &manager,
 {
     setupUi();
     setupActions();
+}
+
+ConnectionListWidget &ConnectionManagerWidget::getConnectionListWidget() const
+{
+    return *connectionListWidget;
 }
 
 void ConnectionManagerWidget::slotAddConnection()
