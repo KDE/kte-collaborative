@@ -75,6 +75,9 @@ class ConnectionListWidgetItem
 
 /**
  * @brief A QListWidget of the current connections.
+ *
+ * A list widget displaying the current connections.  See ConnectionManagerWidget
+ * for a widget to manage these connections.
  */
 class ConnectionListWidget
     : public QListWidget
@@ -210,7 +213,7 @@ class ConnectionManagerWidget
         /**
          * @brief Get the ConnectionListWidget this manager represents.
          */
-        ConnectionListWidget &getConnectionListWidget() const;
+        ConnectionListWidget &getListWidget() const;
 
     private Q_SLOTS:
         void slotAddConnection();

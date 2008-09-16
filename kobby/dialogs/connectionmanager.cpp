@@ -256,7 +256,7 @@ ConnectionManagerWidget::ConnectionManagerWidget( InfinoteManager &manager,
     setupActions();
 }
 
-ConnectionListWidget &ConnectionManagerWidget::getConnectionListWidget() const
+ConnectionListWidget &ConnectionManagerWidget::getListWidget() const
 {
     return *connectionListWidget;
 }

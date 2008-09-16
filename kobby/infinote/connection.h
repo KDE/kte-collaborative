@@ -63,6 +63,7 @@ class Connection
          * @param jid Jabber ID to connect as.
          * @param hostname Hostname to connect to.
          * @param port Port on Hostname to connect to.
+         * @param parent Parent object
          */
         Connection( InfinoteManager &manager,
             const QString &name,

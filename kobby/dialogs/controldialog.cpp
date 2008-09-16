@@ -35,8 +35,8 @@ void ControlWidget::setupUi()
 
 void ControlWidget::setupActions()
 {
-    connect( &connectionManagerWidget->getConnectionListWidget(), SIGNAL( connectionSelectionChanged( Connection* ) ),
-        ui->browseTab, SLOT( setConnection( Connection* ) ) );
+    connect( &connectionManagerWidget->getListWidget(), SIGNAL( connectionSelectionChanged( Connection* ) ),
+        &ui->browseTab->getTreeWidget(), SLOT( setConnection( Connection* ) ) );
 }
 
 ControlDialog::ControlDialog( InfinoteManager &manager, QWidget *parent )

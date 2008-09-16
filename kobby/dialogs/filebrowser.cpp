@@ -17,6 +17,8 @@
 
 #include <glib/gerror.h>
 
+#include "kobby/ui_filebrowserwidget.h"
+
 namespace Kobby
 {
 
@@ -87,14 +89,16 @@ FileBrowserWidgetFolderItem::~FileBrowserWidgetFolderItem()
 
 void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
 {
+    Q_UNUSED( expand_when_finished )
+
     if( is_populated )
         return;
-    else if( node->isExplored() )
+    else if( getNode().isExplored() )
         exploreFinishedCb();
     else
     {
         exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
-        *exploreRequest = node->explore();
+        *exploreRequest = getNode().explore();
         (*exploreRequest)->signal_finished().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFinishedCb ) );
         (*exploreRequest)->signal_failed().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFailedCb ) );
 
@@ -115,13 +119,15 @@ void FileBrowserWidgetFolderItem::exploreFinishedCb()
 
     is_populated = true;
     bool res;
+    Infinity::ClientBrowserIter itr;
+    itr = getNode();
 
-    for( res = node->child(); res; res = node->next() )
+    for( res = itr.child(); res; res = itr.next() )
     {
-        if( node->isDirectory() )
-            addChild( new FileBrowserWidgetFolderItem( *node ) );
+        if( itr.isDirectory() )
+            addChild( new FileBrowserWidgetFolderItem( itr ) );
         else
-            addChild( new FileBrowserWidgetNoteItem( *node ) );
+            addChild( new FileBrowserWidgetNoteItem( itr ) );
     }
 
     setChildIndicatorPolicy( QTreeWidgetItem::DontShowIndicatorWhenChildless );
@@ -129,12 +135,13 @@ void FileBrowserWidgetFolderItem::exploreFinishedCb()
 
 void FileBrowserWidgetFolderItem::exploreFailedCb( GError *value )
 {
+    Q_UNUSED( value )
     kDebug() << "failed.";
 }
 
 // FileBrowserWidget
 
-FileBrowserWidget::FileBrowserWidget( QWidget *parent )
+FileBrowserTreeWidget::FileBrowserTreeWidget( QWidget *parent )
     : QTreeWidget( parent )
     , infinoteManager( 0 )
     , clientBrowser( 0 )
@@ -145,7 +152,7 @@ FileBrowserWidget::FileBrowserWidget( QWidget *parent )
     setupActions();
 }
 
-FileBrowserWidget::FileBrowserWidget( const Connection &conn, QWidget *parent )
+FileBrowserTreeWidget::FileBrowserTreeWidget( const Connection &conn, QWidget *parent )
     : QTreeWidget( parent )
     , infinoteManager( &conn.getInfinoteManager() )
     , clientBrowser(  &conn.getClientBrowser() )
@@ -157,12 +164,12 @@ FileBrowserWidget::FileBrowserWidget( const Connection &conn, QWidget *parent )
     createRootNodes();
 }
 
-FileBrowserWidget::~FileBrowserWidget()
+FileBrowserTreeWidget::~FileBrowserTreeWidget()
 {
     delete rootNode;
 }
 
-void FileBrowserWidget::unsetConnection()
+void FileBrowserTreeWidget::unsetConnection()
 {
     clear();
     setEnabled( false );
@@ -171,7 +178,7 @@ void FileBrowserWidget::unsetConnection()
     infinoteManager = 0;
 }
 
-void FileBrowserWidget::setConnection( Connection *conn )
+void FileBrowserTreeWidget::setConnection( const Connection *conn )
 {
     if( !conn )
         return unsetConnection();
@@ -184,14 +191,31 @@ void FileBrowserWidget::setConnection( Connection *conn )
     setEnabled( true );
 }
 
-void FileBrowserWidget::slotItemExpanded( QTreeWidgetItem *item )
+void FileBrowserTreeWidget::setConnection( Connection *conn )
+{
+    setConnection( (const Connection*) conn );
+}
+
+void FileBrowserTreeWidget::slotItemExpanded( QTreeWidgetItem *item )
 {
     FileBrowserWidgetFolderItem *folderItem;
     folderItem = dynamic_cast<FileBrowserWidgetFolderItem*>(item);
     folderItem->populate();
 }
 
-void FileBrowserWidget::slotConnectionStatusChanged( int status )
+void FileBrowserTreeWidget::slotItemSelectionChanged()
+{
+    QList<QTreeWidgetItem*> items = selectedItems();
+    QList<QTreeWidgetItem*>::iterator itr;
+    QList<FileBrowserWidgetItem*> nodeItems;
+
+    for( itr = items.begin(); itr != items.end(); ++itr )
+        nodeItems += dynamic_cast<FileBrowserWidgetItem*>(*itr);
+
+    emit( nodeSelectionChanged( nodeItems ) );
+}
+
+void FileBrowserTreeWidget::slotConnectionStatusChanged( int status )
 {
     if( status == Infinity::XML_CONNECTION_OPEN )
         setEnabled( true );
@@ -199,7 +223,7 @@ void FileBrowserWidget::slotConnectionStatusChanged( int status )
         setEnabled( false );
 }
 
-void FileBrowserWidget::setupUi()
+void FileBrowserTreeWidget::setupUi()
 {
     setHeaderLabel( "Nodes" );
 
@@ -209,19 +233,20 @@ void FileBrowserWidget::setupUi()
         setEnabled( false );
 }
 
-void FileBrowserWidget::setupActions()
+void FileBrowserTreeWidget::setupActions()
 {
     connect( this, SIGNAL( itemExpanded( QTreeWidgetItem* ) ), this, SLOT( slotItemExpanded( QTreeWidgetItem* ) ) );
     setupConnectionActions();
+    connect( this, SIGNAL( itemSelectionChanged() ), this, SLOT( slotItemSelectionChanged() ) );
 }
 
-void FileBrowserWidget::setupConnectionActions()
+void FileBrowserTreeWidget::setupConnectionActions()
 {
     if( connection )
         connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotConnectionStatusChanged( int ) ) );
 }
 
-void FileBrowserWidget::createRootNodes()
+void FileBrowserTreeWidget::createRootNodes()
 {
     FileBrowserWidgetFolderItem *rootNodeItem;
 
@@ -229,6 +254,26 @@ void FileBrowserWidget::createRootNodes()
     clientBrowser->setRootNode( *rootNode );
     rootNodeItem = new FileBrowserWidgetFolderItem( "/", *rootNode, this );
     addTopLevelItem( rootNodeItem );
+}
+
+FileBrowserWidget::FileBrowserWidget( const Connection &connection, QWidget *parent )
+    : QWidget( parent )
+    , ui( new Ui::FileBrowserWidget )
+{
+    ui->setupUi( this );
+    ui->treeWidget->setConnection( &connection );
+}
+
+FileBrowserWidget::FileBrowserWidget( QWidget *parent )
+    : QWidget( parent )
+    , ui( new Ui::FileBrowserWidget )
+{
+    ui->setupUi( this );
+}
+
+FileBrowserTreeWidget &FileBrowserWidget::getTreeWidget() const
+{
+    return *ui->treeWidget;
 }
 
 FileBrowserDialog::FileBrowserDialog( const Connection &conn, QWidget *parent )

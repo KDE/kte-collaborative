@@ -22,6 +22,11 @@
 
 #include <glibmm/refptr.h>
 
+namespace Ui
+{
+    class FileBrowserWidget;
+}
+
 namespace Infinity
 {
     class XmppConnection;
@@ -40,7 +45,7 @@ class InfinoteManager;
 class Connection;
 
 /**
- * @brief An item of a FileBrowserWidget tree
+ * @brief An item in a FileBrowserTreeWidget which represents a node on the infinote server.
  */
 class FileBrowserWidgetItem
     :    public QObject
@@ -48,18 +53,37 @@ class FileBrowserWidgetItem
 {
 
     public:
+        /**
+         * @brief Type of node this item can represent.
+         */
         enum ItemType { Folder = 1001, Note = 1002 };
 
+        /**
+         * @brief Create an item representing a node on the infinote server without calling getName on the iterator.
+         * @param name Name of this node.
+         * @param iter Iterator pointing to the node.
+         * @param type Type of node.
+         * @param parent Parent widget.
+         */
         FileBrowserWidgetItem( QString name, const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent = 0 );
+        /**
+         * @brief Create an item represented by a node on the infinote server.
+         * @param iter Iterator pointing to the node.
+         * @param type Type of node.
+         * @param parent Parent widget.
+         */
         FileBrowserWidgetItem( const Infinity::ClientBrowserIter &iter, int type, QTreeWidget *parent );
 
+        /**
+         * @brief Get an iterator pointing to node this item represents.
+         * @return Iterator pointing to the underlying node.
+         */
         Infinity::ClientBrowserIter &getNode() const;
-
-    protected:
-        Infinity::ClientBrowserIter *node;
 
     private:
         void setupUi();
+
+        Infinity::ClientBrowserIter *node;
 
 };
 
@@ -71,6 +95,11 @@ class FileBrowserWidgetNoteItem
 {
 
     public:
+        /**
+         * @brief Create a note item representing a note on the infinote server.
+         * @param iter Iterater pointing to note node.
+         * @param parent Parent tree widget.
+         */
         FileBrowserWidgetNoteItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
 
 };
@@ -85,9 +114,17 @@ class FileBrowserWidgetFolderItem
     Q_OBJECT
 
     public:
+        /**
+         * @brief Create folder item representing a folder on the infinote server.
+         * @param iter Iterator pointer to folder node.
+         * @param parent Parent tree widget.
+         */
         FileBrowserWidgetFolderItem( Infinity::ClientBrowserIter &iter, QTreeWidget *parent = 0 );
         /**
-         * @brief Create using the specified name instead of calling getName() on ClientBrowserIter
+         * @brief Create folder item using the specified name instead of calling getName() on ClientBrowserIter.
+         * @param name Name of the folder.
+         * @param iter Iterator ponting to folder node.
+         * @param parent Parent tree widget.
          *
          * Use this to crete a folder item without calling getName() on the ClientBrowserIter.
          */
@@ -111,18 +148,28 @@ class FileBrowserWidgetFolderItem
 };
 
 /**
- * @brief FileBrowser for a connection.
+ * @brief Tree widget of nodes accessible over a connection.
+ *
+ * This clas provides a browser of nodes on the infinote server.  See FileBrowserWidget
+ * for controlling these nodes.
  */
-class FileBrowserWidget
+class FileBrowserTreeWidget
     : public QTreeWidget
 {
 
     Q_OBJECT
 
     public:
-        FileBrowserWidget( QWidget *parent = 0 );
-        FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
-        ~FileBrowserWidget();
+        FileBrowserTreeWidget( QWidget *parent = 0 );
+        FileBrowserTreeWidget( const Connection &connection, QWidget *parent = 0 );
+        ~FileBrowserTreeWidget();
+
+    Q_SIGNALS:
+        /**
+         * @brief Selected nodes in the tree widget have been channged.
+         * @param items List of currently selected items.
+         */
+        void nodeSelectionChanged( QList<FileBrowserWidgetItem*> items );
 
     public Q_SLOTS:
         /**
@@ -132,10 +179,15 @@ class FileBrowserWidget
         /**
          * @brief Set the current Connection, enabling the browser.
          */
+        void setConnection( const Connection *connection );
+        /**
+         * @brief Set the current Connection, enabling the browser.
+         */
         void setConnection( Connection *connection );
 
     private Q_SLOTS:
         void slotItemExpanded( QTreeWidgetItem *item );
+        void slotItemSelectionChanged();
         void slotConnectionStatusChanged( int );
 
     private:
@@ -150,6 +202,23 @@ class FileBrowserWidget
         Infinity::ClientBrowserIter *rootNode;
         Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
 
+};
+
+/**
+ * @brief A widget to manage the nodes on an infinote server.
+ */
+class FileBrowserWidget
+    : public QWidget
+{
+
+    public:
+        FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
+        FileBrowserWidget( QWidget *parent = 0 );
+
+        FileBrowserTreeWidget &getTreeWidget() const;
+
+    private:
+        Ui::FileBrowserWidget *ui;
 };
 
 /**

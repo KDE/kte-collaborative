@@ -51,6 +51,7 @@ set( KOBBY_SRCS
 kde4_add_ui_files( KOBBY_SRCS
 	dialogs/connectioneditor.ui
 	dialogs/addconnectiondialog.ui
+	dialogs/filebrowserwidget.ui
 	dialogs/controlwidget.ui
 	dialogs/settingswidget.ui
 	dialogs/usersettingswidget.ui

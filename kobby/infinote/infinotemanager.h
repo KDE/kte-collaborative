@@ -89,6 +89,7 @@ class InfinoteManager : public QObject
          * @brief Create a new connection to host which will be managed by the InfinoteManager instance.
          * 
          * @param name Label for this connection
+         * @param jid Jaber ID for this connection
          * @param hostname Remote host
          * @param port Remote port
          */
