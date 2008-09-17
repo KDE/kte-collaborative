@@ -17,6 +17,7 @@
 
 #include <glib/gerror.h>
 
+#include "kobby/ui_newfolderwidget.h"
 #include "kobby/ui_filebrowserwidget.h"
 
 namespace Kobby
@@ -152,7 +153,7 @@ FileBrowserTreeWidget::FileBrowserTreeWidget( QWidget *parent )
     setupActions();
 }
 
-FileBrowserTreeWidget::FileBrowserTreeWidget( const Connection &conn, QWidget *parent )
+FileBrowserTreeWidget::FileBrowserTreeWidget( Connection &conn, QWidget *parent )
     : QTreeWidget( parent )
     , infinoteManager( &conn.getInfinoteManager() )
     , clientBrowser(  &conn.getClientBrowser() )
@@ -169,6 +170,31 @@ FileBrowserTreeWidget::~FileBrowserTreeWidget()
     delete rootNode;
 }
 
+QList<FileBrowserWidgetItem*> FileBrowserTreeWidget::getSelectedNodes()
+{
+    QList<QTreeWidgetItem*> items = selectedItems();
+    QList<QTreeWidgetItem*>::iterator itr;
+    QList<FileBrowserWidgetItem*> nodeItems;
+
+    for( itr = items.begin(); itr != items.end(); ++itr )
+        nodeItems += dynamic_cast<FileBrowserWidgetItem*>(*itr);
+
+    return nodeItems;
+}
+
+InfinoteManager *FileBrowserTreeWidget::getInfinoteManager() const
+{
+    if( connection )
+        return &connection->getInfinoteManager();
+
+    return 0;
+}
+
+Connection *FileBrowserTreeWidget::getConnection() const
+{
+    return connection;
+}
+
 void FileBrowserTreeWidget::unsetConnection()
 {
     clear();
@@ -178,7 +204,7 @@ void FileBrowserTreeWidget::unsetConnection()
     infinoteManager = 0;
 }
 
-void FileBrowserTreeWidget::setConnection( const Connection *conn )
+void FileBrowserTreeWidget::setConnection( Connection *conn )
 {
     if( !conn )
         return unsetConnection();
@@ -191,28 +217,11 @@ void FileBrowserTreeWidget::setConnection( const Connection *conn )
     setEnabled( true );
 }
 
-void FileBrowserTreeWidget::setConnection( Connection *conn )
-{
-    setConnection( (const Connection*) conn );
-}
-
 void FileBrowserTreeWidget::slotItemExpanded( QTreeWidgetItem *item )
 {
     FileBrowserWidgetFolderItem *folderItem;
     folderItem = dynamic_cast<FileBrowserWidgetFolderItem*>(item);
     folderItem->populate();
-}
-
-void FileBrowserTreeWidget::slotItemSelectionChanged()
-{
-    QList<QTreeWidgetItem*> items = selectedItems();
-    QList<QTreeWidgetItem*>::iterator itr;
-    QList<FileBrowserWidgetItem*> nodeItems;
-
-    for( itr = items.begin(); itr != items.end(); ++itr )
-        nodeItems += dynamic_cast<FileBrowserWidgetItem*>(*itr);
-
-    emit( nodeSelectionChanged( nodeItems ) );
 }
 
 void FileBrowserTreeWidget::slotConnectionStatusChanged( int status )
@@ -237,7 +246,6 @@ void FileBrowserTreeWidget::setupActions()
 {
     connect( this, SIGNAL( itemExpanded( QTreeWidgetItem* ) ), this, SLOT( slotItemExpanded( QTreeWidgetItem* ) ) );
     setupConnectionActions();
-    connect( this, SIGNAL( itemSelectionChanged() ), this, SLOT( slotItemSelectionChanged() ) );
 }
 
 void FileBrowserTreeWidget::setupConnectionActions()
@@ -256,11 +264,42 @@ void FileBrowserTreeWidget::createRootNodes()
     addTopLevelItem( rootNodeItem );
 }
 
-FileBrowserWidget::FileBrowserWidget( const Connection &connection, QWidget *parent )
+
+NewFolderDialog::NewFolderDialog( Infinity::ClientBrowserIter &iter, QWidget *parent )
+    : KDialog( parent )
+    , ui( new Ui::NewFolderWidget )
+    , parentIter( &iter )
+{
+    setupUi();
+    setupActions();
+}
+
+void NewFolderDialog::slotCreate()
+{
+    emit( create( ui->nameLineEdit->text(), *parentIter ) );
+}
+
+void NewFolderDialog::setupUi()
+{
+    QWidget *mainWidget = new QWidget( this );
+    ui->setupUi( mainWidget );
+    setCaption( "Kobby - Create Folder" );
+    setButtons( KDialog::Ok | KDialog::Cancel );
+    setMainWidget( mainWidget );
+}
+
+void NewFolderDialog::setupActions()
+{
+    connect( this, SIGNAL( okClicked() ), this, SLOT( slotCreate() ) );
+}
+
+FileBrowserWidget::FileBrowserWidget( Connection &connection, QWidget *parent )
     : QWidget( parent )
     , ui( new Ui::FileBrowserWidget )
 {
     ui->setupUi( this );
+    setupUi();
+    setupActions();
     ui->treeWidget->setConnection( &connection );
 }
 
@@ -269,6 +308,8 @@ FileBrowserWidget::FileBrowserWidget( QWidget *parent )
     , ui( new Ui::FileBrowserWidget )
 {
     ui->setupUi( this );
+    setupUi();
+    setupActions();
 }
 
 FileBrowserTreeWidget &FileBrowserWidget::getTreeWidget() const
@@ -276,7 +317,93 @@ FileBrowserTreeWidget &FileBrowserWidget::getTreeWidget() const
     return *ui->treeWidget;
 }
 
-FileBrowserDialog::FileBrowserDialog( const Connection &conn, QWidget *parent )
+void FileBrowserWidget::addFolder( const QString &name, Infinity::ClientBrowserIter &parentNode )
+{
+    Connection *conn = getTreeWidget().getConnection();
+
+    if( !conn )
+    {
+        kDebug() << "No connection to add folder over.";
+        return;
+    }
+
+    if( !parentNode.isExplored() )
+    {
+        kDebug() << "Parent node to add folder to is not explored.";
+        return;
+    }
+
+    conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() );
+}
+
+void FileBrowserWidget::slotNodeSelectionChanged()
+{
+    kDebug() << "node selection changed.";
+    QList<FileBrowserWidgetItem*> items = ui->treeWidget->getSelectedNodes();
+    if( items.size() > 0 )
+    {
+        ui->deleteButton->setEnabled( true );
+        if( items.size() == 1 && items.at(0)->getNode().isDirectory() )
+        {
+            ui->createFolderButton->setEnabled( true );
+            ui->createNoteButton->setEnabled( true );
+        }
+        else
+        {
+            ui->createFolderButton->setEnabled( false );
+            ui->createNoteButton->setEnabled( false );
+        }
+    }
+    else
+    {
+        ui->createFolderButton->setEnabled( false );
+        ui->createNoteButton->setEnabled( false );
+        ui->deleteButton->setEnabled( false );
+    }
+}
+
+void FileBrowserWidget::slotNewFolderDialog()
+{
+    QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
+    if( items.size() == 1 )
+    {
+        kDebug() << "Create folder dialog.";
+        NewFolderDialog *dialog = new NewFolderDialog( items.at(0)->getNode(), this );
+        connect( dialog, SIGNAL( create( const QString&, Infinity::ClientBrowserIter& ) ),
+            this, SLOT( addFolder( const QString&, Infinity::ClientBrowserIter& ) ) );
+        dialog->setVisible( true );
+    }
+    else
+        kDebug() << "Cannot add folder to more than one parent.";
+}
+
+void FileBrowserWidget::slotRemoveNodes()
+{
+    QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
+    QList<FileBrowserWidgetItem*>::iterator itr;
+    Infinity::ClientBrowser *browser = &getTreeWidget().getConnection()->getClientBrowser();
+
+    for( itr = items.begin(); itr != items.end(); ++itr )
+    {
+        browser->removeNode( (*itr)->getNode() );
+    }
+}
+
+void FileBrowserWidget::setupUi()
+{
+    ui->createFolderButton->setIcon( KIcon( "folder-new.png" ) );
+    ui->createNoteButton->setIcon( KIcon( "document-new.png" ) );
+    ui->deleteButton->setIcon( KIcon( "edit-delete.png" ) );
+}
+
+void FileBrowserWidget::setupActions()
+{
+    connect( ui->treeWidget, SIGNAL( itemSelectionChanged() ), this, SLOT( slotNodeSelectionChanged() ) );
+    connect( ui->createFolderButton, SIGNAL( clicked() ), this, SLOT( slotNewFolderDialog() ) );
+    connect( ui->deleteButton, SIGNAL( clicked() ), this, SLOT( slotRemoveNodes() ) );
+}
+
+FileBrowserDialog::FileBrowserDialog( Connection &conn, QWidget *parent )
     : KDialog( parent )
     , fileBrowserWidget( new FileBrowserWidget( conn, this ) )
 {

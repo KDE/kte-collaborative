@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
-    <height>284</height>
+    <width>277</width>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -25,14 +25,30 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" >
      <item>
-      <widget class="QPushButton" name="newFolderButton" >
+      <widget class="QPushButton" name="createFolderButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="text" >
         <string>New</string>
        </property>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="createNoteButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>Create</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="deleteButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="text" >
         <string>Delete</string>
        </property>

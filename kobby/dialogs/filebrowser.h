@@ -24,6 +24,7 @@
 
 namespace Ui
 {
+    class NewFolderWidget;
     class FileBrowserWidget;
 }
 
@@ -161,15 +162,12 @@ class FileBrowserTreeWidget
 
     public:
         FileBrowserTreeWidget( QWidget *parent = 0 );
-        FileBrowserTreeWidget( const Connection &connection, QWidget *parent = 0 );
+        FileBrowserTreeWidget( Connection &connection, QWidget *parent = 0 );
         ~FileBrowserTreeWidget();
 
-    Q_SIGNALS:
-        /**
-         * @brief Selected nodes in the tree widget have been channged.
-         * @param items List of currently selected items.
-         */
-        void nodeSelectionChanged( QList<FileBrowserWidgetItem*> items );
+        QList<FileBrowserWidgetItem*> getSelectedNodes();
+        InfinoteManager *getInfinoteManager() const;
+        Connection *getConnection() const;
 
     public Q_SLOTS:
         /**
@@ -179,15 +177,10 @@ class FileBrowserTreeWidget
         /**
          * @brief Set the current Connection, enabling the browser.
          */
-        void setConnection( const Connection *connection );
-        /**
-         * @brief Set the current Connection, enabling the browser.
-         */
         void setConnection( Connection *connection );
 
     private Q_SLOTS:
         void slotItemExpanded( QTreeWidgetItem *item );
-        void slotItemSelectionChanged();
         void slotConnectionStatusChanged( int );
 
     private:
@@ -198,9 +191,33 @@ class FileBrowserTreeWidget
 
         InfinoteManager *infinoteManager;
         Infinity::ClientBrowser *clientBrowser;
-        const Connection *connection;
+        Connection *connection;
         Infinity::ClientBrowserIter *rootNode;
         Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
+
+};
+
+class NewFolderDialog
+    : public KDialog
+{
+
+    Q_OBJECT
+
+    public:
+        NewFolderDialog( Infinity::ClientBrowserIter &parentIter, QWidget *parent = 0 );
+
+    Q_SIGNALS:
+        void create( const QString &name, Infinity::ClientBrowserIter &parentIter );
+
+    private Q_SLOTS:
+        void slotCreate();
+
+    private:
+        void setupUi();
+        void setupActions();
+
+        Ui::NewFolderWidget *ui;
+        Infinity::ClientBrowserIter *parentIter;
 
 };
 
@@ -211,13 +228,26 @@ class FileBrowserWidget
     : public QWidget
 {
 
+    Q_OBJECT
+
     public:
-        FileBrowserWidget( const Connection &connection, QWidget *parent = 0 );
+        FileBrowserWidget( Connection &connection, QWidget *parent = 0 );
         FileBrowserWidget( QWidget *parent = 0 );
 
         FileBrowserTreeWidget &getTreeWidget() const;
 
+    public Q_SLOTS:
+        void addFolder( const QString &name, Infinity::ClientBrowserIter &parentNode );
+
+    private Q_SLOTS:
+        void slotNodeSelectionChanged();
+        void slotNewFolderDialog();
+        void slotRemoveNodes();
+
     private:
+        void setupUi();
+        void setupActions();
+
         Ui::FileBrowserWidget *ui;
 };
 
@@ -229,7 +259,7 @@ class FileBrowserDialog
 {
 
     public:
-        FileBrowserDialog( const Connection &connection, QWidget *parent = 0 );
+        FileBrowserDialog( Connection &connection, QWidget *parent = 0 );
         ~FileBrowserDialog();
 
     private:
