@@ -334,9 +334,8 @@ void FileBrowserWidget::addFolder( const QString &name, Infinity::ClientBrowserI
         return;
     }
 
-    RequestProgressDialog *progressDialog;
-    progressDialog = new RequestProgressDialog( conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() ),
-        "Creating folder..." );
+    RequestProgressDialog *progressDialog = new RequestProgressDialog( "Creating folder...", this );
+    progressDialog->addRequest( conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() ) );
     progressDialog->setVisible( true );
 }
 
@@ -386,10 +385,12 @@ void FileBrowserWidget::slotRemoveNodes()
     QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
     QList<FileBrowserWidgetItem*>::iterator itr;
     Infinity::ClientBrowser *browser = &getTreeWidget().getConnection()->getClientBrowser();
+    RequestProgressDialog *requestDialog = new RequestProgressDialog( "Removing nodes...", this );
+    requestDialog->setVisible( true );
 
     for( itr = items.begin(); itr != items.end(); ++itr )
     {
-        browser->removeNode( (*itr)->getNode() );
+        requestDialog->addRequest( browser->removeNode( (*itr)->getNode() ) );
     }
 }
 

@@ -126,8 +126,6 @@ void Connection::init()
 
 void Connection::statusChangedCb()
 {
-    kDebug() << "status changed.";
-
     switch( getStatus() )
     {
         case Infinity::XML_CONNECTION_OPEN:

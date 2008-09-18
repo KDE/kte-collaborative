@@ -108,7 +108,7 @@ Infinity::XmppConnection &InfinoteManager::createXmppConnection( const QString &
         address, port
     );
     Infinity::XmppConnection *xmppConnection = new Infinity::XmppConnection(
-        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, getLocalHostname().toAscii(), hostname, gnutls_cred, gsasl_context
+        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, getLocalHostname().toAscii(), host.toAscii(), gnutls_cred, gsasl_context
     );
     
     return *xmppConnection;

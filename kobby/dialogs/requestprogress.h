@@ -14,9 +14,9 @@
 #ifndef KOBBY_REQUESTPROGRESS_H
 #define KOBBY_REQUESTPROGRESS_H
 
-#include <KDialog>
+#include <KProgressDialog>
 
-#include <QWidget>
+#include <QList>
 
 #include <glibmm/refptr.h>
 
@@ -35,44 +35,22 @@ namespace Infinity
 namespace Kobby
 {
 
-class RequestProgressWidget
-    : public QWidget
+class RequestProgressDialog
+    : public KProgressDialog
 {
 
-    Q_OBJECT
-
     public:
-        RequestProgressWidget( const Glib::RefPtr<Infinity::ClientNodeRequest> &request,
-            const QString &text = "Running request.",
+        RequestProgressDialog( const QString &text = "Running request.",
             QWidget *parent = 0);
 
-    Q_SIGNALS:
-        void requestFinished();
-        void requestFailed();
+        void addRequest( Glib::RefPtr<Infinity::ClientNodeRequest> request );
 
     private:
-        void setupUi();
-        void setupActions();
         void requestFinishedCb( Infinity::ClientBrowserIter iter );
         void requestFailedCb( const GError* );
 
-        Ui::RequestProgressWidget *ui;
-        Glib::RefPtr<Infinity::ClientNodeRequest> *request;
-        QString text;
-
-};
-
-class RequestProgressDialog
-    : public KDialog
-{
-
-    public:
-        RequestProgressDialog( const Glib::RefPtr<Infinity::ClientNodeRequest> &request,
-            const QString &text = "Running request.",
-            QWidget *parent = 0);
-
-    private:
-        RequestProgressWidget *mainWidget;
+        unsigned int completed_requests;
+        QList<Glib::RefPtr<Infinity::ClientNodeRequest>*> requests;
 
 };
 

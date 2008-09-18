@@ -4,55 +4,43 @@
 
 #include "kobby/ui_requestprogresswidget.h"
 
+#include <KDebug>
+
 namespace Kobby
 {
 
-RequestProgressWidget::RequestProgressWidget( const Glib::RefPtr<Infinity::ClientNodeRequest> &crequest,
-    const QString &ctext,
+RequestProgressDialog::RequestProgressDialog( const QString &ctext,
     QWidget *parent )
-    : QWidget( parent )
-    , ui( new Ui::RequestProgressWidget )
-    , request( new Glib::RefPtr<Infinity::ClientNodeRequest> )
-    , text( ctext )
+    : KProgressDialog( parent, ctext, ctext )
+    , completed_requests( 0 )
 {
-    *request = crequest;
-    setupUi();
-    setupActions();
 }
 
-void RequestProgressWidget::setupUi()
+void RequestProgressDialog::addRequest( Glib::RefPtr<Infinity::ClientNodeRequest> request )
 {
-    ui->setupUi( this );
-    ui->statusLabel->setText( text );
+    Glib::RefPtr<Infinity::ClientNodeRequest> *localReq = new Glib::RefPtr<Infinity::ClientNodeRequest>;
+    *localReq = request;
+    (*localReq)->signal_finished().connect( sigc::mem_fun(
+        this, &RequestProgressDialog::requestFinishedCb ) );
+    (*localReq)->signal_failed().connect( sigc::mem_fun(
+        this, &RequestProgressDialog::requestFailedCb ) );
+    requests += localReq;
+
+    progressBar()->setMaximum( requests.size() );
 }
 
-void RequestProgressWidget::setupActions()
+void RequestProgressDialog::requestFinishedCb( Infinity::ClientBrowserIter iter )
 {
-    (*request)->signal_finished().connect( sigc::mem_fun(
-        this, &RequestProgressWidget::requestFinishedCb ) );
-    (*request)->signal_failed().connect( sigc::mem_fun(
-        this, &RequestProgressWidget::requestFailedCb ) );
+    kDebug() << "Request finished.";
+    completed_requests++;
+    progressBar()->setValue( completed_requests );
 }
 
-void RequestProgressWidget::requestFinishedCb( Infinity::ClientBrowserIter iter )
+void RequestProgressDialog::requestFailedCb( const GError *err )
 {
-    ui->statusLabel->setText( "Finished." );
-    emit( requestFinished() );
-}
-
-void RequestProgressWidget::requestFailedCb( const GError *err )
-{
-    ui->statusLabel->setText( "Failed!" );
-    emit( requestFailed() );
-}
-
-RequestProgressDialog::RequestProgressDialog( const Glib::RefPtr<Infinity::ClientNodeRequest> &crequest,
-    const QString &ctext,
-    QWidget *parent )
-    : KDialog( parent )
-    , mainWidget( new RequestProgressWidget( crequest, ctext, this ) )
-{
-    setMainWidget( mainWidget );
+    setLabelText( "Request failed!" );
+    completed_requests++;
+    progressBar()->setValue( completed_requests );
 }
 
 }
