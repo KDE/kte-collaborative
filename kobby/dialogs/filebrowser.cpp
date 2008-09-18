@@ -10,6 +10,7 @@
 
 #include <kobby/infinote/connection.h>
 #include <kobby/infinote/infinotemanager.h>
+#include <kobby/dialogs/requestprogress.h>
 
 #include <KDebug>
 #include <KIcon>
@@ -333,7 +334,10 @@ void FileBrowserWidget::addFolder( const QString &name, Infinity::ClientBrowserI
         return;
     }
 
-    conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() );
+    RequestProgressDialog *progressDialog;
+    progressDialog = new RequestProgressDialog( conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() ),
+        "Creating folder..." );
+    progressDialog->setVisible( true );
 }
 
 void FileBrowserWidget::slotNodeSelectionChanged()

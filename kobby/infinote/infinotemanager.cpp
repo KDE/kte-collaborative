@@ -17,6 +17,7 @@ namespace Kobby
 
 InfinoteManager::InfinoteManager( QObject *parent )
     : QObject( parent )
+    , localHostname( "localhost" )
     , gnutls_cred( 0 )
     , gsasl_context( 0 )
 {
@@ -47,10 +48,15 @@ QList<Connection*> &InfinoteManager::getConnections()
     return connections;
 }
 
-Connection &InfinoteManager::connectToHost( const QString &jid, const QString &name, const QString &host, unsigned int port )
+const QString &InfinoteManager::getLocalHostname() const
+{
+    return localHostname;
+}
+
+Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
-    connection = new Connection( *this, name, jid, host, port, this );
+    connection = new Connection( *this, name, host, port, this );
 
     addConnection( *connection );
 
@@ -90,8 +96,9 @@ void InfinoteManager::removeConnection( Connection &connection )
     delete local_conn;
 }
 
-Infinity::XmppConnection &InfinoteManager::createXmppConnection( const QString &jid, const QString &host, unsigned int port )
+Infinity::XmppConnection &InfinoteManager::createXmppConnection( const QString &host, unsigned int port )
 {
+    kDebug() << "creating connection from " << getLocalHostname().toAscii() << " to " << host.toAscii();
     const char *hostname = host.toAscii();
 
     Infinity::IpAddress address( hostname );
@@ -101,7 +108,7 @@ Infinity::XmppConnection &InfinoteManager::createXmppConnection( const QString &
         address, port
     );
     Infinity::XmppConnection *xmppConnection = new Infinity::XmppConnection(
-        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, jid.toAscii(), gnutls_cred, gsasl_context
+        *tcpConnection, Infinity::XMPP_CONNECTION_CLIENT, getLocalHostname().toAscii(), hostname, gnutls_cred, gsasl_context
     );
     
     return *xmppConnection;

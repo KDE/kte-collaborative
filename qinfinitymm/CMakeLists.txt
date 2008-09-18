@@ -23,6 +23,3 @@ TARGET_LINK_LIBRARIES( qinfinitymm
 	${LIBINFINITYMM_LIBRARIES}
 )
 
-
-
-SUBDIRS( test )

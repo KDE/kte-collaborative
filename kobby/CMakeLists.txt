@@ -31,6 +31,7 @@ set( KOBBY_SRCS
 	# dialogs
 	dialogs/settingsdialog.cpp
 	dialogs/connectionmanager.cpp
+	dialogs/requestprogress.cpp
 	dialogs/filebrowser.cpp
 	dialogs/controldialog.cpp
 
@@ -52,6 +53,7 @@ kde4_add_ui_files( KOBBY_SRCS
 	dialogs/connectioneditor.ui
 	dialogs/addconnectiondialog.ui
 	dialogs/newfolderwidget.ui
+	dialogs/requestprogresswidget.ui
 	dialogs/filebrowserwidget.ui
 	dialogs/controlwidget.ui
 	dialogs/settingswidget.ui

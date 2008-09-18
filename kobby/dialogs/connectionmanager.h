@@ -181,7 +181,7 @@ class AddConnectionDialog
         /**
          * @brief The user is attempting to add a connection.
          */
-        void addConnection( const QString &jid, const QString &label, const QString &hostname, unsigned int port );
+        void addConnection( const QString &label, const QString &hostname, unsigned int port );
     
     private Q_SLOTS:
         void slotLocationChanged( const QString &text );

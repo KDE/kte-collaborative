@@ -60,14 +60,12 @@ class Connection
          * @brief Create Connection object.
          * @param manager InfinoteManager instance.
          * @param name Name of connection.  This functions only as a label and must be unique.
-         * @param jid Jabber ID to connect as.
          * @param hostname Hostname to connect to.
          * @param port Port on Hostname to connect to.
          * @param parent Parent object
          */
         Connection( InfinoteManager &manager,
             const QString &name,
-            const QString &jid,
             const QString &hostname,
             unsigned int port,
             QObject *parent = 0 );
@@ -147,7 +145,6 @@ class Connection
 
         InfinoteManager *infinoteManager;
         QString name;
-        QString jid;
         QString hostname;
         unsigned int port;
         Infinity::XmppConnection *xmppConnection;

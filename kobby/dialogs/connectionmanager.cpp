@@ -222,7 +222,7 @@ void AddConnectionDialog::slotLocationChanged( const QString &text )
 
 void AddConnectionDialog::tryConnecting()
 {
-    emit( addConnection( ui->jidLineEdit->text(), ui->labelLineEdit->text(), ui->hostnameLineEdit->text(), ui->portLineEdit->text().toUInt() ) );
+    emit( addConnection( ui->labelLineEdit->text(), ui->hostnameLineEdit->text(), ui->portLineEdit->text().toUInt() ) );
 }
 
 void AddConnectionDialog::setupUi()
@@ -271,8 +271,8 @@ void ConnectionManagerWidget::slotAddConnection()
     
     addConnectionDialog = new AddConnectionDialog();
     connect( addConnectionDialog, SIGNAL( finished() ), this, SLOT( slotAddConnectionFinished() ) );
-    connect( addConnectionDialog, SIGNAL( addConnection( const QString&, const QString&, const QString&, unsigned int ) ),
-        infinoteManager, SLOT( connectToHost( const QString&, const QString&, const QString&, unsigned int ) ) );
+    connect( addConnectionDialog, SIGNAL( addConnection( const QString&, const QString&, unsigned int ) ),
+        infinoteManager, SLOT( connectToHost( const QString&, const QString&, unsigned int ) ) );
     addConnectionDialog->setVisible( true );
 }
 

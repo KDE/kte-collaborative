@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>282</width>
-    <height>139</height>
+    <width>322</width>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -20,9 +20,9 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout" >
       <item>
-       <widget class="QLabel" name="requestLabel" >
+       <widget class="QLabel" name="statusLabel" >
         <property name="text" >
-         <string>Running Request</string>
+         <string>Running Request...</string>
         </property>
        </widget>
       </item>

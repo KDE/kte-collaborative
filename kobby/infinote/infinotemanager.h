@@ -67,12 +67,13 @@ class InfinoteManager : public QObject
         QList<Connection*> &getConnections();
         /**
          * @brief Create an XmppConnection and TcpConnection, without connecting
-         * @param jid Jabber ID used for connection
-         * @param host Hostname to connect to
+         * @param hostname Hostname to connect to
          * @param port Port to connect to on Hostname
          * @return Unconnected XmppConnection
          */
-        Infinity::XmppConnection &createXmppConnection( const QString &jid, const QString &host, unsigned int port );
+        Infinity::XmppConnection &createXmppConnection( const QString &hostname,
+            unsigned int port );
+        const QString &getLocalHostname() const;
 
     Q_SIGNALS:
         /**
@@ -89,11 +90,12 @@ class InfinoteManager : public QObject
          * @brief Create a new connection to host which will be managed by the InfinoteManager instance.
          * 
          * @param name Label for this connection
-         * @param jid Jaber ID for this connection
          * @param hostname Remote host
          * @param port Remote port
          */
-        Connection &connectToHost( const QString &name, const QString &jid, const QString &hostname, unsigned int port );
+        Connection &connectToHost( const QString &name,
+            const QString &hostname,
+            unsigned int port );
         /**
          * @brief Add connection to managed connections.
          */
@@ -105,6 +107,7 @@ class InfinoteManager : public QObject
         Infinity::QtIo *io;
         QList<Connection*> connections;
         Infinity::ConnectionManager *connectionManager;
+        QString localHostname;
         gnutls_certificate_credentials_t gnutls_cred;
         Gsasl *gsasl_context;
     

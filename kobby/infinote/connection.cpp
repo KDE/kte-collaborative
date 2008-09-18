@@ -16,14 +16,12 @@ namespace Kobby
 
 Connection::Connection( InfinoteManager &cmanager,
     const QString &cname,
-    const QString &cjid,
     const QString &chostname,
     unsigned int cport,
     QObject *parent )
     : QObject( parent )
     , infinoteManager( &cmanager )
     , name( cname )
-    , jid( cjid )
     , hostname( chostname )
     , port( cport )
 {
@@ -119,7 +117,7 @@ Infinity::ClientBrowser &Connection::getClientBrowser() const
 
 void Connection::init()
 {
-    xmppConnection = &infinoteManager->createXmppConnection( jid, hostname, port );
+    xmppConnection = &infinoteManager->createXmppConnection( hostname, port );
     tcpConnection = &xmppConnection->getTcpConnection();
     clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(),
         *xmppConnection,
