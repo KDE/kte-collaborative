@@ -101,7 +101,6 @@ void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
     {
         exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
         *exploreRequest = getNode().explore();
-        (*exploreRequest)->signal_finished().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFinishedCb ) );
         (*exploreRequest)->signal_failed().connect( sigc::mem_fun( this, &FileBrowserWidgetFolderItem::exploreFailedCb ) );
 
         if( (*exploreRequest)->getFinished() )
@@ -113,26 +112,6 @@ void FileBrowserWidgetFolderItem::setupUi()
 {
     setExpanded( false );
     setChildIndicatorPolicy( QTreeWidgetItem::ShowIndicator );
-}
-
-void FileBrowserWidgetFolderItem::exploreFinishedCb()
-{
-    kDebug() << "finished.";
-
-    is_populated = true;
-    bool res;
-    Infinity::ClientBrowserIter itr;
-    itr = getNode();
-
-    for( res = itr.child(); res; res = itr.next() )
-    {
-        if( itr.isDirectory() )
-            addChild( new FileBrowserWidgetFolderItem( itr ) );
-        else
-            addChild( new FileBrowserWidgetNoteItem( itr ) );
-    }
-
-    setChildIndicatorPolicy( QTreeWidgetItem::DontShowIndicatorWhenChildless );
 }
 
 void FileBrowserWidgetFolderItem::exploreFailedCb( GError *value )
@@ -331,7 +310,6 @@ FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeInList( Infinity::ClientBr
         FileBrowserWidgetItem *item = dynamic_cast<FileBrowserWidgetItem*>(*itr);
         if( item->getNode() == iter )
         {
-            kDebug() << "found " << iter.getName();
             return item;
         }
         else

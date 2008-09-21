@@ -140,7 +140,6 @@ class FileBrowserWidgetFolderItem
 
     private:
         void setupUi();
-        void exploreFinishedCb();
         void exploreFailedCb( GError * );
 
         Glib::RefPtr<Infinity::ClientExploreRequest> *exploreRequest;
