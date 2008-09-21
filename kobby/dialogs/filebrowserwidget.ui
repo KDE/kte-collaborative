@@ -15,6 +15,12 @@
   <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
     <widget class="Kobby::FileBrowserTreeWidget" name="treeWidget" >
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
      <column>
       <property name="text" >
        <string>Name</string>

@@ -176,6 +176,10 @@ class FileBrowserTreeWidget
         void unsetConnection();
         /**
          * @brief Set the current Connection, enabling the browser.
+         *
+         * Use this to set which connection the file browser is using.  If
+         * connection is NULL then unsetConnection() will be called and the
+         * widget will be disabled.
          */
         void setConnection( Connection *connection );
 
@@ -188,6 +192,10 @@ class FileBrowserTreeWidget
         void setupActions();
         void setupConnectionActions();
         void createRootNodes();
+        void nodeAddedCb( Infinity::ClientBrowserIter node );
+        void nodeRemovedCb( Infinity::ClientBrowserIter node );
+        FileBrowserWidgetItem *findNodeItem( Infinity::ClientBrowserIter &iter );
+        FileBrowserWidgetItem *findNodeInList( Infinity::ClientBrowserIter &iter, QList<QTreeWidgetItem*> items );
 
         InfinoteManager *infinoteManager;
         Infinity::ClientBrowser *clientBrowser;

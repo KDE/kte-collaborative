@@ -158,9 +158,9 @@ FileBrowserTreeWidget::FileBrowserTreeWidget( Connection &conn, QWidget *parent 
     : QTreeWidget( parent )
     , infinoteManager( &conn.getInfinoteManager() )
     , clientBrowser(  &conn.getClientBrowser() )
-    , connection( &conn )
     , rootNode( 0 )
 {
+    setConnection( &conn );
     setupUi();
     setupActions();
     createRootNodes();
@@ -252,7 +252,11 @@ void FileBrowserTreeWidget::setupActions()
 void FileBrowserTreeWidget::setupConnectionActions()
 {
     if( connection )
+    {
         connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotConnectionStatusChanged( int ) ) );
+        connection->getClientBrowser().signal_node_added().connect( sigc::mem_fun(
+            this, &FileBrowserTreeWidget::nodeAddedCb ) );
+    }
 }
 
 void FileBrowserTreeWidget::createRootNodes()
@@ -263,6 +267,78 @@ void FileBrowserTreeWidget::createRootNodes()
     clientBrowser->setRootNode( *rootNode );
     rootNodeItem = new FileBrowserWidgetFolderItem( "/", *rootNode, this );
     addTopLevelItem( rootNodeItem );
+}
+
+void FileBrowserTreeWidget::nodeAddedCb( Infinity::ClientBrowserIter node )
+{
+    FileBrowserWidgetItem *found, *added;
+    Infinity::ClientBrowserIter parentItr = node;
+    node.setBrowser( *clientBrowser );
+    parentItr.parent();
+
+    if( !(found = findNodeItem( parentItr )) )
+    {
+        kDebug() << "Item " << parentItr.getName() << " not found.";
+    }
+    else
+    {
+        if( node.isDirectory() )
+            found->addChild( new FileBrowserWidgetFolderItem( node ) );
+        else
+            found->addChild( new FileBrowserWidgetNoteItem( node ) );
+    }
+}
+
+void FileBrowserTreeWidget::nodeRemovedCb( Infinity::ClientBrowserIter node )
+{
+    FileBrowserWidgetItem *found;
+    
+    if( !(found = findNodeItem( node )) )
+    {
+        kDebug() << "Item " << node.getName() << " not found.";
+    }
+    else
+    {
+        delete found;
+    }
+}
+
+FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeItem( Infinity::ClientBrowserIter &iter )
+{
+    QList<QTreeWidgetItem*> found;
+    Infinity::ClientBrowserIter parentItr;
+    FileBrowserWidgetItem *parentItem;
+    iter.setBrowser( *clientBrowser );
+
+    parentItr = iter;
+    parentItr.parent();
+    found = findItems( parentItr.getName(), Qt::MatchContains | Qt::MatchRecursive );
+
+    if( found.size() == 0 )
+        return 0;
+    else
+        return parentItem = findNodeInList( parentItr, found );
+}
+
+FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeInList( Infinity::ClientBrowserIter &iter, QList<QTreeWidgetItem*> items )
+{
+    QList<QTreeWidgetItem*>::iterator itr;
+    if( !items.size() )
+        kDebug() << "no items to find in.";
+
+    for( itr = items.begin(); itr != items.end(); itr++ )
+    {
+        FileBrowserWidgetItem *item = dynamic_cast<FileBrowserWidgetItem*>(*itr);
+        if( item->getNode() == iter )
+        {
+            kDebug() << "found " << iter.getName();
+            return item;
+        }
+        else
+            kDebug() << iter.getName() << " != " << item->getNode().getName();
+    }
+
+    return 0;
 }
 
 
