@@ -96,7 +96,7 @@ void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
     if( is_populated )
         return;
     else if( getNode().isExplored() )
-        exploreFinishedCb();
+        return;
     else
     {
         exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
@@ -235,6 +235,8 @@ void FileBrowserTreeWidget::setupConnectionActions()
         connect( connection, SIGNAL( statusChanged( int ) ), this, SLOT( slotConnectionStatusChanged( int ) ) );
         connection->getClientBrowser().signal_node_added().connect( sigc::mem_fun(
             this, &FileBrowserTreeWidget::nodeAddedCb ) );
+        connection->getClientBrowser().signal_node_removed().connect( sigc::mem_fun(
+            this, &FileBrowserTreeWidget::nodeRemovedCb ) );
     }
 }
 
@@ -250,9 +252,9 @@ void FileBrowserTreeWidget::createRootNodes()
 
 void FileBrowserTreeWidget::nodeAddedCb( Infinity::ClientBrowserIter node )
 {
-    FileBrowserWidgetItem *found, *added;
-    Infinity::ClientBrowserIter parentItr = node;
+    FileBrowserWidgetItem *found;
     node.setBrowser( *clientBrowser );
+    Infinity::ClientBrowserIter parentItr = node;
     parentItr.parent();
 
     if( !(found = findNodeItem( parentItr )) )
@@ -282,21 +284,17 @@ void FileBrowserTreeWidget::nodeRemovedCb( Infinity::ClientBrowserIter node )
     }
 }
 
-FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeItem( Infinity::ClientBrowserIter &iter )
+FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeItem( Infinity::ClientBrowserIter &itr )
 {
     QList<QTreeWidgetItem*> found;
-    Infinity::ClientBrowserIter parentItr;
-    FileBrowserWidgetItem *parentItem;
-    iter.setBrowser( *clientBrowser );
+    itr.setBrowser( *clientBrowser );
 
-    parentItr = iter;
-    parentItr.parent();
-    found = findItems( parentItr.getName(), Qt::MatchContains | Qt::MatchRecursive );
+    found = findItems( itr.getName(), Qt::MatchContains | Qt::MatchRecursive );
 
     if( found.size() == 0 )
         return 0;
     else
-        return parentItem = findNodeInList( parentItr, found );
+        return findNodeInList( itr, found );
 }
 
 FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeInList( Infinity::ClientBrowserIter &iter, QList<QTreeWidgetItem*> items )
