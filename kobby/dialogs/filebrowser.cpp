@@ -395,25 +395,23 @@ void FileBrowserWidget::slotNodeSelectionChanged()
 {
     kDebug() << "node selection changed.";
     QList<FileBrowserWidgetItem*> items = ui->treeWidget->getSelectedNodes();
-    if( items.size() > 0 )
-    {
-        ui->deleteButton->setEnabled( true );
-        if( items.size() == 1 && items.at(0)->getNode().isDirectory() )
-        {
-            ui->createFolderButton->setEnabled( true );
-            ui->createNoteButton->setEnabled( true );
-        }
-        else
-        {
-            ui->createFolderButton->setEnabled( false );
-            ui->createNoteButton->setEnabled( false );
-        }
-    }
-    else
+    if( items.size() == 0 )
     {
         ui->createFolderButton->setEnabled( false );
         ui->createNoteButton->setEnabled( false );
         ui->deleteButton->setEnabled( false );
+    }
+    else
+    {
+        bool multi_items;
+        if( items.size() > 1 )
+            multi_items = true;
+        else
+            multi_items = false;
+        
+        ui->createFolderButton->setEnabled( !multi_items );
+        ui->createNoteButton->setEnabled( !multi_items );
+        ui->deleteButton->setEnabled( true );
     }
 }
 
