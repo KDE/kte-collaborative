@@ -18,7 +18,7 @@
 
 #include <glib/gerror.h>
 
-#include "kobby/ui_newfolderwidget.h"
+#include "kobby/ui_createnodewidget.h"
 #include "kobby/ui_filebrowserwidget.h"
 
 namespace Kobby
@@ -317,31 +317,33 @@ FileBrowserWidgetItem *FileBrowserTreeWidget::findNodeInList( Infinity::ClientBr
     return 0;
 }
 
+// CreateNodeDialog
 
-NewFolderDialog::NewFolderDialog( Infinity::ClientBrowserIter &iter, QWidget *parent )
+CreateNodeDialog::CreateNodeDialog( const QString &caption, const QString &text, Infinity::ClientBrowserIter &iter, QWidget *parent )
     : KDialog( parent )
-    , ui( new Ui::NewFolderWidget )
+    , ui( new Ui::CreateNodeWidget )
     , parentIter( &iter )
 {
-    setupUi();
+    setupUi( caption, text );
     setupActions();
 }
 
-void NewFolderDialog::slotCreate()
+void CreateNodeDialog::slotCreate()
 {
     emit( create( ui->nameLineEdit->text(), *parentIter ) );
 }
 
-void NewFolderDialog::setupUi()
+void CreateNodeDialog::setupUi( const QString &caption, const QString &text )
 {
     QWidget *mainWidget = new QWidget( this );
     ui->setupUi( mainWidget );
-    setCaption( "Kobby - Create Folder" );
+    ui->mainGroupBox->setTitle( text );
+    setCaption( caption );
     setButtons( KDialog::Ok | KDialog::Cancel );
     setMainWidget( mainWidget );
 }
 
-void NewFolderDialog::setupActions()
+void CreateNodeDialog::setupActions()
 {
     connect( this, SIGNAL( okClicked() ), this, SLOT( slotCreate() ) );
 }
@@ -376,18 +378,47 @@ void FileBrowserWidget::addFolder( const QString &name, Infinity::ClientBrowserI
 
     if( !conn )
     {
-        kDebug() << "No connection to add folder over.";
+        kDebug() << "No connection currently set.";
         return;
     }
 
     if( !parentNode.isExplored() )
     {
-        kDebug() << "Parent node to add folder to is not explored.";
+        kDebug() << "Parent node is not explored.";
         return;
     }
 
     RequestProgressDialog *progressDialog = new RequestProgressDialog( "Creating folder...", this );
     progressDialog->addRequest( conn->getClientBrowser().addSubdirectory( parentNode, name.toAscii() ) );
+    progressDialog->setVisible( true );
+}
+
+void FileBrowserWidget::createNote( const QString &name, Infinity::ClientBrowserIter &parentNode )
+{
+    Connection *conn = getTreeWidget().getConnection();
+
+    if( !conn )
+    {
+        kDebug() << "No connection currently set.";
+        return;
+    }
+
+    if( !parentNode.isExplored() )
+    {
+        kDebug() << "Parent node is not explored.";
+        return;
+    }
+
+    if( !parentNode.isDirectory() )
+    {
+        kDebug() << "Parent node is not a directory!";
+        return;
+    }
+
+    RequestProgressDialog *progressDialog = new RequestProgressDialog( "Creating note...", this );
+    Glib::RefPtr<Infinity::ClientNodeRequest> req;
+    req = conn->getClientBrowser().addNote( parentNode, name.toAscii(), &conn->getInfinoteManager().getTextPlugin(), false );
+    progressDialog->addRequest( req );
     progressDialog->setVisible( true );
 }
 
@@ -415,19 +446,32 @@ void FileBrowserWidget::slotNodeSelectionChanged()
     }
 }
 
-void FileBrowserWidget::slotNewFolderDialog()
+void FileBrowserWidget::slotCreateFolder()
 {
     QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
     if( items.size() == 1 )
     {
-        kDebug() << "Create folder dialog.";
-        NewFolderDialog *dialog = new NewFolderDialog( items.at(0)->getNode(), this );
+        CreateNodeDialog *dialog = new CreateNodeDialog( "Create Folder", "Create Folder", items.at(0)->getNode(), this );
         connect( dialog, SIGNAL( create( const QString&, Infinity::ClientBrowserIter& ) ),
             this, SLOT( addFolder( const QString&, Infinity::ClientBrowserIter& ) ) );
         dialog->setVisible( true );
     }
     else
         kDebug() << "Cannot add folder to more than one parent.";
+}
+
+void FileBrowserWidget::slotCreateNote()
+{
+    QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
+    if( items.size() == 1 )
+    {
+        CreateNodeDialog *dialog = new CreateNodeDialog( "Create Note", "Create Note", items.at(0)->getNode(), this );
+        connect( dialog, SIGNAL( create( const QString&, Infinity::ClientBrowserIter& ) ),
+            this, SLOT( createNote( const QString&, Infinity::ClientBrowserIter& ) ) );
+        dialog->setVisible( true );
+    }
+    else
+        kDebug() << "Cannot create note with more than one parent.";
 }
 
 void FileBrowserWidget::slotRemoveNodes()
@@ -454,7 +498,8 @@ void FileBrowserWidget::setupUi()
 void FileBrowserWidget::setupActions()
 {
     connect( ui->treeWidget, SIGNAL( itemSelectionChanged() ), this, SLOT( slotNodeSelectionChanged() ) );
-    connect( ui->createFolderButton, SIGNAL( clicked() ), this, SLOT( slotNewFolderDialog() ) );
+    connect( ui->createFolderButton, SIGNAL( clicked() ), this, SLOT( slotCreateFolder() ) );
+    connect( ui->createNoteButton, SIGNAL( clicked() ), this, SLOT( slotCreateNote() ) );
     connect( ui->deleteButton, SIGNAL( clicked() ), this, SLOT( slotRemoveNodes() ) );
 }
 

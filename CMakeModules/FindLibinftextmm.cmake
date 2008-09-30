@@ -1,0 +1,73 @@
+# Find libinfinitymm
+#
+# This script will define:
+#	LIBINFINITYMM_FOUND
+#	LIBINFINITYMM_INCLUDES
+#	LIBINFINITYMM_LIBRARY
+#	LIBINFINITYMM_LIBRARIES
+#
+# Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
+
+if( LIBINFTEXTMM_LIBRARIES AND LIBINFTEXTMM_INCLUDES )
+	
+	set( LIBINFTEXTMM_FOUND true )
+
+else( LIBINFTEXTMM_LIBRARIES AND LIBINFTEXTMM_INCLUDES )
+	
+	set( LIBINFTEXTMM_FOUND false )
+	
+# dependancies
+	FIND_PACKAGE(Glibmm REQUIRED)
+	FIND_PACKAGE(LibXml2 REQUIRED)
+	FIND_PACKAGE(Libinfinity REQUIRED)
+	FIND_PACKAGE(Libinfinitymm REQUIRED)
+	FIND_PACKAGE(Libinftext REQUIRED)
+	
+	if( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
+		include(UsePkgConfig)
+		pkgconfig(libinftextmm-1.0
+			_LIBINFTEXTMM_INCLUDE_DIR
+			_LIBINFTEXTMM_LIBRARY_DIR
+			_LIBINFTEXTMM_LINKER_FLAGS
+			_LIBINFTEXTMM_COMPILER_FLAGS
+		)
+	endif( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
+	
+	find_path( LIBINFTEXTMM_INCLUDE_DIR
+		NAMES
+			libinftextmm/init.h
+		PATHS
+			${_LIBINFTEXTMM_INCLUDE_DIR}
+			/usr/include
+			/usr/local/include
+			/opt/local/include
+		PATH_SUFFIXES
+			libinftextmm-1.0
+	)
+	
+	find_library( LIBINFTEXTMM_LIBRARY
+		NAMES
+			inftextmm-1.0
+		PATHS
+			${_LIBINFTEXTMM_LIBRARY_DIR}
+			/usr/lib
+			/usr/local/lib
+	)
+	
+	set( LIBINFTEXTMM_INCLUDES
+		${LIBINFTEXTMM_INCLUDE_DIR}
+		${LIBINFINITYMM_INCLUDES}
+		${LIBINFTEXT_INCLUDES}
+	)
+	
+	set( LIBINFTEXTMM_LIBRARIES
+		${LIBINFINITYMM_LIBRARIES}
+		${LIBINFTEXTMM_LIBRARY}
+		${LIBINFTEXT_LIBRARIES}
+	)
+
+endif( LIBINFTEXTMM_LIBRARIES AND LIBINFTEXTMM_INCLUDES )

@@ -1,12 +1,12 @@
 <ui version="4.0" >
- <class>NewFolderWidget</class>
- <widget class="QWidget" name="NewFolderWidget" >
+ <class>CreateNodeWidget</class>
+ <widget class="QWidget" name="CreateNodeWidget" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>339</width>
-    <height>129</height>
+    <width>357</width>
+    <height>147</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -16,7 +16,7 @@
    <item>
     <widget class="QGroupBox" name="mainGroupBox" >
      <property name="title" >
-      <string>New Folder</string>
+      <string>Create Node</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout" >
       <item>

@@ -2,6 +2,9 @@
 #include <libinfinitymm/common/tcpconnection.h>
 #include <libinfinitymm/common/xmppconnection.h>
 #include <libinfinitymm/common/connectionmanager.h>
+#include <libinfinitymm/client/clientnoteplugin.h>
+#include <libinftextmm/init.h>
+#include <libinftextmm/textsession.h>
 
 #include "infinotemanager.h"
 
@@ -17,11 +20,13 @@ namespace Kobby
 
 InfinoteManager::InfinoteManager( QObject *parent )
     : QObject( parent )
+    , textPlugin( new Infinity::ClientNotePlugin( "InfText", (Infinity::ClientNotePlugin::SessionCreateFunction) TEXT_SESSION_CREATE_FUNCTION( Infinity::TextSession::create ) ) )
     , localHostname( "localhost" )
     , gnutls_cred( 0 )
     , gsasl_context( 0 )
 {
     Infinity::init();
+    Infinity::text_init();
     
     io = new Infinity::QtIo;
     connectionManager = new Infinity::ConnectionManager();
@@ -46,6 +51,11 @@ Infinity::ConnectionManager &InfinoteManager::getConnectionManager() const
 QList<Connection*> &InfinoteManager::getConnections()
 {
     return connections;
+}
+
+Infinity::ClientNotePlugin &InfinoteManager::getTextPlugin() const
+{
+    return *textPlugin;
 }
 
 const QString &InfinoteManager::getLocalHostname() const

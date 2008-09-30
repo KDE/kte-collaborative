@@ -24,7 +24,7 @@
 
 namespace Ui
 {
-    class NewFolderWidget;
+    class CreateNodeWidget;
     class FileBrowserWidget;
 }
 
@@ -204,14 +204,27 @@ class FileBrowserTreeWidget
 
 };
 
-class NewFolderDialog
+/**
+ * @brief A dialog to create a node on an infinote server.
+ *
+ * This dialog does not actually perform the creating of the folder, but rather
+ * emits the create signal when necessary.
+ */
+class CreateNodeDialog
     : public KDialog
 {
 
     Q_OBJECT
 
     public:
-        NewFolderDialog( Infinity::ClientBrowserIter &parentIter, QWidget *parent = 0 );
+        /**
+         * @brief Create instance of CreatNodeDialog class.
+         * @param caption Caption text of dialog window.
+         * @param text Title text for group box.
+         * @param parentIter Parent node to add folder to, or to pass to create signal.
+         * @param parent Parent widget.
+         */
+        CreateNodeDialog( const QString &caption, const QString &text, Infinity::ClientBrowserIter &parentIter, QWidget *parent = 0 );
 
     Q_SIGNALS:
         void create( const QString &name, Infinity::ClientBrowserIter &parentIter );
@@ -220,10 +233,10 @@ class NewFolderDialog
         void slotCreate();
 
     private:
-        void setupUi();
+        void setupUi( const QString &caption, const QString &text );
         void setupActions();
 
-        Ui::NewFolderWidget *ui;
+        Ui::CreateNodeWidget *ui;
         Infinity::ClientBrowserIter *parentIter;
 
 };
@@ -245,10 +258,12 @@ class FileBrowserWidget
 
     public Q_SLOTS:
         void addFolder( const QString &name, Infinity::ClientBrowserIter &parentNode );
+        void createNote( const QString &name, Infinity::ClientBrowserIter &parentNode );
 
     private Q_SLOTS:
         void slotNodeSelectionChanged();
-        void slotNewFolderDialog();
+        void slotCreateFolder();
+        void slotCreateNote();
         void slotRemoveNodes();
 
     private:

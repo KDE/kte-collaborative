@@ -29,6 +29,7 @@ namespace Infinity
     class XmppConnection;
     class QtIo;
     class ConnectionManager;
+    class ClientNotePlugin;
 }
 
 namespace Kobby
@@ -47,6 +48,10 @@ class InfinoteManager : public QObject
     Q_OBJECT
     
     public:
+        /**
+         * @brief Create instance of an InfinoteManager class.
+         * @param parent Parent QObject.
+         */
         InfinoteManager( QObject *parent = 0 );
         ~InfinoteManager();
 
@@ -66,6 +71,11 @@ class InfinoteManager : public QObject
          */
         QList<Connection*> &getConnections();
         /**
+         * @brief Get the current text plugin.
+         * @return A ClientNotePlugin named InfText
+         */
+        Infinity::ClientNotePlugin &getTextPlugin() const;
+        /**
          * @brief Create an XmppConnection and TcpConnection, without connecting
          * @param hostname Hostname to connect to
          * @param port Port to connect to on Hostname
@@ -73,6 +83,12 @@ class InfinoteManager : public QObject
          */
         Infinity::XmppConnection &createXmppConnection( const QString &hostname,
             unsigned int port );
+        /**
+         * @brief Get the hostname of the local computer.
+         * @return Local hostname
+         *
+         * This will be modified in the future to read from KDE settings.
+         */
         const QString &getLocalHostname() const;
 
     Q_SIGNALS:
@@ -98,8 +114,13 @@ class InfinoteManager : public QObject
             unsigned int port );
         /**
          * @brief Add connection to managed connections.
+         * @param connectin Connection to add.
          */
         void addConnection( Connection &connection );
+        /**
+         * @brief Remove a connection from the managed connections.
+         * @param conneciton Connection to remove.
+         */
         void removeConnection( Connection &connection );
 
     private:
@@ -107,6 +128,7 @@ class InfinoteManager : public QObject
         Infinity::QtIo *io;
         QList<Connection*> connections;
         Infinity::ConnectionManager *connectionManager;
+        Infinity::ClientNotePlugin *textPlugin;
         QString localHostname;
         gnutls_certificate_credentials_t gnutls_cred;
         Gsasl *gsasl_context;

@@ -8,20 +8,20 @@ project(Kobby)
 
 find_package(KDE4 REQUIRED)
 find_package(Glib REQUIRED)
-find_package(Libinfinitymm REQUIRED)
+find_package(Libinftextmm REQUIRED)
 
 # data files
 add_subdirectory( data )
 
 set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
-	${LIBINFINITYMM_INCLUDES}
+	${LIBINFTEXTMM_INCLUDES}
 	${CMAKE_SOURCE_DIR}
 )
 
 set( KOBBY_LIBRARIES
 	${KDE4_KDECORE_LIBS}
-	${LIBINFINITYMM_LIBRARIES}
+	${LIBINFTEXTMM_LIBRARIES}
 )
 
 set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
@@ -52,7 +52,7 @@ set( KOBBY_SRCS
 kde4_add_ui_files( KOBBY_SRCS
 	dialogs/connectioneditor.ui
 	dialogs/addconnectiondialog.ui
-	dialogs/newfolderwidget.ui
+	dialogs/createnodewidget.ui
 	dialogs/requestprogresswidget.ui
 	dialogs/filebrowserwidget.ui
 	dialogs/controlwidget.ui
