@@ -424,13 +424,13 @@ void FileBrowserWidget::createNote( const QString &name, Infinity::ClientBrowser
 
 void FileBrowserWidget::slotNodeSelectionChanged()
 {
-    kDebug() << "node selection changed.";
     QList<FileBrowserWidgetItem*> items = ui->treeWidget->getSelectedNodes();
     if( items.size() == 0 )
     {
         ui->createFolderButton->setEnabled( false );
         ui->createNoteButton->setEnabled( false );
         ui->deleteButton->setEnabled( false );
+        ui->joinButton->setEnabled( false );
     }
     else
     {
@@ -443,6 +443,10 @@ void FileBrowserWidget::slotNodeSelectionChanged()
         ui->createFolderButton->setEnabled( !multi_items );
         ui->createNoteButton->setEnabled( !multi_items );
         ui->deleteButton->setEnabled( true );
+        if( !multi_items && !items.at( 0 )->getNode().isDirectory() )
+            ui->joinButton->setEnabled( true );
+        else
+            ui->joinButton->setEnabled( false );
     }
 }
 
@@ -480,12 +484,28 @@ void FileBrowserWidget::slotRemoveNodes()
     QList<FileBrowserWidgetItem*>::iterator itr;
     Infinity::ClientBrowser *browser = &getTreeWidget().getConnection()->getClientBrowser();
     RequestProgressDialog *requestDialog = new RequestProgressDialog( "Removing nodes...", this );
-    requestDialog->setVisible( true );
 
     for( itr = items.begin(); itr != items.end(); ++itr )
     {
         requestDialog->addRequest( browser->removeNode( (*itr)->getNode() ) );
     }
+
+    requestDialog->setVisible( true );
+}
+
+void FileBrowserWidget::slotJoinNote()
+{
+    QList<FileBrowserWidgetItem*> items = getTreeWidget().getSelectedNodes();
+    QList<FileBrowserWidgetItem*>::iterator itr;
+    Infinity::ClientBrowser *browser = &getTreeWidget().getConnection()->getClientBrowser();
+    RequestProgressDialog *requestDialog = new RequestProgressDialog( "Joining Note...", this );
+
+    for( itr = items.begin(); itr != items.end(); ++itr )
+    {
+        requestDialog->addRequest( browser->subscribeSession( (*itr)->getNode() ) );
+    }
+
+    requestDialog->setVisible( true );
 }
 
 void FileBrowserWidget::setupUi()
@@ -493,6 +513,7 @@ void FileBrowserWidget::setupUi()
     ui->createFolderButton->setIcon( KIcon( "folder-new.png" ) );
     ui->createNoteButton->setIcon( KIcon( "document-new.png" ) );
     ui->deleteButton->setIcon( KIcon( "edit-delete.png" ) );
+    ui->joinButton->setIcon( KIcon( "document-open-remote.png" ) );
 }
 
 void FileBrowserWidget::setupActions()
@@ -501,6 +522,7 @@ void FileBrowserWidget::setupActions()
     connect( ui->createFolderButton, SIGNAL( clicked() ), this, SLOT( slotCreateFolder() ) );
     connect( ui->createNoteButton, SIGNAL( clicked() ), this, SLOT( slotCreateNote() ) );
     connect( ui->deleteButton, SIGNAL( clicked() ), this, SLOT( slotRemoveNodes() ) );
+    connect( ui->joinButton, SIGNAL( clicked() ), this, SLOT( slotJoinNote() ) );
 }
 
 FileBrowserDialog::FileBrowserDialog( Connection &conn, QWidget *parent )

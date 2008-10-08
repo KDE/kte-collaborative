@@ -3,6 +3,7 @@
 #include <libinfinitymm/common/connectionmanager.h>
 #include <libinfinitymm/client/clientbrowser.h>
 #include <libinfinitymm/client/clientexplorerequest.h>
+#include <libinfinitymm/client/clientsessionproxy.h>
 
 #include <qinfinitymm/qtio.h>
 
@@ -122,6 +123,9 @@ void Connection::init()
     clientBrowser = new Infinity::ClientBrowser( infinoteManager->getIo(),
         *xmppConnection,
         infinoteManager->getConnectionManager() );
+    clientBrowser->addPlugin( infinoteManager->getTextPlugin() );
+    clientBrowser->signal_subscribe_session().connect( sigc::mem_fun( this,
+        &Connection::slotSubscribeSession ) );
 }
 
 void Connection::statusChangedCb()
@@ -134,6 +138,11 @@ void Connection::statusChangedCb()
     }
 
     emit( statusChanged( getStatus() ) );
+}
+
+void Connection::slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Infinity::ClientSessionProxy *proxy )
+{
+    kDebug() << "Subscription made.";
 }
 
 }

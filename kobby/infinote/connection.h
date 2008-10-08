@@ -27,6 +27,7 @@ namespace Infinity
     class ClientBrowser;
     class ClientBrowserIter;
     class ClientExploreRequest;
+    class ClientSessionProxy;
     class QtIo;
 }
 
@@ -138,10 +139,17 @@ class Connection
          * @param name New name for this connectin
          */
         void nameChanged( const QString &name );
+        /**
+         * @brief A subscription has been made on this connection.
+         * @param node Subscribed node.
+         * @param sessionProxy Proxy for the subscribed session.
+         */
+        void sessionSubcribe( Infinity::ClientBrowserIter &node, Infinity::ClientSessionProxy *sessionProxy );
 
     private:
         void init();
         void statusChangedCb();
+        void slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Infinity::ClientSessionProxy* );
 
         InfinoteManager *infinoteManager;
         QString name;

@@ -20,7 +20,7 @@ namespace Kobby
 
 InfinoteManager::InfinoteManager( QObject *parent )
     : QObject( parent )
-    , textPlugin( new Infinity::ClientNotePlugin( "InfText", (Infinity::ClientNotePlugin::SessionCreateFunction) TEXT_SESSION_CREATE_FUNCTION( Infinity::TextSession::create ) ) )
+    , textPlugin( new Infinity::ClientNotePlugin( "InfText", Infinity::TextSession::infCreate ) )
     , localHostname( "localhost" )
     , gnutls_cred( 0 )
     , gsasl_context( 0 )

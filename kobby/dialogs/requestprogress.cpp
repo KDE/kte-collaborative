@@ -18,13 +18,16 @@ RequestProgressDialog::RequestProgressDialog( const QString &ctext,
 
 void RequestProgressDialog::addRequest( Glib::RefPtr<Infinity::ClientNodeRequest> request )
 {
-    Glib::RefPtr<Infinity::ClientNodeRequest> *localReq = new Glib::RefPtr<Infinity::ClientNodeRequest>;
-    *localReq = request;
-    (*localReq)->signal_finished().connect( sigc::mem_fun(
-        this, &RequestProgressDialog::requestFinishedCb ) );
-    (*localReq)->signal_failed().connect( sigc::mem_fun(
-        this, &RequestProgressDialog::requestFailedCb ) );
-    requests += localReq;
+    if( request )
+    {
+        Glib::RefPtr<Infinity::ClientNodeRequest> *localReq = new Glib::RefPtr<Infinity::ClientNodeRequest>;
+        *localReq = request;
+        (*localReq)->signal_finished().connect( sigc::mem_fun(
+            this, &RequestProgressDialog::requestFinishedCb ) );
+        (*localReq)->signal_failed().connect( sigc::mem_fun(
+            this, &RequestProgressDialog::requestFailedCb ) );
+        requests += localReq;
+    }
 
     progressBar()->setMaximum( requests.size() );
 }

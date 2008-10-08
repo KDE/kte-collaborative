@@ -265,6 +265,7 @@ class FileBrowserWidget
         void slotCreateFolder();
         void slotCreateNote();
         void slotRemoveNodes();
+        void slotJoinNote();
 
     private:
         void setupUi();

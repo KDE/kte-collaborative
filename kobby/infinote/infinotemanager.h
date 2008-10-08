@@ -124,7 +124,6 @@ class InfinoteManager : public QObject
         void removeConnection( Connection &connection );
 
     private:
-
         Infinity::QtIo *io;
         QList<Connection*> connections;
         Infinity::ConnectionManager *connectionManager;
