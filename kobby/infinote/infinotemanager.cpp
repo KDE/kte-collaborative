@@ -6,6 +6,8 @@
 #include <libinftextmm/init.h>
 #include <libinftextmm/textsession.h>
 
+#include <kobby/infinote/connection.h>
+
 #include "infinotemanager.h"
 
 #include <KDebug>

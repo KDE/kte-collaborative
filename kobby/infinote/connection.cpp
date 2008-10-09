@@ -35,11 +35,7 @@ Connection::Connection( InfinoteManager &cmanager,
 
 Connection::~Connection()
 {
-    if( tcpConnection && tcpConnection->getStatus() == Infinity::TCP_CONNECTION_CONNECTED )
-        tcpConnection->close();
-
-    DEL_IF_EXISTS( xmppConnection )
-    DEL_IF_EXISTS( tcpConnection )
+    close();
 }
 
 #undef DEL_IF_EXISTS
@@ -103,12 +99,16 @@ void Connection::open()
 
 void Connection::close()
 {
+    kDebug() << "Closing connection " << getName();
+    
     if( clientBrowser )
     {
         delete clientBrowser;
         clientBrowser = 0;
     }
-    tcpConnection->close();
+    
+    if( xmppConnection )
+        xmppConnection->close();
 }
 
 Infinity::ClientBrowser &Connection::getClientBrowser() const
@@ -140,8 +140,10 @@ void Connection::statusChangedCb()
     emit( statusChanged( getStatus() ) );
 }
 
-void Connection::slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Infinity::ClientSessionProxy *proxy )
+void Connection::slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Glib::RefPtr<Infinity::ClientSessionProxy> proxy )
 {
+    Q_UNUSED(iter)
+    Q_UNUSED(proxy)
     kDebug() << "Subscription made.";
 }
 

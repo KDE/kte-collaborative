@@ -144,12 +144,12 @@ class Connection
          * @param node Subscribed node.
          * @param sessionProxy Proxy for the subscribed session.
          */
-        void sessionSubcribe( Infinity::ClientBrowserIter &node, Infinity::ClientSessionProxy *sessionProxy );
+        void sessionSubcribe( Infinity::ClientBrowserIter &node, Infinity::ClientSessionProxy &sessionProxy );
 
     private:
         void init();
         void statusChangedCb();
-        void slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Infinity::ClientSessionProxy* );
+        void slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Glib::RefPtr<Infinity::ClientSessionProxy> proxy );
 
         InfinoteManager *infinoteManager;
         QString name;

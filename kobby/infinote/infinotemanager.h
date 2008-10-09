@@ -14,8 +14,6 @@
 #ifndef KOBBY_INFINOTEMANAGER_H
 #define KOBBY_INFINOTEMANAGER_H
 
-#include <kobby/infinote/connection.h>
-
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -34,6 +32,8 @@ namespace Infinity
 
 namespace Kobby
 {
+    
+    class Connection;
 
 /**
  * @brief A manager class for libinfinitymm objects.
