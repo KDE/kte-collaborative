@@ -10,8 +10,7 @@ find_package(KDE4 REQUIRED)
 find_package(Glib REQUIRED)
 find_package(Libinftextmm REQUIRED)
 
-# data files
-add_subdirectory( data )
+subdirs(data)
 
 set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
@@ -20,7 +19,9 @@ set( KOBBY_INCLUDES
 )
 
 set( KOBBY_LIBRARIES
-	${KDE4_KDECORE_LIBS}
+	${KDE4_KDEUI_LIBS}
+	${KDE4_KIO_LIBS}
+	${KDE4_KTEXTEDITOR_LIBS}
 	${LIBINFTEXTMM_LIBRARIES}
 )
 
@@ -29,16 +30,13 @@ set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 set( KOBBY_SRCS
 
 	# dialogs
-	dialogs/settingsdialog.cpp
 	dialogs/connectionmanager.cpp
 	dialogs/requestprogress.cpp
 	dialogs/filebrowser.cpp
 	dialogs/controldialog.cpp
 
 	# editor components
-	editor/document.cpp
-	editor/view.cpp
-	editor/plugin.cpp
+	editor/mainwindow.cpp
 
 	# infinote related
 	infinote/infinotemanager.cpp
@@ -47,6 +45,8 @@ set( KOBBY_SRCS
 	# qinfinitymm
 	${qinfinitymm_source_dir}/qtio.cpp
 	${qinfinitymm_source_dir}/ioqsocketnotifier.cpp
+	
+	main.cpp
 )
 
 kde4_add_ui_files( KOBBY_SRCS
@@ -60,15 +60,15 @@ kde4_add_ui_files( KOBBY_SRCS
 	dialogs/usersettingswidget.ui
 )
 
-kde4_add_plugin( ktexteditor_kobby ${KOBBY_SRCS} )
+kde4_add_executable( kobby ${KOBBY_SRCS} )
 
 INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )
 
-target_link_libraries( ktexteditor_kobby ${KOBBY_LIBRARIES} ktexteditor )
+target_link_libraries( kobby ${KOBBY_LIBRARIES} )
 
 install(
 	TARGETS 
-		ktexteditor_kobby
+		kobby
 	DESTINATION
-		${PLUGIN_INSTALL_DIR}
+		${BIN_INSTALL_DIR}
 )

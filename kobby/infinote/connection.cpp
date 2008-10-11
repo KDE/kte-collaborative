@@ -142,9 +142,7 @@ void Connection::statusChangedCb()
 
 void Connection::slotSubscribeSession( const Infinity::ClientBrowserIter &iter, Glib::RefPtr<Infinity::ClientSessionProxy> proxy )
 {
-    Q_UNUSED(iter)
-    Q_UNUSED(proxy)
-    kDebug() << "Subscription made.";
+    emit( sessionSubscribe( iter, proxy.operator->() ) );
 }
 
 }

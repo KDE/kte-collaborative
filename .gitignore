@@ -12,4 +12,5 @@ MissingRequirements.txt
 *.moc
 moc_*
 ui_*
+*.shell
 

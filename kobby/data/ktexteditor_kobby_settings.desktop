@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Service
-X-KDE-ServiceTypes=KCModule
-X-KDE-Library=ktexteditor_kobby
-X-KDE-PluginKeyword=ktexteditor_kobby_settings
-X-KDE-FactoryName=ktexteditor_kobby_settings
-X-KDE-ParentComponents=ktexteditorkobby
-Name=Kobby Settings

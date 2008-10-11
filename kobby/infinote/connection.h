@@ -144,7 +144,7 @@ class Connection
          * @param node Subscribed node.
          * @param sessionProxy Proxy for the subscribed session.
          */
-        void sessionSubcribe( Infinity::ClientBrowserIter &node, Infinity::ClientSessionProxy &sessionProxy );
+        void sessionSubscribe( const Infinity::ClientBrowserIter &node, Infinity::ClientSessionProxy *sessionProxy );
 
     private:
         void init();

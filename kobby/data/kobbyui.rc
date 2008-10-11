@@ -1,11 +1,14 @@
-<!DOCTYPE kpartgui>
-<kpartplugin name="ktexteditor_kobby" library="ktexteditor_kobby" version="1">
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="kobby" version="1">
+
 <MenuBar>
-	<Menu name="tools"><Text>&amp;Tools</Text>
+	<Menu name="tools" noMerge="1"><text>&amp;Tools</text>
 		<Menu name="tools_kobby"><Text>Kobby</Text>
-			<Action name="tools_kobby_manageconnections" />
 			<Action name="tools_kobby_control" />
 		</Menu>
 	</Menu>
+	
+	<Merge />
 </MenuBar>
-</kpartplugin>
+
+</kpartgui>
