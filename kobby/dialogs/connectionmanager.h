@@ -86,7 +86,7 @@ class ConnectionListWidget
     Q_OBJECT
 
     public:
-        ConnectionListWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+        ConnectionListWidget( QWidget *parent = 0 );
 
     Q_SIGNALS:
         /**
@@ -208,7 +208,7 @@ class ConnectionManagerWidget
     Q_OBJECT
 
     public:
-        ConnectionManagerWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+        ConnectionManagerWidget( QWidget *parent = 0 );
 
         /**
          * @brief Get the ConnectionListWidget this manager represents.
@@ -243,7 +243,7 @@ class ConnectionManagerDialog
 {
 
     public:
-        ConnectionManagerDialog( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+        ConnectionManagerDialog( QWidget *parent = 0 );
 
     private:
         void setupUi();

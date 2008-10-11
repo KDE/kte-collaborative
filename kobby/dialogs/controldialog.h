@@ -40,7 +40,7 @@ class ControlWidget
 {
 
     public:
-        ControlWidget( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+        ControlWidget( QWidget *parent = 0 );
 
     private:
         void setupUi();
@@ -62,7 +62,7 @@ class ControlDialog
 {
 
     public:
-        ControlDialog( InfinoteManager &infinoteManager, QWidget *parent = 0 );
+        ControlDialog( QWidget *parent = 0 );
 
     private:
         void setupUi();

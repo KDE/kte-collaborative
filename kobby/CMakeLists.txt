@@ -30,6 +30,7 @@ set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 set( KOBBY_SRCS
 
 	# dialogs
+	dialogs/settingsdialog.cpp
 	dialogs/connectionmanager.cpp
 	dialogs/requestprogress.cpp
 	dialogs/filebrowser.cpp

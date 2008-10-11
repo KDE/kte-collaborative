@@ -1,11 +1,15 @@
 #ifndef KOBBY_EDITOR_MAINWINDOW_H
 #define KOBBY_EDITOR_MAINWINDOW_H
 
+#include <KSharedConfig>
 #include <KParts/MainWindow>
 #include <QtGui/QKeyEvent>
 
+class KConfigGroup;
+
 namespace KTextEditor
 {
+    class Editor;
     class Document;
     class View;
 }
@@ -26,15 +30,21 @@ class MainWindow
     
     private Q_SLOTS:
         void openControlDialog();
+        void openSettingsDialog();
     
     private:
+        void init();
         void setupActions();
         
         InfinoteManager *infinoteManager;
         
+        KSharedConfigPtr configptr;
+        KConfigGroup *configGeneralGroup;
+        KTextEditor::Editor *editor;
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
         KAction *controlAction;
+        KAction *settingsAction;
 };
 
 }

@@ -13,4 +13,5 @@ MissingRequirements.txt
 moc_*
 ui_*
 *.shell
+kobby/kobby
 

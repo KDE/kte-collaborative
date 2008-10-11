@@ -14,8 +14,6 @@
 #ifndef KOBBY_SETTINGSDIALOG_H
 #define KOBBY_SETTINGSDIALOG_H
 
-#include <kobby/editor/plugin.h>
-
 #include <KDialog>
 #include <KCModule>
 
@@ -29,13 +27,15 @@ namespace Kobby
 {
 
 class SettingsDialog
-    : public KCModule
+ : public KDialog
 {
 
     public:
-        SettingsDialog( QWidget *parent = 0, const QVariantList &args = QVariantList() );
+        SettingsDialog( QWidget *parent = 0 );
 
     private:
+        void loadConfig();
+        
         Ui::SettingsWidget *settingsWidgetUi;
         Ui::UserSettingsWidget *userSettingsWidgetUi;
 

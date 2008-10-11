@@ -49,10 +49,13 @@ class InfinoteManager : public QObject
     
     public:
         /**
-         * @brief Create instance of an InfinoteManager class.
-         * @param parent Parent QObject.
+         * @brief Retrieve an instance of the manager.
+         * @param parent Parent QObject
+         *
+         * Use this method to obtain an instance of the Infinote Manager.
          */
-        InfinoteManager( QObject *parent = 0 );
+        static InfinoteManager *instance( QObject *parent = 0 );
+
         ~InfinoteManager();
 
         /**
@@ -114,16 +117,25 @@ class InfinoteManager : public QObject
             unsigned int port );
         /**
          * @brief Add connection to managed connections.
-         * @param connectin Connection to add.
+         * @param connection Connection to add.
          */
         void addConnection( Connection &connection );
         /**
          * @brief Remove a connection from the managed connections.
-         * @param conneciton Connection to remove.
+         * @param connection Connection to remove.
          */
         void removeConnection( Connection &connection );
 
+    protected:
+        /**
+         * @brief Create instance of an InfinoteManager class.
+         * @param parent Parent QObject.
+         */
+        InfinoteManager( QObject *parent = 0 );
+
     private:
+        static InfinoteManager *_instance;
+        
         Infinity::QtIo *io;
         QList<Connection*> connections;
         Infinity::ConnectionManager *connectionManager;

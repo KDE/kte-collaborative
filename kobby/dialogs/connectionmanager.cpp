@@ -75,9 +75,9 @@ void ConnectionListWidgetItem::slotStatusChanged( int status )
 
 // ConnectionListWidget
 
-ConnectionListWidget::ConnectionListWidget( InfinoteManager &manager, QWidget *parent )
+ConnectionListWidget::ConnectionListWidget( QWidget *parent )
     : QListWidget( parent )
-    , infinoteManager( &manager )
+    , infinoteManager( InfinoteManager::instance( this ) )
 {
     addConnections( infinoteManager->getConnections() );
     setupUi();
@@ -172,9 +172,6 @@ void ConnectionEditorWidget::saveChanges()
 void ConnectionEditorWidget::setConnection( Connection &conn )
 {
     connection = &conn;
-
-    
-
     setEditable( true );
 }
 
@@ -245,13 +242,12 @@ void AddConnectionDialog::setupActions()
 
 // ConnectionManagerWidget
 
-ConnectionManagerWidget::ConnectionManagerWidget( InfinoteManager &manager,
-    QWidget *parent )
+ConnectionManagerWidget::ConnectionManagerWidget( QWidget *parent )
     : QWidget( parent )
-    , infinoteManager( &manager )
-    , connectionListWidget( new ConnectionListWidget( manager, this ) )
+    , connectionListWidget( new ConnectionListWidget( this ) )
     , addConnectionDialog( 0 )
 {
+    infinoteManager = InfinoteManager::instance( this );
     setupUi();
     setupActions();
 }
@@ -360,16 +356,16 @@ void ConnectionManagerWidget::setupActions()
         this, SLOT( slotItemSelectionChanged() ) );
 }
 
-ConnectionManagerDialog::ConnectionManagerDialog( InfinoteManager &manager, QWidget *parent )
+ConnectionManagerDialog::ConnectionManagerDialog( QWidget *parent )
     : KDialog( parent )
-    , infinoteManager( &manager )
+    , infinoteManager( InfinoteManager::instance( this ) )
 {
     setupUi();
 }
 
 void ConnectionManagerDialog::setupUi()
 {
-    connectionManagerWidget = new ConnectionManagerWidget( *infinoteManager, this );
+    connectionManagerWidget = new ConnectionManagerWidget( this );
 
     setCaption( "Connection Manager" );
     setMainWidget( connectionManagerWidget );

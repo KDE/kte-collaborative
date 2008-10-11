@@ -14,11 +14,11 @@
 namespace Kobby
 {
 
-ControlWidget::ControlWidget( InfinoteManager &manager, QWidget *parent )
+ControlWidget::ControlWidget( QWidget *parent )
     : QWidget( parent )
-    , infinoteManager( &manager )
     , ui( new Ui::ControlWidget )
 {
+    infinoteManager = InfinoteManager::instance( this );
     ui->setupUi( this );
     setupUi();
     setupActions();
@@ -26,7 +26,7 @@ ControlWidget::ControlWidget( InfinoteManager &manager, QWidget *parent )
 
 void ControlWidget::setupUi()
 {
-    connectionManagerWidget = new ConnectionManagerWidget( *infinoteManager, this );
+    connectionManagerWidget = new ConnectionManagerWidget( this );
 
     QVBoxLayout *connectionsGroupLayout = new QVBoxLayout( ui->connectionsGroupBox );
     
@@ -39,17 +39,17 @@ void ControlWidget::setupActions()
         &ui->browseTab->getTreeWidget(), SLOT( setConnection( Connection* ) ) );
 }
 
-ControlDialog::ControlDialog( InfinoteManager &manager, QWidget *parent )
+ControlDialog::ControlDialog( QWidget *parent )
     : KDialog( parent )
-    , infinoteManager( &manager )
 {
+    infinoteManager = InfinoteManager::instance( this );
     setupUi();
 }
 
 void ControlDialog::setupUi()
 {
     setCaption( "Kobby Control" );
-    controlWidget = new ControlWidget( *infinoteManager, this );
+    controlWidget = new ControlWidget( this );
     setMainWidget( controlWidget );
     setButtons( KDialog::Ok );
 }

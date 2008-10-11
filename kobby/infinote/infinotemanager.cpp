@@ -20,6 +20,16 @@
 namespace Kobby
 {
 
+// Singleton implementation
+InfinoteManager *InfinoteManager::_instance = 0;
+
+InfinoteManager *InfinoteManager::instance( QObject *parent )
+{
+    if( !_instance )
+        _instance = new InfinoteManager( parent );
+    return _instance;
+}
+
 InfinoteManager::InfinoteManager( QObject *parent )
     : QObject( parent )
     , textPlugin( new Infinity::ClientNotePlugin( "InfText", Infinity::TextSession::infCreate ) )
@@ -68,7 +78,7 @@ const QString &InfinoteManager::getLocalHostname() const
 Connection &InfinoteManager::connectToHost( const QString &name, const QString &host, unsigned int port )
 {
     Connection *connection;
-    connection = new Connection( *this, name, host, port, this );
+    connection = new Connection( name, host, port, this );
 
     addConnection( *connection );
 

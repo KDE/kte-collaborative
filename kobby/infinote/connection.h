@@ -59,14 +59,12 @@ class Connection
     public:
         /**
          * @brief Create Connection object.
-         * @param manager InfinoteManager instance.
          * @param name Name of connection.  This functions only as a label and must be unique.
          * @param hostname Hostname to connect to.
          * @param port Port on Hostname to connect to.
          * @param parent Parent object
          */
-        Connection( InfinoteManager &manager,
-            const QString &name,
+        Connection( const QString &name,
             const QString &hostname,
             unsigned int port,
             QObject *parent = 0 );

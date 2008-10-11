@@ -1,10 +1,13 @@
 #include <kobby/editor/mainwindow.h>
 #include <kobby/infinote/infinotemanager.h>
 #include <kobby/dialogs/controldialog.h>
+#include <kobby/dialogs/settingsdialog.h>
 
 #include <KAction>
 #include <KActionCollection>
 #include <KApplication>
+#include <KSharedConfig>
+#include <KConfigGroup>
 #include <KLocale>
 #include <KMessageBox>
 #include <KXMLGUIFactory>
@@ -19,7 +22,9 @@ namespace Kobby
 
 MainWindow::MainWindow( QWidget *parent )
 {
-    KTextEditor::Editor *editor = KTextEditor::EditorChooser::editor();
+    Q_UNUSED(parent)
+    
+    editor = KTextEditor::EditorChooser::editor();
     
     if( !editor )
     {
@@ -28,8 +33,24 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
     
+    init();
+}
+
+MainWindow::~MainWindow()
+{
+    configGeneralGroup->writeEntry( "width", width() );
+    configGeneralGroup->writeEntry( "height", height() );
+    
+    delete configGeneralGroup;
+}
+
+void MainWindow::init()
+{
+    configptr = KSharedConfig::openConfig();
+    configGeneralGroup = new KConfigGroup( configptr.data(), "General" );
+    
     // Initialize Infinote
-    infinoteManager = new InfinoteManager( this );
+    infinoteManager = InfinoteManager::instance( this );
     
     curr_document = editor->createDocument(0);
     curr_view = qobject_cast<KTextEditor::View*>( curr_document->createView( this ) );
@@ -42,11 +63,8 @@ MainWindow::MainWindow( QWidget *parent )
     
     guiFactory()->addClient( curr_view );
     
-    show();
-}
-
-MainWindow::~MainWindow()
-{
+    setMinimumWidth( configGeneralGroup->readEntry( "width", 100 ) );
+    setMinimumHeight( configGeneralGroup->readEntry( "height", 100 ) );
 }
 
 void MainWindow::setupActions()
@@ -54,11 +72,21 @@ void MainWindow::setupActions()
     controlAction = actionCollection()->addAction( "tools_kobby_control" );
     controlAction->setText( "Kobby" );
     connect( controlAction, SIGNAL(triggered()), this, SLOT(openControlDialog()) );
+    
+    settingsAction = actionCollection()->addAction( "settings_kobby" );
+    settingsAction->setText( "Configure Kobby" );
+    connect( settingsAction, SIGNAL(triggered()), this, SLOT(openSettingsDialog()) );
 }
 
 void MainWindow::openControlDialog()
 {
-    ControlDialog *dialog = new ControlDialog( *infinoteManager, this );
+    ControlDialog *dialog = new ControlDialog( this );
+    dialog->setVisible( true );
+}
+
+void MainWindow::openSettingsDialog()
+{
+    SettingsDialog *dialog = new SettingsDialog( this );
     dialog->setVisible( true );
 }
 

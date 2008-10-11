@@ -15,17 +15,16 @@
 namespace Kobby
 {
 
-Connection::Connection( InfinoteManager &cmanager,
-    const QString &cname,
+Connection::Connection( const QString &cname,
     const QString &chostname,
     unsigned int cport,
     QObject *parent )
     : QObject( parent )
-    , infinoteManager( &cmanager )
     , name( cname )
     , hostname( chostname )
     , port( cport )
 {
+    infinoteManager = InfinoteManager::instance( this );
     init();
 
     xmppConnection->property_status().signal_changed().connect( sigc::mem_fun( this, &Connection::statusChangedCb ) );
