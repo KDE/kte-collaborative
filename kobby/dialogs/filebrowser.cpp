@@ -96,7 +96,17 @@ void FileBrowserWidgetFolderItem::populate( bool expand_when_finished )
     if( is_populated )
         return;
     else if( getNode().isExplored() )
-        return;
+    {
+        Infinity::ClientBrowserIter iter = getNode();
+        bool res;
+        for( res = iter.child(); res; res = iter.next() )
+        {
+            if( iter.isDirectory() )
+                addChild( new FileBrowserWidgetFolderItem( iter ) );
+            else
+                addChild( new FileBrowserWidgetNoteItem( iter ) );
+        }
+    }
     else
     {
         exploreRequest = new Glib::RefPtr<Infinity::ClientExploreRequest>;
