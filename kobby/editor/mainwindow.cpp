@@ -1,7 +1,5 @@
 #include <kobby/editor/mainwindow.h>
-#include <kobby/infinote/infinotemanager.h>
-#include <kobby/dialogs/controldialog.h>
-#include <kobby/dialogs/settingsdialog.h>
+#include <libqinfinitymm/infinotemanager.h>
 
 #include <KAction>
 #include <KActionCollection>
@@ -50,7 +48,7 @@ void MainWindow::init()
     configGeneralGroup = new KConfigGroup( configptr.data(), "General" );
     
     // Initialize Infinote
-    infinoteManager = InfinoteManager::instance( this );
+    infinoteManager = QInfinity::InfinoteManager::instance( this );
     
     curr_document = editor->createDocument(0);
     curr_view = qobject_cast<KTextEditor::View*>( curr_document->createView( this ) );
@@ -80,14 +78,10 @@ void MainWindow::setupActions()
 
 void MainWindow::openControlDialog()
 {
-    ControlDialog *dialog = new ControlDialog( this );
-    dialog->setVisible( true );
 }
 
 void MainWindow::openSettingsDialog()
 {
-    SettingsDialog *dialog = new SettingsDialog( this );
-    dialog->setVisible( true );
 }
 
 }

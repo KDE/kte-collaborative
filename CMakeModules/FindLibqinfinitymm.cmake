@@ -1,0 +1,67 @@
+# Find libinfinitymm
+#
+# This script will define:
+#	LIBQINFINITYMM_FOUND
+#	LIBQINFINITYMM_INCLUDES
+#	LIBQINFINITYMM_LIBRARY
+#	LIBQINFINITYMM_LIBRARIES
+#
+# Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
+
+if( LIBQINFINITYMM_LIBRARIES AND LIBQINFINITYMM_INCLUDES )
+	
+	set( LIBQINFINITYMM_FOUND true )
+
+else( LIBQINFINITYMM_LIBRARIES AND LIBQINFINITYMM_INCLUDES )
+	
+	set( LIBQINFINITYMM_FOUND false )
+	
+# dependancies
+	FIND_PACKAGE(Libinfinitymm REQUIRED)
+	
+	if( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
+		include(UsePkgConfig)
+		pkgconfig(libqinfinitymm-1.0
+			_LIBQINFINITYMM_INCLUDE_DIR
+			_LIBQINFINITYMM_LIBRARY_DIR
+			_LIBQINFINITYMM_LINKER_FLAGS
+			_LIBQINFINITYMM_COMPILER_FLAGS
+		)
+	endif( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
+	
+	find_path( LIBQINFINITYMM_INCLUDE_DIR
+		NAMES
+			libqinfinitymm/qtio.h
+		PATHS
+			${_LIBQINFINITYMM_INCLUDE_DIR}
+			/usr/include
+			/usr/local/include
+			/opt/local/include
+		PATH_SUFFIXES
+			libqinfinitymm-1.0
+	)
+	
+	find_library( LIBQINFINITYMM_LIBRARY
+		NAMES
+			qinfinitymm
+		PATHS
+			${_LIBQINFINITYMM_LIBRARY_DIR}
+			/usr/lib
+			/usr/local/lib
+	)
+	
+	set( LIBQINFINITYMM_INCLUDES
+		${LIBQINFINITYMM_INCLUDE_DIR}
+		${LIBINFINITY_INCLUDES}
+	)
+	
+	set( LIBQINFINITYMM_LIBRARIES
+		${LIBINFINITYMM_LIBRARY}
+		${LIBQINFINITYMM_LIBRARY}
+	)
+
+endif( LIBQINFINITYMM_LIBRARIES AND LIBQINFINITYMM_INCLUDES )

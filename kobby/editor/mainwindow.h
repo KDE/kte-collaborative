@@ -14,10 +14,13 @@ namespace KTextEditor
     class View;
 }
 
+namespace QInfinity
+{
+    class InfinoteManager;
+}
+
 namespace Kobby
 {
-
-class InfinoteManager;
 
 class MainWindow
     : public KParts::MainWindow
@@ -36,7 +39,7 @@ class MainWindow
         void init();
         void setupActions();
         
-        InfinoteManager *infinoteManager;
+        QInfinity::InfinoteManager *infinoteManager;
         
         KSharedConfigPtr configptr;
         KConfigGroup *configGeneralGroup;
