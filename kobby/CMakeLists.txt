@@ -32,8 +32,7 @@ set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 
 set( KOBBY_SRCS
 	editor/mainwindow.cpp
-	
-	main.cpp
+	editor/main.cpp
 )
 
 kde4_add_executable( kobby ${KOBBY_SRCS} )
