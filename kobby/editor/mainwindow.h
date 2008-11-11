@@ -6,6 +6,7 @@
 #include <QtGui/QKeyEvent>
 
 class KConfigGroup;
+class QSplitter;
 
 namespace KTextEditor
 {
@@ -21,6 +22,8 @@ namespace QInfinity
 
 namespace Kobby
 {
+
+class Sidebar;
 
 class MainWindow
     : public KParts::MainWindow
@@ -38,9 +41,13 @@ class MainWindow
     private:
         void init();
         void setupActions();
+        void loadConfig();
+        void saveConfig();
         
         QInfinity::InfinoteManager *infinoteManager;
         
+        QSplitter *mainSplitter;
+        Sidebar *m_sidebar;
         KSharedConfigPtr configptr;
         KConfigGroup *configGeneralGroup;
         KTextEditor::Editor *editor;

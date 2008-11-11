@@ -13,5 +13,6 @@ MissingRequirements.txt
 moc_*
 ui_*
 *.shell
+*.swp
 kobby/kobby
 

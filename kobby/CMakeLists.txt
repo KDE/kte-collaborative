@@ -8,6 +8,8 @@ project(Kobby)
 
 find_package(KDE4 REQUIRED)
 find_package(Glib REQUIRED)
+find_package(Libinfinity REQUIRED)
+find_package(Libinfinitymm REQUIRED)
 find_package(Libinftextmm REQUIRED)
 find_package(Libqinfinitymm REQUIRED)
 
@@ -15,7 +17,9 @@ subdirs(data)
 
 set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
-	${LIBINFTEXTMM_INCLUDES}
+	${GLIBMM_INCLUDES}
+	${LIBINFINITY_INCLUDES}
+	${LIBINFTEXTYMM_INCLUDES}
 	${LIBQINFINITYMM_INCLUDES}
 	${CMAKE_SOURCE_DIR}
 )
@@ -24,6 +28,8 @@ set( KOBBY_LIBRARIES
 	${KDE4_KDEUI_LIBS}
 	${KDE4_KIO_LIBS}
 	${KDE4_KTEXTEDITOR_LIBS}
+	${GLIBMM_LIBRARIES}
+	${LIBINFINITY_LIBRARY}
 	${LIBINFTEXTMM_LIBRARIES}
 	${LIBQINFINITYMM_LIBRARIES}
 )
@@ -31,6 +37,7 @@ set( KOBBY_LIBRARIES
 set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 
 set( KOBBY_SRCS
+	editor/sidebar.cpp
 	editor/mainwindow.cpp
 	editor/main.cpp
 )
