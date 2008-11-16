@@ -5,13 +5,10 @@
 
 class QTreeView;
 
-namespace QInfinity
-{
-    class ConnectionListWidget;
-}
-
 namespace Kobby
 {
+
+class ConnectionManagerWidget;
 
 class Sidebar
     : public QTabWidget
@@ -22,7 +19,7 @@ class Sidebar
 
     private:
         QTreeView *m_treeView;
-        QInfinity::ConnectionListWidget *m_connectionList;
+        ConnectionManagerWidget *m_connectionManager;
 };
 
 }

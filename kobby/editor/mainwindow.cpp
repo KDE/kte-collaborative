@@ -61,7 +61,7 @@ void MainWindow::openSettingsDialog()
 void MainWindow::init()
 {
     m_sidebar = new Sidebar( this );
-    
+
     curr_document = editor->createDocument(0);
     curr_view = qobject_cast<KTextEditor::View*>( curr_document->createView( this ) );
     

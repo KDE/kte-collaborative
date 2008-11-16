@@ -44,6 +44,7 @@ set( KOBBY_SRCS
 	editor/main.cpp
 	
 	dialogs/createconnectiondialog.cpp
+	dialogs/connectionmanagerwidget.cpp
 )
 
 set( KOBBY_UI
