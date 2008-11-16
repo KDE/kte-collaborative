@@ -1,6 +1,7 @@
 #include "connectionmanagerwidget.h"
 #include "createconnectiondialog.h"
 
+#include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/connectionmanager.h>
 
 #include <KIcon>
@@ -21,6 +22,11 @@ ConnectionManagerWidget::ConnectionManagerWidget( QWidget *parent )
     setupActions();
 }
 
+void ConnectionManagerWidget::slotSelectionChanged()
+{
+    removeConnectionButton->setEnabled( connectionListWidget->selectedItems().size() != 0 );
+}
+
 void ConnectionManagerWidget::slotCreateConnection()
 {
     CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
@@ -29,7 +35,15 @@ void ConnectionManagerWidget::slotCreateConnection()
 
 void ConnectionManagerWidget::slotRemoveConnection()
 {
-    
+    QList<QListWidgetItem*> items = connectionListWidget->selectedItems();
+    QList<QListWidgetItem*>::Iterator itr;
+    QInfinity::ConnectionListWidgetItem *connectionItem;
+
+    for( itr = items.begin(); itr != items.end(); ++itr )
+    {
+        connectionItem = dynamic_cast<QInfinity::ConnectionListWidgetItem*>(*itr);
+        QInfinity::InfinoteManager::instance()->removeConnection( connectionItem->connection() );
+    }
 }
 
 void ConnectionManagerWidget::setupUi()
@@ -58,6 +72,8 @@ void ConnectionManagerWidget::setupActions()
         this, SLOT(slotCreateConnection()) );
     connect( removeConnectionButton, SIGNAL(clicked()),
         this, SLOT(slotRemoveConnection()) );
+    connect( connectionListWidget, SIGNAL(itemSelectionChanged()),
+        this, SLOT(slotSelectionChanged()) );
 }
 
 }

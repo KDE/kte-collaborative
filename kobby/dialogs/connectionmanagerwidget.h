@@ -22,6 +22,7 @@ class ConnectionManagerWidget
         ConnectionManagerWidget( QWidget *parent = 0 );
 
     private Q_SLOTS:
+        void slotSelectionChanged();
         void slotCreateConnection();
         void slotRemoveConnection();    
 
