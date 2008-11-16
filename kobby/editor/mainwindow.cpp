@@ -89,17 +89,23 @@ void MainWindow::setupActions()
 
 void MainWindow::loadConfig()
 {
+    QList<int> s;
     configptr = KSharedConfig::openConfig();
     configGeneralGroup = new KConfigGroup( configptr.data(), "General" );
 
     setMinimumWidth( configGeneralGroup->readEntry( "width", 100 ) );
     setMinimumHeight( configGeneralGroup->readEntry( "height", 100 ) );
+    s << 1 << 5;
+    s = configGeneralGroup->readEntry( "sidebarSizes", s );
+    if( s.size() > 0 )
+        mainSplitter->setSizes( s );
 }
 
 void MainWindow::saveConfig()
 {
     configGeneralGroup->writeEntry( "width", width() );
     configGeneralGroup->writeEntry( "height", height() );
+    configGeneralGroup->writeEntry( "sidebarSizes", mainSplitter->sizes() );
 }
 
 }
