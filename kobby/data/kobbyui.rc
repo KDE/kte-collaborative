@@ -2,6 +2,13 @@
 <kpartgui name="kobby" version="1">
 
 <MenuBar>
+	<Menu name="file" noMerge="1"><text>&amp;File</text>
+		<Menu name="file_new"><text>New</text>
+			<Action name="file_new_document" />
+			<Action name="file_new_connection" />
+		</Menu>
+	</Menu>
+	
 	<Menu name="tools" noMerge="1"><text>&amp;Tools</text>
 		<Menu name="tools_kobby"><text>Kobby</text>
 			<Action name="tools_kobby_control" />

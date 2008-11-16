@@ -22,6 +22,8 @@ set( KOBBY_INCLUDES
 	${LIBINFTEXTYMM_INCLUDES}
 	${LIBQINFINITYMM_INCLUDES}
 	${CMAKE_SOURCE_DIR}
+	${CMAKE_SOURCE_DIR}/kobby
+	${CMAKE_SOURCE_DIR}/kobby/dialogs
 )
 
 set( KOBBY_LIBRARIES
@@ -40,8 +42,15 @@ set( KOBBY_SRCS
 	editor/sidebar.cpp
 	editor/mainwindow.cpp
 	editor/main.cpp
+	
+	dialogs/createconnectiondialog.cpp
 )
 
+set( KOBBY_UI
+	dialogs/createconnectionwidget.ui
+)
+
+kde4_add_ui_files( KOBBY_SRCS ${KOBBY_UI} )
 kde4_add_executable( kobby ${KOBBY_SRCS} )
 
 INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )

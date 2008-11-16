@@ -37,6 +37,8 @@ class MainWindow
     private Q_SLOTS:
         void openControlDialog();
         void openSettingsDialog();
+        void slotCreateConnection();
+        void slotProxy( const QString &, const QString &, unsigned int );
     
     private:
         void init();
@@ -53,6 +55,9 @@ class MainWindow
         KTextEditor::Editor *editor;
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
+        
+        KAction *newDocumentAction;
+        KAction *newConnectionAction;
         KAction *controlAction;
         KAction *settingsAction;
 };

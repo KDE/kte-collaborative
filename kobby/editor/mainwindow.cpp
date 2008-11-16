@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "sidebar.h"
+#include "../dialogs/createconnectiondialog.h"
+
 #include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/filebrowsermodel.h>
 
@@ -20,10 +22,13 @@
 #include <QSplitter>
 #include <QTreeView>
 
+#include "../mainwindow.moc"
+
 namespace Kobby
 {
 
 MainWindow::MainWindow( QWidget *parent )
+    : KParts::MainWindow( parent, "Kobby" )
 {
     Q_UNUSED(parent)
     
@@ -55,7 +60,6 @@ void MainWindow::openSettingsDialog()
 
 void MainWindow::init()
 {
-    infinoteManager = QInfinity::InfinoteManager::instance( this );
     m_sidebar = new Sidebar( this );
     
     curr_document = editor->createDocument(0);
@@ -76,8 +80,28 @@ void MainWindow::init()
     loadConfig();
 }
 
+void MainWindow::slotCreateConnection()
+{
+    CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
+    dialog->setVisible( true );
+}
+
+void MainWindow::slotProxy( const QString &a, const QString &b, unsigned int )
+{
+    kDebug() << "ping";
+}
+
 void MainWindow::setupActions()
 {
+    newDocumentAction = actionCollection()->addAction( "file_new_document" );
+    newDocumentAction->setText( "Document..." );
+    newDocumentAction->setWhatsThis( "Create a new document." );
+
+    newConnectionAction = actionCollection()->addAction( "file_new_connection" );
+    newConnectionAction->setText( "Connection..." );
+    newConnectionAction->setWhatsThis( "Create a new connection to an Infinote server." );
+    connect( newConnectionAction, SIGNAL(triggered()), this, SLOT(slotCreateConnection()) );
+    
     controlAction = actionCollection()->addAction( "tools_kobby_control" );
     controlAction->setText( "Kobby" );
     connect( controlAction, SIGNAL(triggered()), this, SLOT(openControlDialog()) );
