@@ -18,12 +18,17 @@ namespace KTextEditor
 namespace QInfinity
 {
     class InfinoteManager;
+    class FileBrowserItem;
+    class Connection;
 }
 
 namespace Kobby
 {
 
 class Sidebar;
+class ConnectionManagerWidget;
+class FileBrowserWidget;
+class FileBrowserItem;
 
 class MainWindow
     : public KParts::MainWindow
@@ -35,23 +40,24 @@ class MainWindow
         ~MainWindow();
     
     private Q_SLOTS:
-        void openControlDialog();
-        void openSettingsDialog();
         void slotCreateConnection();
-        void slotProxy( const QString &, const QString &, unsigned int );
+        void slotOpenItem( QInfinity::FileBrowserItem &item );
+        void addConnection( QInfinity::Connection &connection );
     
     private:
         void init();
+        void setupUi();
         void setupActions();
         void loadConfig();
         void saveConfig();
         
         QInfinity::InfinoteManager *infinoteManager;
+        ConnectionManagerWidget *connectionManager;
+        FileBrowserWidget *fileBrowser;
         
         QSplitter *mainSplitter;
         Sidebar *m_sidebar;
-        KSharedConfigPtr configptr;
-        KConfigGroup *configGeneralGroup;
+
         KTextEditor::Editor *editor;
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
@@ -60,6 +66,9 @@ class MainWindow
         KAction *newConnectionAction;
         KAction *controlAction;
         KAction *settingsAction;
+
+        KSharedConfigPtr configptr;
+        KConfigGroup *configGeneralGroup;
 };
 
 }

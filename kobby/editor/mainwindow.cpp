@@ -1,8 +1,13 @@
+#include <libinfinitymm/client/clientbrowser.h>
+
 #include "mainwindow.h"
 #include "sidebar.h"
-#include "../dialogs/createconnectiondialog.h"
+#include "createconnectiondialog.h"
+#include "filebrowserwidget.h"
+#include "connectionmanagerwidget.h"
 
 #include <libqinfinitymm/infinotemanager.h>
+#include <libqinfinitymm/filebrowseritem.h>
 #include <libqinfinitymm/filebrowsermodel.h>
 
 #include <KAction>
@@ -13,6 +18,7 @@
 #include <KLocale>
 #include <KMessageBox>
 #include <KXMLGUIFactory>
+#include <KDebug>
 
 #include <KTextEditor/Document>
 #include <KTextEditor/View>
@@ -22,13 +28,13 @@
 #include <QSplitter>
 #include <QTreeView>
 
-#include "../mainwindow.moc"
+#include "mainwindow.moc"
 
 namespace Kobby
 {
 
 MainWindow::MainWindow( QWidget *parent )
-    : KParts::MainWindow( parent, "Kobby" )
+    : infinoteManager( QInfinity::InfinoteManager::instance() )
 {
     Q_UNUSED(parent)
     
@@ -41,7 +47,8 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
     
-    init();
+    setupUi();
+    setupActions();
 }
 
 MainWindow::~MainWindow()
@@ -50,17 +57,34 @@ MainWindow::~MainWindow()
     delete configGeneralGroup;
 }
 
-void MainWindow::openControlDialog()
+void MainWindow::slotCreateConnection()
 {
+    CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
+    dialog->setVisible( true );
 }
 
-void MainWindow::openSettingsDialog()
+void MainWindow::slotOpenItem( QInfinity::FileBrowserItem &item )
 {
+    item.open();
 }
 
-void MainWindow::init()
+void MainWindow::addConnection( QInfinity::Connection &connection )
 {
+    // Let us know when weve subscribed to a note
+    Infinity::ClientBrowser *browser;
+    browser = connection.clientBrowser();
+    if( browser )
+    {
+    }
+}
+
+void MainWindow::setupUi()
+{
+    connectionManager = new ConnectionManagerWidget( this );
+    fileBrowser = new FileBrowserWidget( this );
     m_sidebar = new Sidebar( this );
+    m_sidebar->addTab( connectionManager, "Connections" );
+    m_sidebar->addTab( fileBrowser, "Browse" );
 
     curr_document = editor->createDocument(0);
     curr_view = qobject_cast<KTextEditor::View*>( curr_document->createView( this ) );
@@ -70,7 +94,6 @@ void MainWindow::init()
     mainSplitter->addWidget( m_sidebar );
     mainSplitter->addWidget( curr_view );
     setCentralWidget( mainSplitter );
-    setupActions();
     
     setXMLFile("kobbyui.rc");
     createShellGUI( true );
@@ -80,19 +103,9 @@ void MainWindow::init()
     loadConfig();
 }
 
-void MainWindow::slotCreateConnection()
-{
-    CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
-    dialog->setVisible( true );
-}
-
-void MainWindow::slotProxy( const QString &a, const QString &b, unsigned int )
-{
-    kDebug() << "ping";
-}
-
 void MainWindow::setupActions()
 {
+    // Setup menu actions
     newDocumentAction = actionCollection()->addAction( "file_new_document" );
     newDocumentAction->setText( "Document..." );
     newDocumentAction->setWhatsThis( "Create a new document." );
@@ -109,6 +122,13 @@ void MainWindow::setupActions()
     settingsAction = actionCollection()->addAction( "settings_kobby" );
     settingsAction->setText( "Configure Kobby" );
     connect( settingsAction, SIGNAL(triggered()), this, SLOT(openSettingsDialog()) );
+
+    // Connect to InfinoteManager
+    connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
+        this, SLOT(addConnection( Connection& )) );
+
+    connect( fileBrowser, SIGNAL(itemOpened( QInfinity::FileBrowserItem& )),
+        this, SLOT(slotOpenItem( QInfinity::FileBrowserItem& )) );
 }
 
 void MainWindow::loadConfig()

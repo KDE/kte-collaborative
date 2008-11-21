@@ -9,6 +9,7 @@ namespace Kobby
 {
 
 class ConnectionManagerWidget;
+class FileBrowserWidget;
 
 class Sidebar
     : public QTabWidget
@@ -17,9 +18,6 @@ class Sidebar
     public:
         Sidebar( QWidget *parent = 0 );
 
-    private:
-        QTreeView *m_treeView;
-        ConnectionManagerWidget *m_connectionManager;
 };
 
 }
