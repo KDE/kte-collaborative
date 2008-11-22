@@ -16,6 +16,7 @@ CreateConnectionDialog::CreateConnectionDialog( QWidget *parent )
     ui->setupUi( mainWidget );
     setMainWidget( mainWidget );
     setupActions();
+    sizeHint();
 }
 
 void CreateConnectionDialog::slotOkClicked()
