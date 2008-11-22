@@ -15,7 +15,7 @@ namespace Kobby
 
 FileBrowserWidget::FileBrowserWidget( QWidget *parent )
     : QWidget( parent )
-    , fileModel( new QInfinity::BrowserModel() )
+    , fileModel( new QInfinity::BrowserModel( this ) )
 {
     setupUi();
     setupActions();
@@ -34,7 +34,9 @@ void FileBrowserWidget::setupUi()
 void FileBrowserWidget::setupActions()
 {
     connect( m_treeView, SIGNAL(doubleClicked( const QModelIndex& )),
-        fileModel, SLOT(open( const QModelIndex& )) );
+        fileModel, SLOT(openItem( const QModelIndex& )) );
+    connect( m_treeView, SIGNAL(expanded( const QModelIndex& )),
+        fileModel, SLOT(openItem( const QModelIndex& )) );
 }
 
 }
