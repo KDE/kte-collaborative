@@ -3,8 +3,12 @@
 
 #include <QWidget>
 
+class KAction;
+
 class QTreeView;
 class QModelIndex;
+class QContextMenuEvent;
+class QItemSelection;
 
 namespace QInfinity
 {
@@ -26,12 +30,24 @@ class FileBrowserWidget
     Q_SIGNALS:
         void itemOpened( QInfinity::BrowserItem &item );
 
+    protected:
+        void contextMenuEvent( QContextMenuEvent *e );
+
+    private Q_SLOTS:
+        void slotSelectionChanged( const QItemSelection &selected,
+            const QItemSelection &deselected );
+        void slotDeleteSelected();
+        void slotCreateFolder();
+
     private:
         void setupUi();
         void setupActions();
+        bool canHaveChildren( const QModelIndex &index );
 
         QTreeView *m_treeView;
         QInfinity::BrowserModel *fileModel;
+        KAction *deleteItemAction;
+        KAction *createFolderAction;
 
 };
 
