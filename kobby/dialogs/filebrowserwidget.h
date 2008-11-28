@@ -9,11 +9,13 @@ class QTreeView;
 class QModelIndex;
 class QContextMenuEvent;
 class QItemSelection;
+class QString;
 
 namespace QInfinity
 {
     class BrowserModel;
     class BrowserItem;
+    class BrowserFolderItem;
 }
 
 namespace Kobby
@@ -29,6 +31,10 @@ class FileBrowserWidget
 
     Q_SIGNALS:
         void itemOpened( QInfinity::BrowserItem &item );
+
+    public Q_SLOTS:
+        void createFolder( const QInfinity::BrowserFolderItem &parent,
+            QString name );
 
     protected:
         void contextMenuEvent( QContextMenuEvent *e );

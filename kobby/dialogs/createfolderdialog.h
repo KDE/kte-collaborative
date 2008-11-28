@@ -11,18 +11,34 @@ namespace Ui
     class CreateFolderWidget;
 }
 
+namespace QInfinity
+{
+    class BrowserFolderItem;
+}
+
 namespace Kobby
 {
 
 class CreateFolderDialog
     : public KDialog
 {
+    Q_OBJECT
 
     public:
-        CreateFolderDialog( QWidget *parent = 0 );
-        const QString &folderName() const;
+        CreateFolderDialog( const QInfinity::BrowserFolderItem &parentItem,
+            QWidget *parent = 0 );
+
+        QString folderName() const;
+    
+    Q_SIGNALS:
+        void createFolder( const QInfinity::BrowserFolderItem &parent,
+            QString name );
+
+    private Q_SLOTS:
+        void slotOkClicked();
 
     private:
+        const QInfinity::BrowserFolderItem *m_parent;
         Ui::CreateFolderWidget *ui;
 
 };

@@ -47,11 +47,13 @@ set( KOBBY_SRCS
 	
 	dialogs/createconnectiondialog.cpp
 	dialogs/connectionmanagerwidget.cpp
+	dialogs/createfolderdialog.cpp
 	dialogs/filebrowserwidget.cpp
 )
 
 set( KOBBY_UI
 	dialogs/createconnectionwidget.ui
+	dialogs/createfolderwidget.ui
 )
 
 kde4_add_ui_files( KOBBY_SRCS ${KOBBY_UI} )

@@ -1,6 +1,8 @@
 #include <libinfinitymm/client/clientbrowser.h>
+#include <libinfinitymm/client/clientbrowseriter.h>
 #include <libqinfinitymm/browsermodel.h>
 #include "filebrowserwidget.h"
+#include "createfolderdialog.h"
 
 #include <libqinfinitymm/browseritem.h>
 #include <libqinfinitymm/infinotemanager.h>
@@ -10,6 +12,7 @@
 #include <KDebug>
 
 #include <QList>
+#include <QString>
 #include <QVBoxLayout>
 #include <QTreeView>
 #include <QContextMenuEvent>
@@ -28,6 +31,20 @@ FileBrowserWidget::FileBrowserWidget( QWidget *parent )
 {
     setupUi();
     setupActions();
+}
+
+void FileBrowserWidget::createFolder( const QInfinity::BrowserFolderItem &parent,
+    QString name )
+{
+    Infinity::ClientBrowserIter iter = parent.iter();
+    Infinity::ClientBrowser *browser = iter.getBrowser();
+    if( !browser )
+    {
+        kDebug() << "parent iterator for adding folder does not reference a browser!";
+        return;
+    }
+
+    browser->addSubdirectory( iter, name.toAscii() );
 }
 
 void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
@@ -111,7 +128,10 @@ void FileBrowserWidget::slotCreateFolder()
             folderItem = dynamic_cast<QInfinity::BrowserFolderItem*>(item);
     }
 
-    folderItem->iter().getBrowser()->addSubdirectory( folderItem->iter(), "test" );
+    CreateFolderDialog *dialog = new CreateFolderDialog( *folderItem, this );
+    connect( dialog, SIGNAL(createFolder( const QInfinity::BrowserFolderItem&, QString )),
+        this, SLOT(createFolder( const QInfinity::BrowserFolderItem&, QString )) );
+    dialog->exec();
 }
 
 void FileBrowserWidget::setupUi()
