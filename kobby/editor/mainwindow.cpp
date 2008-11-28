@@ -7,8 +7,8 @@
 #include "connectionmanagerwidget.h"
 
 #include <libqinfinitymm/infinotemanager.h>
-#include <libqinfinitymm/filebrowseritem.h>
-#include <libqinfinitymm/filebrowsermodel.h>
+#include <libqinfinitymm/browseritem.h>
+#include <libqinfinitymm/browsermodel.h>
 
 #include <KAction>
 #include <KActionCollection>
@@ -63,19 +63,8 @@ void MainWindow::slotCreateConnection()
     dialog->setVisible( true );
 }
 
-void MainWindow::slotOpenItem( QInfinity::FileBrowserItem &item )
+void MainWindow::slotOpenItem( QInfinity::BrowserItem &item )
 {
-    item.open();
-}
-
-void MainWindow::addConnection( QInfinity::Connection &connection )
-{
-    // Let us know when weve subscribed to a note
-    Infinity::ClientBrowser *browser;
-    browser = connection.clientBrowser();
-    if( browser )
-    {
-    }
 }
 
 void MainWindow::setupUi()

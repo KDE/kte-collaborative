@@ -18,7 +18,7 @@ namespace KTextEditor
 namespace QInfinity
 {
     class InfinoteManager;
-    class FileBrowserItem;
+    class BrowserItem;
     class Connection;
 }
 
@@ -28,7 +28,6 @@ namespace Kobby
 class Sidebar;
 class ConnectionManagerWidget;
 class FileBrowserWidget;
-class FileBrowserItem;
 
 class MainWindow
     : public KParts::MainWindow
@@ -41,8 +40,7 @@ class MainWindow
     
     private Q_SLOTS:
         void slotCreateConnection();
-        void slotOpenItem( QInfinity::FileBrowserItem &item );
-        void addConnection( QInfinity::Connection &connection );
+        void slotOpenItem( QInfinity::BrowserItem &item );
     
     private:
         void init();

@@ -1,4 +1,4 @@
-#include <libqinfinitymm/filebrowsermodel.h>
+#include <libqinfinitymm/browsermodel.h>
 #include "sidebar.h"
 #include "connectionmanagerwidget.h"
 #include "filebrowserwidget.h"
