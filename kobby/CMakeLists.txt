@@ -47,12 +47,14 @@ set( KOBBY_SRCS
 	
 	dialogs/createconnectiondialog.cpp
 	dialogs/connectionmanagerwidget.cpp
+	dialogs/createitemdialog.cpp
 	dialogs/createfolderdialog.cpp
 	dialogs/filebrowserwidget.cpp
 )
 
 set( KOBBY_UI
 	dialogs/createconnectionwidget.ui
+	dialogs/createitemwidget.ui
 	dialogs/createfolderwidget.ui
 )
 

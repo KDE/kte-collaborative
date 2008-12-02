@@ -2,7 +2,7 @@
 #include <libinfinitymm/client/clientbrowseriter.h>
 #include <libqinfinitymm/browsermodel.h>
 #include "filebrowserwidget.h"
-#include "createfolderdialog.h"
+#include "createitemdialog.h"
 
 #include <libqinfinitymm/browseritem.h>
 #include <libqinfinitymm/infinotemanager.h>
@@ -33,7 +33,7 @@ FileBrowserWidget::FileBrowserWidget( QWidget *parent )
     setupActions();
 }
 
-void FileBrowserWidget::createFolder( const QInfinity::BrowserFolderItem &parent,
+void FileBrowserWidget::createFolder( QInfinity::BrowserFolderItem &parent,
     QString name )
 {
     Infinity::ClientBrowserIter iter = parent.iter();
@@ -128,9 +128,9 @@ void FileBrowserWidget::slotCreateFolder()
             folderItem = dynamic_cast<QInfinity::BrowserFolderItem*>(item);
     }
 
-    CreateFolderDialog *dialog = new CreateFolderDialog( *folderItem, this );
-    connect( dialog, SIGNAL(createFolder( const QInfinity::BrowserFolderItem&, QString )),
-        this, SLOT(createFolder( const QInfinity::BrowserFolderItem&, QString )) );
+    CreateItemDialog *dialog = new CreateItemDialog( *folderItem, this );
+    connect( dialog, SIGNAL(createFolder( QInfinity::BrowserFolderItem&, QString )),
+        this, SLOT(createFolder( QInfinity::BrowserFolderItem&, QString )) );
     dialog->exec();
 }
 

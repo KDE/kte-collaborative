@@ -33,7 +33,7 @@ class FileBrowserWidget
         void itemOpened( QInfinity::BrowserItem &item );
 
     public Q_SLOTS:
-        void createFolder( const QInfinity::BrowserFolderItem &parent,
+        void createFolder( QInfinity::BrowserFolderItem &parent,
             QString name );
 
     protected:
