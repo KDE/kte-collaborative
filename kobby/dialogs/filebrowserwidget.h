@@ -10,6 +10,7 @@ class QModelIndex;
 class QContextMenuEvent;
 class QItemSelection;
 class QString;
+class QStandardItem;
 
 namespace QInfinity
 {
@@ -35,6 +36,8 @@ class FileBrowserWidget
     public Q_SLOTS:
         void createFolder( QInfinity::BrowserFolderItem &parent,
             QString name );
+        void createNote( QInfinity::BrowserFolderItem &parent,
+            QString name );
 
     protected:
         void contextMenuEvent( QContextMenuEvent *e );
@@ -44,16 +47,23 @@ class FileBrowserWidget
             const QItemSelection &deselected );
         void slotDeleteSelected();
         void slotCreateFolder();
+        void slotCreateNote();
 
     private:
         void setupUi();
         void setupActions();
         bool canHaveChildren( const QModelIndex &index );
+        /**
+         * Returns pointer to the selected item or 0 if
+         * no items selected or multiple items selected.
+         */
+        QStandardItem *getSingleSelectedItem();
 
         QTreeView *m_treeView;
         QInfinity::BrowserModel *fileModel;
         KAction *deleteItemAction;
         KAction *createFolderAction;
+        KAction *createNoteAction;
 
 };
 

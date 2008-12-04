@@ -47,11 +47,21 @@ void FileBrowserWidget::createFolder( QInfinity::BrowserFolderItem &parent,
     browser->addSubdirectory( iter, name.toAscii() );
 }
 
+void FileBrowserWidget::createNote( QInfinity::BrowserFolderItem &parent,
+    QString name )
+{
+    Infinity::ClientBrowserIter iter = parent.iter();
+    Infinity::ClientBrowser *browser = iter.getBrowser();
+
+    browser->addNote( iter, name.toAscii(), &QInfinity::InfinoteManager::instance()->textPlugin(), false );
+}
+
 void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
 {
     QMenu *menu = new QMenu( this );
 
     menu->addAction( createFolderAction );
+    menu->addAction( createNoteAction );
     menu->addAction( deleteItemAction );
 
     menu->popup( e->globalPos() );
@@ -60,16 +70,23 @@ void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
 void FileBrowserWidget::slotSelectionChanged( const QItemSelection &selected,
     const QItemSelection &deselected )
 {
+    bool is_single_selected = false;
+
     if( selected.indexes().size() == 0 )
     {
         createFolderAction->setEnabled( false );
         deleteItemAction->setEnabled( false );
+        deleteItemAction->setEnabled( false );
     }
     else
     {
+        is_single_selected = selected.indexes().size() == 1;
+
         deleteItemAction->setEnabled( true );
-        createFolderAction->setEnabled( selected.indexes().size() == 1
+        createFolderAction->setEnabled( is_single_selected
             && canHaveChildren( selected.indexes().at(0) ) );
+        createFolderAction->setEnabled( is_single_selected
+      && canHaveChildren( selected.indexes().at(0) ) );
     }
 }
 
@@ -107,17 +124,11 @@ void FileBrowserWidget::slotDeleteSelected()
 
 void FileBrowserWidget::slotCreateFolder()
 {
-    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
-    QStandardItem *item;
-    QInfinity::BrowserFolderItem *folderItem;
-    if( !selectionModel )
-        return;
-    QList<QModelIndex> selectedIndexes = selectionModel->selectedRows();
+    QStandardItem *item = getSingleSelectedItem();
+    QInfinity::BrowserFolderItem *folderItem = 0;
 
-    if( selectedIndexes.size() == 0 || selectedIndexes.size() > 1 )
+    if( !item )
         return;
-
-    item = fileModel->itemFromIndex( selectedIndexes.at(0) );
 
     switch( item->type() )
     {
@@ -128,15 +139,46 @@ void FileBrowserWidget::slotCreateFolder()
             folderItem = dynamic_cast<QInfinity::BrowserFolderItem*>(item);
     }
 
+    if( !folderItem )
+        return;
+
     CreateItemDialog *dialog = new CreateItemDialog( *folderItem, this );
-    connect( dialog, SIGNAL(createFolder( QInfinity::BrowserFolderItem&, QString )),
+    connect( dialog, SIGNAL(create( QInfinity::BrowserFolderItem&, QString )),
         this, SLOT(createFolder( QInfinity::BrowserFolderItem&, QString )) );
+    dialog->exec();
+}
+
+void FileBrowserWidget::slotCreateNote()
+{
+    QStandardItem *item = getSingleSelectedItem();
+    QInfinity::BrowserFolderItem *folderItem = 0;
+
+    if( !item )
+        return;
+
+    switch( item->type() )
+    {
+        case QInfinity::BrowserItem::Connection:
+            folderItem = dynamic_cast<QInfinity::BrowserConnectionItem*>(item)->rootFolder();
+            break;
+        case QInfinity::BrowserItem::Folder:
+            folderItem = dynamic_cast<QInfinity::BrowserFolderItem*>(item);
+    }
+
+    if( !folderItem )
+        return;
+
+    CreateItemDialog *dialog = new CreateItemDialog( *folderItem, this );
+    connect( dialog, SIGNAL(create( QInfinity::BrowserFolderItem&, QString )),
+        this, SLOT(createNote( QInfinity::BrowserFolderItem&, QString )) );
     dialog->exec();
 }
 
 void FileBrowserWidget::setupUi()
 {
     createFolderAction = new KAction( KIcon( "folder-new.png" ) , tr("Create Folder"), this );
+    createFolderAction->setEnabled( false );
+    createNoteAction = new KAction( KIcon( "document-new.png" ), tr("Create Note"), this );
     createFolderAction->setEnabled( false );
     deleteItemAction = new KAction( KIcon( "edit-delete.png" ), tr("delete"), this );
     deleteItemAction->setEnabled( false );
@@ -164,6 +206,8 @@ void FileBrowserWidget::setupActions()
         this, SLOT(slotDeleteSelected()) );
     connect( createFolderAction, SIGNAL(triggered()),
         this, SLOT(slotCreateFolder()) );
+    connect( createNoteAction, SIGNAL(triggered()),
+        this, SLOT(slotCreateNote()) );
 
     connect( m_treeView, SIGNAL(doubleClicked( const QModelIndex& )),
         fileModel, SLOT(openItem( const QModelIndex& )) );
@@ -184,6 +228,22 @@ bool FileBrowserWidget::canHaveChildren( const QModelIndex &index )
         default:
             return false;
     }
+}
+
+QStandardItem *FileBrowserWidget::getSingleSelectedItem()
+{
+    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
+    QStandardItem *item;
+    if( !selectionModel )
+        return 0;
+    QList<QModelIndex> selectedIndexes = selectionModel->selectedRows();
+
+    if( selectedIndexes.size() == 0 || selectedIndexes.size() > 1 )
+        return 0;
+
+    item = fileModel->itemFromIndex( selectedIndexes.at(0) );
+
+    return item;
 }
 
 }

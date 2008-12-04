@@ -59,7 +59,7 @@ void CreateItemDialog::setupUi()
 void CreateItemDialog::setupActions()
 {
     connect( this, SIGNAL(okClicked()),
-        this, SLOT(okClicked()) );
+        this, SLOT(slotOkClicked()) );
 }
 
 }
