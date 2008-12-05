@@ -3,6 +3,8 @@ CMakeFiles
 CMakeTmp
 cmake_*
 *.files
+*~
+*.kdev4
 lib
 Makefile*
 install_manifest.txt

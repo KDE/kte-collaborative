@@ -28,7 +28,7 @@
 #include <QSplitter>
 #include <QTreeView>
 
-#include "mainwindow.moc"
+#include <mainwindow.moc>
 
 namespace Kobby
 {

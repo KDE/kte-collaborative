@@ -53,7 +53,10 @@ void FileBrowserWidget::createNote( QInfinity::BrowserFolderItem &parent,
     Infinity::ClientBrowserIter iter = parent.iter();
     Infinity::ClientBrowser *browser = iter.getBrowser();
 
-    browser->addNote( iter, name.toAscii(), &QInfinity::InfinoteManager::instance()->textPlugin(), false );
+    browser->addNote( iter,
+        name.toAscii(),
+        &QInfinity::InfinoteManager::instance()->textPlugin(),
+        false );
 }
 
 void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
@@ -189,7 +192,7 @@ void FileBrowserWidget::setupUi()
     createFolderAction = new KAction( KIcon( "folder-new.png" ) , tr("Create Folder"), this );
     createFolderAction->setEnabled( false );
     createNoteAction = new KAction( KIcon( "document-new.png" ), tr("Create Note"), this );
-    createFolderAction->setEnabled( false );
+    createNoteAction->setEnabled( false );
     joinNoteAction = new KAction( KIcon( "document-open.png" ), tr("Join Note"), this );
     joinNoteAction->setEnabled( false );
     deleteItemAction = new KAction( KIcon( "edit-delete.png" ), tr("delete"), this );

@@ -25,6 +25,7 @@ set( KOBBY_INCLUDES
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/kobby
 	${CMAKE_SOURCE_DIR}/kobby/dialogs
+	${CMAKE_BINARY_DIR}/kobby
 )
 
 set( KOBBY_LIBRARIES
@@ -37,8 +38,6 @@ set( KOBBY_LIBRARIES
 	${LIBINFTEXTMM_LIBRARIES}
 	${LIBQINFINITYMM_LIBRARIES}
 )
-
-set( qinfinitymm_source_dir ${CMAKE_SOURCE_DIR}/qinfinitymm )
 
 set( KOBBY_SRCS
 	editor/sidebar.cpp
