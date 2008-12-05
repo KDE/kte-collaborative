@@ -62,6 +62,7 @@ void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
 
     menu->addAction( createFolderAction );
     menu->addAction( createNoteAction );
+    menu->addAction( joinNoteAction );
     menu->addAction( deleteItemAction );
 
     menu->popup( e->globalPos() );
@@ -71,22 +72,31 @@ void FileBrowserWidget::slotSelectionChanged( const QItemSelection &selected,
     const QItemSelection &deselected )
 {
     bool is_single_selected = false;
+    bool can_have_children = false;
+    QModelIndex index;
+    QStandardItem *item = 0;
 
     if( selected.indexes().size() == 0 )
     {
         createFolderAction->setEnabled( false );
         deleteItemAction->setEnabled( false );
-        deleteItemAction->setEnabled( false );
+        createNoteAction->setEnabled( false );
+        joinNoteAction->setEnabled( false );
     }
     else
     {
         is_single_selected = selected.indexes().size() == 1;
+        index = selected.indexes().at(0);
+        item = fileModel->itemFromIndex( index );
+        can_have_children = canHaveChildren( index );
 
         deleteItemAction->setEnabled( true );
         createFolderAction->setEnabled( is_single_selected
-            && canHaveChildren( selected.indexes().at(0) ) );
-        createFolderAction->setEnabled( is_single_selected
-      && canHaveChildren( selected.indexes().at(0) ) );
+            && can_have_children );
+        createNoteAction->setEnabled( is_single_selected
+      && can_have_children );
+        joinNoteAction->setEnabled( is_single_selected
+            && item->type() == QInfinity::BrowserItem::Note );
     }
 }
 
@@ -180,6 +190,8 @@ void FileBrowserWidget::setupUi()
     createFolderAction->setEnabled( false );
     createNoteAction = new KAction( KIcon( "document-new.png" ), tr("Create Note"), this );
     createFolderAction->setEnabled( false );
+    joinNoteAction = new KAction( KIcon( "document-open.png" ), tr("Join Note"), this );
+    joinNoteAction->setEnabled( false );
     deleteItemAction = new KAction( KIcon( "edit-delete.png" ), tr("delete"), this );
     deleteItemAction->setEnabled( false );
 

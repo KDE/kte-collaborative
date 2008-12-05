@@ -64,6 +64,7 @@ class FileBrowserWidget
         KAction *deleteItemAction;
         KAction *createFolderAction;
         KAction *createNoteAction;
+        KAction *joinNoteAction;
 
 };
 
