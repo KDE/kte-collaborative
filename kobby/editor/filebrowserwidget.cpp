@@ -225,10 +225,10 @@ void FileBrowserWidget::setupActions()
     connect( createNoteAction, SIGNAL(triggered()),
         this, SLOT(slotCreateNote()) );
 
-    connect( m_treeView, SIGNAL(doubleClicked( const QModelIndex& )),
-        fileModel, SLOT(openItem( const QModelIndex& )) );
     connect( m_treeView, SIGNAL(expanded( const QModelIndex& )),
-        fileModel, SLOT(openItem( const QModelIndex& )) );
+        fileModel, SLOT(activateItem( const QModelIndex& )) );
+    connect( m_treeView, SIGNAL(activated( const QModelIndex& )),
+        fileModel, SLOT(activateItem( const QModelIndex& )) );
 }
 
 bool FileBrowserWidget::canHaveChildren( const QModelIndex &index )
