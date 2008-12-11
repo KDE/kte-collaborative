@@ -1,7 +1,8 @@
 #include <libinfinitymm/client/clientbrowser.h>
 #include <libinfinitymm/client/clientbrowseriter.h>
-#include <libqinfinitymm/browsermodel.h>
+
 #include "filebrowserwidget.h"
+#include "browsermodel.h"
 #include "createitemdialog.h"
 
 #include <libqinfinitymm/browseritem.h>
@@ -27,7 +28,7 @@ namespace Kobby
 
 FileBrowserWidget::FileBrowserWidget( QWidget *parent )
     : QWidget( parent )
-    , fileModel( new QInfinity::BrowserModel( this ) )
+    , fileModel( new BrowserModel( this ) )
 {
     setupUi();
     setupActions();

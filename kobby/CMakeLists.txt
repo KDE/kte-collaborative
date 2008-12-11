@@ -40,6 +40,9 @@ set( KOBBY_LIBRARIES
 )
 
 set( KOBBY_SRCS
+	editor/browseritem.cpp
+	editor/browsermodel.cpp
+	editor/filebrowserwidget.cpp
 	editor/sidebar.cpp
 	editor/mainwindow.cpp
 	editor/main.cpp
@@ -48,7 +51,6 @@ set( KOBBY_SRCS
 	dialogs/connectionmanagerwidget.cpp
 	dialogs/createitemdialog.cpp
 	dialogs/createfolderdialog.cpp
-	dialogs/filebrowserwidget.cpp
 )
 
 set( KOBBY_UI
