@@ -22,13 +22,16 @@ namespace QInfinity
 namespace Kobby
 {
 
+class BrowserModel;
+
 class FileBrowserWidget
     : public QWidget
 {
     Q_OBJECT
 
     public:
-        FileBrowserWidget( QWidget *parent = 0 );
+        FileBrowserWidget( BrowserModel &model,
+            QWidget *parent = 0 );
 
     Q_SIGNALS:
         void itemOpened( QInfinity::BrowserItem &item );

@@ -1,8 +1,11 @@
 #include <libinfinitymm/client/clientbrowser.h>
+#include <libinfinitymm/client/clientsessionproxy.h>
+#include <libinfinitymm/common/session.h>
 
 #include "mainwindow.h"
 #include "sidebar.h"
 #include "createconnectiondialog.h"
+#include "browsermodel.h"
 #include "filebrowserwidget.h"
 #include "connectionmanagerwidget.h"
 
@@ -35,6 +38,7 @@ namespace Kobby
 
 MainWindow::MainWindow( QWidget *parent )
     : infinoteManager( QInfinity::InfinoteManager::instance() )
+    , browserModel( new BrowserModel( this ) )
 {
     Q_UNUSED(parent)
     
@@ -55,6 +59,7 @@ MainWindow::~MainWindow()
 {
     saveConfig();
     delete configGeneralGroup;
+    delete browserModel;
 }
 
 void MainWindow::slotCreateConnection()
@@ -67,10 +72,16 @@ void MainWindow::slotOpenItem( QInfinity::BrowserItem &item )
 {
 }
 
+void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
+    Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy )
+{
+    kDebug() << "Subscribed to new session.";
+}
+
 void MainWindow::setupUi()
 {
     connectionManager = new ConnectionManagerWidget( this );
-    fileBrowser = new FileBrowserWidget( this );
+    fileBrowser = new FileBrowserWidget( *browserModel, this );
     m_sidebar = new Sidebar( this );
     m_sidebar->addTab( connectionManager, "Connections" );
     m_sidebar->addTab( fileBrowser, "Browse" );
@@ -118,6 +129,14 @@ void MainWindow::setupActions()
 
     connect( fileBrowser, SIGNAL(itemOpened( QInfinity::FileBrowserItem& )),
         this, SLOT(slotOpenItem( QInfinity::FileBrowserItem& )) );
+
+    // Connect to BrowserModel
+    connect( browserModel, SIGNAL(sessionSubscribed( QInfinity::BrowserNoteItem&,
+            Glib::RefPtr<Infinity::ClientSessionProxy> )),
+        this, SLOT(slotSessionSubscribed( QInfinity::BrowserNoteItem&,
+            Glib::RefPtr<Infinity::ClientSessionProxy> ))
+    );
+    
 }
 
 void MainWindow::loadConfig()

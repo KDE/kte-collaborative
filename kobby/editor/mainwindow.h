@@ -5,6 +5,8 @@
 #include <KParts/MainWindow>
 #include <QtGui/QKeyEvent>
 
+#include <glibmm/refptr.h>
+
 class KConfigGroup;
 class QSplitter;
 
@@ -15,10 +17,16 @@ namespace KTextEditor
     class View;
 }
 
+namespace Infinity
+{
+    class ClientSessionProxy;
+}
+
 namespace QInfinity
 {
     class InfinoteManager;
     class BrowserItem;
+    class BrowserNoteItem;
     class Connection;
 }
 
@@ -27,6 +35,7 @@ namespace Kobby
 
 class Sidebar;
 class ConnectionManagerWidget;
+class BrowserModel;
 class FileBrowserWidget;
 
 class MainWindow
@@ -41,6 +50,8 @@ class MainWindow
     private Q_SLOTS:
         void slotCreateConnection();
         void slotOpenItem( QInfinity::BrowserItem &item );
+        void slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
+            Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy );
     
     private:
         void init();
@@ -51,6 +62,7 @@ class MainWindow
         
         QInfinity::InfinoteManager *infinoteManager;
         ConnectionManagerWidget *connectionManager;
+        BrowserModel *browserModel;
         FileBrowserWidget *fileBrowser;
         
         QSplitter *mainSplitter;

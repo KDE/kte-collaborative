@@ -26,9 +26,10 @@
 namespace Kobby
 {
 
-FileBrowserWidget::FileBrowserWidget( QWidget *parent )
+FileBrowserWidget::FileBrowserWidget( BrowserModel &model,
+    QWidget *parent )
     : QWidget( parent )
-    , fileModel( new BrowserModel( this ) )
+    , fileModel( &model )
 {
     setupUi();
     setupActions();

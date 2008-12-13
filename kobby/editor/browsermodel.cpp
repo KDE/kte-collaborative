@@ -7,6 +7,8 @@
 
 #include <KDebug>
 
+#include "browsermodel.moc"
+
 namespace Kobby
 {
 
