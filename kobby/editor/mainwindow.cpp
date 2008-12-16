@@ -134,8 +134,7 @@ void MainWindow::setupActions()
     connect( browserModel, SIGNAL(sessionSubscribed( QInfinity::BrowserNoteItem&,
             Glib::RefPtr<Infinity::ClientSessionProxy> )),
         this, SLOT(slotSessionSubscribed( QInfinity::BrowserNoteItem&,
-            Glib::RefPtr<Infinity::ClientSessionProxy> ))
-    );
+            Glib::RefPtr<Infinity::ClientSessionProxy> )) );
     
 }
 

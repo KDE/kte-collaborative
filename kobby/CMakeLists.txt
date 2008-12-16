@@ -20,7 +20,7 @@ set( KOBBY_INCLUDES
 	${GLIBMM_INCLUDES}
 	${LIBINFINITY_INCLUDES}
 	${LIBINFINITYMM_INCLUDES}
-	${LIBINFTEXTYMM_INCLUDES}
+	${LIBINFTEXTMM_INCLUDES}
 	${LIBQINFINITYMM_INCLUDES}
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/kobby
@@ -43,6 +43,7 @@ set( KOBBY_SRCS
 	editor/browseritem.cpp
 	editor/browsermodel.cpp
 	editor/filebrowserwidget.cpp
+	editor/collabdocument.cpp
 	editor/sidebar.cpp
 	editor/mainwindow.cpp
 	editor/main.cpp

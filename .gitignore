@@ -16,5 +16,6 @@ moc_*
 ui_*
 *.shell
 *.swp
+*.swo
 kobby/kobby
 
