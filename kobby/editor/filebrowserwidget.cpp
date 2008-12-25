@@ -3,8 +3,10 @@
 
 #include "filebrowserwidget.h"
 #include "browsermodel.h"
+#include "browseritem.h"
 #include "createitemdialog.h"
 
+#include <libqinfinitymm/browser.h>
 #include <libqinfinitymm/browseritem.h>
 #include <libqinfinitymm/infinotemanager.h>
 
@@ -59,6 +61,24 @@ void FileBrowserWidget::createNote( QInfinity::BrowserFolderItem &parent,
         name.toAscii(),
         &QInfinity::InfinoteManager::instance()->textPlugin(),
         false );
+}
+
+void FileBrowserWidget::slotItemActivated( const QModelIndex &index )
+{
+    QStandardItem *standardItem = fileModel->itemFromIndex( index );
+
+    if( !standardItem )
+    {
+        kDebug() << "Got invalid item when locating activated index!";
+        return;
+    }
+
+    if( standardItem->type() == QInfinity::BrowserItem::Note )
+    {
+        BrowserNoteItem *noteItem = dynamic_cast<BrowserNoteItem*>(standardItem);
+        QInfinity::BrowserConnectionItem *parentConnection = fileModel->nodeParentConnection( noteItem->iter() );
+        parentConnection->connection().browser()->clientBrowser().subscribeSession( noteItem->iter() );
+    }
 }
 
 void FileBrowserWidget::contextMenuEvent( QContextMenuEvent *e )
@@ -228,8 +248,8 @@ void FileBrowserWidget::setupActions()
 
     connect( m_treeView, SIGNAL(expanded( const QModelIndex& )),
         fileModel, SLOT(activateItem( const QModelIndex& )) );
-    connect( m_treeView, SIGNAL(activated( const QModelIndex& )),
-        fileModel, SLOT(activateItem( const QModelIndex& )) );
+    connect( m_treeView, SIGNAL(doubleClicked( const QModelIndex& )),
+        this, SLOT(slotItemActivated( const QModelIndex& )) );
 }
 
 bool FileBrowserWidget::canHaveChildren( const QModelIndex &index )

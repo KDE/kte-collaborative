@@ -51,6 +51,7 @@ class FileBrowserWidget
         void slotDeleteSelected();
         void slotCreateFolder();
         void slotCreateNote();
+        void slotItemActivated( const QModelIndex& );
 
     private:
         void setupUi();

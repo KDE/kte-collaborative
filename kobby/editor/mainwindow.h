@@ -28,6 +28,7 @@ namespace QInfinity
     class BrowserItem;
     class BrowserNoteItem;
     class Connection;
+    class Document;
 }
 
 namespace Kobby
@@ -79,6 +80,7 @@ class MainWindow
 
         KSharedConfigPtr configptr;
         KConfigGroup *configGeneralGroup;
+
 };
 
 }
