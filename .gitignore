@@ -17,5 +17,6 @@ ui_*
 *.shell
 *.swp
 *.swo
+*.kdev*
 kobby/kobby
 

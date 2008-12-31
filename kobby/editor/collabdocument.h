@@ -37,7 +37,7 @@ class CollabDocument
         void slotLocalTextInserted( KTextEditor::Document *document,
             const KTextEditor::Range &range );
         void slotInsertText( unsigned int pos,
-            Infinity::TextChunk &textChunk,
+            Infinity::TextChunk textChunk,
             Infinity::User *user );
 
     private:

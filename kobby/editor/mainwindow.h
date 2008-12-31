@@ -38,6 +38,7 @@ class Sidebar;
 class ConnectionManagerWidget;
 class BrowserModel;
 class FileBrowserWidget;
+class CollabDocument;
 
 class MainWindow
     : public KParts::MainWindow
@@ -72,6 +73,7 @@ class MainWindow
         KTextEditor::Editor *editor;
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
+        QList<CollabDocument*> collabDocuments;
         
         KAction *newDocumentAction;
         KAction *newConnectionAction;

@@ -33,13 +33,22 @@ void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
 }
 
 void CollabDocument::slotInsertText( unsigned int pos,
-    Infinity::TextChunk &textChunk,
+    Infinity::TextChunk textChunk,
     Infinity::User *user )
 {
 }
 
 void CollabDocument::setupActions()
 {
+    connect( m_infDocument, SIGNAL(textInserted( unsigned int,
+            Infinity::TextChunk, Infinity::User )),
+        this, SLOT(slotInsertText(unsigned int,
+            Infinity::TextChunk, Infinity::User )) );
+    connect( m_kDocument, SIGNAL(textInserted( KTextEditor::Document*,
+            KTextEditor::Range& )),
+        this, SLOT(slotLocalTextInserted( KTextEditor::Document*,
+            KTextEditor::Range& )) );
+         
 }
 
 }

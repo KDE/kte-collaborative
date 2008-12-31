@@ -1,6 +1,8 @@
 #include <libinfinitymm/client/clientbrowser.h>
 #include <libinfinitymm/client/clientsessionproxy.h>
 #include <libinfinitymm/common/session.h>
+#include <libinfinitymm/common/buffer.h>
+#include <libinftextmm/textbuffer.h>
 
 #include "mainwindow.h"
 #include "sidebar.h"
@@ -8,10 +10,12 @@
 #include "browsermodel.h"
 #include "filebrowserwidget.h"
 #include "connectionmanagerwidget.h"
+#include "collabdocument.h"
 
 #include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/browseritem.h>
 #include <libqinfinitymm/browsermodel.h>
+#include <libqinfinitymm/document.h>
 
 #include <KAction>
 #include <KActionCollection>
@@ -57,6 +61,10 @@ MainWindow::MainWindow( QWidget *parent )
 
 MainWindow::~MainWindow()
 {
+    QList<CollabDocument*>::Iterator itr;
+    for( itr = collabDocuments.begin(); itr != collabDocuments.end(); itr++ )
+        delete *itr;
+
     saveConfig();
     delete configGeneralGroup;
     delete browserModel;
@@ -76,6 +84,28 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
     Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy )
 {
     kDebug() << "Subscribed to new session.";
+    Infinity::Session *session = sessionProxy->getSession();
+    if( !session )
+    {
+        kDebug() << "Could not get session from session proxy.";
+        return;
+    }
+    if( session->getStatus() != Infinity::SESSION_RUNNING )
+    {
+        kDebug() << "Session not currently running.";
+        if( session->getStatus() == Infinity::SESSION_SYNCHRONIZING )
+            kDebug() << "Still syncing.";
+        else
+            kDebug() << "Closed.";
+        return;
+    }
+    session->getBuffer();
+    /*
+    QInfinity::Document *document = new QInfinity::Document( *textBuffer );
+    CollabDocument *collabDocument;
+    collabDocument = new CollabDocument( *document, *editor->createDocument( this ) );
+    collabDocuments.append( collabDocument );
+    */
 }
 
 void MainWindow::setupUi()
@@ -126,9 +156,6 @@ void MainWindow::setupActions()
     // Connect to InfinoteManager
     connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
         this, SLOT(addConnection( Connection& )) );
-
-    connect( fileBrowser, SIGNAL(itemOpened( QInfinity::FileBrowserItem& )),
-        this, SLOT(slotOpenItem( QInfinity::FileBrowserItem& )) );
 
     // Connect to BrowserModel
     connect( browserModel, SIGNAL(sessionSubscribed( QInfinity::BrowserNoteItem&,
