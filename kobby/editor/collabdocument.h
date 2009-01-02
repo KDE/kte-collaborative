@@ -12,6 +12,7 @@ namespace Infinity
 {
     class User;
     class TextChunk;
+    class Session;
 }
 
 namespace KTextEditor
@@ -28,10 +29,12 @@ class CollabDocument
 {
 
     public:
-        CollabDocument( QInfinity::Document &infDocument,
+        CollabDocument( Infinity::Session &session,
             KTextEditor::Document &document,
             QObject *parent = 0 );
-        ~CollabDocument();    
+        ~CollabDocument();
+
+        KTextEditor::Document *kDocument() const;
 
     private Q_SLOTS:
         void slotLocalTextInserted( KTextEditor::Document *document,
@@ -44,6 +47,7 @@ class CollabDocument
         void setupActions();
 
         QInfinity::Document *m_infDocument;
+        Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;
 
 };

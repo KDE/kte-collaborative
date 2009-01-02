@@ -1,3 +1,4 @@
+#include <libinfinitymm/common/session.h>
 #include <libinfinitymm/common/user.h>
 #include <libinftextmm/textchunk.h>
 
@@ -12,18 +13,24 @@
 namespace Kobby
 {
 
-CollabDocument::CollabDocument( QInfinity::Document &infDocument,
+CollabDocument::CollabDocument( Infinity::Session &session,
     KTextEditor::Document &document,
     QObject *parent )
-    : m_infDocument( &infDocument )
+    : QObject( parent )
+    , m_infDocument( 0 )
+    , m_infSession( &session )
     , m_kDocument( &document )
 {
-    setupActions();
 }
 
 CollabDocument::~CollabDocument()
 {
     delete m_infDocument;
+}
+
+KTextEditor::Document *CollabDocument::kDocument() const
+{
+    return m_kDocument;
 }
 
 void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,

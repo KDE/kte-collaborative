@@ -9,6 +9,7 @@
 
 class KConfigGroup;
 class QSplitter;
+class QTabWidget;
 
 namespace KTextEditor
 {
@@ -39,6 +40,7 @@ class ConnectionManagerWidget;
 class BrowserModel;
 class FileBrowserWidget;
 class CollabDocument;
+class DocumentTabWidget;
 
 class MainWindow
     : public KParts::MainWindow
@@ -69,11 +71,12 @@ class MainWindow
         
         QSplitter *mainSplitter;
         Sidebar *m_sidebar;
+        DocumentTabWidget *documentTab;
 
         KTextEditor::Editor *editor;
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
-        QList<CollabDocument*> collabDocuments;
+        CollabDocument *curr_collabDocument;
         
         KAction *newDocumentAction;
         KAction *newConnectionAction;

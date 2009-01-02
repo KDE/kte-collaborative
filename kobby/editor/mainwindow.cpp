@@ -11,6 +11,7 @@
 #include "filebrowserwidget.h"
 #include "connectionmanagerwidget.h"
 #include "collabdocument.h"
+#include "documenttabwidget.h"
 
 #include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/browseritem.h>
@@ -34,6 +35,7 @@
 
 #include <QSplitter>
 #include <QTreeView>
+#include <QTabWidget>
 
 #include <mainwindow.moc>
 
@@ -43,6 +45,8 @@ namespace Kobby
 MainWindow::MainWindow( QWidget *parent )
     : infinoteManager( QInfinity::InfinoteManager::instance() )
     , browserModel( new BrowserModel( this ) )
+    , documentTab( new DocumentTabWidget( this ) )
+    , curr_collabDocument( 0 )
 {
     Q_UNUSED(parent)
     
@@ -61,10 +65,6 @@ MainWindow::MainWindow( QWidget *parent )
 
 MainWindow::~MainWindow()
 {
-    QList<CollabDocument*>::Iterator itr;
-    for( itr = collabDocuments.begin(); itr != collabDocuments.end(); itr++ )
-        delete *itr;
-
     saveConfig();
     delete configGeneralGroup;
     delete browserModel;
@@ -90,22 +90,10 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
         kDebug() << "Could not get session from session proxy.";
         return;
     }
-    if( session->getStatus() != Infinity::SESSION_RUNNING )
-    {
-        kDebug() << "Session not currently running.";
-        if( session->getStatus() == Infinity::SESSION_SYNCHRONIZING )
-            kDebug() << "Still syncing.";
-        else
-            kDebug() << "Closed.";
-        return;
-    }
-    session->getBuffer();
-    /*
-    QInfinity::Document *document = new QInfinity::Document( *textBuffer );
-    CollabDocument *collabDocument;
-    collabDocument = new CollabDocument( *document, *editor->createDocument( this ) );
-    collabDocuments.append( collabDocument );
-    */
+    CollabDocument *collabDocument = new CollabDocument( *sessionProxy->getSession(), *editor->createDocument( this ), editor );
+    curr_document = collabDocument->kDocument();
+    curr_document->insertText( KTextEditor::Cursor( 0, 0 ), "CollabDocument" );
+    documentTab->addDocument( *curr_document );
 }
 
 void MainWindow::setupUi()
@@ -117,12 +105,13 @@ void MainWindow::setupUi()
     m_sidebar->addTab( fileBrowser, "Browse" );
 
     curr_document = editor->createDocument(0);
-    curr_view = qobject_cast<KTextEditor::View*>( curr_document->createView( this ) );
+    documentTab->addDocument( *curr_document );
+    curr_view = curr_document->activeView();
     
     mainSplitter = new QSplitter( Qt::Horizontal, this );
     
     mainSplitter->addWidget( m_sidebar );
-    mainSplitter->addWidget( curr_view );
+    mainSplitter->addWidget( documentTab );
     setCentralWidget( mainSplitter );
     
     setXMLFile("kobbyui.rc");
