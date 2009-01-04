@@ -3,7 +3,9 @@
 
 #include <KSharedConfig>
 #include <KParts/MainWindow>
+
 #include <QtGui/QKeyEvent>
+#include <QMap>
 
 #include <glibmm/refptr.h>
 
@@ -56,6 +58,7 @@ class MainWindow
         void slotOpenItem( QInfinity::BrowserItem &item );
         void slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
             Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy );
+        void slotDocumentTabChanged( int index );
     
     private:
         void init();
@@ -77,6 +80,8 @@ class MainWindow
         KTextEditor::View *curr_view;
         KTextEditor::Document *curr_document;
         CollabDocument *curr_collabDocument;
+        QList<CollabDocument*> collabDocuments;
+        QMap<KTextEditor::Document*, CollabDocument*> collabDocumentMap;
         
         KAction *newDocumentAction;
         KAction *newConnectionAction;

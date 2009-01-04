@@ -68,6 +68,11 @@ MainWindow::~MainWindow()
     saveConfig();
     delete configGeneralGroup;
     delete browserModel;
+    QList<CollabDocument*>::Iterator itr;
+    for( itr = collabDocuments.begin(); itr != collabDocuments.end(); itr++ )
+    {
+        delete *itr;
+    }
 }
 
 void MainWindow::slotCreateConnection()
@@ -90,10 +95,16 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
         kDebug() << "Could not get session from session proxy.";
         return;
     }
-    CollabDocument *collabDocument = new CollabDocument( *sessionProxy->getSession(), *editor->createDocument( this ), editor );
-    curr_document = collabDocument->kDocument();
-    curr_document->insertText( KTextEditor::Cursor( 0, 0 ), "CollabDocument" );
+    curr_collabDocument = new CollabDocument( *sessionProxy->getSession(), *editor->createDocument( this ), editor );
+    curr_document = curr_collabDocument->kDocument();
     documentTab->addDocument( *curr_document );
+    collabDocuments.append( curr_collabDocument );
+    collabDocumentMap.insert( curr_document, curr_collabDocument );
+}
+
+void MainWindow::slotDocumentTabChanged( int index )
+{
+    KTextEditor::Document *newDocument = documentTab->documentAt( index );
 }
 
 void MainWindow::setupUi()

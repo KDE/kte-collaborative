@@ -2,12 +2,14 @@
 #define KOBBY_DOCUMENTTABWIDGET_H
 
 #include <QTabWidget>
+#include <QMap>
 
 class QToolButton;
 
 namespace KTextEditor
 {
     class Document;
+    class View;
 }
 
 namespace Kobby
@@ -23,6 +25,9 @@ class DocumentTabWidget
         ~DocumentTabWidget();
 
         void addDocument( KTextEditor::Document &document );
+        void removeDocument( KTextEditor::Document &document );
+        KTextEditor::Document *documentAt( int index );
+        KTextEditor::View *documentView( KTextEditor::Document &document );
 
     Q_SIGNALS:
         void closingDocument( KTextEditor::Document *document );
@@ -31,9 +36,8 @@ class DocumentTabWidget
         void closeCurrentTab();
 
     private:
-        KTextEditor::Document *documentAt( int index );
-
         QToolButton *closeButton;
+        QMap<KTextEditor::Document*, KTextEditor::View*> documentViewMap;
 
 };
 

@@ -35,12 +35,25 @@ void DocumentTabWidget::closeCurrentTab()
 
 void DocumentTabWidget::addDocument( KTextEditor::Document &document )
 {
-    addTab( document.createView( this ), document.documentName() );
+    KTextEditor::View *view = document.createView( this );
+    documentViewMap.insert( &document, view );
+    addTab( view, document.documentName() );
+}
+
+void DocumentTabWidget::removeDocument( KTextEditor::Document &document )
+{
+    int index = indexOf( documentView( document ) );
+    removeTab( index );
 }
 
 KTextEditor::Document *DocumentTabWidget::documentAt( int index )
 {
     return dynamic_cast<KTextEditor::Document*>(widget( index ));
+}
+
+KTextEditor::View *DocumentTabWidget::documentView( KTextEditor::Document &document )
+{
+    return documentViewMap[&document];
 }
 
 }
