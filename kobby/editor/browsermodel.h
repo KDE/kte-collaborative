@@ -16,6 +16,9 @@ namespace QInfinity
 namespace Kobby
 {
 
+/**
+ * @brief Model containing all connections and nodes on each connection.
+ */
 class BrowserModel
     : public QInfinity::BrowserModel
 {

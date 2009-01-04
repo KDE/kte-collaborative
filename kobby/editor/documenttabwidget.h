@@ -15,6 +15,9 @@ namespace KTextEditor
 namespace Kobby
 {
 
+/**
+ * @brief Tab widget containing active document views, and map from documents to their view.
+ */
 class DocumentTabWidget
     : public QTabWidget
 {

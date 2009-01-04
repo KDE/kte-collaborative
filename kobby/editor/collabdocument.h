@@ -27,6 +27,14 @@ namespace KTextEditor
 namespace Kobby
 {
 
+/**
+ * @brief Connects Infinity::TextBuffer with KTextEditor::Document
+ *
+ * The CollabDocument is responsible for connecting the signals/slots to insert/remove
+ * text from Infinity::TextBuffer and KTextEditor::Document.  It also handles waiting for
+ * the synchronizationComplete signal from Infinity::Session, and maintains a reference to
+ * a sessionProxy if instantiated from one.
+ */
 class CollabDocument
     : public QObject
 {

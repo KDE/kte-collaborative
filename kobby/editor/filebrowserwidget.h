@@ -24,6 +24,9 @@ namespace Kobby
 
 class BrowserModel;
 
+/**
+ * @brief Widget displaying BrowserModel as tree and context menu.
+ */
 class FileBrowserWidget
     : public QWidget
 {
