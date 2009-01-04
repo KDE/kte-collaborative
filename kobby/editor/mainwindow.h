@@ -59,6 +59,7 @@ class MainWindow
         void slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
             Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy );
         void slotDocumentTabChanged( int index );
+        void slotDocumentClose( KTextEditor::Document* );
     
     private:
         void init();

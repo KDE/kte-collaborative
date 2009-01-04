@@ -30,7 +30,7 @@ class DocumentTabWidget
         KTextEditor::View *documentView( KTextEditor::Document &document );
 
     Q_SIGNALS:
-        void closingDocument( KTextEditor::Document *document );
+        void documentClose( KTextEditor::Document *document );
 
     private Q_SLOTS:
         void closeCurrentTab();

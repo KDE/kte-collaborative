@@ -95,7 +95,7 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
         kDebug() << "Could not get session from session proxy.";
         return;
     }
-    curr_collabDocument = new CollabDocument( *sessionProxy->getSession(), *editor->createDocument( this ), editor );
+    curr_collabDocument = new CollabDocument( sessionProxy, *editor->createDocument( this ), editor );
     curr_document = curr_collabDocument->kDocument();
     documentTab->addDocument( *curr_document );
     collabDocuments.append( curr_collabDocument );
@@ -105,6 +105,10 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
 void MainWindow::slotDocumentTabChanged( int index )
 {
     KTextEditor::Document *newDocument = documentTab->documentAt( index );
+}
+
+void MainWindow::slotDocumentClose( KTextEditor::Document *document )
+{
 }
 
 void MainWindow::setupUi()
@@ -144,14 +148,6 @@ void MainWindow::setupActions()
     newConnectionAction->setText( "Connection..." );
     newConnectionAction->setWhatsThis( "Create a new connection to an Infinote server." );
     connect( newConnectionAction, SIGNAL(triggered()), this, SLOT(slotCreateConnection()) );
-    
-    controlAction = actionCollection()->addAction( "tools_kobby_control" );
-    controlAction->setText( "Kobby" );
-    connect( controlAction, SIGNAL(triggered()), this, SLOT(openControlDialog()) );
-    
-    settingsAction = actionCollection()->addAction( "settings_kobby" );
-    settingsAction->setText( "Configure Kobby" );
-    connect( settingsAction, SIGNAL(triggered()), this, SLOT(openSettingsDialog()) );
 
     // Connect to InfinoteManager
     connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
@@ -162,7 +158,11 @@ void MainWindow::setupActions()
             Glib::RefPtr<Infinity::ClientSessionProxy> )),
         this, SLOT(slotSessionSubscribed( QInfinity::BrowserNoteItem&,
             Glib::RefPtr<Infinity::ClientSessionProxy> )) );
-    
+
+    // Connect to DocumentTabWidget
+    connect( documentTab, SIGNAL(currentChanged( int )), this, SLOT(documentTabChanged( int )) );
+    connect( documentTab, SIGNAL(documentClose( KTextEditor::Document* )),
+        this, SLOT(slotDocumentClose( KTextEditor::Document* )) );
 }
 
 void MainWindow::loadConfig()

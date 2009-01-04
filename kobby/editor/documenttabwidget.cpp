@@ -29,7 +29,7 @@ DocumentTabWidget::~DocumentTabWidget()
 
 void DocumentTabWidget::closeCurrentTab()
 {
-    emit(closingDocument( documentAt( currentIndex() ) ));
+    emit(documentClose( documentAt( currentIndex() ) ));
     removeTab( currentIndex() );
 }
 

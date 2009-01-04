@@ -1,5 +1,6 @@
 #include <libinfinitymm/common/session.h>
 #include <libinfinitymm/common/user.h>
+#include <libinfinitymm/client/clientsessionproxy.h>
 #include <libinftextmm/textchunk.h>
 
 #include "collabdocument.h"
@@ -20,7 +21,20 @@ CollabDocument::CollabDocument( Infinity::Session &session,
     , m_infDocument( 0 )
     , m_infSession( &session )
     , m_kDocument( &document )
+    , m_sessionProxy( 0 )
 {
+}
+
+CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
+    KTextEditor::Document &document,
+    QObject *parent )
+    : QObject( parent )
+    , m_infDocument( 0 )
+    , m_infSession( 0 )
+    , m_kDocument( &document )
+    , m_sessionProxy( new Glib::RefPtr<Infinity::ClientSessionProxy>() )
+{
+    *m_sessionProxy = sessionProxy;
 }
 
 CollabDocument::~CollabDocument()
@@ -36,7 +50,6 @@ KTextEditor::Document *CollabDocument::kDocument() const
 void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
-    
 }
 
 void CollabDocument::slotInsertText( unsigned int pos,
@@ -45,7 +58,11 @@ void CollabDocument::slotInsertText( unsigned int pos,
 {
 }
 
-void CollabDocument::setupActions()
+void CollabDocument::setupSessionProxyActions()
+{
+}
+
+void CollabDocument::setupDocumentActions()
 {
     connect( m_infDocument, SIGNAL(textInserted( unsigned int,
             Infinity::TextChunk, Infinity::User )),

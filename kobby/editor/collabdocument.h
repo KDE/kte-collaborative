@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <glibmm/refptr.h>
+
 namespace QInfinity
 {
     class Document;
@@ -13,6 +15,7 @@ namespace Infinity
     class User;
     class TextChunk;
     class Session;
+    class ClientSessionProxy;
 }
 
 namespace KTextEditor
@@ -32,6 +35,9 @@ class CollabDocument
         CollabDocument( Infinity::Session &session,
             KTextEditor::Document &document,
             QObject *parent = 0 );
+        CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
+            KTextEditor::Document &document,
+            QObject *parent = 0 );
         ~CollabDocument();
 
         KTextEditor::Document *kDocument() const;
@@ -44,11 +50,13 @@ class CollabDocument
             Infinity::User *user );
 
     private:
-        void setupActions();
+        void setupSessionProxyActions();
+        void setupDocumentActions();
 
         QInfinity::Document *m_infDocument;
         Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;
+        Glib::RefPtr<Infinity::ClientSessionProxy> *m_sessionProxy;
 
 };
 
