@@ -95,7 +95,7 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
         kDebug() << "Could not get session from session proxy.";
         return;
     }
-    curr_collabDocument = new CollabDocument( sessionProxy, *editor->createDocument( this ), editor );
+    curr_collabDocument = new CollabDocument( *session, *editor->createDocument( this ), editor );
     curr_document = curr_collabDocument->kDocument();
     documentTab->addDocument( *curr_document );
     collabDocuments.append( curr_collabDocument );
@@ -105,6 +105,9 @@ void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
 void MainWindow::slotDocumentTabChanged( int index )
 {
     KTextEditor::Document *newDocument = documentTab->documentAt( index );
+    curr_document = newDocument;
+    curr_view = documentTab->documentView( *curr_document );
+    curr_collabDocument = collabDocumentMap[curr_document];
 }
 
 void MainWindow::slotDocumentClose( KTextEditor::Document *document )

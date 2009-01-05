@@ -14,14 +14,17 @@ namespace Infinity
 {
     class User;
     class TextChunk;
+    class TextBuffer;
     class Session;
     class ClientSessionProxy;
+    class XmlConnection;
 }
 
 namespace KTextEditor
 {
     class Document;
     class Range;
+    class Cursor;
 }
 
 namespace Kobby
@@ -38,6 +41,7 @@ namespace Kobby
 class CollabDocument
     : public QObject
 {
+    Q_OBJECT
 
     public:
         CollabDocument( Infinity::Session &session,
@@ -58,10 +62,12 @@ class CollabDocument
             Infinity::User *user );
 
     private:
-        void setupSessionProxyActions();
+        void setupSessionActions();
         void setupDocumentActions();
+        unsigned int cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document );
+        void sessionSynchronizationComplete( Infinity::XmlConnection *connection );
 
-        QInfinity::Document *m_infDocument;
+        Infinity::TextBuffer *m_textBuffer;
         Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;
         Glib::RefPtr<Infinity::ClientSessionProxy> *m_sessionProxy;
