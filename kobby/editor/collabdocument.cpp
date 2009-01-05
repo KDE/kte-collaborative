@@ -2,6 +2,7 @@
 #include <libinfinitymm/common/user.h>
 #include <libinfinitymm/client/clientsessionproxy.h>
 #include <libinftextmm/textchunk.h>
+#include <libinftextmm/textbuffer.h>
 
 #include "collabdocument.h"
 
@@ -94,13 +95,14 @@ void CollabDocument::setupDocumentActions()
 
 unsigned int CollabDocument::cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document )
 {
-    unsigned int pos = 0, i;
+    int pos = 0, i;
     for( i = 0; i < cursor.line(); i++ )
     {
         pos += document.lineLength( i );
     }
     pos += cursor.column();
-    return pos;
+    unsigned int upos = pos;
+    return upos;
 }
 
 void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *connection )
