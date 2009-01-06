@@ -44,9 +44,6 @@ class CollabDocument
     Q_OBJECT
 
     public:
-        CollabDocument( Infinity::Session &session,
-            KTextEditor::Document &document,
-            QObject *parent = 0 );
         CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
             KTextEditor::Document &document,
             QObject *parent = 0 );
@@ -66,6 +63,7 @@ class CollabDocument
         void setupDocumentActions();
         unsigned int cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document );
         void sessionSynchronizationComplete( Infinity::XmlConnection *connection );
+        void sessionStatusChanged();
 
         Infinity::TextBuffer *m_textBuffer;
         Infinity::Session *m_infSession;

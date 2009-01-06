@@ -13,22 +13,12 @@
 
 #include <KDebug>
 
+#include <glib-object.h>
+
 #include "collabdocument.moc"
 
 namespace Kobby
 {
-
-CollabDocument::CollabDocument( Infinity::Session &session,
-    KTextEditor::Document &document,
-    QObject *parent )
-    : QObject( parent )
-    , m_textBuffer( 0 )
-    , m_infSession( &session )
-    , m_kDocument( &document )
-    , m_sessionProxy( 0 )
-{
-    setupSessionActions();
-}
 
 CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
     KTextEditor::Document &document,
@@ -47,6 +37,7 @@ CollabDocument::~CollabDocument()
 {
     if( m_sessionProxy )
         delete m_sessionProxy;
+    m_infSession->close();
 }
 
 KTextEditor::Document *CollabDocument::kDocument() const
@@ -79,6 +70,8 @@ void CollabDocument::setupSessionActions()
     }
     m_infSession->signal_synchronizationComplete().connect( sigc::mem_fun( this,
         &CollabDocument::sessionSynchronizationComplete ) );
+    m_infSession->property_status().signal_changed().connect( sigc::mem_fun( this,
+        &CollabDocument::sessionStatusChanged ) );
 }
 
 void CollabDocument::setupDocumentActions()
@@ -107,6 +100,22 @@ void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *co
 {
     m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
     setupDocumentActions();
+}
+
+void CollabDocument::sessionStatusChanged()
+{
+    if( !m_infSession )
+        return;
+    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
+    {
+        GParameter *userParam = g_new( GParameter, 1 );
+        userParam[0].value.g_type = 0;
+        userParam[0].name = "name";
+        g_value_init( &userParam[0].value, G_TYPE_STRING );
+        g_value_set_string( &userParam[0].value, "greghaynes" );
+        infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), userParam, 1, 0 );
+        g_free( userParam );
+    }
 }
 
 }
