@@ -1,6 +1,8 @@
 #include <libinfinitymm/common/session.h>
 #include <libinfinitymm/common/user.h>
 #include <libinfinitymm/client/clientsessionproxy.h>
+#include <libinfinitymm/adopted/adoptedstatevector.h>
+#include <libinfinitymm/adopted/adoptedsession.h>
 #include <libinftextmm/textchunk.h>
 #include <libinftextmm/textbuffer.h>
 
@@ -110,13 +112,30 @@ void CollabDocument::sessionStatusChanged()
         return;
     if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
     {
-        GParameter *userParam = g_new( GParameter, 1 );
-        userParam[0].value.g_type = 0;
-        userParam[0].name = "name";
-        g_value_init( &userParam[0].value, G_TYPE_STRING );
-        g_value_set_string( &userParam[0].value, "greghaynes" );
-        infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), userParam, 1, 0 );
-        g_free( userParam );
+        // 'Borrowed' from Gobby
+        GParameter params[5] = {
+            { "name", { 0 } },
+            { "hue", { 0 } },
+            { "vector", { 0 } },
+            { "caret-position", { 0 } },
+            { "status", { 0 } }
+        };
+
+        g_value_init(&params[0].value, G_TYPE_STRING);
+        g_value_init(&params[1].value, G_TYPE_DOUBLE);
+        g_value_init(&params[2].value, INF_ADOPTED_TYPE_STATE_VECTOR);
+        g_value_init(&params[3].value, G_TYPE_UINT);
+        g_value_init(&params[4].value, INF_TYPE_USER_STATUS);
+
+        g_value_set_static_string(&params[0].value, "greghaynes");
+        g_value_set_double(&params[1].value, 0);
+        g_value_take_boxed(
+                &params[2].value,inf_adopted_state_vector_copy(
+                        inf_adopted_algorithm_get_current(
+                                inf_adopted_session_get_algorithm(
+                                        INF_ADOPTED_SESSION(m_infSession->gobj())))));
+
+        infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), params, 5, 0 );
     }
 }
 
