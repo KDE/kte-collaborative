@@ -1,12 +1,15 @@
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
 
-typedef InfIo struct _InfIo;
-typedef InfConnectionManager struct _InfConnectionManager;
+// Make sure to include this header BEFORE any Qt headers!
+#include <libinfinitymm/client/clientnoteplugin.h>
 
 namespace Kobby
 {
 
+/**
+ * @brief Instantiates InfText sessions.
+ */
 class NotePlugin
     : public Infinity::ClientNotePlugin
 {

@@ -41,6 +41,7 @@ set( KOBBY_LIBRARIES
 )
 
 set( KOBBY_SRCS
+	editor/noteplugin.cpp
 	editor/browseritem.cpp
 	editor/browsermodel.cpp
 	editor/filebrowserwidget.cpp

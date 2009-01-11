@@ -4,6 +4,9 @@
 #include <libinfinitymm/common/buffer.h>
 #include <libinftextmm/textbuffer.h>
 
+// This has to be included before anything using Qt
+#include "noteplugin.h"
+
 #include "mainwindow.h"
 #include "sidebar.h"
 #include "createconnectiondialog.h"
@@ -61,6 +64,8 @@ MainWindow::MainWindow( QWidget *parent )
     
     setupUi();
     setupActions();
+    NotePlugin *notePlugin = new NotePlugin();
+    infinoteManager->addNotePlugin( *notePlugin );
 }
 
 MainWindow::~MainWindow()
