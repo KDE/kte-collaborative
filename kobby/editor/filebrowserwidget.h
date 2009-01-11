@@ -43,6 +43,7 @@ class FileBrowserWidget
         void createFolder( QInfinity::BrowserFolderItem &parent,
             QString name );
         void createNote( QInfinity::BrowserFolderItem &parent,
+            Infinity::ClientNotePlugin &notePlugin,
             QString name );
 
     protected:

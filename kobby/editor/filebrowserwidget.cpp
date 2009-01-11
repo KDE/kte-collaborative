@@ -52,6 +52,7 @@ void FileBrowserWidget::createFolder( QInfinity::BrowserFolderItem &parent,
 }
 
 void FileBrowserWidget::createNote( QInfinity::BrowserFolderItem &parent,
+    Infinity::ClientNotePlugin &notePlugin,
     QString name )
 {
     Infinity::ClientBrowserIter iter = parent.iter();
@@ -59,7 +60,7 @@ void FileBrowserWidget::createNote( QInfinity::BrowserFolderItem &parent,
 
     browser->addNote( iter,
         name.toAscii(),
-        &QInfinity::InfinoteManager::instance()->textPlugin(),
+        &notePlugin,
         false );
 }
 
