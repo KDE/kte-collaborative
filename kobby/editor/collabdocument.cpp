@@ -1,6 +1,7 @@
 #include <libinfinitymm/common/session.h>
 #include <libinfinitymm/common/user.h>
 #include <libinfinitymm/client/clientsessionproxy.h>
+#include <libinfinitymm/client/clientuserrequest.h>
 #include <libinfinitymm/adopted/adoptedstatevector.h>
 #include <libinfinitymm/adopted/adoptedsession.h>
 #include <libinftextmm/textchunk.h>
@@ -23,6 +24,11 @@
 namespace Kobby
 {
 
+void get_local_user( InfUser *user, gpointer user_data )
+{
+    (*static_cast<InfUser**>(user_data)) = user;
+}
+
 CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
     KTextEditor::Document &document,
     QObject *parent )
@@ -31,6 +37,8 @@ CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sess
     , m_infSession( sessionProxy->getSession() )
     , m_kDocument( &document )
     , m_sessionProxy( new Glib::RefPtr<Infinity::ClientSessionProxy>() )
+    , localUser( 0 )
+    , do_insert( 1 )
 {
     *m_sessionProxy = sessionProxy;
     setupSessionActions();
@@ -53,13 +61,21 @@ void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
 {
     unsigned int pos = cursorToPos( range.start(), *document );
     QString text = document->text( range, true );
-    m_textBuffer->insertText( pos, (void*)text.toAscii().constData(), text.length(), text.length(), 0 );
+    if( localUser && do_insert )
+    {
+        m_textBuffer->insertText( pos, "e", 1, 2, localUser );
+        do_insert = 0;
+    }
+    else
+        kDebug() << "No local user set.";
+
     kDebug() << "Text inserted.";
 }
 
 void CollabDocument::slotInsertText( unsigned int pos,
     Infinity::TextChunk textChunk,
     Infinity::User *user )
+
 {
     kDebug() << "Insert text";
 }
@@ -102,16 +118,13 @@ unsigned int CollabDocument::cursorToPos( const KTextEditor::Cursor &cursor, KTe
 
 void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *connection )
 {
-    m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
-    setupDocumentActions();
-}
-
-void CollabDocument::sessionStatusChanged()
-{
-    if( !m_infSession )
-        return;
-    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
+    InfUser *infUser = 0;
+    m_infSession->getUserTable()->forEachLocalUser( get_local_user, &infUser) ;
+    if( infUser )
+        localUser = Glib::wrap( infUser, true ).operator->();
+    else
     {
+
         // 'Borrowed' from Gobby
         GParameter params[5] = {
             { "name", { 0 } },
@@ -127,16 +140,45 @@ void CollabDocument::sessionStatusChanged()
         g_value_init(&params[3].value, G_TYPE_UINT);
         g_value_init(&params[4].value, INF_TYPE_USER_STATUS);
 
-        g_value_set_static_string(&params[0].value, "greghaynes");
+        g_value_set_static_string(&params[0].value, "gregh");
         g_value_set_double(&params[1].value, 0);
         g_value_take_boxed(
                 &params[2].value,inf_adopted_state_vector_copy(
                         inf_adopted_algorithm_get_current(
                                 inf_adopted_session_get_algorithm(
                                         INF_ADOPTED_SESSION(m_infSession->gobj())))));
+        g_value_set_uint(&params[3].value, 0);
+        g_value_set_enum(&params[4].value, INF_USER_ACTIVE);
 
-        infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), params, 5, 0 );
+        InfcUserRequest *infUserRequest;
+        infUserRequest = infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), params, 5, 0 );
+        userRequest = Glib::wrap( infUserRequest, true );
+        if( userRequest )
+        {
+            kDebug() << "Successful join.";
+            userRequest->signal_finished().connect( sigc::mem_fun( this, &CollabDocument::userRequestFinished ) );
+        }
+        else
+            kDebug() << "Error joining user.";
+
     }
+
+    m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
+    setupDocumentActions();
+}
+
+void CollabDocument::sessionStatusChanged()
+{
+    if( !m_infSession )
+        return;
+    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
+    {
+    }
+}
+
+void CollabDocument::userRequestFinished( Infinity::User *user )
+{
+    localUser = user;
 }
 
 }

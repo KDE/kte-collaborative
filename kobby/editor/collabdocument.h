@@ -17,6 +17,7 @@ namespace Infinity
     class TextBuffer;
     class Session;
     class ClientSessionProxy;
+    class ClientUserRequest;
     class XmlConnection;
 }
 
@@ -64,11 +65,15 @@ class CollabDocument
         unsigned int cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document );
         void sessionSynchronizationComplete( Infinity::XmlConnection *connection );
         void sessionStatusChanged();
+        void userRequestFinished( Infinity::User *user );
 
         Infinity::TextBuffer *m_textBuffer;
         Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;
         Glib::RefPtr<Infinity::ClientSessionProxy> *m_sessionProxy;
+        Glib::RefPtr<Infinity::ClientUserRequest> userRequest;
+        Infinity::User *localUser;
+        bool do_insert;
 
 };
 
