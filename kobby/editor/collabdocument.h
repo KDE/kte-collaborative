@@ -73,7 +73,7 @@ class CollabDocument
         Glib::RefPtr<Infinity::ClientSessionProxy> *m_sessionProxy;
         Glib::RefPtr<Infinity::ClientUserRequest> userRequest;
         Infinity::User *localUser;
-        bool do_insert;
+        bool local_pass;
 
 };
 
