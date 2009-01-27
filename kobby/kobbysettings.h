@@ -16,22 +16,22 @@ class KobbySettings : public KConfigSkeleton
     ~KobbySettings();
 
     /**
-      Set Main Window sizes.
+      Set Main Window location and size.
     */
     static
-    void setMainWindowSizes( const QList<int> & v )
+    void setMainWindowGeometry( const QList<int> & v )
     {
-      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowSizes" ) ))
-        self()->mMainWindowSizes = v;
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowGeometry" ) ))
+        self()->mMainWindowGeometry = v;
     }
 
     /**
-      Get Main Window sizes.
+      Get Main Window location and size.
     */
     static
-    QList<int> mainWindowSizes()
+    QList<int> mainWindowGeometry()
     {
-      return self()->mMainWindowSizes;
+      return self()->mMainWindowGeometry;
     }
 
     /**
@@ -78,7 +78,7 @@ class KobbySettings : public KConfigSkeleton
 
 
     // ui
-    QList<int> mMainWindowSizes;
+    QList<int> mMainWindowGeometry;
     QList<int> mMainWindowSplitterSizes;
 
     // profile

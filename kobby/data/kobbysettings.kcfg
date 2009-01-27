@@ -7,8 +7,8 @@
 	<kcfgfile name="kobbyrc"/>
 
 	<group name="ui">
-		<entry name="MainWindowSizes" type="IntList">
-			<label>Main Window sizes.</label>
+		<entry name="MainWindowGeometry" type="IntList">
+			<label>Main Window location and size.</label>
 		</entry>
 		<entry name="MainWindowSplitterSizes" type="IntList">
 			<label>Sizes of main splitter.</label>

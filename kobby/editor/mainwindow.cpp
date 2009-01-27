@@ -181,9 +181,9 @@ void MainWindow::loadConfig()
 {
     QList<int> sizes;
 
-    sizes = KobbySettings::mainWindowSizes();
-    if( sizes.size() )
-        setFixedSize( sizes[0], sizes[1] );
+    sizes = KobbySettings::mainWindowGeometry();
+    if( sizes.size() == 4 )
+        setGeometry( sizes[0], sizes[1], sizes[2], sizes[3] );
     sizes = KobbySettings::mainWindowSplitterSizes();
     if( sizes.size() )
         mainSplitter->setSizes( sizes );
@@ -199,8 +199,8 @@ void MainWindow::saveConfig()
 {
     QList<int> sizes;
 
-    sizes << width() << height();
-    KobbySettings::setMainWindowSizes( sizes );
+    sizes << x() << y() << width() << height();
+    KobbySettings::setMainWindowGeometry( sizes );
     KobbySettings::setMainWindowSplitterSizes( mainSplitter->sizes() );
     KobbySettings::self()->writeConfig();
 }

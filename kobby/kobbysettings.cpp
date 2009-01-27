@@ -35,11 +35,11 @@ KobbySettings::KobbySettings(  )
   s_globalKobbySettings->q = this;
   setCurrentGroup( QLatin1String( "ui" ) );
 
-  QList<int> defaultMainWindowSizes;
+  QList<int> defaultMainWindowGeometry;
 
-  KConfigSkeleton::ItemIntList  *itemMainWindowSizes;
-  itemMainWindowSizes = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowSizes" ), mMainWindowSizes, defaultMainWindowSizes );
-  addItem( itemMainWindowSizes, QLatin1String( "MainWindowSizes" ) );
+  KConfigSkeleton::ItemIntList  *itemMainWindowGeometry;
+  itemMainWindowGeometry = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowGeometry" ), mMainWindowGeometry, defaultMainWindowGeometry );
+  addItem( itemMainWindowGeometry, QLatin1String( "MainWindowGeometry" ) );
   QList<int> defaultMainWindowSplitterSizes;
 
   KConfigSkeleton::ItemIntList  *itemMainWindowSplitterSizes;
