@@ -141,8 +141,8 @@ void MainWindow::setupUi()
     mainSplitter->addWidget( documentTab );
     setCentralWidget( mainSplitter );
     
-    setXMLFile("kobbyui.rc");
     createShellGUI( true );
+    setupGUI(KXmlGuiWindow::Default, "kobbyui.rc");
     
     guiFactory()->addClient( curr_view );
     
