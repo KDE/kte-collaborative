@@ -38,7 +38,7 @@ CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sess
     , m_kDocument( &document )
     , m_sessionProxy( new Glib::RefPtr<Infinity::ClientSessionProxy>() )
     , localUser( 0 )
-    , do_insert( 1 )
+    , local_pass( 0 )
 {
     *m_sessionProxy = sessionProxy;
     setupSessionActions();
@@ -61,15 +61,13 @@ void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
 {
     unsigned int pos = cursorToPos( range.start(), *document );
     QString text = document->text( range, true );
-    if( localUser && do_insert )
+    if( localUser )
     {
-        m_textBuffer->insertText( pos, "e", 1, 2, localUser );
-        do_insert = 0;
+        local_pass = 1;
+        m_textBuffer->insertText( pos, text.toUtf8(), text.size(), (text.size() * 2), localUser );
     }
     else
         kDebug() << "No local user set.";
-
-    kDebug() << "Text inserted.";
 }
 
 void CollabDocument::slotInsertText( unsigned int pos,
@@ -78,6 +76,16 @@ void CollabDocument::slotInsertText( unsigned int pos,
 
 {
     kDebug() << "Insert text";
+    if( local_pass )
+    {
+        kDebug() << "passing on local insert.";
+    }
+    else
+    {
+        gsize len = textChunk.getLength();
+        m_kDocument->insertText( KTextEditor::Cursor( 0, pos ), QString::fromUtf8( (const char*)textChunk.getText( &len ), (int)len ) );
+        local_pass = 0;
+    }
 }
 
 void CollabDocument::setupSessionActions()
@@ -140,7 +148,7 @@ void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *co
         g_value_init(&params[3].value, G_TYPE_UINT);
         g_value_init(&params[4].value, INF_TYPE_USER_STATUS);
 
-        g_value_set_static_string(&params[0].value, "gregh");
+        g_value_set_static_string(&params[0].value, "gregha");
         g_value_set_double(&params[1].value, 0);
         g_value_take_boxed(
                 &params[2].value,inf_adopted_state_vector_copy(
