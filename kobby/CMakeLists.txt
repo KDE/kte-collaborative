@@ -4,7 +4,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-project(Kobby)
+project(kobby)
 
 find_package(KDE4 REQUIRED)
 find_package(Glib REQUIRED)
@@ -12,8 +12,6 @@ find_package(Libinfinity REQUIRED)
 find_package(Libinfinitymm REQUIRED)
 find_package(Libinftextmm REQUIRED)
 find_package(Libqinfinitymm REQUIRED)
-
-subdirs(data)
 
 set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
@@ -27,6 +25,7 @@ set( KOBBY_INCLUDES
 	${CMAKE_SOURCE_DIR}/kobby/dialogs
 	${CMAKE_SOURCE_DIR}/kobby/data
 	${CMAKE_BINARY_DIR}/kobby
+	.
 )
 
 set( KOBBY_LIBRARIES
@@ -65,17 +64,14 @@ set( KOBBY_UI
 	dialogs/createfolderwidget.ui
 )
 
+INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )
+
 kde4_add_ui_files( KOBBY_SRCS ${KOBBY_UI} )
 kde4_add_kcfg_files( KOBBY_SRCS data/kobbysettings.kcfgc )
 kde4_add_executable( kobby ${KOBBY_SRCS} )
 
-INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )
 
 target_link_libraries( kobby ${KOBBY_LIBRARIES} )
 
-install(
-	TARGETS 
-		kobby
-	DESTINATION
-		${BIN_INSTALL_DIR}
-)
+install( TARGETS kobby DESTINATION ${BIN_INSTALL_DIR} )
+install( FILES data/kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/kobby )

@@ -7,19 +7,11 @@
 			<Action name="file_new_document" />
 			<Action name="file_new_connection" />
 		</Menu>
+		<Merge/>
 	</Menu>
 	
-	<Menu name="tools" noMerge="1"><text>&amp;Tools</text>
-		<Menu name="tools_kobby"><text>Kobby</text>
-			<Action name="tools_kobby_control" />
-		</Menu>
-	</Menu>
-	
-	<Menu name="settings" noMerge="1"><text>&amp;Settings</text>
-		<Action name="settings_kobby" />
-	</Menu>
-	
-	<Merge />
+	<Merge/>
+
 </MenuBar>
 
 </kpartgui>

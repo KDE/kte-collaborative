@@ -71,7 +71,7 @@ MainWindow::MainWindow( QWidget *parent )
 
 MainWindow::~MainWindow()
 {
-    saveConfig();
+    saveSettings();
     delete documentTab;
     delete browserModel;
     QList<CollabDocument*>::Iterator itr;
@@ -146,7 +146,7 @@ void MainWindow::setupUi()
     
     guiFactory()->addClient( curr_view );
     
-    loadConfig();
+    loadSettings();
 }
 
 void MainWindow::setupActions()
@@ -177,7 +177,7 @@ void MainWindow::setupActions()
         this, SLOT(slotDocumentClose( KTextEditor::Document* )) );
 }
 
-void MainWindow::loadConfig()
+void MainWindow::loadSettings()
 {
     QList<int> sizes;
 
@@ -195,7 +195,7 @@ void MainWindow::loadConfig()
     }
 }
 
-void MainWindow::saveConfig()
+void MainWindow::saveSettings()
 {
     QList<int> sizes;
 

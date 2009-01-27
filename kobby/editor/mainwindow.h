@@ -1,7 +1,6 @@
 #ifndef KOBBY_EDITOR_MAINWINDOW_H
 #define KOBBY_EDITOR_MAINWINDOW_H
 
-#include <KSharedConfig>
 #include <KParts/MainWindow>
 
 #include <QtGui/QKeyEvent>
@@ -9,7 +8,6 @@
 
 #include <glibmm/refptr.h>
 
-class KConfigGroup;
 class QSplitter;
 class QTabWidget;
 
@@ -65,8 +63,8 @@ class MainWindow
         void init();
         void setupUi();
         void setupActions();
-        void loadConfig();
-        void saveConfig();
+        void loadSettings();
+        void saveSettings();
         
         QInfinity::InfinoteManager *infinoteManager;
         ConnectionManagerWidget *connectionManager;
