@@ -19,4 +19,5 @@ ui_*
 *.swo
 *.kdev*
 kobby/kobby
+tags
 

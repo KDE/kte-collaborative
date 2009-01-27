@@ -25,6 +25,7 @@ set( KOBBY_INCLUDES
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/kobby
 	${CMAKE_SOURCE_DIR}/kobby/dialogs
+	${CMAKE_SOURCE_DIR}/kobby/data
 	${CMAKE_BINARY_DIR}/kobby
 )
 
@@ -65,6 +66,7 @@ set( KOBBY_UI
 )
 
 kde4_add_ui_files( KOBBY_SRCS ${KOBBY_UI} )
+kde4_add_kcfg_files( KOBBY_SRCS data/kobbysettings.kcfgc )
 kde4_add_executable( kobby ${KOBBY_SRCS} )
 
 INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )

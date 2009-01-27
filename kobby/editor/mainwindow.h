@@ -89,9 +89,6 @@ class MainWindow
         KAction *controlAction;
         KAction *settingsAction;
 
-        KSharedConfigPtr configptr;
-        KConfigGroup *configGeneralGroup;
-
 };
 
 }

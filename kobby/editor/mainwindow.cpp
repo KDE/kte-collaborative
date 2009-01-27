@@ -15,6 +15,7 @@
 #include "connectionmanagerwidget.h"
 #include "collabdocument.h"
 #include "documenttabwidget.h"
+#include "kobbysettings.h"
 
 #include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/browseritem.h>
@@ -72,7 +73,6 @@ MainWindow::~MainWindow()
 {
     saveConfig();
     delete documentTab;
-    delete configGeneralGroup;
     delete browserModel;
     QList<CollabDocument*>::Iterator itr;
     for( itr = collabDocuments.begin(); itr != collabDocuments.end(); itr++ )
@@ -89,11 +89,13 @@ void MainWindow::slotCreateConnection()
 
 void MainWindow::slotOpenItem( QInfinity::BrowserItem &item )
 {
+    Q_UNUSED(item)
 }
 
 void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
     Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy )
 {
+    Q_UNUSED(node)
     kDebug() << "Subscribed to new session.";
     Infinity::Session *session = sessionProxy->getSession();
     if( !session )
@@ -118,6 +120,7 @@ void MainWindow::slotDocumentTabChanged( int index )
 
 void MainWindow::slotDocumentClose( KTextEditor::Document *document )
 {
+    Q_UNUSED(document)
 }
 
 void MainWindow::setupUi()
@@ -176,23 +179,30 @@ void MainWindow::setupActions()
 
 void MainWindow::loadConfig()
 {
-    QList<int> s;
-    configptr = KSharedConfig::openConfig();
-    configGeneralGroup = new KConfigGroup( configptr.data(), "General" );
+    QList<int> sizes;
 
-    setMinimumWidth( configGeneralGroup->readEntry( "width", 100 ) );
-    setMinimumHeight( configGeneralGroup->readEntry( "height", 100 ) );
-    s << 1 << 5;
-    s = configGeneralGroup->readEntry( "sidebarSizes", s );
-    if( s.size() > 0 )
-        mainSplitter->setSizes( s );
+    sizes = KobbySettings::mainWindowSizes();
+    if( sizes.size() )
+        setFixedSize( sizes[0], sizes[1] );
+    sizes = KobbySettings::mainWindowSplitterSizes();
+    if( sizes.size() )
+        mainSplitter->setSizes( sizes );
+    else
+    {
+        sizes.empty();
+        sizes << 1 << 5;
+        mainSplitter->setSizes( sizes );
+    }
 }
 
 void MainWindow::saveConfig()
 {
-    configGeneralGroup->writeEntry( "width", width() );
-    configGeneralGroup->writeEntry( "height", height() );
-    configGeneralGroup->writeEntry( "sidebarSizes", mainSplitter->sizes() );
+    QList<int> sizes;
+
+    sizes << width() << height();
+    KobbySettings::setMainWindowSizes( sizes );
+    KobbySettings::setMainWindowSplitterSizes( mainSplitter->sizes() );
+    KobbySettings::self()->writeConfig();
 }
 
 }
