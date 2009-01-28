@@ -24,6 +24,9 @@ namespace Kobby
 
 class CollabDocument;
 
+/**
+ * @brief Handles the creation and storage of CollabDocument's for each Session.
+ */
 class DocumentManager
     : public QObject
 {
@@ -35,6 +38,12 @@ class DocumentManager
         ~DocumentManager();
     
     Q_SIGNALS:
+        /**
+         * @brief A document has been created and is loading.
+         *
+         * Make sure document has completed loading before attempting
+         * to access the underlying KTextEditor::Document.
+         */
         void documentLoading( CollabDocument &document);
 
     private Q_SLOTS:
