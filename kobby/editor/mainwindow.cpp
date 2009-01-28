@@ -27,6 +27,7 @@
 #include <KApplication>
 #include <KSharedConfig>
 #include <KConfigGroup>
+#include <KConfigDialog>
 #include <KLocale>
 #include <KMessageBox>
 #include <KXMLGUIFactory>
@@ -171,6 +172,7 @@ void MainWindow::setupActions()
 void MainWindow::setupSignals()
 {
     connect( newConnectionAction, SIGNAL(triggered()), this, SLOT(slotCreateConnection()) );
+    connect( settingsAction, SIGNAL(triggered()), this, SLOT(showSettingsDialog()) );
 
     // Connect to InfinoteManager
     connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
@@ -214,6 +216,13 @@ void MainWindow::saveSettings()
     KobbySettings::setMainWindowGeometry( sizes );
     KobbySettings::setMainWindowSplitterSizes( mainSplitter->sizes() );
     KobbySettings::self()->writeConfig();
+}
+
+void MainWindow::showSettingsDialog()
+{
+    KConfigDialog *dialog = new KConfigDialog( this, "Kobby Settings", KobbySettings::self() );
+    dialog->exec();
+    delete dialog;
 }
 
 }

@@ -58,6 +58,7 @@ class MainWindow
             Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy );
         void slotDocumentTabChanged( int index );
         void slotDocumentClose( KTextEditor::Document* );
+        void showSettingsDialog();
     
     private:
         void init();
