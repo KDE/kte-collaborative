@@ -47,13 +47,13 @@ class CollabDocument
     Q_OBJECT
 
     public:
-        CollabDocument(  QInfinity::Session session,
+        CollabDocument(  QInfinity::Session &session,
             KTextEditor::Document &document,
             QObject *parent = 0 );
         ~CollabDocument();
 
         KTextEditor::Document *kDocument() const;
-        QInfinity::Session session() const;
+        QInfinity::Session &session() const;
 
     private Q_SLOTS:
         void slotLocalTextInserted( KTextEditor::Document *document,
@@ -61,16 +61,19 @@ class CollabDocument
         void slotInsertText( unsigned int pos,
             Infinity::TextChunk textChunk,
             Infinity::User *user );
+        void slotSynchronizationComplete();
 
     private:
         void setupSessionActions();
         void setupDocumentActions();
         unsigned int cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document );
-        void sessionSynchronizationComplete( Infinity::XmlConnection *connection );
         void sessionStatusChanged();
         void userRequestFinished( Infinity::User *user );
+        void joinUser();
+        KTextEditor::Cursor posToCursor( int pos ) const;
+        int cursorToPos( KTextEditor::Cursor cursor ) const;
 
-        QInfinity::Session m_session;
+        QInfinity::Session *m_session;
         Infinity::TextBuffer *m_textBuffer;
         Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;

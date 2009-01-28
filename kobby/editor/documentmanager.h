@@ -47,12 +47,11 @@ class DocumentManager
         void documentLoading( CollabDocument &document);
 
     private Q_SLOTS:
-        void slotSessionSubscribed( QInfinity::BrowserNoteItem &note,
-            QInfinity::Session session );
+        void slotSessionSubscribed( QInfinity::BrowserNoteItem &note );
     
     private:
         void setupSignals();
-        void insertSession( QInfinity::Session session );
+        void insertSession( QInfinity::Session &session );
 
         KTextEditor::Editor *editor;
         QInfinity::BrowserModel *m_browserModel;

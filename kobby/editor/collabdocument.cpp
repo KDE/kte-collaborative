@@ -29,11 +29,11 @@ void get_local_user( InfUser *user, gpointer user_data )
     (*static_cast<InfUser**>(user_data)) = user;
 }
 
-CollabDocument::CollabDocument( QInfinity::Session session,
+CollabDocument::CollabDocument( QInfinity::Session &session,
     KTextEditor::Document &document,
     QObject *parent )
     : QObject( parent )
-    , m_session( session )
+    , m_session( &session )
     , m_textBuffer( 0 )
     , m_infSession( session.infSession() )
     , m_kDocument( &document )
@@ -54,9 +54,9 @@ KTextEditor::Document *CollabDocument::kDocument() const
     return m_kDocument;
 }
 
-QInfinity::Session CollabDocument::session() const
+QInfinity::Session &CollabDocument::session() const
 {
-    return m_session;
+    return *m_session;
 }
 
 void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
@@ -92,6 +92,14 @@ void CollabDocument::slotInsertText( unsigned int pos,
     }
 }
 
+void CollabDocument::slotSynchronizationComplete()
+{
+    kDebug() << "Sync complete.";
+    joinUser();
+    m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
+    setupDocumentActions();
+}
+
 void CollabDocument::setupSessionActions()
 {
     if( !m_infSession )
@@ -99,8 +107,8 @@ void CollabDocument::setupSessionActions()
         kDebug() << "Connecting session actions when no session is set!";
         return;
     }
-    m_infSession->signal_synchronizationComplete().connect( sigc::mem_fun( this,
-        &CollabDocument::sessionSynchronizationComplete ) );
+    connect( &session(), SIGNAL(synchronizationComplete()),
+        this, SLOT(slotSynchronizationComplete()) );
     m_infSession->property_status().signal_changed().connect( sigc::mem_fun( this,
         &CollabDocument::sessionStatusChanged ) );
 }
@@ -128,7 +136,21 @@ unsigned int CollabDocument::cursorToPos( const KTextEditor::Cursor &cursor, KTe
     return upos;
 }
 
-void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *connection )
+void CollabDocument::sessionStatusChanged()
+{
+    if( !m_infSession )
+        return;
+    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
+    {
+    }
+}
+
+void CollabDocument::userRequestFinished( Infinity::User *user )
+{
+    localUser = user;
+}
+
+void CollabDocument::joinUser()
 {
     InfUser *infUser = 0;
     m_infSession->getUserTable()->forEachLocalUser( get_local_user, &infUser) ;
@@ -174,23 +196,14 @@ void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *co
             kDebug() << "Error joining user.";
 
     }
-
-    m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
-    setupDocumentActions();
 }
 
-void CollabDocument::sessionStatusChanged()
+KTextEditor::Cursor CollabDocument::posToCursor( int pos ) const
 {
-    if( !m_infSession )
-        return;
-    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
-    {
-    }
 }
 
-void CollabDocument::userRequestFinished( Infinity::User *user )
+int CollabDocument::cursorToPos( KTextEditor::Cursor cursor ) const
 {
-    localUser = user;
 }
 
 }

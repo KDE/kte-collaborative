@@ -179,9 +179,11 @@ void MainWindow::saveSettings()
 
 void MainWindow::showSettingsDialog()
 {
+    if( KConfigDialog::showDialog("Kobby Settings") )
+        return;
+
     KConfigDialog *dialog = new KConfigDialog( this, "Kobby Settings", KobbySettings::self() );
-    dialog->exec();
-    delete dialog;
+    dialog->show();
 }
 
 void MainWindow::documentLoading( CollabDocument &document )
