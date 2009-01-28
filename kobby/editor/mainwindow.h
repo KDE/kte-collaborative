@@ -49,8 +49,9 @@ class MainWindow
         void slotCreateConnection();
         void slotOpenItem( QInfinity::BrowserItem &item );
         void showSettingsDialog();
-        void loadingDocument( CollabDocument &document );
-        void loadedDocument( CollabDocument &document );
+        void documentLoading( CollabDocument &document );
+        void documentCreated( KTextEditor::Editor *editor,
+            KTextEditor::Document *document );
     
     private:
         void init();

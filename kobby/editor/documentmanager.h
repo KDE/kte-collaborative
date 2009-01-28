@@ -33,15 +33,13 @@ class DocumentManager
         DocumentManager( KTextEditor::Editor &editor,
             QInfinity::BrowserModel &browserModel );
         ~DocumentManager();
-
+    
     Q_SIGNALS:
-        void documentLoading( CollabDocument &document );
-        void documentLoaded( CollabDocument &document );
+        void documentLoading( CollabDocument &document);
 
     private Q_SLOTS:
         void slotSessionSubscribed( QInfinity::BrowserNoteItem &note,
             QInfinity::Session session );
-        void slotSessionSynchronized();
     
     private:
         void setupSignals();
@@ -51,8 +49,6 @@ class DocumentManager
         QInfinity::BrowserModel *m_browserModel;
         QList<CollabDocument*> m_collabDocuments;
         QMap<KTextEditor::Document*, CollabDocument*> documentCollabDocumentMap;
-        QMap<QInfinity::Session, CollabDocument*> sessionCollabDocumentMap;
-        QList<QInfinity::Session*> sessions;
 
 };
 

@@ -29,22 +29,6 @@ void DocumentManager::slotSessionSubscribed( QInfinity::BrowserNoteItem &note,
     insertSession( session );    
 }
 
-void DocumentManager::slotSessionSynchronized()
-{
-    QInfinity::Session *session = dynamic_cast<QInfinity::Session*>(sender());
-    CollabDocument *collabDocument;
-
-    if( !session )
-    {
-        kDebug() << "No sender in session sync slot.  (Should not happen)";
-        return;
-    }
-
-    collabDocument = sessionCollabDocumentMap[*session];
-    emit(documentLoaded(*collabDocument));
-    kDebug() << "syncd";
-}
-
 void DocumentManager::setupSignals()
 {
     connect( m_browserModel, SIGNAL(sessionSubscribed( QInfinity::BrowserNoteItem&, QInfinity::Session )),
@@ -53,16 +37,12 @@ void DocumentManager::setupSignals()
 
 void DocumentManager::insertSession( QInfinity::Session session )
 {
-    QInfinity::Session *localSession = new QInfinity::Session( session );
     KTextEditor::Document *document = editor->createDocument( this );
     CollabDocument *collabDocument = new CollabDocument( session, *document, this );
     m_collabDocuments << collabDocument;
     documentCollabDocumentMap[document] = collabDocument;
-    sessionCollabDocumentMap[collabDocument->session()] = collabDocument;
-    sessions << localSession;
 
-    connect( localSession, SIGNAL(sessionSubscribed()), this, SLOT(slotSessionSubscribed()) );
-    kDebug() << "insert";
+    emit(documentLoading( *collabDocument ));
 }
 
 }

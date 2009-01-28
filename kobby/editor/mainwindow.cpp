@@ -143,9 +143,10 @@ void MainWindow::setupSignals()
         this, SLOT(addConnection( Connection& )) );
 
     connect( documentManager, SIGNAL(documentLoading( CollabDocument& )),
-        this, SLOT(loadingDocument( CollabDocument& )) );
-    connect( documentManager, SIGNAL(documentLoaded( CollabDocument& )),
-        this, SLOT(loadedDocument( CollabDocument& )) );
+        this, SLOT(documentLoading( CollabDocument& )) );
+
+    connect( editor, SIGNAL(documentCreated( KTextEditor::Editor*, KTextEditor::Document* )),
+        this, SLOT(documentCreated( KTextEditor::Editor*, KTextEditor::Document * )) );
 }
 
 void MainWindow::loadSettings()
@@ -183,14 +184,15 @@ void MainWindow::showSettingsDialog()
     delete dialog;
 }
 
-void MainWindow::loadingDocument( CollabDocument &document )
+void MainWindow::documentLoading( CollabDocument &document )
 {
     Q_UNUSED(document)
 }
 
-void MainWindow::loadedDocument( CollabDocument &document )
+void MainWindow::documentCreated( KTextEditor::Editor *editor, KTextEditor::Document *document )
 {
-    documentTab->addDocument( *document.kDocument() );
+    Q_UNUSED(editor)
+    documentTab->addDocument( *document );
 }
 
 }
