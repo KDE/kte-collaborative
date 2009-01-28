@@ -63,6 +63,7 @@ class MainWindow
         void init();
         void setupUi();
         void setupActions();
+        void setupSignals();
         void loadSettings();
         void saveSettings();
         

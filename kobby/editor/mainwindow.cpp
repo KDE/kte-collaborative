@@ -64,7 +64,7 @@ MainWindow::MainWindow( QWidget *parent )
     }
     
     setupUi();
-    setupActions();
+    setupSignals();
     NotePlugin *notePlugin = new NotePlugin();
     infinoteManager->addNotePlugin( *notePlugin );
 }
@@ -141,8 +141,9 @@ void MainWindow::setupUi()
     mainSplitter->addWidget( documentTab );
     setCentralWidget( mainSplitter );
     
+    setupGUI( (ToolBar | Keys | StatusBar | Save), "kobbyui.rc");
+    setupActions();
     createShellGUI( true );
-    setupGUI(KXmlGuiWindow::Default, "kobbyui.rc");
     
     guiFactory()->addClient( curr_view );
     
@@ -154,11 +155,21 @@ void MainWindow::setupActions()
     // Setup menu actions
     newDocumentAction = actionCollection()->addAction( "file_new_document" );
     newDocumentAction->setText( "Document..." );
+    newDocumentAction->setIcon( KIcon( "document-new.png" ) );
     newDocumentAction->setWhatsThis( "Create a new document." );
 
     newConnectionAction = actionCollection()->addAction( "file_new_connection" );
     newConnectionAction->setText( "Connection..." );
+    newConnectionAction->setIcon( KIcon( "network-connect.png" ) );
     newConnectionAction->setWhatsThis( "Create a new connection to an Infinote server." );
+
+    settingsAction = actionCollection()->addAction( "settings_kobby" );
+    settingsAction->setText( "Configure Kobby..." );
+    settingsAction->setWhatsThis( "Modify kobby settings." );
+}
+
+void MainWindow::setupSignals()
+{
     connect( newConnectionAction, SIGNAL(triggered()), this, SLOT(slotCreateConnection()) );
 
     // Connect to InfinoteManager

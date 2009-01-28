@@ -9,8 +9,13 @@
 		</Menu>
 		<Merge/>
 	</Menu>
-	
+
 	<Merge/>
+	
+	<Menu name="settings"><text>&amp;Settings</text>
+		<Merge/>
+		<Action name="settings_kobby" />
+	</Menu>
 
 </MenuBar>
 
