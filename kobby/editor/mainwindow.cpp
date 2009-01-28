@@ -1,5 +1,4 @@
 #include <libinfinitymm/client/clientbrowser.h>
-#include <libinfinitymm/client/clientsessionproxy.h>
 #include <libinfinitymm/common/session.h>
 #include <libinfinitymm/common/buffer.h>
 #include <libinftextmm/textbuffer.h>
@@ -15,6 +14,7 @@
 #include "connectionmanagerwidget.h"
 #include "collabdocument.h"
 #include "documenttabwidget.h"
+#include "documentmanager.h"
 #include "kobbysettings.h"
 
 #include <libqinfinitymm/infinotemanager.h>
@@ -51,12 +51,10 @@ MainWindow::MainWindow( QWidget *parent )
     : infinoteManager( QInfinity::InfinoteManager::instance() )
     , browserModel( new BrowserModel( this ) )
     , documentTab( new DocumentTabWidget( this ) )
-    , curr_collabDocument( 0 )
 {
     Q_UNUSED(parent)
     
     editor = KTextEditor::EditorChooser::editor();
-    
     if( !editor )
     {
         KMessageBox::error(this, i18n("A KDE text-editor component could not be found;\n"
@@ -64,6 +62,7 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
     
+    documentManager = new DocumentManager( *editor, *browserModel );
     setupUi();
     setupSignals();
     NotePlugin *notePlugin = new NotePlugin();
@@ -75,11 +74,6 @@ MainWindow::~MainWindow()
     saveSettings();
     delete documentTab;
     delete browserModel;
-    QList<CollabDocument*>::Iterator itr;
-    for( itr = collabDocuments.begin(); itr != collabDocuments.end(); itr++ )
-    {
-        delete *itr;
-    }
 }
 
 void MainWindow::slotCreateConnection()
@@ -93,48 +87,18 @@ void MainWindow::slotOpenItem( QInfinity::BrowserItem &item )
     Q_UNUSED(item)
 }
 
-void MainWindow::slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
-    Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy )
-{
-    Q_UNUSED(node)
-    kDebug() << "Subscribed to new session.";
-    Infinity::Session *session = sessionProxy->getSession();
-    if( !session )
-    {
-        kDebug() << "Could not get session from session proxy.";
-        return;
-    }
-    curr_collabDocument = new CollabDocument( sessionProxy, *editor->createDocument( this ), editor );
-    curr_document = curr_collabDocument->kDocument();
-    documentTab->addDocument( *curr_document );
-    collabDocuments.append( curr_collabDocument );
-    collabDocumentMap.insert( curr_document, curr_collabDocument );
-}
-
-void MainWindow::slotDocumentTabChanged( int index )
-{
-    KTextEditor::Document *newDocument = documentTab->documentAt( index );
-    curr_document = newDocument;
-    curr_view = documentTab->documentView( *curr_document );
-    curr_collabDocument = collabDocumentMap[curr_document];
-}
-
-void MainWindow::slotDocumentClose( KTextEditor::Document *document )
-{
-    Q_UNUSED(document)
-}
-
 void MainWindow::setupUi()
 {
+    KTextEditor::Document *document;
+
     connectionManager = new ConnectionManagerWidget( this );
     fileBrowser = new FileBrowserWidget( *browserModel, this );
     m_sidebar = new Sidebar( this );
     m_sidebar->addTab( connectionManager, "Connections" );
     m_sidebar->addTab( fileBrowser, "Browse" );
 
-    curr_document = editor->createDocument(0);
-    documentTab->addDocument( *curr_document );
-    curr_view = curr_document->activeView();
+    document = editor->createDocument( this );
+    documentTab->addDocument( *document );
     
     mainSplitter = new QSplitter( Qt::Horizontal, this );
     
@@ -146,7 +110,7 @@ void MainWindow::setupUi()
     setupActions();
     createShellGUI( true );
     
-    guiFactory()->addClient( curr_view );
+    guiFactory()->addClient( document->activeView() );
     
     loadSettings();
 }
@@ -178,16 +142,10 @@ void MainWindow::setupSignals()
     connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
         this, SLOT(addConnection( Connection& )) );
 
-    // Connect to BrowserModel
-    connect( browserModel, SIGNAL(sessionSubscribed( QInfinity::BrowserNoteItem&,
-            Glib::RefPtr<Infinity::ClientSessionProxy> )),
-        this, SLOT(slotSessionSubscribed( QInfinity::BrowserNoteItem&,
-            Glib::RefPtr<Infinity::ClientSessionProxy> )) );
-
-    // Connect to DocumentTabWidget
-    connect( documentTab, SIGNAL(currentChanged( int )), this, SLOT(documentTabChanged( int )) );
-    connect( documentTab, SIGNAL(documentClose( KTextEditor::Document* )),
-        this, SLOT(slotDocumentClose( KTextEditor::Document* )) );
+    connect( documentManager, SIGNAL(documentLoading( CollabDocument& )),
+        this, SLOT(loadingDocument( CollabDocument& )) );
+    connect( documentManager, SIGNAL(documentLoaded( CollabDocument& )),
+        this, SLOT(loadedDocument( CollabDocument& )) );
 }
 
 void MainWindow::loadSettings()
@@ -223,6 +181,16 @@ void MainWindow::showSettingsDialog()
     KConfigDialog *dialog = new KConfigDialog( this, "Kobby Settings", KobbySettings::self() );
     dialog->exec();
     delete dialog;
+}
+
+void MainWindow::loadingDocument( CollabDocument &document )
+{
+    Q_UNUSED(document)
+}
+
+void MainWindow::loadedDocument( CollabDocument &document )
+{
+    documentTab->addDocument( *document.kDocument() );
 }
 
 }

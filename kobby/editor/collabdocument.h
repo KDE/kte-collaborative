@@ -1,6 +1,8 @@
 #ifndef KOBBY_COLLABDOCUMENT_H
 #define KOBBY_COLLABDOCUMENT_H
 
+#include <libqinfinitymm/session.h>
+
 #include <QObject>
 
 #include <glibmm/refptr.h>
@@ -16,8 +18,8 @@ namespace Infinity
     class TextChunk;
     class TextBuffer;
     class Session;
-    class ClientSessionProxy;
     class ClientUserRequest;
+    class ClientSessionProxy;
     class XmlConnection;
 }
 
@@ -45,12 +47,13 @@ class CollabDocument
     Q_OBJECT
 
     public:
-        CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
+        CollabDocument(  QInfinity::Session session,
             KTextEditor::Document &document,
             QObject *parent = 0 );
         ~CollabDocument();
 
         KTextEditor::Document *kDocument() const;
+        QInfinity::Session session() const;
 
     private Q_SLOTS:
         void slotLocalTextInserted( KTextEditor::Document *document,
@@ -67,10 +70,11 @@ class CollabDocument
         void sessionStatusChanged();
         void userRequestFinished( Infinity::User *user );
 
+        QInfinity::Session m_session;
         Infinity::TextBuffer *m_textBuffer;
         Infinity::Session *m_infSession;
         KTextEditor::Document *m_kDocument;
-        Glib::RefPtr<Infinity::ClientSessionProxy> *m_sessionProxy;
+        Glib::RefPtr<Infinity::ClientSessionProxy> m_sessionProxy;
         Glib::RefPtr<Infinity::ClientUserRequest> userRequest;
         Infinity::User *localUser;
         bool local_pass;

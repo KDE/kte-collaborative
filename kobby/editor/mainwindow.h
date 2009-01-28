@@ -6,8 +6,6 @@
 #include <QtGui/QKeyEvent>
 #include <QMap>
 
-#include <glibmm/refptr.h>
-
 class QSplitter;
 class QTabWidget;
 
@@ -16,11 +14,6 @@ namespace KTextEditor
     class Editor;
     class Document;
     class View;
-}
-
-namespace Infinity
-{
-    class ClientSessionProxy;
 }
 
 namespace QInfinity
@@ -41,6 +34,7 @@ class BrowserModel;
 class FileBrowserWidget;
 class CollabDocument;
 class DocumentTabWidget;
+class DocumentManager;
 
 class MainWindow
     : public KParts::MainWindow
@@ -54,11 +48,9 @@ class MainWindow
     private Q_SLOTS:
         void slotCreateConnection();
         void slotOpenItem( QInfinity::BrowserItem &item );
-        void slotSessionSubscribed( QInfinity::BrowserNoteItem &node,
-            Glib::RefPtr<Infinity::ClientSessionProxy> sessionProxy );
-        void slotDocumentTabChanged( int index );
-        void slotDocumentClose( KTextEditor::Document* );
         void showSettingsDialog();
+        void loadingDocument( CollabDocument &document );
+        void loadedDocument( CollabDocument &document );
     
     private:
         void init();
@@ -72,17 +64,13 @@ class MainWindow
         ConnectionManagerWidget *connectionManager;
         BrowserModel *browserModel;
         FileBrowserWidget *fileBrowser;
+
+        KTextEditor::Editor *editor;
+        DocumentTabWidget *documentTab;
+        DocumentManager *documentManager;
         
         QSplitter *mainSplitter;
         Sidebar *m_sidebar;
-        DocumentTabWidget *documentTab;
-
-        KTextEditor::Editor *editor;
-        KTextEditor::View *curr_view;
-        KTextEditor::Document *curr_document;
-        CollabDocument *curr_collabDocument;
-        QList<CollabDocument*> collabDocuments;
-        QMap<KTextEditor::Document*, CollabDocument*> collabDocumentMap;
         
         KAction *newDocumentAction;
         KAction *newConnectionAction;

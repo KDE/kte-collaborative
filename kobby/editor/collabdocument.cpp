@@ -29,31 +29,34 @@ void get_local_user( InfUser *user, gpointer user_data )
     (*static_cast<InfUser**>(user_data)) = user;
 }
 
-CollabDocument::CollabDocument( Glib::RefPtr<Infinity::ClientSessionProxy> &sessionProxy,
+CollabDocument::CollabDocument( QInfinity::Session session,
     KTextEditor::Document &document,
     QObject *parent )
     : QObject( parent )
+    , m_session( session )
     , m_textBuffer( 0 )
-    , m_infSession( sessionProxy->getSession() )
+    , m_infSession( session.infSession() )
     , m_kDocument( &document )
-    , m_sessionProxy( new Glib::RefPtr<Infinity::ClientSessionProxy>() )
+    , m_sessionProxy( session.infSessionProxy() )
     , localUser( 0 )
     , local_pass( 0 )
 {
-    *m_sessionProxy = sessionProxy;
     setupSessionActions();
 }
 
 CollabDocument::~CollabDocument()
 {
-    if( m_sessionProxy )
-        delete m_sessionProxy;
     m_infSession->close();
 }
 
 KTextEditor::Document *CollabDocument::kDocument() const
 {
     return m_kDocument;
+}
+
+QInfinity::Session CollabDocument::session() const
+{
+    return m_session;
 }
 
 void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
@@ -75,6 +78,7 @@ void CollabDocument::slotInsertText( unsigned int pos,
     Infinity::User *user )
 
 {
+    Q_UNUSED(user)
     kDebug() << "Insert text";
     if( local_pass )
     {
@@ -159,7 +163,7 @@ void CollabDocument::sessionSynchronizationComplete( Infinity::XmlConnection *co
         g_value_set_enum(&params[4].value, INF_USER_ACTIVE);
 
         InfcUserRequest *infUserRequest;
-        infUserRequest = infc_session_proxy_join_user( (*m_sessionProxy)->gobj(), params, 5, 0 );
+        infUserRequest = infc_session_proxy_join_user( m_sessionProxy->gobj(), params, 5, 0 );
         userRequest = Glib::wrap( infUserRequest, true );
         if( userRequest )
         {

@@ -47,6 +47,7 @@ set( KOBBY_SRCS
 	editor/filebrowserwidget.cpp
 	editor/collabdocument.cpp
 	editor/collabsession.cpp
+	editor/documentmanager.cpp
 	editor/documenttabwidget.cpp
 	editor/sidebar.cpp
 	editor/mainwindow.cpp
