@@ -15,13 +15,8 @@ class SettingsDialog
     public:
         SettingsDialog( QWidget *parent = 0 );
 
-    private Q_SLOTS:
-        void slotApplyClicked();
-
     private:
         void setupUi();
-        void setupSignals();
-        void saveSettings();
 
         KPageWidgetItem *profilePage;
 

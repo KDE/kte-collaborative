@@ -29,25 +29,10 @@ SettingsDialog::SettingsDialog( QWidget *parent )
     setupUi();
 }
 
-void SettingsDialog::slotApplyClicked()
-{
-    saveSettings();
-}
-
 void SettingsDialog::setupUi()
 {
     profilePage = addPage( new ProfileSettings( this ), i18n("Profile") );
     profilePage->setIcon( KIcon( "user-identity.png" ) );
-}
-
-void SettingsDialog::setupSignals()
-{
-    connect( this, SIGNAL(applyClicked()),
-        this, SLOT(slotApplyClicked()) );
-}
-
-void SettingsDialog::saveSettings()
-{
 }
 
 }
