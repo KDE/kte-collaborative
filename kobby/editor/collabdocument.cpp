@@ -8,6 +8,7 @@
 #include <libinftextmm/textbuffer.h>
 
 #include "collabdocument.h"
+#include "kobbysettings.h"
 
 #include <libqinfinitymm/document.h>
 
@@ -39,7 +40,8 @@ CollabDocument::CollabDocument( QInfinity::Session &session,
     , m_kDocument( &document )
     , m_sessionProxy( session.infSessionProxy() )
     , localUser( 0 )
-    , local_pass( 0 )
+    , local_pass_insert( 0 )
+    , local_pass_erase( 0 )
 {
     setupSessionActions();
 }
@@ -62,13 +64,37 @@ QInfinity::Session &CollabDocument::session() const
 void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
-    unsigned int pos = cursorToPos( range.start(), *document );
+    unsigned int pos;
 
-    QString text = document->text( range, true );
     if( localUser )
     {
-        local_pass = 1;
+        local_pass_insert = 1;
+        pos = cursorToPos( range.start(), *document );
+        QString text = document->text( range, true );
+        if( !text.size() )
+        {
+            text = "\n";
+        }
         m_textBuffer->insertText( pos, text.toUtf8(), text.size(), text.size(), localUser );
+    }
+    else
+        kDebug() << "No local user set.";
+}
+
+void CollabDocument::slotLocalEraseText( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+    unsigned int pos = cursorToPos( range.start(), *document );
+    KTextEditor::Cursor startCursor = range.start();
+    KTextEditor::Cursor endCursor = range.end();
+    unsigned int start = cursorToPos( startCursor );
+    unsigned int end = cursorToPos( endCursor );
+    unsigned int len = end - start;
+
+    if( localUser )
+    {
+        local_pass_erase = 1;
+        m_textBuffer->eraseText( pos, len, *localUser );
     }
     else
         kDebug() << "No local user set.";
@@ -81,9 +107,9 @@ void CollabDocument::slotRemoteInsertText( unsigned int pos,
 {
     Q_UNUSED(user)
 
-    if( local_pass )
+    if( local_pass_insert )
     {
-        local_pass = 0;
+        local_pass_insert = 0;
         return;
     }
 
@@ -92,7 +118,26 @@ void CollabDocument::slotRemoteInsertText( unsigned int pos,
     QString text = QString::fromUtf8( (const char*)textChunk.getText( (gsize*)&len ), len );
 
     m_kDocument->insertText( cursor, text, (int)len );
-    local_pass = 0;
+    local_pass_insert = 0;
+}
+
+void CollabDocument::slotRemoteEraseText( unsigned int pos,
+    unsigned int len,
+       Infinity::User *user )
+{
+    Q_UNUSED(user)
+    
+    if( local_pass_erase )
+    {
+        local_pass_erase = 0;
+        return;
+    }
+
+    KTextEditor::Cursor start = posToCursor( pos );
+    KTextEditor::Cursor end = posToCursor( pos + len );
+    KTextEditor::Range range( start, end );
+
+    m_kDocument->removeText( range );
 }
 
 void CollabDocument::slotSynchronizationComplete()
@@ -123,6 +168,12 @@ void CollabDocument::setupDocumentActions()
     connect( m_kDocument, SIGNAL(textInserted( KTextEditor::Document*,
             const KTextEditor::Range& )),
         this, SLOT(slotLocalTextInserted( KTextEditor::Document*,
+            const KTextEditor::Range& )) );
+    m_textBuffer->signal_eraseText().connect( sigc::mem_fun( this,
+        &CollabDocument::slotRemoteEraseText ) );
+    connect( m_kDocument, SIGNAL(textRemoved( KTextEditor::Document*,
+            const KTextEditor::Range& )),
+        this, SLOT(slotLocalEraseText( KTextEditor::Document*,
             const KTextEditor::Range& )) );
          
 }
@@ -177,7 +228,7 @@ void CollabDocument::joinUser()
         g_value_init(&params[3].value, G_TYPE_UINT);
         g_value_init(&params[4].value, INF_TYPE_USER_STATUS);
 
-        g_value_set_static_string(&params[0].value, "gregha");
+        g_value_set_static_string(&params[0].value, KobbySettings::nickName().toAscii());
         g_value_set_double(&params[1].value, 0);
         g_value_take_boxed(
                 &params[2].value,inf_adopted_state_vector_copy(
@@ -225,6 +276,11 @@ int CollabDocument::cursorToPos( KTextEditor::Cursor cursor ) const
     }
 
     return pos + column;
+}
+
+QList<QString> CollabDocument::cstrToStringList( const char *cstr ) const
+{
+
 }
 
 }

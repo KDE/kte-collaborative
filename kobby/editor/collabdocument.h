@@ -58,8 +58,13 @@ class CollabDocument
     private Q_SLOTS:
         void slotLocalTextInserted( KTextEditor::Document *document,
             const KTextEditor::Range &range );
+        void slotLocalEraseText( KTextEditor::Document *document,
+            const KTextEditor::Range &range );
         void slotRemoteInsertText( unsigned int pos,
             Infinity::TextChunk textChunk,
+            Infinity::User *user );
+        void slotRemoteEraseText( unsigned int pos,
+            unsigned int len,
             Infinity::User *user );
         void slotSynchronizationComplete();
 
@@ -72,6 +77,8 @@ class CollabDocument
         void joinUser();
         KTextEditor::Cursor posToCursor( int pos ) const;
         int cursorToPos( KTextEditor::Cursor cursor ) const;
+        QList<QString> cstrToStringList( const char *cstr ) const;
+
 
         QInfinity::Session *m_session;
         Infinity::TextBuffer *m_textBuffer;
@@ -80,7 +87,8 @@ class CollabDocument
         Glib::RefPtr<Infinity::ClientSessionProxy> m_sessionProxy;
         Glib::RefPtr<Infinity::ClientUserRequest> userRequest;
         Infinity::User *localUser;
-        bool local_pass;
+        bool local_pass_insert;
+        bool local_pass_erase;
 
 };
 
