@@ -51,6 +51,9 @@ KobbySettings::KobbySettings(  )
   KConfigSkeleton::ItemString  *itemNickName;
   itemNickName = new KConfigSkeleton::ItemString( currentGroup(), QLatin1String( "NickName" ), mNickName, QLatin1String( "JohnDoe" ) );
   addItem( itemNickName, QLatin1String( "NickName" ) );
+  KConfigSkeleton::ItemColor  *itemUserColor;
+  itemUserColor = new KConfigSkeleton::ItemColor( currentGroup(), QLatin1String( "UserColor" ), mUserColor );
+  addItem( itemUserColor, QLatin1String( "UserColor" ) );
 }
 
 KobbySettings::~KobbySettings()

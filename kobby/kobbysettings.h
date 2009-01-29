@@ -72,6 +72,25 @@ class KobbySettings : public KConfigSkeleton
       return self()->mNickName;
     }
 
+    /**
+      Set Color user appears as on server.
+    */
+    static
+    void setUserColor( const QColor & v )
+    {
+      if (!self()->isImmutable( QString::fromLatin1 ( "UserColor" ) ))
+        self()->mUserColor = v;
+    }
+
+    /**
+      Get Color user appears as on server.
+    */
+    static
+    QColor userColor()
+    {
+      return self()->mUserColor;
+    }
+
   protected:
     KobbySettings();
     friend class KobbySettingsHelper;
@@ -83,6 +102,7 @@ class KobbySettings : public KConfigSkeleton
 
     // profile
     QString mNickName;
+    QColor mUserColor;
 
   private:
 };

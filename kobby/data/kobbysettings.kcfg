@@ -20,6 +20,9 @@
 			<label>Nick Name other users see.</label>
 			<default>JohnDoe</default>
 		</entry>
+		<entry name="UserColor" type="Color">
+			<label>Color user appears as on server.</label>
+		</entry>
 	</group>
 
 	<group name="network">

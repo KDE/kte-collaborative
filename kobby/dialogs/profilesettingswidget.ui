@@ -30,7 +30,7 @@
        </widget>
       </item>
       <item row="0" column="1" >
-       <widget class="QLineEdit" name="nicknameLineEdit" />
+       <widget class="QLineEdit" name="kcfg_NickName" />
       </item>
       <item row="1" column="0" >
        <widget class="QLabel" name="label_2" >
@@ -55,7 +55,105 @@
          </spacer>
         </item>
         <item>
-         <widget class="KColorCombo" name="comboBox" />
+         <widget class="KColorCombo" name="kcfg_UserColor" >
+          <property name="color" >
+           <color>
+            <red>50</red>
+            <green>70</green>
+            <blue>255</blue>
+           </color>
+          </property>
+          <item>
+           <property name="text" >
+            <string>Custom...</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string/>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </item>
@@ -81,7 +179,7 @@
   <customwidget>
    <class>KColorCombo</class>
    <extends>QComboBox</extends>
-   <header>KColorCombo</header>
+   <header>kcolorcombo.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
