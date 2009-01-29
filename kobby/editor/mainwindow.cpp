@@ -16,6 +16,7 @@
 #include "documenttabwidget.h"
 #include "documentmanager.h"
 #include "kobbysettings.h"
+#include "profilesettings.h"
 
 #include <libqinfinitymm/infinotemanager.h>
 #include <libqinfinitymm/browseritem.h>
@@ -32,6 +33,7 @@
 #include <KMessageBox>
 #include <KXMLGUIFactory>
 #include <KDebug>
+#include <KPageWidgetItem>
 
 #include <KTextEditor/Document>
 #include <KTextEditor/View>
@@ -179,10 +181,14 @@ void MainWindow::saveSettings()
 
 void MainWindow::showSettingsDialog()
 {
+    KPageWidgetItem *item;
+
     if( KConfigDialog::showDialog("Kobby Settings") )
         return;
 
     KConfigDialog *dialog = new KConfigDialog( this, "Kobby Settings", KobbySettings::self() );
+    item = dialog->addPage( new ProfileSettings, "Profile", "Profile" );
+    item->setIcon( KIcon( "user-identity.png" ) );
     dialog->show();
 }
 

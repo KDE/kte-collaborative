@@ -57,6 +57,7 @@ set( KOBBY_SRCS
 	dialogs/connectionmanagerwidget.cpp
 	dialogs/createitemdialog.cpp
 	dialogs/createfolderdialog.cpp
+	dialogs/profilesettings.cpp
 )
 
 set( KOBBY_UI
