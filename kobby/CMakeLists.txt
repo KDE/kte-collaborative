@@ -64,6 +64,7 @@ set( KOBBY_UI
 	dialogs/createconnectionwidget.ui
 	dialogs/createitemwidget.ui
 	dialogs/createfolderwidget.ui
+	dialogs/profilesettingswidget.ui
 )
 
 INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )
