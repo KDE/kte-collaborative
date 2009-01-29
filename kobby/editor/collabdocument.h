@@ -58,7 +58,7 @@ class CollabDocument
     private Q_SLOTS:
         void slotLocalTextInserted( KTextEditor::Document *document,
             const KTextEditor::Range &range );
-        void slotInsertText( unsigned int pos,
+        void slotRemoteInsertText( unsigned int pos,
             Infinity::TextChunk textChunk,
             Infinity::User *user );
         void slotSynchronizationComplete();

@@ -63,33 +63,36 @@ void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     unsigned int pos = cursorToPos( range.start(), *document );
+
     QString text = document->text( range, true );
     if( localUser )
     {
         local_pass = 1;
-        m_textBuffer->insertText( pos, text.toUtf8(), text.size(), (text.size() * 2), localUser );
+        m_textBuffer->insertText( pos, text.toUtf8(), text.size(), text.size(), localUser );
     }
     else
         kDebug() << "No local user set.";
 }
 
-void CollabDocument::slotInsertText( unsigned int pos,
+void CollabDocument::slotRemoteInsertText( unsigned int pos,
     Infinity::TextChunk textChunk,
     Infinity::User *user )
 
 {
     Q_UNUSED(user)
-    kDebug() << "Insert text";
+
     if( local_pass )
     {
-        kDebug() << "passing on local insert.";
-    }
-    else
-    {
-        gsize len = textChunk.getLength();
-        m_kDocument->insertText( KTextEditor::Cursor( 0, pos ), QString::fromUtf8( (const char*)textChunk.getText( &len ), (int)len ) );
         local_pass = 0;
+        return;
     }
+
+    int len = textChunk.getLength();
+    KTextEditor::Cursor cursor = posToCursor( pos );
+    QString text = QString::fromUtf8( (const char*)textChunk.getText( (gsize*)&len ), len );
+
+    m_kDocument->insertText( cursor, text, (int)len );
+    local_pass = 0;
 }
 
 void CollabDocument::slotSynchronizationComplete()
@@ -116,7 +119,7 @@ void CollabDocument::setupSessionActions()
 void CollabDocument::setupDocumentActions()
 {
     m_textBuffer->signal_insertText().connect( sigc::mem_fun( this,
-        &CollabDocument::slotInsertText ) );
+        &CollabDocument::slotRemoteInsertText ) );
     connect( m_kDocument, SIGNAL(textInserted( KTextEditor::Document*,
             const KTextEditor::Range& )),
         this, SLOT(slotLocalTextInserted( KTextEditor::Document*,
@@ -200,10 +203,28 @@ void CollabDocument::joinUser()
 
 KTextEditor::Cursor CollabDocument::posToCursor( int pos ) const
 {
+    int line = 0;
+    for ( ; line < kDocument()->lines()-1; ++line )
+    {
+        if (kDocument()->line(line).length() >= pos)
+            break;
+
+        pos -= kDocument()->line(line).length()+1;
+    }
+     
+    return KTextEditor::Cursor(line, pos);
 }
 
 int CollabDocument::cursorToPos( KTextEditor::Cursor cursor ) const
 {
+    int line = cursor.line(), column = cursor.column();
+    unsigned int pos = 0;
+    for ( int curLine = 0; curLine < line; ++curLine )
+    {
+        pos += kDocument()->line(curLine).length() + 1;
+    }
+
+    return pos + column;
 }
 
 }
