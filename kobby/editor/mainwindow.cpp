@@ -34,6 +34,7 @@
 #include <KXMLGUIFactory>
 #include <KDebug>
 #include <KPageWidgetItem>
+#include <KLocalizedString>
 
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
@@ -110,6 +111,8 @@ void MainWindow::setupUi()
     setupGUI( (ToolBar | Keys | StatusBar | Save), "kobbyui.rc");
     setupActions();
     createShellGUI( true );
+
+    setWindowIcon( KIcon( "meeting-attend.png" ) );
     
     guiFactory()->addClient( document->activeView() );
     
@@ -119,19 +122,20 @@ void MainWindow::setupUi()
 void MainWindow::setupActions()
 {
     // Setup menu actions
-    newDocumentAction = actionCollection()->addAction( "file_new_document" );
-    newDocumentAction->setText( "Document..." );
+    newDocumentAction = actionCollection()->addAction( "new_document" );
+    newDocumentAction->setText( i18n("New Document") );
     newDocumentAction->setIcon( KIcon( "document-new.png" ) );
-    newDocumentAction->setWhatsThis( "Create a new document." );
+    newDocumentAction->setWhatsThis( i18n("Create a new document.") );
 
-    newConnectionAction = actionCollection()->addAction( "file_new_connection" );
-    newConnectionAction->setText( "Connection..." );
+    newConnectionAction = actionCollection()->addAction( "new_connection" );
+    newConnectionAction->setText( i18n("New Connection") );
     newConnectionAction->setIcon( KIcon( "network-connect.png" ) );
-    newConnectionAction->setWhatsThis( "Create a new connection to an Infinote server." );
+    newConnectionAction->setWhatsThis( i18n("Create a new connection to an Infinote server.") );
 
     settingsAction = actionCollection()->addAction( "settings_kobby" );
-    settingsAction->setText( "Configure Kobby..." );
-    settingsAction->setWhatsThis( "Modify kobby settings." );
+    settingsAction->setText( i18n("Configure Kobby...") );
+    settingsAction->setWhatsThis( i18n("Modify kobby settings.") );
+
 }
 
 void MainWindow::setupSignals()

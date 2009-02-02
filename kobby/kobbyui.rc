@@ -3,19 +3,20 @@
 
 <MenuBar>
 	<Menu name="file" noMerge="1"><text>&amp;File</text>
-		<Menu name="file_new"><text>New</text>
-			<Action name="file_new_document" />
-			<Action name="file_new_connection" />
-		</Menu>
+		<Action name="new_connection" />
+		<Action name="new_document" />
+		<Separator />
 		<Merge/>
 	</Menu>
-
 	<Merge/>
-	
 	<Menu name="settings"><text>&amp;Settings</text>
 		<Action name="settings_kobby" />
 		<Merge/>
 	</Menu>
 </MenuBar>
+
+<ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
+	<Action name="new_document" />
+</ToolBar>
 
 </kpartgui>
