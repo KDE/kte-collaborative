@@ -15,8 +15,11 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/Range>
 #include <KTextEditor/Cursor>
+#include <KTextEditor/View>
 
 #include <KDebug>
+
+#include <QBuffer>
 
 #include <glib-object.h>
 
@@ -40,15 +43,14 @@ CollabDocument::CollabDocument( QInfinity::Session &session,
     , m_kDocument( &document )
     , m_sessionProxy( session.infSessionProxy() )
     , localUser( 0 )
-    , local_pass_insert( 0 )
-    , local_pass_erase( 0 )
 {
+    textStream.setCodec( "utf-8" );
     setupSessionActions();
 }
 
 CollabDocument::~CollabDocument()
 {
-    m_infSession->close();
+    delete m_session;
 }
 
 KTextEditor::Document *CollabDocument::kDocument() const
@@ -65,17 +67,19 @@ void CollabDocument::slotLocalTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     unsigned int pos;
+    unsigned int size;
 
     if( localUser )
     {
-        local_pass_insert = 1;
-        pos = cursorToPos( range.start(), *document );
-        QString text = document->text( range, true );
-        if( !text.size() )
-        {
+        QString text = m_kDocument->text( range );
+        pos = cursorToPos( range.start(), *m_kDocument );
+        kDebug() << "Inserting " << text << "on " << range.start().line() 
+            << ":" << range.start().column() << "to " << range.end().line() 
+            << ":" << range.end().column() << " linear is " << pos;
+        if( text[0] == '\n' )
             text = "\n";
-        }
-        m_textBuffer->insertText( pos, text.toUtf8(), text.size(), text.size(), localUser );
+        size = text.size();
+        m_textBuffer->insertText( pos, text.toUtf8(), size, size, localUser );
     }
     else
         kDebug() << "No local user set.";
@@ -85,6 +89,7 @@ void CollabDocument::slotLocalEraseText( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     unsigned int pos = cursorToPos( range.start(), *document );
+    debugRemove( document, range );
     KTextEditor::Cursor startCursor = range.start();
     KTextEditor::Cursor endCursor = range.end();
     unsigned int start = cursorToPos( startCursor );
@@ -93,7 +98,6 @@ void CollabDocument::slotLocalEraseText( KTextEditor::Document *document,
 
     if( localUser )
     {
-        local_pass_erase = 1;
         m_textBuffer->eraseText( pos, len, *localUser );
     }
     else
@@ -105,39 +109,42 @@ void CollabDocument::slotRemoteInsertText( unsigned int pos,
     Infinity::User *user )
 
 {
-    Q_UNUSED(user)
-
-    if( local_pass_insert )
-    {
-        local_pass_insert = 0;
+    if( user->gobj() == localUser->gobj() )
         return;
-    }
 
-    int len = textChunk.getLength();
-    KTextEditor::Cursor cursor = posToCursor( pos );
-    QString text = QString::fromUtf8( (const char*)textChunk.getText( (gsize*)&len ), len );
+    unsigned int length;
+    const char *text;
+    text = (const char*)textChunk.getText( &length );
+    
+    QByteArray byteArr( text, length );
+    QBuffer buffer( &byteArr );
+    buffer.open( QBuffer::ReadOnly );
+    textStream.setDevice( &buffer );
 
-    m_kDocument->insertText( cursor, text, (int)len );
-    local_pass_insert = 0;
+
+    m_kDocument->insertText( posToCursor( pos ), textStream.readAll() );
+    textStream.setDevice( 0 );
 }
 
 void CollabDocument::slotRemoteEraseText( unsigned int pos,
     unsigned int len,
        Infinity::User *user )
 {
-    Q_UNUSED(user)
-    
-    if( local_pass_erase )
-    {
-        local_pass_erase = 0;
+    if( user->gobj() == localUser->gobj() )
         return;
-    }
 
     KTextEditor::Cursor start = posToCursor( pos );
     KTextEditor::Cursor end = posToCursor( pos + len );
     KTextEditor::Range range( start, end );
 
     m_kDocument->removeText( range );
+}
+
+void CollabDocument::slotLocalTextChanged( KTextEditor::Document *document,
+    const KTextEditor::Range &oldRange,
+    const KTextEditor::Range &newRange )
+{
+    kDebug() << "text changed";
 }
 
 void CollabDocument::slotSynchronizationComplete()
@@ -157,8 +164,6 @@ void CollabDocument::setupSessionActions()
     }
     connect( &session(), SIGNAL(synchronizationComplete()),
         this, SLOT(slotSynchronizationComplete()) );
-    m_infSession->property_status().signal_changed().connect( sigc::mem_fun( this,
-        &CollabDocument::sessionStatusChanged ) );
 }
 
 void CollabDocument::setupDocumentActions()
@@ -175,28 +180,22 @@ void CollabDocument::setupDocumentActions()
             const KTextEditor::Range& )),
         this, SLOT(slotLocalEraseText( KTextEditor::Document*,
             const KTextEditor::Range& )) );
-         
+    connect( m_kDocument, SIGNAL(textChanged( KTextEditor::Document*,
+            const KTextEditor::Range&, const KTextEditor::Range& )),
+        this, SLOT(slotLocalTextChanged( KTextEditor::Document*,
+            const KTextEditor::Range&, const KTextEditor::Range& )) );
 }
 
 unsigned int CollabDocument::cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document )
 {
-    int pos = 0, i;
+    unsigned int pos = 0, i;
     for( i = 0; i < cursor.line(); i++ )
     {
         pos += document.lineLength( i );
+        pos++;
     }
     pos += cursor.column();
-    unsigned int upos = pos;
-    return upos;
-}
-
-void CollabDocument::sessionStatusChanged()
-{
-    if( !m_infSession )
-        return;
-    if( m_infSession->getStatus() == Infinity::SESSION_RUNNING )
-    {
-    }
+    return pos;
 }
 
 void CollabDocument::userRequestFinished( Infinity::User *user )
@@ -272,15 +271,26 @@ int CollabDocument::cursorToPos( KTextEditor::Cursor cursor ) const
     unsigned int pos = 0;
     for ( int curLine = 0; curLine < line; ++curLine )
     {
-        pos += kDocument()->line(curLine).length() + 1;
+        pos += kDocument()->lineLength(curLine) + 1;
     }
 
     return pos + column;
 }
 
-QList<QString> CollabDocument::cstrToStringList( const char *cstr ) const
+void CollabDocument::debugInsert( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
 {
+    kDebug() << "inserting " << document->text( range, true ) <<
+        "on line " << range.start().line() << " column " << range.start().column()
+        << " until " << range.end().line() << " column " << range.end().column();
+}
 
+void CollabDocument::debugRemove( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+    kDebug() << "removed " <<
+        "on line " << range.start().line() << " column " << range.start().column()
+        << " until " << range.end().line() << " column " << range.end().column();
 }
 
 }

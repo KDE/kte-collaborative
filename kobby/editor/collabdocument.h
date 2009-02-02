@@ -4,6 +4,7 @@
 #include <libqinfinitymm/session.h>
 
 #include <QObject>
+#include <QTextStream>
 
 #include <glibmm/refptr.h>
 
@@ -28,6 +29,7 @@ namespace KTextEditor
     class Document;
     class Range;
     class Cursor;
+    class View;
 }
 
 namespace Kobby
@@ -66,18 +68,23 @@ class CollabDocument
         void slotRemoteEraseText( unsigned int pos,
             unsigned int len,
             Infinity::User *user );
+        void slotLocalTextChanged( KTextEditor::Document *document,
+            const KTextEditor::Range &oldRange,
+            const KTextEditor::Range &newRange );
         void slotSynchronizationComplete();
 
     private:
         void setupSessionActions();
         void setupDocumentActions();
         unsigned int cursorToPos( const KTextEditor::Cursor &cursor, KTextEditor::Document &document );
-        void sessionStatusChanged();
         void userRequestFinished( Infinity::User *user );
         void joinUser();
         KTextEditor::Cursor posToCursor( int pos ) const;
         int cursorToPos( KTextEditor::Cursor cursor ) const;
-        QList<QString> cstrToStringList( const char *cstr ) const;
+        void debugInsert( KTextEditor::Document *document,
+            const KTextEditor::Range &range );
+        void debugRemove( KTextEditor::Document *document,
+            const KTextEditor::Range &range );
 
 
         QInfinity::Session *m_session;
@@ -87,8 +94,7 @@ class CollabDocument
         Glib::RefPtr<Infinity::ClientSessionProxy> m_sessionProxy;
         Glib::RefPtr<Infinity::ClientUserRequest> userRequest;
         Infinity::User *localUser;
-        bool local_pass_insert;
-        bool local_pass_erase;
+        QTextStream textStream;
 
 };
 
