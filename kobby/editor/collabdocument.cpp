@@ -109,7 +109,7 @@ void CollabDocument::slotRemoteInsertText( unsigned int pos,
     Infinity::User *user )
 
 {
-    if( user->gobj() == localUser->gobj() )
+    if( localUser && user->gobj() == localUser->gobj() )
         return;
 
     unsigned int length;
@@ -151,8 +151,10 @@ void CollabDocument::slotSynchronizationComplete()
 {
     kDebug() << "Sync complete.";
     joinUser();
+    /*
     m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
     setupDocumentActions();
+    */
 }
 
 void CollabDocument::setupSessionActions()
@@ -164,6 +166,8 @@ void CollabDocument::setupSessionActions()
     }
     connect( &session(), SIGNAL(synchronizationComplete()),
         this, SLOT(slotSynchronizationComplete()) );
+    m_textBuffer = dynamic_cast<Infinity::TextBuffer*>(m_infSession->getBuffer());
+    setupDocumentActions();
 }
 
 void CollabDocument::setupDocumentActions()
