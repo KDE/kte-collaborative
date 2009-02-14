@@ -1,6 +1,0 @@
-TODO
-
-*DONE*Fix QtIo - Maybe this needs to be processed by gmmproc?
-*KNOWN BUG*Including sigc++ after including Qt causes compilation issues.
-Including gnutls causues klibloader init function to be undefined.
-Create user info config interface

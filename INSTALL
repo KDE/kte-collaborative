@@ -1,27 +1,2 @@
-Installing Kobby
+See http://kobby.greghaynes.net/
 
-This file is out of date.  See http://trac.greghaynes.net/kobby or generate a doxygen manual for an up to date reference.
-
-Dependancies:
-
-If you already have libinfinitymm installed, you can skip to the Kobby section.
-
-Libinfinitymm:
-Libinfinitymm is a set of C++ bidings for libinfinity.  To install libinfinitymm you will need to have libinfinity and glibmm installed.  Libinfinity can be checked out using git with the following command:
-
-	git clone git://git.0x539.de/git/infinote.git
-
-Glibmm is from the makers of Gtkmm and can be found on their website:
-
-	http://www.gtkmm.org/download.shtml
-
-Kobby:
-Kobby uses CMake to build and install.  If you build KDE with the 'cmakekde' command, you need only run that, otherwise you must first run:
-
-	'cmake .'
-
-to configure Kobby for your system.  After cmake has finished you can run:
-
-	'make && sudo make install'
-
-to build and install Kobby on your system.
