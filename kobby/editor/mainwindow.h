@@ -3,11 +3,14 @@
 
 #include <KParts/MainWindow>
 
-#include <QtGui/QKeyEvent>
-#include <QMap>
-
+class QLabel;
 class QSplitter;
-class QTabWidget;
+class KTabWidget;
+
+namespace QInfinity
+{
+    class FileModel;
+}
 
 namespace KTextEditor
 {
@@ -16,25 +19,11 @@ namespace KTextEditor
     class View;
 }
 
-namespace QInfinity
-{
-    class InfinoteManager;
-    class BrowserItem;
-    class BrowserNoteItem;
-    class Connection;
-    class Document;
-}
-
 namespace Kobby
 {
 
-class Sidebar;
-class ConnectionManagerWidget;
-class BrowserModel;
-class FileBrowserWidget;
-class CollabDocument;
+class BrowserView;
 class DocumentTabWidget;
-class DocumentManager;
 
 class MainWindow
     : public KParts::MainWindow
@@ -45,34 +34,25 @@ class MainWindow
         MainWindow( QWidget *parent = 0 );
         ~MainWindow();
     
-    private Q_SLOTS:
-        void slotCreateConnection();
-        void slotOpenItem( QInfinity::BrowserItem &item );
-        void showSettingsDialog();
-        void documentLoading( CollabDocument &document );
-        void documentCreated( KTextEditor::Editor *editor,
-            KTextEditor::Document *document );
-    
     private:
-        void init();
         void setupUi();
-        void setupActions();
-        void setupSignals();
-        void loadSettings();
+        void restoreSettings();
         void saveSettings();
-        
-        QInfinity::InfinoteManager *infinoteManager;
-        ConnectionManagerWidget *connectionManager;
-        BrowserModel *browserModel;
-        FileBrowserWidget *fileBrowser;
+        void showSettingsDialog();
+
+        // Libqinfinity
+        QInfinity::FileModel *fileModel;
 
         KTextEditor::Editor *editor;
-        DocumentTabWidget *documentTab;
-        DocumentManager *documentManager;
-        
-        QSplitter *mainSplitter;
-        Sidebar *m_sidebar;
-        
+
+        // Ui
+        QSplitter *mainHorizSplitter;
+        KTabWidget *leftTabWidget;
+        BrowserView *browserView;
+        DocumentTabWidget *docTabWidget;
+        QLabel *statusLabel;
+
+        // Actions
         KAction *newDocumentAction;
         KAction *newConnectionAction;
         KAction *controlAction;

@@ -1,10 +1,8 @@
 #ifndef KOBBY_DOCUMENTTABWIDGET_H
 #define KOBBY_DOCUMENTTABWIDGET_H
 
-#include <QTabWidget>
+#include <KTabWidget>
 #include <QMap>
-
-class QToolButton;
 
 namespace KTextEditor
 {
@@ -19,7 +17,7 @@ namespace Kobby
  * @brief Tab widget containing active document views, and map from documents to their view.
  */
 class DocumentTabWidget
-    : public QTabWidget
+    : public KTabWidget
 {
     Q_OBJECT
 
@@ -39,7 +37,6 @@ class DocumentTabWidget
         void closeCurrentTab();
 
     private:
-        QToolButton *closeButton;
         QMap<KTextEditor::Document*, KTextEditor::View*> documentViewMap;
 
 };

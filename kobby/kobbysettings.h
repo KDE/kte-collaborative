@@ -35,22 +35,22 @@ class KobbySettings : public KConfigSkeleton
     }
 
     /**
-      Set Sizes of main splitter.
+      Set Sizes of main horizontal splitter.
     */
     static
-    void setMainWindowSplitterSizes( const QList<int> & v )
+    void setMainWindowHorizSplitterSizes( const QList<int> & v )
     {
-      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowSplitterSizes" ) ))
-        self()->mMainWindowSplitterSizes = v;
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowHorizSplitterSizes" ) ))
+        self()->mMainWindowHorizSplitterSizes = v;
     }
 
     /**
-      Get Sizes of main splitter.
+      Get Sizes of main horizontal splitter.
     */
     static
-    QList<int> mainWindowSplitterSizes()
+    QList<int> mainWindowHorizSplitterSizes()
     {
-      return self()->mMainWindowSplitterSizes;
+      return self()->mMainWindowHorizSplitterSizes;
     }
 
     /**
@@ -98,7 +98,7 @@ class KobbySettings : public KConfigSkeleton
 
     // ui
     QList<int> mMainWindowGeometry;
-    QList<int> mMainWindowSplitterSizes;
+    QList<int> mMainWindowHorizSplitterSizes;
 
     // profile
     QString mNickName;

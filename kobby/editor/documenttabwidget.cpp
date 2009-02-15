@@ -13,18 +13,13 @@ namespace Kobby
 {
 
 DocumentTabWidget::DocumentTabWidget( QWidget *parent )
-    : QTabWidget( parent )
+    : KTabWidget( parent )
 {
-    closeButton = new QToolButton();
-    closeButton->setIcon( KIcon( "tab-close.png" ) );
-    setCornerWidget( closeButton, Qt::TopRightCorner );
-
-    connect( closeButton, SIGNAL(pressed()), this, SLOT(closeCurrentTab()) );
+    setCloseButtonEnabled( true );
 }
 
 DocumentTabWidget::~DocumentTabWidget()
 {
-    delete closeButton;
 }
 
 void DocumentTabWidget::closeCurrentTab()

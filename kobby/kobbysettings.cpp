@@ -40,11 +40,11 @@ KobbySettings::KobbySettings(  )
   KConfigSkeleton::ItemIntList  *itemMainWindowGeometry;
   itemMainWindowGeometry = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowGeometry" ), mMainWindowGeometry, defaultMainWindowGeometry );
   addItem( itemMainWindowGeometry, QLatin1String( "MainWindowGeometry" ) );
-  QList<int> defaultMainWindowSplitterSizes;
+  QList<int> defaultMainWindowHorizSplitterSizes;
 
-  KConfigSkeleton::ItemIntList  *itemMainWindowSplitterSizes;
-  itemMainWindowSplitterSizes = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowSplitterSizes" ), mMainWindowSplitterSizes, defaultMainWindowSplitterSizes );
-  addItem( itemMainWindowSplitterSizes, QLatin1String( "MainWindowSplitterSizes" ) );
+  KConfigSkeleton::ItemIntList  *itemMainWindowHorizSplitterSizes;
+  itemMainWindowHorizSplitterSizes = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowHorizSplitterSizes" ), mMainWindowHorizSplitterSizes, defaultMainWindowHorizSplitterSizes );
+  addItem( itemMainWindowHorizSplitterSizes, QLatin1String( "MainWindowHorizSplitterSizes" ) );
 
   setCurrentGroup( QLatin1String( "profile" ) );
 

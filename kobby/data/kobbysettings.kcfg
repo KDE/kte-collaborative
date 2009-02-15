@@ -10,8 +10,8 @@
 		<entry name="MainWindowGeometry" type="IntList">
 			<label>Main Window location and size.</label>
 		</entry>
-		<entry name="MainWindowSplitterSizes" type="IntList">
-			<label>Sizes of main splitter.</label>
+		<entry name="MainWindowHorizSplitterSizes" type="IntList">
+			<label>Sizes of main horizontal splitter.</label>
 		</entry>
 	</group>
 

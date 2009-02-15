@@ -4,8 +4,11 @@
 
 #include <kobby/editor/mainwindow.h>
 
+#include <libqinfinity/init.h>
+
 int main( int argc, char **argv )
 {
+    int ret;
     KAboutData aboutData( "kobby", "kobby",
         ki18n( "kobby" ), "1.0",
         ki18n( "Collaborative text editing environment." ),
@@ -14,9 +17,13 @@ int main( int argc, char **argv )
     
     KCmdLineArgs::init( argc, argv, &aboutData );
     KApplication app;
+
+    QInfinity::init();
     
     Kobby::MainWindow *mainWindow = new Kobby::MainWindow();
     mainWindow->show();
     
-    return app.exec();
+    ret = app.exec();
+    QInfinity::deinit();
+    return ret;
 }

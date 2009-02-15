@@ -1,27 +1,10 @@
-#include <libinfinitymm/client/clientbrowser.h>
-#include <libinfinitymm/common/session.h>
-#include <libinfinitymm/common/buffer.h>
-#include <libinftextmm/textbuffer.h>
-
-// This has to be included before anything using Qt
-#include "noteplugin.h"
-
 #include "mainwindow.h"
-#include "sidebar.h"
-#include "createconnectiondialog.h"
-#include "browsermodel.h"
-#include "filebrowserwidget.h"
-#include "connectionmanagerwidget.h"
-#include "collabdocument.h"
-#include "documenttabwidget.h"
-#include "documentmanager.h"
 #include "kobbysettings.h"
 #include "settingsdialog.h"
+#include "browserview.h"
+#include "documenttabwidget.h"
 
-#include <libqinfinitymm/infinotemanager.h>
-#include <libqinfinitymm/browseritem.h>
-#include <libqinfinitymm/browsermodel.h>
-#include <libqinfinitymm/document.h>
+#include <libqinfinity/filemodel.h>
 
 #include <KAction>
 #include <KActionCollection>
@@ -35,27 +18,28 @@
 #include <KDebug>
 #include <KPageWidgetItem>
 #include <KLocalizedString>
+#include <KTabWidget>
 
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
 #include <KTextEditor/EditorChooser>
+#include <KTextEditor/Document>
 
+#include <QLabel>
 #include <QSplitter>
 #include <QTreeView>
 #include <QTabWidget>
+#include <QStatusBar>
 
-#include <mainwindow.moc>
+#include "mainwindow.moc"
 
 namespace Kobby
 {
 
 MainWindow::MainWindow( QWidget *parent )
-    : infinoteManager( QInfinity::InfinoteManager::instance() )
-    , browserModel( new BrowserModel( this ) )
-    , documentTab( new DocumentTabWidget( this ) )
 {
-    Q_UNUSED(parent)
-    
+    Q_UNUSED( parent )
+
     editor = KTextEditor::EditorChooser::editor();
     if( !editor )
     {
@@ -63,112 +47,63 @@ MainWindow::MainWindow( QWidget *parent )
             "please check your KDE installation."));
         kapp->exit(1);
     }
-    
-    documentManager = new DocumentManager( *editor, *browserModel );
+
+    fileModel = new QInfinity::FileModel( this );
+    docTabWidget = new DocumentTabWidget( this );
+
+    setXMLFile( "kobbyui.rc" );
+
+    KTextEditor::Document *doc = editor->createDocument( this );
+    docTabWidget->addDocument( *doc );
+
+    guiFactory()->addClient( docTabWidget->documentView( *doc ) );
+    createShellGUI( true );
     setupUi();
-    setupSignals();
-    NotePlugin *notePlugin = new NotePlugin();
-    infinoteManager->addNotePlugin( *notePlugin );
+
+    restoreSettings();
 }
 
 MainWindow::~MainWindow()
 {
     saveSettings();
-    delete documentTab;
-    delete browserModel;
-}
-
-void MainWindow::slotCreateConnection()
-{
-    CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
-    dialog->setVisible( true );
-}
-
-void MainWindow::slotOpenItem( QInfinity::BrowserItem &item )
-{
-    Q_UNUSED(item)
 }
 
 void MainWindow::setupUi()
 {
-    KTextEditor::Document *document;
+    statusLabel = new QLabel( this );
+    QStatusBar *statusBar = new QStatusBar( this );
+    statusBar->addWidget( statusLabel );
+    setStatusBar( statusBar );
 
-    connectionManager = new ConnectionManagerWidget( this );
-    fileBrowser = new FileBrowserWidget( *browserModel, this );
-    m_sidebar = new Sidebar( this );
-    m_sidebar->addTab( connectionManager, "Connections" );
-    m_sidebar->addTab( fileBrowser, "Browse" );
+    browserView = new BrowserView( *fileModel, this );
 
-    document = editor->createDocument( this );
-    documentTab->addDocument( *document );
-    
-    mainSplitter = new QSplitter( Qt::Horizontal, this );
-    
-    mainSplitter->addWidget( m_sidebar );
-    mainSplitter->addWidget( documentTab );
-    setCentralWidget( mainSplitter );
-    
-    setupGUI( (ToolBar | Keys | StatusBar | Save), "kobbyui.rc");
-    setupActions();
-    createShellGUI( true );
+    leftTabWidget = new KTabWidget( this );
+    leftTabWidget->setTabPosition( QTabWidget::West );
+    leftTabWidget->addTab( browserView,
+        KIcon("folder.png"),
+        i18n("Files") );
 
-    setWindowIcon( KIcon( "meeting-attend.png" ) );
-    
-    guiFactory()->addClient( document->activeView() );
-    
-    loadSettings();
+    mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
+    mainHorizSplitter->addWidget( leftTabWidget );
+    mainHorizSplitter->addWidget( docTabWidget );
+
+    setCentralWidget( mainHorizSplitter );
 }
 
-void MainWindow::setupActions()
-{
-    // Setup menu actions
-    newDocumentAction = actionCollection()->addAction( "new_document" );
-    newDocumentAction->setText( i18n("New Document") );
-    newDocumentAction->setIcon( KIcon( "document-new.png" ) );
-    newDocumentAction->setWhatsThis( i18n("Create a new document.") );
-
-    newConnectionAction = actionCollection()->addAction( "new_connection" );
-    newConnectionAction->setText( i18n("New Connection") );
-    newConnectionAction->setIcon( KIcon( "network-connect.png" ) );
-    newConnectionAction->setWhatsThis( i18n("Create a new connection to an Infinote server.") );
-
-    settingsAction = actionCollection()->addAction( "settings_kobby" );
-    settingsAction->setText( i18n("Configure Kobby...") );
-    settingsAction->setWhatsThis( i18n("Modify kobby settings.") );
-
-}
-
-void MainWindow::setupSignals()
-{
-    connect( newConnectionAction, SIGNAL(triggered()), this, SLOT(slotCreateConnection()) );
-    connect( settingsAction, SIGNAL(triggered()), this, SLOT(showSettingsDialog()) );
-
-    // Connect to InfinoteManager
-    connect( infinoteManager, SIGNAL(connectionAdded( Connection& )),
-        this, SLOT(addConnection( Connection& )) );
-
-    connect( documentManager, SIGNAL(documentLoading( CollabDocument& )),
-        this, SLOT(documentLoading( CollabDocument& )) );
-
-    connect( editor, SIGNAL(documentCreated( KTextEditor::Editor*, KTextEditor::Document* )),
-        this, SLOT(documentCreated( KTextEditor::Editor*, KTextEditor::Document * )) );
-}
-
-void MainWindow::loadSettings()
+void MainWindow::restoreSettings()
 {
     QList<int> sizes;
-
     sizes = KobbySettings::mainWindowGeometry();
     if( sizes.size() == 4 )
         setGeometry( sizes[0], sizes[1], sizes[2], sizes[3] );
-    sizes = KobbySettings::mainWindowSplitterSizes();
+    sizes = KobbySettings::mainWindowHorizSplitterSizes();
     if( sizes.size() )
-        mainSplitter->setSizes( sizes );
+        mainHorizSplitter->setSizes( sizes );
     else
     {
         sizes.empty();
-        sizes << 1 << 5;
-        mainSplitter->setSizes( sizes );
+        sizes << 1 << 10;
+        mainHorizSplitter->setSizes( sizes );
     }
 }
 
@@ -178,30 +113,17 @@ void MainWindow::saveSettings()
 
     sizes << x() << y() << width() << height();
     KobbySettings::setMainWindowGeometry( sizes );
-    KobbySettings::setMainWindowSplitterSizes( mainSplitter->sizes() );
+    KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
 }
 
 void MainWindow::showSettingsDialog()
 {
-    KPageWidgetItem *item;
-
     if( KConfigDialog::showDialog("Kobby Settings") )
         return;
 
     SettingsDialog *dialog = new SettingsDialog( this );
     dialog->show();
-}
-
-void MainWindow::documentLoading( CollabDocument &document )
-{
-    Q_UNUSED(document)
-}
-
-void MainWindow::documentCreated( KTextEditor::Editor *editor, KTextEditor::Document *document )
-{
-    Q_UNUSED(editor)
-    documentTab->addDocument( *document );
 }
 
 }
