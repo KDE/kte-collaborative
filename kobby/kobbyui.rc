@@ -5,6 +5,7 @@
 	<Menu name="file"><text>&amp;File</text>
 		<Action name="new_connection" />
 		<Action name="new_document" />
+		<Action name="open_local" />
 		<Separator />
 		<Merge/>
 	</Menu>
@@ -17,6 +18,7 @@
 
 <ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
 	<Action name="new_document" />
+	<Action name="open_local" />
 </ToolBar>
 
 </kpartgui>

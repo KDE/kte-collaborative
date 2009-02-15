@@ -30,12 +30,23 @@ void Connection::open()
         SLOT(slotHostnameLookedUp(const QHostInfo&)) );
 }
 
+QString Connection::name() const
+{
+    QString str = m_hostname + ":" + QString::number( m_port );
+    return str;
+}
+
+QInfinity::XmppConnection *Connection::xmppConnection() const
+{
+    return m_xmppConnection;
+}
+
 void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
 {
     QList<QHostAddress> addresses = hostInfo.addresses();
     if( addresses.size() == 0 )
     {
-        emit(error( "Host not found." ));
+        emit(error( this, "Host not found." ));
         return;
     }
 
@@ -64,22 +75,22 @@ void Connection::slotStatusChanged()
     switch( m_xmppConnection->status() )
     {
         case QInfinity::XmlConnection::Opening:
-            emit(connecting());
+            emit(connecting( this ));
             break;
         case QInfinity::XmlConnection::Closing:
-            emit(disconnecting());
+            emit(disconnecting( this ));
             break;
         case QInfinity::XmlConnection::Open:
-            emit(connected());
+            emit(connected( this ));
             break;
         case QInfinity::XmlConnection::Closed:
-            emit(disconnected());
+            emit(disconnected( this ));
     }
 }
 
 void Connection::slotError( const GError *err )
 {
-    emit(error( QString(err->message) ));
+    emit(error( this, QString(err->message) ));
 }
 
 }

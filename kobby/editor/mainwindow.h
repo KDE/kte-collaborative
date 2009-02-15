@@ -26,7 +26,8 @@ namespace KTextEditor
 namespace Kobby
 {
 
-class BrowserView;
+class RemoteBrowserView;
+class LocalBrowserView;
 class DocumentTabWidget;
 class Connection;
 
@@ -40,10 +41,12 @@ class MainWindow
         ~MainWindow();
 
     private Q_SLOTS:
-        void newConnection( bool checked );
-        void createConnection( const QString &hostname,
+        void slotNewConnection();
+        void slotCreateConnection( const QString &hostname,
             unsigned int port );
-        void showSettingsDialog();
+        void slotShowSettingsDialog();
+        void slotConnectionConnected( Connection *conn );
+        void slotConnectionError( Connection *conn, QString );
     
     private:
         void setupUi();
@@ -59,13 +62,15 @@ class MainWindow
         // Ui
         QSplitter *mainHorizSplitter;
         KTabWidget *leftTabWidget;
-        BrowserView *browserView;
+        RemoteBrowserView *remoteBrowserView;
+        LocalBrowserView *localBrowserView;
         DocumentTabWidget *docTabWidget;
         QLabel *statusLabel;
 
         // Actions
         KAction *newDocumentAction;
         KAction *newConnectionAction;
+        KAction *openAction;
         KAction *settingsAction;
 
 };

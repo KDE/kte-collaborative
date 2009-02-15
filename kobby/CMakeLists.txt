@@ -22,6 +22,7 @@ set( KOBBY_INCLUDES
 set( KOBBY_LIBRARIES
 	${KDE4_KDEUI_LIBS}
 	${KDE4_KIO_LIBS}
+	${KDE4_KFILE_LIBS}
 	${KDE4_KTEXTEDITOR_LIBS}
 	${KDE4_KDECORE_LIBS}
 	${LIBQINFINITY_LIBRARIES}
@@ -30,7 +31,8 @@ set( KOBBY_LIBRARIES
 set( KOBBY_SRCS
 	dialogs/createconnectiondialog.cpp
 
-	editor/browserview.cpp
+	editor/remotebrowserview.cpp
+	editor/localbrowserview.cpp
 	editor/documenttabwidget.cpp
 	editor/connection.cpp
 	editor/itemfactory.cpp

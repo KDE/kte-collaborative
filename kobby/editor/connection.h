@@ -30,13 +30,15 @@ class Connection
             QObject *parent = 0 );
 
         void open();
+        QString name() const;
+        QInfinity::XmppConnection *xmppConnection() const;
 
     Q_SIGNALS:
-        void connecting();
-        void connected();
-        void disconnecting();
-        void disconnected();
-        void error( QString message );
+        void connecting( Connection *conn );
+        void connected( Connection *conn );
+        void disconnecting( Connection *conn );
+        void disconnected( Connection *conn );
+        void error( Connection *conn, QString message );
 
     private Q_SLOTS:
         void slotHostnameLookedUp( const QHostInfo &hostInfo );
