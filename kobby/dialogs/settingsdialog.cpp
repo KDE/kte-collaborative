@@ -5,6 +5,7 @@
 #include <KIcon>
 
 #include "ui_profilesettingswidget.h"
+#include "ui_networksettingswidget.h"
 
 namespace Kobby
 {
@@ -23,6 +24,20 @@ class ProfileSettings
 
 };
 
+class NetworkSettings
+    : public QWidget
+    , public Ui::NetworkSettingsWidget
+{
+
+    public:
+        NetworkSettings(QWidget *parent = 0)
+            : QWidget( parent )
+        {
+            setupUi( this );
+        }
+
+};
+
 SettingsDialog::SettingsDialog( QWidget *parent )
     : KConfigDialog( parent, "Kobby Settings", KobbySettings::self() )
 {
@@ -33,6 +48,8 @@ void SettingsDialog::setupUi()
 {
     profilePage = addPage( new ProfileSettings( this ), i18n("Profile") );
     profilePage->setIcon( KIcon( "user-identity.png" ) );
+    networkPage = addPage( new NetworkSettings( this ), i18n("Network") );
+    networkPage->setIcon( KIcon( "network-workgroup.png" ) );
 }
 
 }

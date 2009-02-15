@@ -43,12 +43,13 @@ class MainWindow
         void newConnection( bool checked );
         void createConnection( const QString &hostname,
             unsigned int port );
+        void showSettingsDialog();
     
     private:
         void setupUi();
+        void setupActions();
         void restoreSettings();
         void saveSettings();
-        void showSettingsDialog();
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;

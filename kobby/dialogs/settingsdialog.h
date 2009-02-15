@@ -19,6 +19,7 @@ class SettingsDialog
         void setupUi();
 
         KPageWidgetItem *profilePage;
+        KPageWidgetItem *networkPage;
 
 };
 

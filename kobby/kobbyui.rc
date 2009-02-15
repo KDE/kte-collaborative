@@ -2,7 +2,7 @@
 <kpartgui name="kobby" version="1">
 
 <MenuBar>
-	<Menu name="file" noMerge="1"><text>&amp;File</text>
+	<Menu name="file"><text>&amp;File</text>
 		<Action name="new_connection" />
 		<Action name="new_document" />
 		<Separator />

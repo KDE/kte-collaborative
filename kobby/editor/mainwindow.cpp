@@ -60,8 +60,9 @@ MainWindow::MainWindow( QWidget *parent )
     KTextEditor::Document *doc = editor->createDocument( this );
     docTabWidget->addDocument( *doc );
 
-    guiFactory()->addClient( docTabWidget->documentView( *doc ) );
+    setupActions();
     createShellGUI( true );
+    guiFactory()->addClient( docTabWidget->documentView( *doc ) );
     setupUi();
 
     restoreSettings();
@@ -84,7 +85,7 @@ void MainWindow::setupUi()
     leftTabWidget = new KTabWidget( this );
     leftTabWidget->setTabPosition( QTabWidget::West );
     leftTabWidget->addTab( browserView,
-        KIcon("folder.png"),
+        KIcon("document-open-remote.png"),
         i18n("Remote Browser") );
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
@@ -92,6 +93,21 @@ void MainWindow::setupUi()
     mainHorizSplitter->addWidget( docTabWidget );
 
     setCentralWidget( mainHorizSplitter );
+}
+
+void MainWindow::setupActions()
+{
+    newDocumentAction = new KAction( i18n("New Document"), this );
+    newDocumentAction->setIcon( KIcon("document-new.png") );
+    newConnectionAction = new KAction( i18n("New Connection"), this );
+    newConnectionAction->setIcon( KIcon("network-connect.png") );
+    settingsAction = new KAction( i18n("Configure Kobby"), this );
+    connect( settingsAction, SIGNAL(triggered(bool)),
+        this, SLOT(showSettingsDialog()) );
+
+    actionCollection()->addAction( "new_document", newDocumentAction );
+    actionCollection()->addAction( "new_connection", newConnectionAction );
+    actionCollection()->addAction( "settings_kobby", settingsAction );
 }
 
 void MainWindow::newConnection( bool checked )

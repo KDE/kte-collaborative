@@ -42,6 +42,7 @@ set( KOBBY_SRCS
 set( KOBBY_UI
 	dialogs/createconnectionwidget.ui
 	dialogs/profilesettingswidget.ui
+	dialogs/networksettingswidget.ui
 )
 
 INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>316</width>
-    <height>184</height>
+    <width>375</width>
+    <height>93</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,12 +14,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
-    <widget class="QFrame" name="frame" >
-     <property name="frameShape" >
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow" >
-      <enum>QFrame::Raised</enum>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout" >
       <item row="0" column="0" >
@@ -48,21 +45,14 @@
           </property>
           <property name="sizeHint" stdset="0" >
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>118</width>
+            <height>25</height>
            </size>
           </property>
          </spacer>
         </item>
         <item>
-         <widget class="KColorCombo" name="kcfg_UserColor" >
-          <property name="color" >
-           <color>
-            <red>50</red>
-            <green>70</green>
-            <blue>255</blue>
-           </color>
-          </property>
+         <widget class="KColorCombo" name="kcolorcombo" >
           <item>
            <property name="text" >
             <string>Custom...</string>
@@ -168,7 +158,7 @@
      <property name="sizeHint" stdset="0" >
       <size>
        <width>20</width>
-       <height>70</height>
+       <height>81</height>
       </size>
      </property>
     </spacer>
