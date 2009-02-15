@@ -1,17 +1,12 @@
 #ifndef KOBBY_BROWSERVIEW_H
 #define KOBBY_BROWSERVIEW_H
 
-#include <libqinfinity/filemodel.h>
+#include <libqinfinity/browsermodel.h>
 
 #include <QWidget>
 
 class QTreeView;
 class KAction;
-
-namespace QInfinity
-{
-    class FileModel;
-}
 
 namespace Kobby
 {
@@ -21,7 +16,7 @@ class BrowserView
 {
 
     public:
-        BrowserView( QInfinity::FileModel &model,
+        BrowserView( QInfinity::BrowserModel &model,
             QWidget *parent = 0 );
     
     private:

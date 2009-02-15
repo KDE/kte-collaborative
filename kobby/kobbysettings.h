@@ -91,6 +91,25 @@ class KobbySettings : public KConfigSkeleton
       return self()->mUserColor;
     }
 
+    /**
+      Set Hostname of local computer.
+    */
+    static
+    void setHostName( const QString & v )
+    {
+      if (!self()->isImmutable( QString::fromLatin1 ( "HostName" ) ))
+        self()->mHostName = v;
+    }
+
+    /**
+      Get Hostname of local computer.
+    */
+    static
+    QString hostName()
+    {
+      return self()->mHostName;
+    }
+
   protected:
     KobbySettings();
     friend class KobbySettingsHelper;
@@ -103,6 +122,9 @@ class KobbySettings : public KConfigSkeleton
     // profile
     QString mNickName;
     QColor mUserColor;
+
+    // network
+    QString mHostName;
 
   private:
 };

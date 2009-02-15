@@ -26,6 +26,9 @@
 	</group>
 
 	<group name="network">
+		<entry name="HostName" type="String">
+			<label>Hostname of local computer.</label>
+		</entry>
 	</group>
 
 </kcfg>	

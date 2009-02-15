@@ -3,8 +3,11 @@
 #include "settingsdialog.h"
 #include "browserview.h"
 #include "documenttabwidget.h"
+#include "connection.h"
+#include "createconnectiondialog.h"
+#include "itemfactory.h"
 
-#include <libqinfinity/filemodel.h>
+#include <libqinfinity/browseritemfactory.h>
 
 #include <KAction>
 #include <KActionCollection>
@@ -48,7 +51,8 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
 
-    fileModel = new QInfinity::FileModel( this );
+    browserModel = new QInfinity::BrowserModel( this );
+    browserModel->setItemFactory( new ItemFactory( this ) );
     docTabWidget = new DocumentTabWidget( this );
 
     setXMLFile( "kobbyui.rc" );
@@ -75,19 +79,35 @@ void MainWindow::setupUi()
     statusBar->addWidget( statusLabel );
     setStatusBar( statusBar );
 
-    browserView = new BrowserView( *fileModel, this );
+    browserView = new BrowserView( *browserModel, this );
 
     leftTabWidget = new KTabWidget( this );
     leftTabWidget->setTabPosition( QTabWidget::West );
     leftTabWidget->addTab( browserView,
         KIcon("folder.png"),
-        i18n("Files") );
+        i18n("Remote Browser") );
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
     mainHorizSplitter->addWidget( leftTabWidget );
     mainHorizSplitter->addWidget( docTabWidget );
 
     setCentralWidget( mainHorizSplitter );
+}
+
+void MainWindow::newConnection( bool checked )
+{
+    Q_UNUSED( checked )
+
+    CreateConnectionDialog *dialog = new CreateConnectionDialog( this );
+    connect( dialog, SIGNAL(createConnection(const QString&, unsigned int)),
+        this, SLOT(createConnection(const QString&, unsigned int)) );
+    dialog->setVisible( true );
+}
+
+void MainWindow::createConnection( const QString &hostname,
+    unsigned int port )
+{
+    Connection *conn = new Connection( hostname, port, this );
 }
 
 void MainWindow::restoreSettings()

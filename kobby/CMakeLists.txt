@@ -28,14 +28,19 @@ set( KOBBY_LIBRARIES
 )
 
 set( KOBBY_SRCS
+	dialogs/createconnectiondialog.cpp
+
 	editor/browserview.cpp
 	editor/documenttabwidget.cpp
+	editor/connection.cpp
+	editor/itemfactory.cpp
 	editor/mainwindow.cpp
 	editor/main.cpp
 	dialogs/settingsdialog.cpp
 )
 
 set( KOBBY_UI
+	dialogs/createconnectionwidget.ui
 	dialogs/profilesettingswidget.ui
 )
 

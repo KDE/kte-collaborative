@@ -54,6 +54,12 @@ KobbySettings::KobbySettings(  )
   KConfigSkeleton::ItemColor  *itemUserColor;
   itemUserColor = new KConfigSkeleton::ItemColor( currentGroup(), QLatin1String( "UserColor" ), mUserColor );
   addItem( itemUserColor, QLatin1String( "UserColor" ) );
+
+  setCurrentGroup( QLatin1String( "network" ) );
+
+  KConfigSkeleton::ItemString  *itemHostName;
+  itemHostName = new KConfigSkeleton::ItemString( currentGroup(), QLatin1String( "HostName" ), mHostName );
+  addItem( itemHostName, QLatin1String( "HostName" ) );
 }
 
 KobbySettings::~KobbySettings()

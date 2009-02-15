@@ -18,12 +18,17 @@ class CreateConnectionDialog
 
     public:
         CreateConnectionDialog( QWidget *parent = 0 );
-    
+
+    Q_SIGNALS:
+        void createConnection( const QString &hostname,
+            unsigned int port );
+
     private Q_SLOTS:
         void slotOkClicked();
 
     private:
         void setupActions();
+        bool verifyInput();
         
         Ui::CreateConnectionWidget *ui;
 };

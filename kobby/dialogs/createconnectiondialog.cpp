@@ -1,7 +1,5 @@
 #include "createconnectiondialog.h"
 
-#include <libqinfinitymm/infinotemanager.h>
-
 #include "ui_createconnectionwidget.h"
 #include "createconnectiondialog.moc"
 
@@ -21,14 +19,19 @@ CreateConnectionDialog::CreateConnectionDialog( QWidget *parent )
 
 void CreateConnectionDialog::slotOkClicked()
 {
-    QInfinity::InfinoteManager *infinoteManager = QInfinity::InfinoteManager::instance();
-    
-    infinoteManager->connectToHost( ui->nameLineEdit->text(), ui->hostnameLineEdit->text(), ui->portLineEdit->text().toUInt() );
+    if( verifyInput() )
+        emit(createConnection( ui->hostnameLineEdit->text(),
+            ui->portLineEdit->text().toUInt() ));
 }
 
 void CreateConnectionDialog::setupActions()
 {
     connect( this, SIGNAL(okClicked()), this, SLOT(slotOkClicked()) );
+}
+
+bool CreateConnectionDialog::verifyInput()
+{
+    return true;
 }
 
 }

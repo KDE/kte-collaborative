@@ -1,7 +1,11 @@
 #ifndef KOBBY_EDITOR_MAINWINDOW_H
 #define KOBBY_EDITOR_MAINWINDOW_H
 
+#include <libqinfinity/browsermodel.h>
+
 #include <KParts/MainWindow>
+
+#include <QMap>
 
 class QLabel;
 class QSplitter;
@@ -9,7 +13,7 @@ class KTabWidget;
 
 namespace QInfinity
 {
-    class FileModel;
+    class ConnectionItem;
 }
 
 namespace KTextEditor
@@ -24,6 +28,7 @@ namespace Kobby
 
 class BrowserView;
 class DocumentTabWidget;
+class Connection;
 
 class MainWindow
     : public KParts::MainWindow
@@ -33,6 +38,11 @@ class MainWindow
     public:
         MainWindow( QWidget *parent = 0 );
         ~MainWindow();
+
+    private Q_SLOTS:
+        void newConnection( bool checked );
+        void createConnection( const QString &hostname,
+            unsigned int port );
     
     private:
         void setupUi();
@@ -41,7 +51,7 @@ class MainWindow
         void showSettingsDialog();
 
         // Libqinfinity
-        QInfinity::FileModel *fileModel;
+        QInfinity::BrowserModel *browserModel;
 
         KTextEditor::Editor *editor;
 
@@ -55,7 +65,6 @@ class MainWindow
         // Actions
         KAction *newDocumentAction;
         KAction *newConnectionAction;
-        KAction *controlAction;
         KAction *settingsAction;
 
 };

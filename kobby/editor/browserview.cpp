@@ -6,7 +6,7 @@
 namespace Kobby
 {
 
-BrowserView::BrowserView( QInfinity::FileModel &model,
+BrowserView::BrowserView( QInfinity::BrowserModel &model,
     QWidget *parent )
     : QWidget( parent )
     , m_treeView( new QTreeView( this ) )
