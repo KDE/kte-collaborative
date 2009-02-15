@@ -86,6 +86,8 @@ void MainWindow::setupUi()
     setStatusBar( statusBar );
 
     remoteBrowserView = new RemoteBrowserView( *browserModel, this );
+    connect( remoteBrowserView, SIGNAL(createConnection()),
+        this, SLOT(slotNewConnection()) );
     localBrowserView = new LocalBrowserView( this );
 
     leftTabWidget = new KTabWidget( this );
