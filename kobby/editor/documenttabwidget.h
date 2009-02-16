@@ -2,7 +2,7 @@
 #define KOBBY_DOCUMENTTABWIDGET_H
 
 #include <KTabWidget>
-#include <QMap>
+#include <QHash>
 
 namespace KTextEditor
 {
@@ -30,14 +30,11 @@ class DocumentTabWidget
         KTextEditor::Document *documentAt( int index );
         KTextEditor::View *documentView( KTextEditor::Document &document );
 
-    Q_SIGNALS:
-        void documentClose( KTextEditor::Document *document );
-
     private Q_SLOTS:
-        void closeCurrentTab();
+        void closeWidget( QWidget *widget );
 
     private:
-        QMap<KTextEditor::Document*, KTextEditor::View*> documentViewMap;
+        QHash<KTextEditor::Document*, KTextEditor::View*> documentToView;
 
 };
 

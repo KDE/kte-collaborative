@@ -25,6 +25,7 @@
 #include <KLocalizedString>
 #include <KTabWidget>
 #include <KMessageBox>
+#include <KUrl>
 
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
@@ -66,10 +67,10 @@ MainWindow::MainWindow( QWidget *parent )
     KTextEditor::Document *doc = editor->createDocument( this );
     docTabWidget->addDocument( *doc );
 
+    setupUi();
     setupActions();
     createShellGUI( true );
     guiFactory()->addClient( docTabWidget->documentView( *doc ) );
-    setupUi();
 
     restoreSettings();
 }
@@ -89,7 +90,10 @@ void MainWindow::setupUi()
     remoteBrowserView = new RemoteBrowserView( *browserModel, this );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
+
     localBrowserView = new LocalBrowserView( this );
+    connect( localBrowserView, SIGNAL(urlSelected(const KUrl&)),
+        this, SLOT(slotOpenUrl(const KUrl&)) );
 
     leftTabWidget = new KTabWidget( this );
     leftTabWidget->setTabPosition( QTabWidget::West );
@@ -156,6 +160,13 @@ void MainWindow::slotConnectionError( Connection *conn,
     str += errMsg;
     KMessageBox::error( this, str );
     slotNewConnection();
+}
+
+void MainWindow::slotOpenUrl( const KUrl &url )
+{
+    KTextEditor::Document *doc = editor->createDocument( this );
+    doc->openUrl( url );
+    docTabWidget->addDocument( *doc );
 }
 
 void MainWindow::slotShowSettingsDialog()

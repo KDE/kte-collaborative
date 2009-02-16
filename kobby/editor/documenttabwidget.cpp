@@ -15,6 +15,8 @@ namespace Kobby
 DocumentTabWidget::DocumentTabWidget( QWidget *parent )
     : KTabWidget( parent )
 {
+    connect( this, SIGNAL(closeRequest( QWidget* )),
+        this, SLOT(closeWidget( QWidget* )) );
     setCloseButtonEnabled( true );
 }
 
@@ -22,17 +24,19 @@ DocumentTabWidget::~DocumentTabWidget()
 {
 }
 
-void DocumentTabWidget::closeCurrentTab()
+void DocumentTabWidget::closeWidget( QWidget *cw )
 {
-    emit(documentClose( documentAt( currentIndex() ) ));
-    removeTab( currentIndex() );
+    int tab = indexOf( cw );
+    removeTab( tab );
 }
 
 void DocumentTabWidget::addDocument( KTextEditor::Document &document )
 {
     KTextEditor::View *view = document.createView( this );
-    documentViewMap.insert( &document, view );
-    addTab( view, document.documentName() );
+    int tab;
+    documentToView.insert( &document, view );
+    tab = addTab( view, document.documentName() );
+    setCurrentIndex( tab );
 }
 
 void DocumentTabWidget::removeDocument( KTextEditor::Document &document )
@@ -48,7 +52,7 @@ KTextEditor::Document *DocumentTabWidget::documentAt( int index )
 
 KTextEditor::View *DocumentTabWidget::documentView( KTextEditor::Document &document )
 {
-    return documentViewMap[&document];
+    return documentToView[&document];
 }
 
 }

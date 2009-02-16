@@ -10,6 +10,7 @@
 class QLabel;
 class QSplitter;
 class KTabWidget;
+class KUrl;
 
 namespace QInfinity
 {
@@ -47,6 +48,7 @@ class MainWindow
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
+        void slotOpenUrl( const KUrl &url );
     
     private:
         void setupUi();
