@@ -3,6 +3,7 @@
 
 #include <libqinfinity/browseritemfactory.h>
 
+class KIcon;
 class QObject;
 class QString;
 
@@ -14,6 +15,30 @@ namespace QInfinity
 
 namespace Kobby
 {
+
+class Connection;
+
+/**
+ * Subclass so we can store connections with their item
+ */
+class ConnectionItem
+    : public QInfinity::ConnectionItem
+{
+
+    public:
+        ConnectionItem( QInfinity::XmlConnection &conn,
+            const KIcon &icon,
+            const QString &text );
+        ~ConnectionItem();
+
+        void setConnection( Connection *conn );
+
+    private:
+        Connection *m_conn;
+
+};
+
+
 
 class ItemFactory
     : public QInfinity::BrowserItemFactory

@@ -168,7 +168,9 @@ void MainWindow::slotShowSettingsDialog()
 
 void MainWindow::slotConnectionConnected( Connection *conn )
 {
-    browserModel->addConnection( *conn->xmppConnection(), conn->name() );
+    QInfinity::ConnectionItem *item;
+    item = browserModel->addConnection( *conn->xmppConnection(), conn->name() );
+    dynamic_cast<Kobby::ConnectionItem*>(item)->setConnection( conn );
 }
 
 void MainWindow::restoreSettings()

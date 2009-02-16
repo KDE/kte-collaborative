@@ -53,6 +53,14 @@ void RemoteBrowserView::slotOpen()
 
 void RemoteBrowserView::slotDelete()
 {
+    if( !m_treeView->selectionModel()->hasSelection() )
+        return;
+    QList<QModelIndex> indexes = m_treeView->selectionModel()->selectedIndexes();
+    QList<QModelIndex>::Iterator indexItr;
+    for( indexItr = indexes.begin(); indexItr != indexes.end(); indexItr++ )
+    {
+        browserModel->removeRow( indexItr->row() );
+    }
 }
 
 void RemoteBrowserView::setupActions()

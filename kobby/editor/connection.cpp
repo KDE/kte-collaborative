@@ -7,6 +7,7 @@
 
 #include <QHostInfo>
 #include <QHostAddress>
+#include <QDebug>
 
 #include "connection.moc"
 
@@ -22,6 +23,16 @@ Connection::Connection( const QString &hostname,
     , m_tcpConnection( 0 )
     , m_xmppConnection( 0 )
 {
+}
+
+Connection::~Connection()
+{
+    m_tcpConnection->close();
+    if( m_xmppConnection )
+        delete m_xmppConnection;
+    if( m_tcpConnection )
+        delete m_tcpConnection;
+    qDebug() << "Deleting conn.";
 }
 
 void Connection::open()

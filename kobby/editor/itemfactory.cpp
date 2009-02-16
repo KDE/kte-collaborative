@@ -1,4 +1,5 @@
 #include "itemfactory.h"
+#include "connection.h"
 
 #include <libqinfinity/browseriter.h>
 
@@ -6,6 +7,25 @@
 
 namespace Kobby
 {
+
+ConnectionItem::ConnectionItem( QInfinity::XmlConnection &conn,
+    const KIcon &icon,
+    const QString &text )
+    : QInfinity::ConnectionItem( conn, icon, text )
+    , m_conn( 0 )
+{
+}
+
+ConnectionItem::~ConnectionItem()
+{
+    if( m_conn )
+        delete m_conn;
+}
+
+void ConnectionItem::setConnection( Connection *conn )
+{
+    m_conn = conn;
+}
 
 ItemFactory::ItemFactory( QObject *parent )
     : QInfinity::BrowserItemFactory( parent )
@@ -34,7 +54,7 @@ QInfinity::NodeItem *ItemFactory::createNodeItem( const QInfinity::BrowserIter &
 QInfinity::ConnectionItem *ItemFactory::createConnectionItem( QInfinity::XmlConnection &conn,
     const QString &name )
 {
-    return new QInfinity::ConnectionItem( conn, KIcon("network-connect.png"), name );
+    return new Kobby::ConnectionItem( conn, KIcon("network-connect.png"), name );
 }
 
 }

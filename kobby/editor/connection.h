@@ -28,6 +28,7 @@ class Connection
         Connection( const QString &hostname,
             unsigned int port,
             QObject *parent = 0 );
+        ~Connection();
 
         void open();
         QString name() const;
