@@ -36,6 +36,7 @@
 #include <QTreeView>
 #include <QTabWidget>
 #include <QStatusBar>
+#include <QHostInfo>
 
 #include <QDebug>
 
@@ -188,6 +189,9 @@ void MainWindow::restoreSettings()
         sizes << 1 << 10;
         mainHorizSplitter->setSizes( sizes );
     }
+
+    if( KobbySettings::hostName().isEmpty() )
+        KobbySettings::setHostName( QHostInfo::localHostName() );
 }
 
 void MainWindow::saveSettings()

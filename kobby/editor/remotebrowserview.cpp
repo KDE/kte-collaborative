@@ -71,22 +71,13 @@ void RemoteBrowserView::slotSelectionChanged( const QItemSelection &selected,
     const QItemSelection &deselected )
 {
     QList<QModelIndex> indexes = selected.indexes();
-    if( indexes.size() > 1 )
+    if( indexes.size() != 1 )
     {
         createDocumentAction->setEnabled( false );
         createFolderAction->setEnabled( false );
         createDocumentAction->setEnabled( false );
         openAction->setEnabled( false );
-        deleteAction->setEnabled( true );
-        return;
-    }
-    else if( indexes.size() == 0 )
-    {
-        createDocumentAction->setEnabled( false );
-        createFolderAction->setEnabled( false );
-        createDocumentAction->setEnabled( false );
-        openAction->setEnabled( false );
-        deleteAction->setEnabled( false );
+        deleteAction->setEnabled( indexes.size() != 0 );
         return;
     }
 
