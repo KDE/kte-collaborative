@@ -15,6 +15,7 @@ class KUrl;
 namespace QInfinity
 {
     class ConnectionItem;
+    class DefaultTextPlugin;
 }
 
 namespace KTextEditor
@@ -58,6 +59,7 @@ class MainWindow
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;
+        QInfinity::DefaultTextPlugin *textPlugin;
 
         KTextEditor::Editor *editor;
 
