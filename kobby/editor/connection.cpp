@@ -32,7 +32,6 @@ Connection::~Connection()
         delete m_xmppConnection;
     if( m_tcpConnection )
         delete m_tcpConnection;
-    qDebug() << "Deleting conn.";
 }
 
 void Connection::open()

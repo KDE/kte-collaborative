@@ -1,4 +1,5 @@
 #include "remotebrowserview.h"
+#include "itemfactory.h"
 
 #include <libqinfinity/browsermodel.h>
 
@@ -9,6 +10,7 @@
 
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QItemSelection>
 
 #include "remotebrowserview.moc"
 
@@ -24,6 +26,8 @@ RemoteBrowserView::RemoteBrowserView( QInfinity::BrowserModel &model,
     m_treeView->setModel( &model );
     connect( m_treeView, SIGNAL(expanded(const QModelIndex&)),
         browserModel, SLOT(itemActivated(const QModelIndex&)) );
+    connect( m_treeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+        this, SLOT(slotSelectionChanged(const QItemSelection&, const QItemSelection&)) );
     setupActions();
     setupToolbar();
 
@@ -63,6 +67,58 @@ void RemoteBrowserView::slotDelete()
     }
 }
 
+void RemoteBrowserView::slotSelectionChanged( const QItemSelection &selected,
+    const QItemSelection &deselected )
+{
+    QList<QModelIndex> indexes = selected.indexes();
+    if( indexes.size() > 1 )
+    {
+        createDocumentAction->setEnabled( false );
+        createFolderAction->setEnabled( false );
+        createDocumentAction->setEnabled( false );
+        openAction->setEnabled( false );
+        deleteAction->setEnabled( true );
+        return;
+    }
+    else if( indexes.size() == 0 )
+    {
+        createDocumentAction->setEnabled( false );
+        createFolderAction->setEnabled( false );
+        createDocumentAction->setEnabled( false );
+        openAction->setEnabled( false );
+        deleteAction->setEnabled( false );
+        return;
+    }
+
+    QStandardItem *item = browserModel->itemFromIndex( indexes[0] );
+    QInfinity::NodeItem *nodeItem;
+    switch( item->type() )
+    {
+        case QInfinity::BrowserItemFactory::ConnectionItem:
+            createDocumentAction->setEnabled( true );
+            createFolderAction->setEnabled( true );
+            openAction->setEnabled( false );
+            deleteAction->setEnabled( true );
+            break;
+        case QInfinity::BrowserItemFactory::NodeItem:
+            nodeItem = dynamic_cast<QInfinity::NodeItem*>(item);
+            if( nodeItem->isDirectory() )
+            {
+                createDocumentAction->setEnabled( true );
+                createFolderAction->setEnabled( true );
+                openAction->setEnabled( false );
+                deleteAction->setEnabled( true );
+            }
+            else
+            {
+                createDocumentAction->setEnabled( false );
+                createFolderAction->setEnabled( false );
+                openAction->setEnabled( true );
+                deleteAction->setEnabled( true );
+            }
+    }
+}
+
 void RemoteBrowserView::setupActions()
 {
     createConnectionAction = new KAction( i18n("New Connection"), this );
@@ -76,6 +132,12 @@ void RemoteBrowserView::setupActions()
     createFolderAction->setIcon( KIcon("folder-new.png") );
     openAction->setIcon( KIcon("document-open.png") );
     deleteAction->setIcon( KIcon("user-trash.png") );
+
+    createFolderAction->setEnabled( true );
+    createDocumentAction->setEnabled( false );
+    createFolderAction->setEnabled( false );
+    openAction->setEnabled( false );
+    deleteAction->setEnabled( false );
 
     connect( createConnectionAction, SIGNAL(triggered(bool)),
         this, SLOT(slotNewConnection()) );

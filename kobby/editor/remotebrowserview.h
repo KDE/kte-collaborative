@@ -4,6 +4,8 @@
 #include <QWidget>
 
 class QTreeView;
+class QModelIndex;
+class QItemSelection;
 class KAction;
 class KToolBar;
 
@@ -33,6 +35,8 @@ class RemoteBrowserView
         void slotNewFolder();
         void slotOpen();
         void slotDelete();
+        void slotSelectionChanged( const QItemSelection &selected,
+            const QItemSelection &deselected );
     
     private:
         void setupActions();
