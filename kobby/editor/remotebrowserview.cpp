@@ -65,10 +65,7 @@ void RemoteBrowserView::slotDelete()
     for( indexItr = indexes.begin(); indexItr != indexes.end(); indexItr++ )
     {
         item = browserModel->itemFromIndex( *indexItr );
-        if( item->type() == QInfinity::BrowserItemFactory::ConnectionItem )
-            browserModel->removeConnectionIndex( *indexItr );
-        else
-            browserModel->removeRow( indexItr->row() );
+        browserModel->removeRow( indexItr->row() );
     }
 }
 
