@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QItemSelection>
 #include <QModelIndexList>
+#include <QDebug>
 
 #include "remotebrowserview.moc"
 
@@ -46,14 +47,33 @@ void RemoteBrowserView::slotNewConnection()
 
 void RemoteBrowserView::slotNewDocument()
 {
+    QItemSelection selection = getSelection();
+    if( canCreateDocument( selection.indexes() ) )
+        emit(createDocument( selection.indexes()[0] ));
+    else
+        qDebug() << "Create document handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotNewFolder()
 {
+    QItemSelection selection = getSelection();
+    if( canCreateFolder( selection.indexes() ) )
+        emit(createFolder( selection.indexes()[0] ));
+    else
+        qDebug() << "Create folder handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotOpen()
 {
+    QItemSelection selection = getSelection();
+    QModelIndexList::Iterator itr;
+    if( canOpenItem( selection.indexes() ) )
+    {
+        for( itr = selection.indexes().begin(); itr != selection.indexes().end(); itr++ )
+            emit( openItem( *itr ) );
+    }
+    else
+        qDebug() << "Open handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotDelete()
@@ -169,6 +189,16 @@ bool RemoteBrowserView::canOpenItem( QModelIndexList selected )
 bool RemoteBrowserView::canDeleteItem( QModelIndexList selected )
 {
     return selected.size() != 0;
+}
+
+QItemSelection RemoteBrowserView::getSelection()
+{
+    QItemSelectionModel *selectionModel;
+    QItemSelection selection;
+    QItemSelection::Iterator itr;
+    selectionModel = m_treeView->selectionModel();
+    selection = selectionModel->selection();
+    return selection;
 }
 
 }

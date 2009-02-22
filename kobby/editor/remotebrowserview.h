@@ -53,6 +53,7 @@ class RemoteBrowserView
         bool canCreateFolder( QModelIndexList selected );
         bool canOpenItem( QModelIndexList selected );
         bool canDeleteItem( QModelIndexList seletected );
+        QItemSelection getSelection();
 
         QTreeView *m_treeView;
         QInfinity::BrowserModel *browserModel;
