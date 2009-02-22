@@ -127,6 +127,8 @@ void MainWindow::setupActions()
     settingsAction = new KAction( i18n("Configure Kobby"), this );
     connect( settingsAction, SIGNAL(triggered(bool)),
         this, SLOT(slotShowSettingsDialog()) );
+    KStandardAction::quit(kapp, SLOT(quit()),
+        actionCollection());
 
     actionCollection()->addAction( "new_document", newDocumentAction );
     actionCollection()->addAction( "new_connection", newConnectionAction );
