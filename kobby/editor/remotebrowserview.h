@@ -2,6 +2,7 @@
 #define KOBBY_BROWSERVIEW_H
 
 #include <QWidget>
+#include <QModelIndexList>
 
 class QTreeView;
 class QModelIndex;
@@ -17,6 +18,9 @@ namespace QInfinity
 namespace Kobby
 {
 
+/**
+ * @brief Widget containing toolbar and tree view of a QInfinity::BrowserModel.
+ */
 class RemoteBrowserView
     : public QWidget
 {
@@ -28,6 +32,10 @@ class RemoteBrowserView
 
     Q_SIGNALS:
         void createConnection();
+        void createDocument( QModelIndex parent );
+        void createFolder( QModelIndex parent );
+        void openItem( QModelIndex item );
+        void deleteItem( QModelIndex item );
     
     private Q_SLOTS:
         void slotNewConnection();
@@ -41,6 +49,10 @@ class RemoteBrowserView
     private:
         void setupActions();
         void setupToolbar();
+        bool canCreateDocument( QModelIndexList selected );
+        bool canCreateFolder( QModelIndexList selected );
+        bool canOpenItem( QModelIndexList selected );
+        bool canDeleteItem( QModelIndexList seletected );
 
         QTreeView *m_treeView;
         QInfinity::BrowserModel *browserModel;

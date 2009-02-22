@@ -11,6 +11,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QItemSelection>
+#include <QModelIndexList>
 
 #include "remotebrowserview.moc"
 
@@ -72,44 +73,11 @@ void RemoteBrowserView::slotDelete()
 void RemoteBrowserView::slotSelectionChanged( const QItemSelection &selected,
     const QItemSelection &deselected )
 {
-    QList<QModelIndex> indexes = selected.indexes();
-    if( indexes.size() != 1 )
-    {
-        createDocumentAction->setEnabled( false );
-        createFolderAction->setEnabled( false );
-        createDocumentAction->setEnabled( false );
-        openAction->setEnabled( false );
-        deleteAction->setEnabled( indexes.size() != 0 );
-        return;
-    }
-
-    QStandardItem *item = browserModel->itemFromIndex( indexes[0] );
-    QInfinity::NodeItem *nodeItem;
-    switch( item->type() )
-    {
-        case QInfinity::BrowserItemFactory::ConnectionItem:
-            createDocumentAction->setEnabled( true );
-            createFolderAction->setEnabled( true );
-            openAction->setEnabled( false );
-            deleteAction->setEnabled( true );
-            break;
-        case QInfinity::BrowserItemFactory::NodeItem:
-            nodeItem = dynamic_cast<QInfinity::NodeItem*>(item);
-            if( nodeItem->isDirectory() )
-            {
-                createDocumentAction->setEnabled( true );
-                createFolderAction->setEnabled( true );
-                openAction->setEnabled( false );
-                deleteAction->setEnabled( true );
-            }
-            else
-            {
-                createDocumentAction->setEnabled( false );
-                createFolderAction->setEnabled( false );
-                openAction->setEnabled( true );
-                deleteAction->setEnabled( true );
-            }
-    }
+    Q_UNUSED(deselected)
+    createDocumentAction->setEnabled( canCreateDocument( selected.indexes() ) );
+    createFolderAction->setEnabled( canCreateDocument( selected.indexes() ) );
+    openAction->setEnabled( canOpenItem( selected.indexes() ) );
+    deleteAction->setEnabled( canDeleteItem( selected.indexes() ) );
 }
 
 void RemoteBrowserView::setupActions()
@@ -126,7 +94,7 @@ void RemoteBrowserView::setupActions()
     openAction->setIcon( KIcon("document-open.png") );
     deleteAction->setIcon( KIcon("user-trash.png") );
 
-    createFolderAction->setEnabled( true );
+    createConnectionAction->setEnabled( true );
     createDocumentAction->setEnabled( false );
     createFolderAction->setEnabled( false );
     openAction->setEnabled( false );
@@ -154,6 +122,53 @@ void RemoteBrowserView::setupToolbar()
     toolBar->addAction( createFolderAction );
     toolBar->addAction( openAction );
     toolBar->addAction( deleteAction );
+}
+
+bool RemoteBrowserView::canCreateDocument( QModelIndexList selected )
+{
+    QStandardItem *item;
+    QInfinity::NodeItem *nodeItem;
+    if( selected.size() != 1 )
+        return false;
+    item = browserModel->itemFromIndex( selected[0] );
+    if( !item )
+        return false;
+    if( item->type() == QInfinity::BrowserItemFactory::ConnectionItem )
+        return true;
+    if( item->type() == QInfinity::BrowserItemFactory::NodeItem )
+    {
+        nodeItem = dynamic_cast<QInfinity::NodeItem*>(item);
+        return nodeItem->isDirectory();
+    }
+    return false;
+}
+
+bool RemoteBrowserView::canCreateFolder( QModelIndexList selected )
+{
+    return canCreateDocument( selected );
+}
+
+bool RemoteBrowserView::canOpenItem( QModelIndexList selected )
+{
+    QStandardItem *item;
+    QModelIndexList::Iterator itr;
+    if( selected.size() == 0 )
+        return false;
+
+    for( itr = selected.begin(); itr != selected.end(); itr++ )
+    {
+        item = browserModel->itemFromIndex( *itr );
+        if( !item ||
+            !(item->type() & QInfinity::BrowserItemFactory::NoteItem) )
+            return false;
+    }
+
+    return true;
+}
+
+bool RemoteBrowserView::canDeleteItem( QModelIndexList selected )
+{
+    return selected.size() != 0;
 }
 
 }
