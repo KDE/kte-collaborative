@@ -3,7 +3,6 @@
 #include <QWidget>
 
 #include "ui_createfolderwidget.h"
-#include "createfolderdialog.moc"
 
 namespace Kobby
 {
