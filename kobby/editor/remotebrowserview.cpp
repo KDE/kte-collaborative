@@ -1,5 +1,6 @@
 #include "remotebrowserview.h"
 #include "itemfactory.h"
+#include "createfolderdialog.h"
 
 #include <libqinfinity/browsermodel.h>
 
@@ -80,7 +81,12 @@ void RemoteBrowserView::slotNewFolder()
 {
     QItemSelection selection = getSelection();
     if( canCreateFolder( selection.indexes() ) )
-        emit(createFolder( selection.indexes()[0] ));
+    {
+        CreateFolderDialog *dialog = new CreateFolderDialog( this );
+        if( dialog->exec() )
+            browserModel->createDirectory( selection.indexes()[0], dialog->folderName() );
+        delete dialog;
+    }
     else
         qDebug() << "Create folder handler called but we have invalid selection.";
 }
@@ -175,8 +181,6 @@ bool RemoteBrowserView::canCreateDocument( QModelIndexList selected )
     item = browserModel->itemFromIndex( selected[0] );
     if( !item )
         return false;
-    if( item->type() == QInfinity::BrowserItemFactory::ConnectionItem )
-        return true;
     if( item->type() == QInfinity::BrowserItemFactory::NodeItem )
     {
         nodeItem = dynamic_cast<QInfinity::NodeItem*>(item);
@@ -201,7 +205,7 @@ bool RemoteBrowserView::canOpenItem( QModelIndexList selected )
     {
         item = browserModel->itemFromIndex( *itr );
         if( !item ||
-            !(item->type() & QInfinity::BrowserItemFactory::NodeItem) )
+            !(item->type() == QInfinity::BrowserItemFactory::NodeItem) )
             return false;
     }
 
