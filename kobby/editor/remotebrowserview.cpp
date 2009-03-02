@@ -179,7 +179,7 @@ bool RemoteBrowserView::canOpenItem( QModelIndexList selected )
     {
         item = browserModel->itemFromIndex( *itr );
         if( !item ||
-            !(item->type() & QInfinity::BrowserItemFactory::NoteItem) )
+            !(item->type() & QInfinity::BrowserItemFactory::NodeItem) )
             return false;
     }
 

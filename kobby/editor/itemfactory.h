@@ -10,6 +10,7 @@ class QString;
 namespace QInfinity
 {
     class XmlConnection;
+    class Browser;
     class BrowserIter;
 }
 
@@ -27,6 +28,7 @@ class ConnectionItem
 
     public:
         ConnectionItem( QInfinity::XmlConnection &conn,
+            QInfinity::Browser &browser,
             const KIcon &icon,
             const QString &text );
         ~ConnectionItem();
@@ -50,6 +52,7 @@ class ItemFactory
         QInfinity::NodeItem *createRootNodeItem( const QInfinity::BrowserIter &iter );
         QInfinity::NodeItem *createNodeItem( const QInfinity::BrowserIter &iter );
         QInfinity::ConnectionItem *createConnectionItem( QInfinity::XmlConnection &conn,
+            QInfinity::Browser &browser,
             const QString &name );
 
 };

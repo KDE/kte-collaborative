@@ -2,6 +2,7 @@
 #include "connection.h"
 
 #include <libqinfinity/browseriter.h>
+#include <libqinfinity/browser.h>
 
 #include <KIcon>
 
@@ -9,9 +10,10 @@ namespace Kobby
 {
 
 ConnectionItem::ConnectionItem( QInfinity::XmlConnection &conn,
+    QInfinity::Browser &browser,
     const KIcon &icon,
     const QString &text )
-    : QInfinity::ConnectionItem( conn, icon, text )
+    : QInfinity::ConnectionItem( conn, browser, icon, text )
     , m_conn( 0 )
 {
 }
@@ -52,9 +54,10 @@ QInfinity::NodeItem *ItemFactory::createNodeItem( const QInfinity::BrowserIter &
 }
 
 QInfinity::ConnectionItem *ItemFactory::createConnectionItem( QInfinity::XmlConnection &conn,
+    QInfinity::Browser &browser,
     const QString &name )
 {
-    return new Kobby::ConnectionItem( conn, KIcon("network-connect.png"), name );
+    return new Kobby::ConnectionItem( conn, browser, KIcon("network-connect.png"), name );
 }
 
 }
