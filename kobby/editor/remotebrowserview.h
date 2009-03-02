@@ -7,8 +7,11 @@
 class QTreeView;
 class QModelIndex;
 class QItemSelection;
+class QContextMenuEvent;
+
 class KAction;
 class KToolBar;
+class KMenu;
 
 namespace QInfinity
 {
@@ -36,6 +39,9 @@ class RemoteBrowserView
         void createFolder( QModelIndex parent );
         void openItem( QModelIndex item );
         void deleteItem( QModelIndex item );
+
+    protected:
+        void contextMenuEvent( QContextMenuEvent *e );
     
     private Q_SLOTS:
         void slotNewConnection();
@@ -64,6 +70,7 @@ class RemoteBrowserView
         KAction *createFolderAction;
         KAction *openAction;
         KAction *deleteAction;
+        KMenu *contextMenu;
 };
 
 }

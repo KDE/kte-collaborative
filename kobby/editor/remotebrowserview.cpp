@@ -7,12 +7,14 @@
 #include <KIcon>
 #include <KLocalizedString>
 #include <KToolBar>
+#include <KMenu>
 
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QItemSelection>
 #include <QModelIndexList>
 #include <QDebug>
+#include <QContextMenuEvent>
 
 #include "remotebrowserview.moc"
 
@@ -24,6 +26,7 @@ RemoteBrowserView::RemoteBrowserView( QInfinity::BrowserModel &model,
     : QWidget( parent )
     , m_treeView( new QTreeView( this ) )
     , browserModel( &model )
+    , contextMenu( 0 )
 {
     m_treeView->setModel( &model );
     connect( m_treeView, SIGNAL(expanded(const QModelIndex&)),
@@ -38,6 +41,25 @@ RemoteBrowserView::RemoteBrowserView( QInfinity::BrowserModel &model,
     vertLayout->addWidget( m_treeView );
 
     setLayout( vertLayout );
+}
+
+void RemoteBrowserView::contextMenuEvent( QContextMenuEvent *e )
+{
+    if( !e )
+        return;
+
+    if( !contextMenu )
+    {
+        contextMenu = new KMenu( this );
+        contextMenu->addAction( createConnectionAction );
+        contextMenu->addAction( createDocumentAction );
+        contextMenu->addAction( createFolderAction );
+        contextMenu->addSeparator();
+        contextMenu->addAction( openAction );
+        contextMenu->addAction( deleteAction );
+    }
+
+    contextMenu->popup( e->globalPos() );
 }
 
 void RemoteBrowserView::slotNewConnection()
