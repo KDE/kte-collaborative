@@ -49,7 +49,7 @@ QInfinity::NodeItem *ItemFactory::createNodeItem( const QInfinity::BrowserIter &
     if( localItr.isDirectory() )
         item = new QInfinity::NodeItem( localItr, KIcon("folder.png") );
     else
-        item = new QInfinity::NodeItem( localItr, KIcon("document.png") );
+        item = new QInfinity::NodeItem( localItr, KIcon("text-x-generic.png") );
     return item;
 }
 
