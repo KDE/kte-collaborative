@@ -15,6 +15,7 @@ class KMenu;
 
 namespace QInfinity
 {
+    class NotePlugin;
     class BrowserModel;
 }
 
@@ -30,13 +31,12 @@ class RemoteBrowserView
     Q_OBJECT
 
     public:
-        RemoteBrowserView( QInfinity::BrowserModel &model,
+        RemoteBrowserView( QInfinity::NotePlugin &plugin,
+            QInfinity::BrowserModel &model,
             QWidget *parent = 0 );
 
     Q_SIGNALS:
         void createConnection();
-        void createDocument( QModelIndex parent );
-        void createFolder( QModelIndex parent );
         void openItem( QModelIndex item );
         void deleteItem( QModelIndex item );
 
@@ -62,6 +62,7 @@ class RemoteBrowserView
         QItemSelection getSelection();
 
         QTreeView *m_treeView;
+        QInfinity::NotePlugin *m_plugin;
         QInfinity::BrowserModel *browserModel;
 
         KToolBar *toolBar;

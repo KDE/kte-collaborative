@@ -8,6 +8,7 @@
 #include "createconnectiondialog.h"
 #include "itemfactory.h"
 
+#include <libqinfinity/defaulttextplugin.h>
 #include <libqinfinity/browseritemfactory.h>
 #include <libqinfinity/xmppconnection.h>
 
@@ -60,6 +61,7 @@ MainWindow::MainWindow( QWidget *parent )
 
     browserModel = new QInfinity::BrowserModel( this );
     browserModel->setItemFactory( new ItemFactory( this ) );
+    textPlugin = new QInfinity::DefaultTextPlugin( this );
     docTabWidget = new DocumentTabWidget( this );
 
     setXMLFile( "kobbyui.rc" );
@@ -87,7 +89,8 @@ void MainWindow::setupUi()
     statusBar->addWidget( statusLabel );
     setStatusBar( statusBar );
 
-    remoteBrowserView = new RemoteBrowserView( *browserModel, this );
+    remoteBrowserView = new RemoteBrowserView( *textPlugin,
+        *browserModel, this );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
 
@@ -158,6 +161,7 @@ void MainWindow::slotCreateConnection( const QString &hostname,
 void MainWindow::slotConnectionError( Connection *conn,
     QString errMsg )
 {
+    Q_UNUSED(conn);
     QString str = i18n("Error creating conneciton: ");
     str += errMsg;
     KMessageBox::error( this, str );

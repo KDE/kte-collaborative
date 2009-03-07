@@ -2,6 +2,7 @@
 #include "itemfactory.h"
 #include "createitemdialog.h"
 
+#include <libqinfinity/noteplugin.h>
 #include <libqinfinity/browsermodel.h>
 
 #include <KAction>
@@ -22,10 +23,12 @@
 namespace Kobby
 {
 
-RemoteBrowserView::RemoteBrowserView( QInfinity::BrowserModel &model,
+RemoteBrowserView::RemoteBrowserView( QInfinity::NotePlugin &plugin,
+    QInfinity::BrowserModel &model,
     QWidget *parent )
     : QWidget( parent )
     , m_treeView( new QTreeView( this ) )
+    , m_plugin( &plugin )
     , browserModel( &model )
     , contextMenu( 0 )
 {
@@ -71,8 +74,16 @@ void RemoteBrowserView::slotNewConnection()
 void RemoteBrowserView::slotNewDocument()
 {
     QItemSelection selection = getSelection();
+    CreateItemDialog *dialog;
     if( canCreateDocument( selection.indexes() ) )
-        emit(createDocument( selection.indexes()[0] ));
+    {
+        dialog = new CreateItemDialog( "Create Note",
+            "Note name:", this );
+        if( dialog->exec() )
+            browserModel->createNote( selection.indexes()[0],
+                *m_plugin, dialog->name() );
+        delete dialog;
+    }
     else
         qDebug() << "Create document handler called but we have invalid selection.";
 }
@@ -84,8 +95,7 @@ void RemoteBrowserView::slotNewFolder()
     if( canCreateFolder( selection.indexes() ) )
     {
         dialog = new CreateItemDialog( "Create Folder",
-            "Folder Name:",
-            this );
+            "Folder Name:", this );
         if( dialog->exec() )
             browserModel->createDirectory( selection.indexes()[0], dialog->name() );
         delete dialog;
