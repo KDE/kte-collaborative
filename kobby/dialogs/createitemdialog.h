@@ -21,35 +21,22 @@ namespace QInfinity
 namespace Kobby
 {
 
+/**
+ * @brief Generic dialog for creating a named item.
+ */
 class CreateItemDialog
     : public KDialog
 {
-    Q_OBJECT
 
     public:
-        CreateItemDialog( QInfinity::BrowserFolderItem &parentItem,
-            QWidget *parent = 0 );
-        CreateItemDialog( QInfinity::BrowserFolderItem &parentItem,
-            const QString &label,
-            QWidget *parent = 0 );
-        CreateItemDialog( QInfinity::BrowserFolderItem &parentItem,
-            const QString &title,
-            const QString &label,
+        CreateItemDialog( QString title,
+            QString label,
             QWidget *parent = 0 );
 
-    Q_SIGNALS:
-        void create( QInfinity::BrowserFolderItem &parent,
-            QString name );
-
-    private Q_SLOTS:
-        void slotOkClicked();
+        QString name() const;
 
     private:
-        void setupUi();
-        void setupActions();
-
         Ui::CreateItemWidget *ui;
-        QInfinity::BrowserFolderItem *m_parentItem;
 
 };
 

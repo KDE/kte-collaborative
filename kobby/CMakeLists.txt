@@ -30,7 +30,7 @@ set( KOBBY_LIBRARIES
 
 set( KOBBY_SRCS
 	dialogs/createconnectiondialog.cpp
-	dialogs/createfolderdialog.cpp
+	dialogs/createitemdialog.cpp
 	dialogs/settingsdialog.cpp
 
 	editor/remotebrowserview.cpp
@@ -44,7 +44,7 @@ set( KOBBY_SRCS
 
 set( KOBBY_UI
 	dialogs/createconnectionwidget.ui
-	dialogs/createfolderwidget.ui
+	dialogs/createitemwidget.ui
 	dialogs/profilesettingswidget.ui
 	dialogs/networksettingswidget.ui
 )

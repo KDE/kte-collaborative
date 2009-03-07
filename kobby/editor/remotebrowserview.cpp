@@ -1,6 +1,6 @@
 #include "remotebrowserview.h"
 #include "itemfactory.h"
-#include "createfolderdialog.h"
+#include "createitemdialog.h"
 
 #include <libqinfinity/browsermodel.h>
 
@@ -80,11 +80,14 @@ void RemoteBrowserView::slotNewDocument()
 void RemoteBrowserView::slotNewFolder()
 {
     QItemSelection selection = getSelection();
+    CreateItemDialog *dialog;
     if( canCreateFolder( selection.indexes() ) )
     {
-        CreateFolderDialog *dialog = new CreateFolderDialog( this );
+        dialog = new CreateItemDialog( "Create Folder",
+            "Folder Name:",
+            this );
         if( dialog->exec() )
-            browserModel->createDirectory( selection.indexes()[0], dialog->folderName() );
+            browserModel->createDirectory( selection.indexes()[0], dialog->name() );
         delete dialog;
     }
     else
@@ -114,7 +117,7 @@ void RemoteBrowserView::slotDelete()
     for( indexItr = indexes.begin(); indexItr != indexes.end(); indexItr++ )
     {
         item = browserModel->itemFromIndex( *indexItr );
-        browserModel->removeRow( indexItr->row() );
+        browserModel->removeRow( indexItr->row(), indexItr->parent() );
     }
 }
 
