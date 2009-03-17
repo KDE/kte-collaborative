@@ -175,6 +175,10 @@ void MainWindow::slotOpenUrl( const KUrl &url )
     docTabWidget->addDocument( *doc );
 }
 
+void MainWindow::slotOpenRemote( const QModelIndex &index )
+{
+}
+
 void MainWindow::slotShowSettingsDialog()
 {
     if( KConfigDialog::showDialog("Kobby Settings") )

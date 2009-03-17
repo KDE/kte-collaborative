@@ -50,6 +50,7 @@ class MainWindow
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
         void slotOpenUrl( const KUrl &url );
+        void slotOpenRemote( const QModelIndex &index );
     
     private:
         void setupUi();

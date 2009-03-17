@@ -33,10 +33,6 @@ RemoteBrowserView::RemoteBrowserView( QInfinity::NotePlugin &plugin,
     , contextMenu( 0 )
 {
     m_treeView->setModel( &model );
-    connect( m_treeView, SIGNAL(expanded(const QModelIndex&)),
-        browserModel, SLOT(itemActivated(const QModelIndex&)) );
-    connect( m_treeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-        this, SLOT(slotSelectionChanged(const QItemSelection&, const QItemSelection&)) );
     setupActions();
     setupToolbar();
 
@@ -111,10 +107,15 @@ void RemoteBrowserView::slotOpen()
     if( canOpenItem( selection.indexes() ) )
     {
         for( itr = selection.indexes().begin(); itr != selection.indexes().end(); itr++ )
-            emit( openItem( *itr ) );
+            slotOpen( *itr );
     }
     else
         qDebug() << "Open handler called but we have invalid selection.";
+}
+
+void RemoteBrowserView::slotOpen( const QModelIndex &index )
+{
+    emit( openItem( index ) );
 }
 
 void RemoteBrowserView::slotDelete()
@@ -171,6 +172,12 @@ void RemoteBrowserView::setupActions()
         this, SLOT(slotOpen()) );
     connect( deleteAction, SIGNAL(triggered(bool)),
         this, SLOT(slotDelete()) );
+    connect( m_treeView, SIGNAL(expanded(const QModelIndex&)),
+        browserModel, SLOT(itemActivated(const QModelIndex&)) );
+    connect( m_treeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+        this, SLOT(slotSelectionChanged(const QItemSelection&, const QItemSelection&)) );
+    connect( m_treeView, SIGNAL(doubleClicked(const QModelIndex&)),
+        this, SLOT(slotOpen(const QModelIndex&)) );
 }
 
 void RemoteBrowserView::setupToolbar()

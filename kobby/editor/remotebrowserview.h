@@ -48,6 +48,7 @@ class RemoteBrowserView
         void slotNewDocument();
         void slotNewFolder();
         void slotOpen();
+        void slotOpen( const QModelIndex &index );
         void slotDelete();
         void slotSelectionChanged( const QItemSelection &selected,
             const QItemSelection &deselected );
