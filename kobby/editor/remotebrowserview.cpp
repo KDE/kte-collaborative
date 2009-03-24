@@ -69,14 +69,14 @@ void RemoteBrowserView::slotNewConnection()
 
 void RemoteBrowserView::slotNewDocument()
 {
-    QItemSelection selection = getSelection();
+    QList<QModelIndex> indexes = getSelection();
     CreateItemDialog *dialog;
-    if( canCreateDocument( selection.indexes() ) )
+    if( canCreateDocument( indexes ) )
     {
         dialog = new CreateItemDialog( "Create Note",
             "Note name:", this );
         if( dialog->exec() )
-            browserModel->createNote( selection.indexes()[0],
+            browserModel->createNote( indexes[0],
                 *m_plugin, dialog->name() );
         delete dialog;
     }
@@ -86,14 +86,14 @@ void RemoteBrowserView::slotNewDocument()
 
 void RemoteBrowserView::slotNewFolder()
 {
-    QItemSelection selection = getSelection();
+    QList<QModelIndex> indexes = getSelection();
     CreateItemDialog *dialog;
-    if( canCreateFolder( selection.indexes() ) )
+    if( canCreateFolder( indexes ) )
     {
         dialog = new CreateItemDialog( "Create Folder",
             "Folder Name:", this );
         if( dialog->exec() )
-            browserModel->createDirectory( selection.indexes()[0], dialog->name() );
+            browserModel->createDirectory( indexes[0], dialog->name() );
         delete dialog;
     }
     else
@@ -102,11 +102,11 @@ void RemoteBrowserView::slotNewFolder()
 
 void RemoteBrowserView::slotOpen()
 {
-    QItemSelection selection = getSelection();
-    QModelIndexList::Iterator itr;
-    if( canOpenItem( selection.indexes() ) )
+    QList<QModelIndex> indexes = getSelection();
+    QList<QModelIndex>::ConstIterator itr;
+    if( canOpenItem( indexes ) )
     {
-        for( itr = selection.indexes().begin(); itr != selection.indexes().end(); itr++ )
+        for( itr = indexes.begin(); itr != indexes.end(); itr++ )
             slotOpen( *itr );
     }
     else
@@ -237,14 +237,9 @@ bool RemoteBrowserView::canDeleteItem( QModelIndexList selected )
     return selected.size() != 0;
 }
 
-QItemSelection RemoteBrowserView::getSelection()
+QList<QModelIndex> RemoteBrowserView::getSelection()
 {
-    QItemSelectionModel *selectionModel;
-    QItemSelection selection;
-    QItemSelection::Iterator itr;
-    selectionModel = m_treeView->selectionModel();
-    selection = selectionModel->selection();
-    return selection;
+    return m_treeView->selectionModel()->selectedRows();
 }
 
 }

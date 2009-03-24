@@ -9,6 +9,7 @@
 #include "itemfactory.h"
 
 #include <libqinfinity/defaulttextplugin.h>
+#include <libqinfinity/browser.h>
 #include <libqinfinity/browseritemfactory.h>
 #include <libqinfinity/xmppconnection.h>
 
@@ -62,6 +63,7 @@ MainWindow::MainWindow( QWidget *parent )
     browserModel = new QInfinity::BrowserModel( this );
     browserModel->setItemFactory( new ItemFactory( this ) );
     textPlugin = new QInfinity::DefaultTextPlugin( this );
+    browserModel->addPlugin( *textPlugin );
     docTabWidget = new DocumentTabWidget( this );
 
     setXMLFile( "kobbyui.rc" );
@@ -93,6 +95,8 @@ void MainWindow::setupUi()
         *browserModel, this );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
+    connect( remoteBrowserView, SIGNAL(openItem(const QModelIndex&)),
+        this, SLOT(slotOpenRemote(const QModelIndex&)) );
 
     localBrowserView = new LocalBrowserView( this );
     connect( localBrowserView, SIGNAL(urlSelected(const KUrl&)),
@@ -177,6 +181,21 @@ void MainWindow::slotOpenUrl( const KUrl &url )
 
 void MainWindow::slotOpenRemote( const QModelIndex &index )
 {
+    QStandardItem *stdItem = browserModel->itemFromIndex( index );
+    QInfinity::NodeItem *nodeItem = 0;
+    if( !stdItem )
+    {
+        qDebug() << "Opening remote invalid index.";
+        return;
+    }
+    if( stdItem->type() == QInfinity::BrowserItemFactory::NodeItem )
+    {
+        nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
+        if( !nodeItem->isDirectory() )
+        {
+            joinNote( nodeItem->iter() );
+        }
+    }
 }
 
 void MainWindow::slotShowSettingsDialog()
@@ -223,6 +242,14 @@ void MainWindow::saveSettings()
     KobbySettings::setMainWindowGeometry( sizes );
     KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
+}
+
+void MainWindow::joinNote( const QInfinity::BrowserIter &noteItr )
+{
+    QInfinity::BrowserIter itr = noteItr;
+    if( itr.isDirectory() )
+        return;
+    itr.browser()->subscribeSession( itr );
 }
 
 }

@@ -57,6 +57,7 @@ class MainWindow
         void setupActions();
         void restoreSettings();
         void saveSettings();
+        void joinNote( const QInfinity::BrowserIter &noteItr );
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;
