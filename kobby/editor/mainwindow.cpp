@@ -41,7 +41,7 @@
 #include <QStatusBar>
 #include <QHostInfo>
 
-#include <QDebug>
+#include <KDebug>
 
 #include "mainwindow.moc"
 
@@ -185,7 +185,7 @@ void MainWindow::slotOpenRemote( const QModelIndex &index )
     QInfinity::NodeItem *nodeItem = 0;
     if( !stdItem )
     {
-        qDebug() << "Opening remote invalid index.";
+        kDebug() << "Opening remote invalid index.";
         return;
     }
     if( stdItem->type() == QInfinity::BrowserItemFactory::NodeItem )
@@ -196,6 +196,12 @@ void MainWindow::slotOpenRemote( const QModelIndex &index )
             joinNote( nodeItem->iter() );
         }
     }
+}
+
+void MainWindow::slotSessionSubscribed( const QInfinity::BrowserIter &node,
+    QPointer<QInfinity::SessionProxy> sessionProxy )
+{
+    kDebug() << "Subscribed to session.";
 }
 
 void MainWindow::slotShowSettingsDialog()
@@ -210,6 +216,7 @@ void MainWindow::slotShowSettingsDialog()
 void MainWindow::slotConnectionConnected( Connection *conn )
 {
     QInfinity::ConnectionItem *item;
+    // We are using our subclassed QInfinity ConnectionItem
     item = browserModel->addConnection( *conn->xmppConnection(), conn->name() );
     dynamic_cast<Kobby::ConnectionItem*>(item)->setConnection( conn );
 }

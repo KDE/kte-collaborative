@@ -2,9 +2,11 @@
 #define KOBBY_EDITOR_MAINWINDOW_H
 
 #include <libqinfinity/browsermodel.h>
+#include <libqinfinity/sessionproxy.h>
 
 #include <KParts/MainWindow>
 
+#include <QPointer>
 #include <QMap>
 
 class QLabel;
@@ -51,6 +53,8 @@ class MainWindow
         void slotConnectionError( Connection *conn, QString );
         void slotOpenUrl( const KUrl &url );
         void slotOpenRemote( const QModelIndex &index );
+        void slotSessionSubscribed( const QInfinity::BrowserIter &node,
+            QPointer<QInfinity::SessionProxy> sessionProxy );
     
     private:
         void setupUi();

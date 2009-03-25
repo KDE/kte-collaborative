@@ -33,6 +33,7 @@ set( KOBBY_SRCS
 	dialogs/createitemdialog.cpp
 	dialogs/settingsdialog.cpp
 
+	editor/documentbuilder.cpp
 	editor/remotebrowserview.cpp
 	editor/localbrowserview.cpp
 	editor/documenttabwidget.cpp
