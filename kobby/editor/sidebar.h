@@ -8,9 +8,6 @@ class QTreeView;
 namespace Kobby
 {
 
-class ConnectionManagerWidget;
-class FileBrowserWidget;
-
 class Sidebar
     : public QTabWidget
 {

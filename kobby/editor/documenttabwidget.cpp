@@ -1,4 +1,5 @@
 #include "documenttabwidget.h"
+#include "document.h"
 
 #include <KIcon>
 #include <KTextEditor/Document>
@@ -24,6 +25,20 @@ DocumentTabWidget::~DocumentTabWidget()
 {
 }
 
+KTextEditor::View *DocumentTabWidget::viewAt( int index )
+{
+    return dynamic_cast<KTextEditor::View*>(widget( index ));
+}
+
+void DocumentTabWidget::addDocument( Document &doc )
+{
+    addDocument( *doc.kDocument() );
+}
+
+void DocumentTabWidget::removeDocument( Document &doc )
+{
+}
+
 void DocumentTabWidget::closeWidget( QWidget *cw )
 {
     int tab = indexOf( cw );
@@ -34,25 +49,12 @@ void DocumentTabWidget::addDocument( KTextEditor::Document &document )
 {
     KTextEditor::View *view = document.createView( this );
     int tab;
-    documentToView.insert( &document, view );
     tab = addTab( view, document.documentName() );
     setCurrentIndex( tab );
 }
 
 void DocumentTabWidget::removeDocument( KTextEditor::Document &document )
 {
-    int index = indexOf( documentView( document ) );
-    removeTab( index );
-}
-
-KTextEditor::Document *DocumentTabWidget::documentAt( int index )
-{
-    return dynamic_cast<KTextEditor::Document*>(widget( index ));
-}
-
-KTextEditor::View *DocumentTabWidget::documentView( KTextEditor::Document &document )
-{
-    return documentToView[&document];
 }
 
 }

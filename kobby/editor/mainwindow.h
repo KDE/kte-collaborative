@@ -32,8 +32,11 @@ namespace Kobby
 
 class RemoteBrowserView;
 class LocalBrowserView;
+class DocumentListView;
 class DocumentTabWidget;
 class Connection;
+class DocumentModel;
+class DocumentBuilder;
 
 class MainWindow
     : public KParts::MainWindow
@@ -51,7 +54,6 @@ class MainWindow
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
-        void slotOpenUrl( const KUrl &url );
         void slotOpenRemote( const QModelIndex &index );
         void slotSessionSubscribed( const QInfinity::BrowserIter &node,
             QPointer<QInfinity::SessionProxy> sessionProxy );
@@ -68,12 +70,15 @@ class MainWindow
         QInfinity::DefaultTextPlugin *textPlugin;
 
         KTextEditor::Editor *editor;
+        DocumentModel *docModel;
+        DocumentBuilder *docBuilder;
 
         // Ui
         QSplitter *mainHorizSplitter;
         KTabWidget *leftTabWidget;
         RemoteBrowserView *remoteBrowserView;
         LocalBrowserView *localBrowserView;
+        DocumentListView *documentListView;
         DocumentTabWidget *docTabWidget;
         QLabel *statusLabel;
 

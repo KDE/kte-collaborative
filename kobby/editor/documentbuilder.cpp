@@ -1,4 +1,5 @@
 #include "documentbuilder.h"
+#include "document.h"
 
 #include <libqinfinity/browsermodel.h>
 
@@ -13,15 +14,22 @@ namespace Kobby
 {
 
 DocumentBuilder::DocumentBuilder( KTextEditor::Editor &editor,
-    QInfinity::BrowserModel &browserModel )
-    : editor( &editor )
+    QInfinity::BrowserModel &browserModel,
+    QObject *parent )
+    : QObject( parent )
+    , editor( &editor )
     , m_browserModel( &browserModel )
 {
-    setupSignals();
 }
 
 DocumentBuilder::~DocumentBuilder()
 {
+}
+
+void DocumentBuilder::openBlank()
+{
+    Document *doc = new Document( *editor->createDocument( this ), this );
+    emit( documentCreated( *doc ) );
 }
 
 void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
@@ -30,10 +38,11 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 
 void DocumentBuilder::openUrl( const KUrl &url )
 {
-}
-
-void DocumentBuilder::setupSignals()
-{
+    KTextEditor::Document *kdoc = editor->createDocument( this );
+    Document *doc;
+    kdoc->openUrl( url );
+    doc = new Document( *kdoc, this );
+    emit( documentCreated( *doc ) );
 }
 
 }

@@ -13,6 +13,8 @@ namespace KTextEditor
 namespace Kobby
 {
 
+class Document;
+
 /**
  * @brief Tab widget containing active document views, and map from documents to their view.
  */
@@ -25,16 +27,23 @@ class DocumentTabWidget
         DocumentTabWidget( QWidget *parent = 0 );
         ~DocumentTabWidget();
 
-        void addDocument( KTextEditor::Document &document );
-        void removeDocument( KTextEditor::Document &document );
-        KTextEditor::Document *documentAt( int index );
-        KTextEditor::View *documentView( KTextEditor::Document &document );
+        KTextEditor::View *viewAt( int index );
+
+    public Q_SLOTS:
+        /**
+         * @brief Create new view of document and add as a new tab.
+         */
+        void addDocument( Document &doc );
+
+        /**
+         * @brief Remove all views of document
+         */
+        void removeDocument( Document &doc );
 
     private Q_SLOTS:
         void closeWidget( QWidget *widget );
-
-    private:
-        QHash<KTextEditor::Document*, KTextEditor::View*> documentToView;
+        void addDocument( KTextEditor::Document &document );
+        void removeDocument( KTextEditor::Document &document );
 
 };
 

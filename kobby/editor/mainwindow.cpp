@@ -3,7 +3,10 @@
 #include "settingsdialog.h"
 #include "remotebrowserview.h"
 #include "localbrowserview.h"
+#include "documentlistview.h"
 #include "documenttabwidget.h"
+#include "documentmodel.h"
+#include "documentbuilder.h"
 #include "connection.h"
 #include "createconnectiondialog.h"
 #include "itemfactory.h"
@@ -60,21 +63,30 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
 
+    // Setup the QInfinity BrowserModel
     browserModel = new QInfinity::BrowserModel( this );
     browserModel->setItemFactory( new ItemFactory( this ) );
     textPlugin = new QInfinity::DefaultTextPlugin( this );
     browserModel->addPlugin( *textPlugin );
+
+    // Setup Document Management
     docTabWidget = new DocumentTabWidget( this );
+    docModel = new DocumentModel( this );
+    docBuilder = new DocumentBuilder( *editor, *browserModel, this );
+    connect( docBuilder, SIGNAL(documentCreated(Document&)),
+            docModel, SLOT(insertDocument(Document&)) );
+    connect( docModel, SIGNAL(documentAdded(Document&)),
+            docTabWidget, SLOT(addDocument(Document&)) );
+    connect( docModel, SIGNAL(documentRemoved(Document&)),
+            docTabWidget, SLOT(removeDocument(Document&)) );
 
     setXMLFile( "kobbyui.rc" );
-
-    KTextEditor::Document *doc = editor->createDocument( this );
-    docTabWidget->addDocument( *doc );
-
     setupUi();
     setupActions();
     createShellGUI( true );
-    guiFactory()->addClient( docTabWidget->documentView( *doc ) );
+
+    docBuilder->openBlank();
+    guiFactory()->addClient( docTabWidget->viewAt( 0 ) );
 
     restoreSettings();
 }
@@ -91,19 +103,27 @@ void MainWindow::setupUi()
     statusBar->addWidget( statusLabel );
     setStatusBar( statusBar );
 
+    // Setup RemoteBrowserView
     remoteBrowserView = new RemoteBrowserView( *textPlugin,
         *browserModel, this );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
     connect( remoteBrowserView, SIGNAL(openItem(const QModelIndex&)),
-        this, SLOT(slotOpenRemote(const QModelIndex&)) );
+        docBuilder, SLOT(openInfDocmuent(const QModelIndex&)) );
 
+    // Setup LocalBrowserView
     localBrowserView = new LocalBrowserView( this );
     connect( localBrowserView, SIGNAL(urlSelected(const KUrl&)),
-        this, SLOT(slotOpenUrl(const KUrl&)) );
+        docBuilder, SLOT(openUrl(const KUrl&)) );
 
+    documentListView = new DocumentListView( *docModel, this );
+
+    // Setup Left Tab Bar
     leftTabWidget = new KTabWidget( this );
     leftTabWidget->setTabPosition( QTabWidget::West );
+    leftTabWidget->addTab( documentListView,
+        KIcon("document-preview.png"),
+        i18n("Documents") );
     leftTabWidget->addTab( remoteBrowserView,
         KIcon("document-open-remote.png"),
         i18n("Remote Browser") );
@@ -121,19 +141,21 @@ void MainWindow::setupUi()
 void MainWindow::setupActions()
 {
     newDocumentAction = new KAction( i18n("New"), this );
-    newDocumentAction->setIcon( KIcon("document-new.png") );
-
     newConnectionAction = new KAction( i18n("New Connection"), this );
-    newConnectionAction->setIcon( KIcon("network-connect.png") );
-    connect( newConnectionAction, SIGNAL(triggered(bool)),
-        this, SLOT(slotNewConnection()) );
-
     openAction = new KAction( i18n("Open"), this );
+    settingsAction = new KAction( i18n("Configure Kobby"), this );
+
+    newDocumentAction->setIcon( KIcon("document-new.png") );
+    newConnectionAction->setIcon( KIcon("network-connect.png") );
     openAction->setIcon( KIcon("document-open.png") );
 
-    settingsAction = new KAction( i18n("Configure Kobby"), this );
+    connect( newDocumentAction, SIGNAL(triggered(bool)),
+        docBuilder, SLOT(openBlank()) );
+    connect( newConnectionAction, SIGNAL(triggered(bool)),
+        this, SLOT(slotNewConnection()) );
     connect( settingsAction, SIGNAL(triggered(bool)),
         this, SLOT(slotShowSettingsDialog()) );
+
     KStandardAction::quit(kapp, SLOT(quit()),
         actionCollection());
 
@@ -170,13 +192,6 @@ void MainWindow::slotConnectionError( Connection *conn,
     str += errMsg;
     KMessageBox::error( this, str );
     slotNewConnection();
-}
-
-void MainWindow::slotOpenUrl( const KUrl &url )
-{
-    KTextEditor::Document *doc = editor->createDocument( this );
-    doc->openUrl( url );
-    docTabWidget->addDocument( *doc );
 }
 
 void MainWindow::slotOpenRemote( const QModelIndex &index )

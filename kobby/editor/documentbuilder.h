@@ -2,6 +2,8 @@
 #define KOBBY_DOCUMENTMANAGER_H
 
 #include <QObject>
+#include <QPointer>
+#include <QHash>
 
 class QModelIndex;
 class KUrl;
@@ -9,6 +11,7 @@ class KUrl;
 namespace QInfinity
 {
     class BrowserModel;
+    class Browser;
 }
 
 namespace KTextEditor
@@ -37,19 +40,19 @@ class DocumentBuilder
 
     public:
         DocumentBuilder( KTextEditor::Editor &editor,
-            QInfinity::BrowserModel &browserModel );
+            QInfinity::BrowserModel &browserModel,
+            QObject *parent = 0 );
         ~DocumentBuilder();
     
     Q_SIGNALS:
         void documentCreated( Document &document );
 
     public Q_SLOTS:
+        void openBlank();
         void openInfDocmuent( const QModelIndex &index );
         void openUrl( const KUrl &url );
     
     private:
-        void setupSignals();
-
         KTextEditor::Editor *editor;
         QInfinity::BrowserModel *m_browserModel;
 
