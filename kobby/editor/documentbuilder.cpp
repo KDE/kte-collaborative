@@ -1,7 +1,11 @@
 #include "documentbuilder.h"
 #include "document.h"
 
+#include <libqinfinity/session.h>
 #include <libqinfinity/browsermodel.h>
+#include <libqinfinity/browser.h>
+#include <libqinfinity/browseriter.h>
+#include <libqinfinity/browseritemfactory.h>
 
 #include <KTextEditor/Editor>
 #include <KTextEditor/Document>
@@ -20,6 +24,13 @@ DocumentBuilder::DocumentBuilder( KTextEditor::Editor &editor,
     , editor( &editor )
     , m_browserModel( &browserModel )
 {
+    QInfinity::Browser *itr;
+    foreach( itr, browserModel.browsers() )
+    {
+        slotBrowserAdded( *itr );
+    }
+    connect( m_browserModel, SIGNAL(browserAdded( QInfinity::Browser& )),
+        this, SLOT(slotBrowserAdded( QInfinity::Browser& )) );
 }
 
 DocumentBuilder::~DocumentBuilder()
@@ -34,6 +45,18 @@ void DocumentBuilder::openBlank()
 
 void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 {
+    QStandardItem *stdItem = m_browserModel->itemFromIndex( index );
+    QInfinity::NodeItem *nodeItem;
+
+    if( stdItem->type() != QInfinity::BrowserItemFactory::NodeItem )
+    {
+        kDebug() << "Cannot open non-node item.";
+        return;
+    }
+
+    nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
+    QInfinity::BrowserIter nodeItr = nodeItem->iter();
+    nodeItr.browser()->subscribeSession( nodeItr );
 }
 
 void DocumentBuilder::openUrl( const KUrl &url )
@@ -43,6 +66,22 @@ void DocumentBuilder::openUrl( const KUrl &url )
     kdoc->openUrl( url );
     doc = new Document( *kdoc, this );
     emit( documentCreated( *doc ) );
+}
+
+void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
+    QPointer<QInfinity::SessionProxy> sessProxy )
+{
+    KTextEditor::Document *kdoc = editor->createDocument( this );
+    InfTextDocument *infDoc = new InfTextDocument( *kdoc, sessProxy, this );
+    emit( documentCreated( *infDoc ) );
+}
+
+void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )
+{
+    connect( &browser, SIGNAL(subscribeSession(const QInfinity::BrowserIter&,
+            QPointer<QInfinity::SessionProxy>)),
+        this, SLOT(sessionSubscribed(QInfinity::BrowserIter,
+            QPointer<QInfinity::SessionProxy>)) );
 }
 
 }

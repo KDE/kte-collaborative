@@ -1,5 +1,8 @@
 #include "createconnectiondialog.h"
 
+#include <KIcon>
+#include <KLocalizedString>
+
 #include "ui_createconnectionwidget.h"
 #include "createconnectiondialog.moc"
 
@@ -13,6 +16,8 @@ CreateConnectionDialog::CreateConnectionDialog( QWidget *parent )
     QWidget *mainWidget = new QWidget( this );
     ui->setupUi( mainWidget );
     setMainWidget( mainWidget );
+    setWindowIcon( KIcon("network-connect.png") );
+    setCaption( i18n("Create Connection") );
     setupActions();
     sizeHint();
 }

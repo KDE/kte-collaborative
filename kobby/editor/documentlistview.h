@@ -4,9 +4,9 @@
 #include <QWidget>
 
 class KAction;
+class KMenu;
 class QListView;
 class QContextMenuEvent;
-class KMenu;
 
 namespace Kobby
 {
@@ -16,6 +16,7 @@ class DocumentModel;
 class DocumentListView
     : public QWidget
 {
+    Q_OBJECT;
 
     public:
         DocumentListView( DocumentModel &model,
@@ -23,6 +24,9 @@ class DocumentListView
 
     protected:
         void contextMenuEvent( QContextMenuEvent *e );
+
+    private Q_SLOTS:
+        void closeSelected();
 
     private:
         void setupUi();

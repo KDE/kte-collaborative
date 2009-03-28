@@ -11,7 +11,9 @@ class KUrl;
 namespace QInfinity
 {
     class BrowserModel;
+    class BrowserIter;
     class Browser;
+    class SessionProxy;
 }
 
 namespace KTextEditor
@@ -51,6 +53,11 @@ class DocumentBuilder
         void openBlank();
         void openInfDocmuent( const QModelIndex &index );
         void openUrl( const KUrl &url );
+
+    private Q_SLOTS:
+        void sessionSubscribed( const QInfinity::BrowserIter &iter,
+            QPointer<QInfinity::SessionProxy> sessProxy );
+        void slotBrowserAdded( QInfinity::Browser &browser );
     
     private:
         KTextEditor::Editor *editor;

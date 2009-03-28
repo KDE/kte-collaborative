@@ -9,10 +9,10 @@
 #include <QPointer>
 #include <QMap>
 
-class QLabel;
-class QSplitter;
 class KTabWidget;
 class KUrl;
+class QLabel;
+class QSplitter;
 
 namespace QInfinity
 {
@@ -35,13 +35,14 @@ class LocalBrowserView;
 class DocumentListView;
 class DocumentTabWidget;
 class Connection;
+class Document;
 class DocumentModel;
 class DocumentBuilder;
 
 class MainWindow
     : public KParts::MainWindow
 {
-    Q_OBJECT
+    Q_OBJECT;
     
     public:
         MainWindow( QWidget *parent = 0 );
@@ -54,16 +55,15 @@ class MainWindow
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
-        void slotOpenRemote( const QModelIndex &index );
-        void slotSessionSubscribed( const QInfinity::BrowserIter &node,
-            QPointer<QInfinity::SessionProxy> sessionProxy );
+        void slotViewDestroyed( QObject *obj );
+        void slotViewRemoved( KTextEditor::View &view );
     
     private:
         void setupUi();
         void setupActions();
         void restoreSettings();
         void saveSettings();
-        void joinNote( const QInfinity::BrowserIter &noteItr );
+        void mergeView( KTextEditor::View *view );
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;
@@ -81,6 +81,7 @@ class MainWindow
         DocumentListView *documentListView;
         DocumentTabWidget *docTabWidget;
         QLabel *statusLabel;
+        KTextEditor::View *merged_view;
 
         // Actions
         KAction *newDocumentAction;

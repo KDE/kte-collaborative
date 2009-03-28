@@ -23,6 +23,7 @@ class DocumentItem
         ~DocumentItem();
 
         int type() const;
+        Document &document() const;
 
     private:
         Document *m_document;
@@ -39,10 +40,14 @@ class DocumentModel
 
     Q_SIGNALS:
         void documentAdded( Document &document );
-        void documentRemoved( Document &document );
+        void documentAboutToBeRemoved( Document &document );
 
     public Q_SLOTS:
         void insertDocument( Document &document );
+
+    private Q_SLOTS:
+        void slotRowsAboutRemoved( const QModelIndex &parent,
+            int start, int end );
 
 };
 

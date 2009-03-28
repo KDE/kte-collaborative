@@ -9,6 +9,8 @@
 #include <QListView>
 #include <QHBoxLayout>
 #include <QContextMenuEvent>
+#include <QItemSelectionModel>
+#include <QModelIndex>
 
 namespace Kobby
 {
@@ -33,6 +35,16 @@ void DocumentListView::contextMenuEvent( QContextMenuEvent *e )
     contextMenu->popup( e->globalPos() );
 }
 
+void DocumentListView::closeSelected()
+{
+    QList<QModelIndex> selected = listView->selectionModel()->selectedIndexes();
+    QModelIndex index;
+    foreach( index, selected );
+    {
+        docModel->removeRow( index.row() );
+    }
+}
+
 void DocumentListView::setupUi()
 {
     QHBoxLayout *layout = new QHBoxLayout( this );
@@ -46,7 +58,9 @@ void DocumentListView::setupActions()
 {
     closeAction = new KAction( KIcon("dialog-close.png"),
         i18n("Close"), this );
-    closeAction->setEnabled( false );
+    closeAction->setEnabled( true );
+    connect( closeAction, SIGNAL(triggered(bool)),
+        this, SLOT(closeSelected()) );
 }
 
 }

@@ -16,7 +16,7 @@ namespace Kobby
 class ConnectionManagerWidget
     : public QWidget
 {
-    Q_OBJECT
+    Q_OBJECT;
     
     public:
         ConnectionManagerWidget( QWidget *parent = 0 );

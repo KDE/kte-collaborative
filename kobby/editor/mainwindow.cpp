@@ -7,6 +7,7 @@
 #include "documenttabwidget.h"
 #include "documentmodel.h"
 #include "documentbuilder.h"
+#include "document.h"
 #include "connection.h"
 #include "createconnectiondialog.h"
 #include "itemfactory.h"
@@ -53,7 +54,7 @@ namespace Kobby
 
 MainWindow::MainWindow( QWidget *parent )
 {
-    Q_UNUSED( parent )
+    Q_UNUSED( parent );
 
     editor = KTextEditor::EditorChooser::editor();
     if( !editor )
@@ -74,11 +75,13 @@ MainWindow::MainWindow( QWidget *parent )
     docModel = new DocumentModel( this );
     docBuilder = new DocumentBuilder( *editor, *browserModel, this );
     connect( docBuilder, SIGNAL(documentCreated(Document&)),
-            docModel, SLOT(insertDocument(Document&)) );
+        docModel, SLOT(insertDocument(Document&)) );
     connect( docModel, SIGNAL(documentAdded(Document&)),
-            docTabWidget, SLOT(addDocument(Document&)) );
-    connect( docModel, SIGNAL(documentRemoved(Document&)),
-            docTabWidget, SLOT(removeDocument(Document&)) );
+        docTabWidget, SLOT(addDocument(Document&)) );
+    connect( docModel, SIGNAL(documentAboutToBeRemoved(Document&)),
+        docTabWidget, SLOT(removeDocument(Document&)) );
+    connect( docTabWidget, SIGNAL(viewRemoved(KTextEditor::View&)),
+        this, SLOT(slotViewRemoved(KTextEditor::View&)) );
 
     setXMLFile( "kobbyui.rc" );
     setupUi();
@@ -86,7 +89,7 @@ MainWindow::MainWindow( QWidget *parent )
     createShellGUI( true );
 
     docBuilder->openBlank();
-    guiFactory()->addClient( docTabWidget->viewAt( 0 ) );
+    mergeView( docTabWidget->activeView() );
 
     restoreSettings();
 }
@@ -188,35 +191,40 @@ void MainWindow::slotConnectionError( Connection *conn,
     QString errMsg )
 {
     Q_UNUSED(conn);
-    QString str = i18n("Error creating conneciton: ");
+    QString str = i18n("Error with connecton: ");
     str += errMsg;
     KMessageBox::error( this, str );
     slotNewConnection();
 }
 
-void MainWindow::slotOpenRemote( const QModelIndex &index )
+void MainWindow::slotViewDestroyed( QObject *obj )
 {
-    QStandardItem *stdItem = browserModel->itemFromIndex( index );
-    QInfinity::NodeItem *nodeItem = 0;
-    if( !stdItem )
-    {
-        kDebug() << "Opening remote invalid index.";
-        return;
-    }
-    if( stdItem->type() == QInfinity::BrowserItemFactory::NodeItem )
-    {
-        nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
-        if( !nodeItem->isDirectory() )
-        {
-            joinNote( nodeItem->iter() );
-        }
-    }
+    slotViewRemoved( *dynamic_cast<KTextEditor::View*>(obj) );
 }
 
-void MainWindow::slotSessionSubscribed( const QInfinity::BrowserIter &node,
-    QPointer<QInfinity::SessionProxy> sessionProxy )
+void MainWindow::slotViewRemoved( KTextEditor::View &view )
 {
-    kDebug() << "Subscribed to session.";
+    KTextEditor::View *tmpView;
+    kDebug() << "Removing view " << docTabWidget->count();
+    if( merged_view == &view )
+    {
+        guiFactory()->removeClient( &view );
+        tmpView = docTabWidget->activeView();
+        if( !tmpView || (tmpView == merged_view && docTabWidget->count() <= 1))
+        {
+            if( true )
+            {
+                docBuilder->openBlank();
+                tmpView = docTabWidget->activeView();
+                if( !tmpView )
+                {
+                    kDebug() << "Unable to create new view to merge.";
+                    return;
+                }
+            }
+        }
+        mergeView( tmpView );
+    }
 }
 
 void MainWindow::slotShowSettingsDialog()
@@ -266,12 +274,12 @@ void MainWindow::saveSettings()
     KobbySettings::self()->writeConfig();
 }
 
-void MainWindow::joinNote( const QInfinity::BrowserIter &noteItr )
+void MainWindow::mergeView( KTextEditor::View *view )
 {
-    QInfinity::BrowserIter itr = noteItr;
-    if( itr.isDirectory() )
-        return;
-    itr.browser()->subscribeSession( itr );
+    merged_view = view;
+    connect( view, SIGNAL(destroyed(QObject*)),
+        this, SLOT(slotViewDestroyed(QObject*)) );
+    guiFactory()->addClient( view );
 }
 
 }

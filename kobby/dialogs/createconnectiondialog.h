@@ -14,7 +14,7 @@ namespace Kobby
 class CreateConnectionDialog
     : public KDialog
 {
-    Q_OBJECT
+    Q_OBJECT;
 
     public:
         CreateConnectionDialog( QWidget *parent = 0 );

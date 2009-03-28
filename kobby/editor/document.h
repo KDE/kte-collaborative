@@ -4,10 +4,15 @@
 #include <KTextEditor/Document>
 
 #include <QObject>
+#include <QPointer>
+
+#include <glib/gerror.h>
 
 namespace QInfinity
 {
     class Session;
+    class SessionProxy;
+    class User;
 }
 
 namespace Kobby
@@ -44,18 +49,23 @@ class Document
 class InfTextDocument
     : public Document
 {
+    Q_OBJECT;
 
     public:
         InfTextDocument( KTextEditor::Document &kDocument,
-            QInfinity::Session &session,
+            QPointer<QInfinity::SessionProxy> sesisonProxy,
             QObject *parent = 0 );
 
         Document::Type type() const;
 
-    private:
-        void setupSignals();
+    private Q_SLOTS:
+        void sessionRunning();
+        void userJoined( QPointer<QInfinity::User> user );
+        void userJoinFailed( GError *error );
 
-        QInfinity::Session *m_session;
+    private:
+        QPointer<QInfinity::SessionProxy> m_sessionProxy;
+        QPointer<QInfinity::User> m_user;
 
 };
 

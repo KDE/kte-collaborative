@@ -21,13 +21,18 @@ class Document;
 class DocumentTabWidget
     : public KTabWidget
 {
-    Q_OBJECT
+    Q_OBJECT;
 
     public:
         DocumentTabWidget( QWidget *parent = 0 );
         ~DocumentTabWidget();
 
         KTextEditor::View *viewAt( int index );
+        KTextEditor::View *activeView();
+
+    Q_SIGNALS:
+        void viewRemoved( KTextEditor::View &view );
+        void viewAdded( KTextEditor::View &view );
 
     public Q_SLOTS:
         /**
