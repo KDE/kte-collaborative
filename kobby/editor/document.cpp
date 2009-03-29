@@ -6,7 +6,12 @@
 #include <libqinfinity/textsession.h>
 #include <libqinfinity/userrequest.h>
 #include <libqinfinity/user.h>
+#include <libqinfinity/textbuffer.h>
+#include <libqinfinity/textchunk.h>
 
+#include <KTextEditor/Document>
+#include <KTextEditor/Range>
+#include <KTextEditor/Cursor>
 #include <KDebug>
 
 namespace Kobby
@@ -89,12 +94,82 @@ void InfTextDocument::sessionRunning()
 void InfTextDocument::userJoined( QPointer<QInfinity::User> user )
 {
     kDebug() << "User join successfull, enabling editing.";
+    m_user = user;
+    block_inf_op = false;
+    QPointer<QInfinity::Buffer> buffer = m_sessionProxy->session()->buffer();
+    m_textBuffer = dynamic_cast<QInfinity::TextBuffer*>(buffer.data());
+    connect( kDocument(), SIGNAL(textInserted( KTextEditor::Document*,
+            const KTextEditor::Range )),
+        this, SLOT(slotKTextInserted( KTextEditor::Document*,
+            const KTextEditor::Range& )) );
+    connect( kDocument(), SIGNAL(textRemoved( KTextEditor::Document*,
+            const KTextEditor::Range )),
+        this, SLOT(slotKTextRemoved( KTextEditor::Document*,
+            const KTextEditor::Range& )) );
+    connect( m_textBuffer, SIGNAL(insertText( unsigned int,
+            const QInfinity::TextChunk&, QPointer<QInfinity::User> )),
+        this, SLOT(slotInfTextInserted(unsigned int,
+            const QInfinity::TextChunk, QPointer<QInfinity::User>)) );
     kDocument()->setReadWrite( true );
 }
 
 void InfTextDocument::userJoinFailed( GError *error )
 {
     kDebug() << "User joining failed!";
+}
+
+void InfTextDocument::slotKTextInserted( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+    unsigned int offset = cursorToOffset( range.start() );
+    QString text = kDocument()->text( range );
+    QInfinity::TextChunk chunk( "UTF-8" );
+    chunk.insertText( 0, text, m_user->id() );
+    block_inf_op = true;
+    m_textBuffer->insertChunk( offset, chunk, m_user );
+}
+
+void InfTextDocument::slotKTextRemoved( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+}
+
+void InfTextDocument::slotInfTextInserted( unsigned int offset,
+    const QInfinity::TextChunk &textChunk,
+    QPointer<QInfinity::User> user )
+{
+    if( !block_inf_op )
+    {
+        QByteArray data = textChunk.text();
+        KTextEditor::Cursor startCursor = offsetToCursor( offset );
+        QString text = QString::fromUtf8( data );
+        kDocument()->insertText( startCursor, text );
+    }
+    block_inf_op = false;
+}
+
+void InfTextDocument::slotInfTextErased( unsigned int offset,
+    unsigned int len,
+    QPointer<QInfinity::User> user )
+{
+}
+
+unsigned int InfTextDocument::cursorToOffset( const KTextEditor::Cursor &cursor )
+{
+    unsigned int offset = 0;
+    int i, cursor_line = cursor.line();
+    for( i = 0; i < cursor_line; i++ )
+        offset += kDocument()->lineLength( i ) + 1; // Add newline
+    offset += cursor.column();
+    return offset;
+}
+
+KTextEditor::Cursor InfTextDocument::offsetToCursor( unsigned int offset )
+{
+    int i;
+    for( i = 0; i < kDocument()->lineLength( i ); i++ )
+        offset -= kDocument()->lineLength( i ) + 1; // Subtract newline
+    return KTextEditor::Cursor( i, offset );
 }
 
 }

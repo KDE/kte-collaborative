@@ -1,6 +1,8 @@
 #include "documentmodel.h"
 #include "document.h"
 
+#include <KDebug>
+
 #include "documentmodel.moc"
 
 namespace Kobby
