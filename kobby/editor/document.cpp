@@ -141,7 +141,9 @@ void InfTextDocument::slotInfTextInserted( unsigned int offset,
     if( !block_inf_op )
     {
         QByteArray data = textChunk.text();
+        kDebug() << "inserting at offset " << offset << " data " << data;
         KTextEditor::Cursor startCursor = offsetToCursor( offset );
+        kDebug() << "at line " << startCursor.line() << " column " << startCursor.column();
         QString text = QString::fromUtf8( data );
         kDocument()->insertText( startCursor, text );
     }
@@ -167,7 +169,7 @@ unsigned int InfTextDocument::cursorToOffset( const KTextEditor::Cursor &cursor 
 KTextEditor::Cursor InfTextDocument::offsetToCursor( unsigned int offset )
 {
     int i;
-    for( i = 0; i < kDocument()->lineLength( i ); i++ )
+    for( i = 0; offset > kDocument()->lineLength( i ); i++ )
         offset -= kDocument()->lineLength( i ) + 1; // Subtract newline
     return KTextEditor::Cursor( i, offset );
 }
