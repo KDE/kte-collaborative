@@ -22,7 +22,7 @@ InfSession *NotePlugin::createSession( InfIo *io,
     InfXmlConnection *sync_connection )
 {
     InfUserTable *userTable = inf_user_table_new();
-    InfTextDefaultBuffer *buffer = inf_text_default_buffer_new( "utf-8" );
+    InfTextDefaultBuffer *buffer = inf_text_default_buffer_new( "UTF-8" );
     InfTextSession *textSession = inf_text_session_new_with_user_table( manager,
         INF_TEXT_BUFFER(buffer),
         io,
