@@ -73,6 +73,7 @@ InfTextDocument::InfTextDocument( KTextEditor::Document &kDocument,
 
 InfTextDocument::~InfTextDocument()
 {
+    
 }
 
 Document::Type InfTextDocument::type() const
@@ -163,6 +164,8 @@ void InfTextDocument::slotInfTextInserted( unsigned int offset,
         KTextEditor::Cursor startCursor = offsetToCursor( offset );
         kDebug() << "at line " << startCursor.line() << " column " << startCursor.column();
         QString text = QString::fromUtf8( data );
+        if( text[0] == '\n' )
+         text = "\n";
         kDocument()->insertText( startCursor, text );
     }
     block_inf_ins_op = false;
