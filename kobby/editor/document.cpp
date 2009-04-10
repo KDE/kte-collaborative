@@ -12,6 +12,8 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/Range>
 #include <KTextEditor/Cursor>
+#include <KLocalizedString>
+#include <KMessageBox>
 #include <KDebug>
 
 namespace Kobby
@@ -69,6 +71,10 @@ InfTextDocument::InfTextDocument( KTextEditor::Document &kDocument,
         kDebug() << "Session closed.  Editing disabled.";
 }
 
+InfTextDocument::~InfTextDocument()
+{
+}
+
 Document::Type InfTextDocument::type() const
 {
     return Document::InfText;
@@ -79,7 +85,7 @@ void InfTextDocument::sessionRunning()
     QInfinity::Session *session = m_sessionProxy->session();
     if( session->type() != QInfinity::Session::Text )
     {
-        kDebug() << "Cant join session of unknown type.  Editing disabled.";
+        KMessageBox::error( 0, i18n("Unknown session type"), i18n("Unknown session type") );
         return;
     }
     QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
@@ -120,7 +126,10 @@ void InfTextDocument::userJoined( QPointer<QInfinity::User> user )
 
 void InfTextDocument::userJoinFailed( GError *error )
 {
-    kDebug() << "User joining failed!";
+    QString errorMessage = i18n("User join failed!\n");
+    errorMessage.append( error->message );
+    KMessageBox::error( 0, errorMessage, i18n("User join failed!") );
+    deleteLater();
 }
 
 void InfTextDocument::slotKTextInserted( KTextEditor::Document *document,

@@ -62,6 +62,7 @@ class InfTextDocument
         InfTextDocument( KTextEditor::Document &kDocument,
             QPointer<QInfinity::SessionProxy> sesisonProxy,
             QObject *parent = 0 );
+        ~InfTextDocument();
 
         Document::Type type() const;
 
