@@ -86,7 +86,8 @@ class InfTextDocument
         QPointer<QInfinity::SessionProxy> m_sessionProxy;
         QPointer<QInfinity::User> m_user;
         QPointer<QInfinity::TextBuffer> m_textBuffer;
-        bool block_inf_op;
+        bool block_inf_ins_op;
+        bool block_inf_del_op;
 
 };
 

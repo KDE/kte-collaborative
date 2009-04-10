@@ -95,7 +95,8 @@ void InfTextDocument::userJoined( QPointer<QInfinity::User> user )
 {
     kDebug() << "User join successfull, enabling editing.";
     m_user = user;
-    block_inf_op = false;
+    block_inf_ins_op = false;
+    block_inf_del_op = false;
     QPointer<QInfinity::Buffer> buffer = m_sessionProxy->session()->buffer();
     m_textBuffer = dynamic_cast<QInfinity::TextBuffer*>(buffer.data());
     connect( kDocument(), SIGNAL(textInserted( KTextEditor::Document*,
@@ -106,10 +107,14 @@ void InfTextDocument::userJoined( QPointer<QInfinity::User> user )
             const KTextEditor::Range )),
         this, SLOT(slotKTextRemoved( KTextEditor::Document*,
             const KTextEditor::Range& )) );
-    connect( m_textBuffer, SIGNAL(insertText( unsigned int,
+    connect( m_textBuffer, SIGNAL(textInserted( unsigned int,
             const QInfinity::TextChunk&, QPointer<QInfinity::User> )),
         this, SLOT(slotInfTextInserted(unsigned int,
             const QInfinity::TextChunk, QPointer<QInfinity::User>)) );
+    connect( m_textBuffer, SIGNAL(textErased( unsigned int,
+            unsigned int, QPointer<QInfinity::User>)),
+        this, SLOT(slotInfTextErased(unsigned int, unsigned int,
+            QPointer<QInfinity::User>)) );
     kDocument()->setReadWrite( true );
 }
 
@@ -125,20 +130,24 @@ void InfTextDocument::slotKTextInserted( KTextEditor::Document *document,
     QString text = kDocument()->text( range );
     QInfinity::TextChunk chunk( "UTF-8" );
     chunk.insertText( 0, text, m_user->id() );
-    block_inf_op = true;
+    block_inf_ins_op = true;
     m_textBuffer->insertChunk( offset, chunk, m_user );
 }
 
 void InfTextDocument::slotKTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    unsigned int offset = cursorToOffset( range.start() );
+    unsigned int end = cursorToOffset( range.end() );
+    block_inf_del_op = true;
+    m_textBuffer->eraseText( offset, end - offset, m_user );
 }
 
 void InfTextDocument::slotInfTextInserted( unsigned int offset,
     const QInfinity::TextChunk &textChunk,
     QPointer<QInfinity::User> user )
 {
-    if( !block_inf_op )
+    if( !block_inf_ins_op )
     {
         QByteArray data = textChunk.text();
         kDebug() << "inserting at offset " << offset << " data " << data;
@@ -147,13 +156,19 @@ void InfTextDocument::slotInfTextInserted( unsigned int offset,
         QString text = QString::fromUtf8( data );
         kDocument()->insertText( startCursor, text );
     }
-    block_inf_op = false;
+    block_inf_ins_op = false;
 }
 
 void InfTextDocument::slotInfTextErased( unsigned int offset,
     unsigned int len,
     QPointer<QInfinity::User> user )
 {
+    if( !block_inf_del_op )
+    {
+        KTextEditor::Range range( offsetToCursor( offset ), offsetToCursor( offset + len ) );
+        kDocument()->removeText( range );
+    }
+    block_inf_del_op = false;
 }
 
 unsigned int InfTextDocument::cursorToOffset( const KTextEditor::Cursor &cursor )

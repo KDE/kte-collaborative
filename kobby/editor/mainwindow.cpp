@@ -83,7 +83,7 @@ MainWindow::MainWindow( QWidget *parent )
     connect( docTabWidget, SIGNAL(viewRemoved(KTextEditor::View&)),
         this, SLOT(slotViewRemoved(KTextEditor::View&)) );
 
-    setXMLFile( "kobbyui.rc" );
+    setXMLFile( "kobby/kobbyui.rc" );
     setupUi();
     setupActions();
     createShellGUI( true );
