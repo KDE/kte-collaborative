@@ -140,7 +140,7 @@ void InfTextDocument::slotKTextInserted( KTextEditor::Document *document,
     unsigned int offset = cursorToOffset( range.start() );
     QString text = kDocument()->text( range );
     QInfinity::TextChunk chunk( "UTF-8" );
-    chunk.insertText( 0, text, m_user->id() );
+    chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
     block_inf_ins_op = true;
     m_textBuffer->insertChunk( offset, chunk, m_user );
 }
