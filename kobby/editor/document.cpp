@@ -89,6 +89,7 @@ void InfTextDocument::sessionRunning()
         KMessageBox::error( 0, i18n("Unknown session type"), i18n("Unknown session type") );
         return;
     }
+    qDebug() << "Attempting to join session as " << KobbySettings::nickName();
     QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
         KobbySettings::nickName(),
         0 );

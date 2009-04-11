@@ -8,6 +8,9 @@ project(kobby)
 
 find_package(KDE4 REQUIRED)
 find_package(Libqinfinity REQUIRED)
+set(KDE_MIN_VERSION "4.2.0")
+
+subdirs( data )
 
 set( KOBBY_INCLUDES
 	${KDE4_INCLUDES}
@@ -63,4 +66,3 @@ kde4_add_executable( kobby ${KOBBY_SRCS} )
 target_link_libraries( kobby ${KOBBY_LIBRARIES} )
 
 install( TARGETS kobby DESTINATION ${BIN_INSTALL_DIR} )
-install( FILES kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/kobby )
