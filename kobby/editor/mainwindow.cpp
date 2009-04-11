@@ -101,6 +101,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
+    setWindowIcon( KIcon( "meeting-attending.png" ) );
+
     statusLabel = new QLabel( this );
     QStatusBar *statusBar = new QStatusBar( this );
     statusBar->addWidget( statusLabel );
