@@ -19,10 +19,8 @@
 namespace Kobby
 {
 
-Document::Document( KTextEditor::Document &kDocument,
-    QObject *parent )
-    : QObject( parent )
-    , m_kDocument( &kDocument )
+Document::Document( KTextEditor::Document &kDocument )
+    : m_kDocument( &kDocument )
 {
     m_kDocument->setParent( this );
 }

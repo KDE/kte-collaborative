@@ -1,6 +1,8 @@
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
 
+#include <libqinfinity/abstracttextbuffer.h>
+
 #include <QObject>
 #include <QPointer>
 
@@ -29,7 +31,6 @@ namespace Kobby
  * @brief A base class for interacting with Documents.
  */
 class Document
-    : public QObject
 {
 
     public:
@@ -39,8 +40,7 @@ class Document
             InfText = 2
         };
 
-        Document( KTextEditor::Document &kDocument,
-            QObject *parent = 0 );
+        Document( KTextEditor::Document &kDocument );
         virtual ~Document();
 
         virtual Type type() const;
@@ -54,7 +54,8 @@ class Document
 };
 
 class InfTextDocument
-    : public Document
+    : public QInfinity::AbstractTextBuffer
+    , public Document
 {
     Q_OBJECT;
 

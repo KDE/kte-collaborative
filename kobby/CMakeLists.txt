@@ -36,6 +36,7 @@ set( KOBBY_SRCS
 	dialogs/createitemdialog.cpp
 	dialogs/settingsdialog.cpp
 
+	editor/noteplugin.cpp
 	editor/document.cpp
 	editor/documentbuilder.cpp
 	editor/documentmodel.cpp

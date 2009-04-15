@@ -1,8 +1,7 @@
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
 
-// Make sure to include this header BEFORE any Qt headers!
-#include <libinfinitymm/client/clientnoteplugin.h>
+#include <libqinfinity/noteplugin.h>
 
 namespace Kobby
 {
@@ -11,18 +10,15 @@ namespace Kobby
  * @brief Instantiates InfText sessions.
  */
 class NotePlugin
-    : public Infinity::ClientNotePlugin
+    : public QInfinity::NotePlugin
 {
 
     public:
-        NotePlugin();
-        ~NotePlugin();
+        NotePlugin( QObject *parent = 0 );
 
-    protected:
-        InfSession *createSession( InfIo *io,
-            InfConnectionManager *manager,
-            InfConnectionManagerGroup *sync_group,
-            InfXmlConnection *sync_connection );
+        QInfinity::Session *createSession( QInfinity::CommunicationManager *commMgr,
+            QInfinity::CommunicationJoinedGroup *syncGroup,
+            QInfinity::XmlConnection *syncConnection );
 
 };
 
