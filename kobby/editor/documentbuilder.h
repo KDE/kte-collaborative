@@ -14,6 +14,7 @@ namespace QInfinity
     class BrowserIter;
     class Browser;
     class SessionProxy;
+    class Session;
 }
 
 namespace KTextEditor
@@ -66,11 +67,15 @@ class DocumentBuilder
     private Q_SLOTS:
         void sessionSubscribed( const QInfinity::BrowserIter &iter,
             QPointer<QInfinity::SessionProxy> sessProxy );
+        void slotSessionSynchronized();
         void slotBrowserAdded( QInfinity::Browser &browser );
     
     private:
+        void sessionSynchronized( QInfinity::Session *session );
+
         KTextEditor::Editor *editor;
         QInfinity::BrowserModel *m_browserModel;
+        QHash<QInfinity::Session*, QInfinity::SessionProxy*> sessionToProxy;
 
 };
 

@@ -1,11 +1,15 @@
 #include "documentbuilder.h"
 #include "document.h"
+#include "kobbysettings.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
 #include <libqinfinity/browseriter.h>
 #include <libqinfinity/browseritemfactory.h>
+#include <libqinfinity/userrequest.h>
+#include <libqinfinity/session.h>
+#include <libqinfinity/textsession.h>
 
 #include <KTextEditor/Editor>
 #include <KTextEditor/Document>
@@ -80,6 +84,37 @@ void DocumentBuilder::openUrl( const KUrl &url )
 void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     QPointer<QInfinity::SessionProxy> sessProxy )
 {
+    QInfinity::Session *session = sessProxy->session();
+    if( session->status() == QInfinity::Session::Running )
+        sessionSynchronized( session );
+    else if( session->status() == QInfinity::Session::Synchronizing )
+    {
+        sessionToProxy[session] = sessProxy;
+        connect( session, SIGNAL(synchronizationComplete()),
+            this, SLOT(slotSessionSynchronized()) );
+    }
+}
+
+void DocumentBuilder::slotSessionSynchronized()
+{
+    QInfinity::Session *session = dynamic_cast<QInfinity::Session*>(sender());
+    sessionSynchronized( session );
+}
+
+void DocumentBuilder::sessionSynchronized( QInfinity::Session *session )
+{
+    QInfinity::Buffer *infBuff = session->buffer();
+    KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
+    if( !kbuff )
+    {
+        kDebug() << "Non kobby buffer, cannot join.";
+        return;
+    }
+    QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( sessionToProxy[session],
+        KobbySettings::nickName(),
+        0 );
+    connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
+        kbuff, SLOT(setUser(QPointer<QInfinity::User>)) );
 }
 
 void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )

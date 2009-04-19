@@ -73,9 +73,23 @@ class KDocumentTextBuffer
             unsigned int length,
             QInfinity::User *user );
 
+
+    private Q_SLOTS:
+        void localTextInserted( KTextEditor::Document *document,
+            const KTextEditor::Range &range );
+        void localTextRemoved( KTextEditor::Document *document,
+            const KTextEditor::Range &range );
+        void setUser( QPointer<QInfinity::User> user );
+
     private:
         unsigned int cursorToOffset( const KTextEditor::Cursor &cursor );
         KTextEditor::Cursor offsetToCursor( unsigned int offset );
+
+        bool blockLocalInsert;
+        bool blockLocalRemove;
+        bool blockRemoteInsert;
+        bool blockRemoteRemove;
+        QPointer<QInfinity::User> m_user;
 
 };
 

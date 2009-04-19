@@ -48,7 +48,15 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     QObject *parent )
     : QInfinity::AbstractTextBuffer( encoding, parent )
     , Document( kDocument )
+    , blockLocalInsert( false )
+    , blockLocalRemove( false )
+    , blockRemoteInsert( false )
+    , blockRemoteRemove( false )
 {
+    connect( &kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
+        this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
+    connect( &kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
+        this, SLOT(localTextRemoved(KTextEditor::Document*, const KTextEditor::Range&)) );
 }
 
 KDocumentTextBuffer::~KDocumentTextBuffer()
@@ -59,14 +67,66 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
-    KTextEditor::Cursor startCursor = offsetToCursor( offset );
-    kDocument()->insertText( startCursor, chunk.text() );
+    if( !blockRemoteInsert )
+    {
+        KTextEditor::Cursor startCursor = offsetToCursor( offset );
+        blockLocalInsert = true;
+        kDocument()->insertText( startCursor, chunk.text() );
+    }
+    else
+        blockRemoteInsert = false;
 }
 
 void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )
 {
+    if( !blockRemoteRemove )
+    {
+        KTextEditor::Cursor startCursor = offsetToCursor( offset );
+        KTextEditor::Cursor endCursor = offsetToCursor( offset+length );
+        blockLocalRemove = true;
+        kDocument()->removeText( KTextEditor::Range(startCursor, endCursor) );
+    }
+    else
+        blockRemoteRemove = false;
+}
+
+void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+    unsigned int offset;
+    if( !blockLocalInsert && m_user )
+    {
+        offset = cursorToOffset( range.start() );
+        QInfinity::TextChunk chunk( "UTF-8" );
+        QString text = kDocument()->text( range );
+        chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
+        blockRemoteInsert = true;
+        insertChunk( offset, chunk, m_user );
+    }
+    else
+        blockLocalInsert = false;
+}
+
+void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
+    const KTextEditor::Range &range )
+{
+    if( !blockLocalRemove && m_user )
+    {
+        unsigned int offset = cursorToOffset( range.start() );
+        unsigned int end = cursorToOffset( range.end() );
+        blockRemoteRemove = true;
+        eraseText( offset, end-offset, m_user );
+    }
+    else
+        blockLocalRemove = false;
+}
+
+void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
+{
+    m_user = user;
+    kDocument()->setReadWrite( true );
 }
 
 unsigned int KDocumentTextBuffer::cursorToOffset( const KTextEditor::Cursor &cursor )
