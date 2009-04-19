@@ -37,7 +37,7 @@ KTextEditor::View *DocumentTabWidget::activeView()
 
 void DocumentTabWidget::addDocument( Document &doc )
 {
-    addDocument( *doc.kDocument() );
+    addDocument( *doc.kDocument(), doc.name()  );
 }
 
 void DocumentTabWidget::removeDocument( Document &doc )
@@ -51,11 +51,11 @@ void DocumentTabWidget::closeWidget( QWidget *cw )
     removeTab( tab );
 }
 
-void DocumentTabWidget::addDocument( KTextEditor::Document &document )
+void DocumentTabWidget::addDocument( KTextEditor::Document &document, QString name )
 {
     KTextEditor::View *view = document.createView( this );
     int tab;
-    tab = addTab( view, document.documentName() );
+    tab = addTab( view, name );
     setCurrentIndex( tab );
     emit( viewAdded( *view ) );
 }

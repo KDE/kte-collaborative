@@ -22,6 +22,7 @@ namespace QInfinity
     class User;
     class TextChunk;
     class TextBuffer;
+    class BrowserIter;
 }
 
 namespace Kobby
@@ -65,13 +66,14 @@ class KDocumentTextBuffer
             QObject *parent = 0 );
         ~KDocumentTextBuffer();
 
+        void setName( const QString &name );
         void onInsertText( unsigned int offset,
             const QInfinity::TextChunk &chunk,
             QInfinity::User *user );
-
         void onEraseText( unsigned int offset,
             unsigned int length,
             QInfinity::User *user );
+        QString name();
 
 
     private Q_SLOTS:
@@ -90,6 +92,7 @@ class KDocumentTextBuffer
         bool blockRemoteInsert;
         bool blockRemoteRemove;
         QPointer<QInfinity::User> m_user;
+        QString m_name;
 
 };
 

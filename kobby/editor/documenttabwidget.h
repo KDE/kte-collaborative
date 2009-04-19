@@ -47,7 +47,7 @@ class DocumentTabWidget
 
     private Q_SLOTS:
         void closeWidget( QWidget *widget );
-        void addDocument( KTextEditor::Document &document );
+        void addDocument( KTextEditor::Document &document, QString name );
         void removeDocument( KTextEditor::Document &document );
 
 };

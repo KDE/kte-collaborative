@@ -46,7 +46,6 @@ KDocumentTextBuffer *DocumentBuilder::createKDocumentTextBuffer(
 {
     KDocumentTextBuffer *doc = new KDocumentTextBuffer( *editor->createDocument( this ),
         encoding, this );
-    emit( documentCreated( *doc ) );
     return doc;
 }
 
@@ -93,6 +92,12 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
         connect( session, SIGNAL(synchronizationComplete()),
             this, SLOT(slotSessionSynchronized()) );
     }
+
+    QInfinity::Buffer *infBuff = session->buffer();
+    KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
+    QInfinity::BrowserIter bi( iter );
+    kbuff->setName( bi.name() );
+    emit(documentCreated(*kbuff));
 }
 
 void DocumentBuilder::slotSessionSynchronized()

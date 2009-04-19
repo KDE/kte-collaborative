@@ -16,7 +16,6 @@ DocumentItem::DocumentItem( Document &doc )
 
 DocumentItem::~DocumentItem()
 {
-    delete m_document;
 }
 
 int DocumentItem::type() const

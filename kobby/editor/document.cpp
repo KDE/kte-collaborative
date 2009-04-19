@@ -8,6 +8,7 @@
 #include <libqinfinity/user.h>
 #include <libqinfinity/textbuffer.h>
 #include <libqinfinity/textchunk.h>
+#include <libqinfinity/browseriter.h>
 
 #include <KTextEditor/Document>
 #include <KTextEditor/Range>
@@ -63,6 +64,11 @@ KDocumentTextBuffer::~KDocumentTextBuffer()
 {
 }
 
+void KDocumentTextBuffer::setName( const QString &name )
+{
+    m_name = name;
+}
+
 void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
@@ -90,6 +96,11 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     }
     else
         blockRemoteRemove = false;
+}
+
+QString KDocumentTextBuffer::name()
+{
+    return m_name;
 }
 
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
