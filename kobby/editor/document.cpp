@@ -112,6 +112,8 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
         offset = cursorToOffset( range.start() );
         QInfinity::TextChunk chunk( "UTF-8" );
         QString text = kDocument()->text( range );
+        if( text[0] == '\n' ) // hack
+            text = '\n';
         chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
         blockRemoteInsert = true;
         insertChunk( offset, chunk, m_user );
