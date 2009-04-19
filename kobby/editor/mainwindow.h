@@ -17,7 +17,6 @@ class QSplitter;
 namespace QInfinity
 {
     class ConnectionItem;
-    class DefaultTextPlugin;
 }
 
 namespace KTextEditor
@@ -38,6 +37,7 @@ class Connection;
 class Document;
 class DocumentModel;
 class DocumentBuilder;
+class NotePlugin;
 
 class MainWindow
     : public KParts::MainWindow
@@ -67,7 +67,7 @@ class MainWindow
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;
-        QInfinity::DefaultTextPlugin *textPlugin;
+        NotePlugin *textPlugin;
 
         KTextEditor::Editor *editor;
         DocumentModel *docModel;

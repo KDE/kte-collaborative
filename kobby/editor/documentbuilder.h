@@ -26,6 +26,7 @@ namespace Kobby
 {
 
 class Document;
+class KDocumentTextBuffer;
 
 /**
  * @brief Handles the creation of documents.
@@ -45,7 +46,15 @@ class DocumentBuilder
             QInfinity::BrowserModel &browserModel,
             QObject *parent = 0 );
         ~DocumentBuilder();
-    
+
+        /**
+         * @brief Create a new document.
+         *
+         * Returns created document, and emits
+         * documentCreated signal.
+         */
+        KDocumentTextBuffer *createKDocumentTextBuffer( const QString &encoding );
+
     Q_SIGNALS:
         void documentCreated( Document &document );
 

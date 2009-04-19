@@ -37,9 +37,18 @@ DocumentBuilder::~DocumentBuilder()
 {
 }
 
+KDocumentTextBuffer *DocumentBuilder::createKDocumentTextBuffer(
+    const QString &encoding )
+{
+    KDocumentTextBuffer *doc = new KDocumentTextBuffer( *editor->createDocument( this ),
+        encoding, this );
+    emit( documentCreated( *doc ) );
+    return doc;
+}
+
 void DocumentBuilder::openBlank()
 {
-    Document *doc = new Document( *editor->createDocument( this ), this );
+    Document *doc = new Document( *editor->createDocument( this ) );
     emit( documentCreated( *doc ) );
 }
 
@@ -64,16 +73,13 @@ void DocumentBuilder::openUrl( const KUrl &url )
     KTextEditor::Document *kdoc = editor->createDocument( this );
     Document *doc;
     kdoc->openUrl( url );
-    doc = new Document( *kdoc, this );
+    doc = new Document( *kdoc );
     emit( documentCreated( *doc ) );
 }
 
 void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     QPointer<QInfinity::SessionProxy> sessProxy )
 {
-    KTextEditor::Document *kdoc = editor->createDocument( this );
-    InfTextDocument *infDoc = new InfTextDocument( *kdoc, sessProxy, this );
-    emit( documentCreated( *infDoc ) );
 }
 
 void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )

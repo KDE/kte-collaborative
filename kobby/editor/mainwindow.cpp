@@ -11,6 +11,7 @@
 #include "connection.h"
 #include "createconnectiondialog.h"
 #include "itemfactory.h"
+#include "noteplugin.h"
 
 #include <libqinfinity/defaulttextplugin.h>
 #include <libqinfinity/browser.h>
@@ -64,11 +65,8 @@ MainWindow::MainWindow( QWidget *parent )
         kapp->exit(1);
     }
 
-    // Setup the QInfinity BrowserModel
     browserModel = new QInfinity::BrowserModel( this );
     browserModel->setItemFactory( new ItemFactory( this ) );
-    textPlugin = new QInfinity::DefaultTextPlugin( this );
-    browserModel->addPlugin( *textPlugin );
 
     // Setup Document Management
     docTabWidget = new DocumentTabWidget( this );
@@ -82,6 +80,10 @@ MainWindow::MainWindow( QWidget *parent )
         docTabWidget, SLOT(removeDocument(Document&)) );
     connect( docTabWidget, SIGNAL(viewRemoved(KTextEditor::View&)),
         this, SLOT(slotViewRemoved(KTextEditor::View&)) );
+
+    // Setup the QInfinity BrowserModel
+    textPlugin = new NotePlugin( *docBuilder, this );
+    browserModel->addPlugin( *textPlugin );
 
     setXMLFile( "kobby/kobbyui.rc" );
     setupUi();
