@@ -1,1 +1,28 @@
+Kobby: Collaborative Text Editor for KDE
+
+Terminology
+---------------------
+Infinote Server: Server hosting collaborative editing sessions
+
+Session: A collaborative editing instance of a note
+
+Note: An editable document on an infinote server
+
+
+Starting an Infinote Serever
+----------------------
+Kobby does not have the ability to start an infinote server.  If you would like
+to run an infinote server, you can use the 'infinoted' application installed
+with libinfinity.
+
+Example usage, using no encryption:
+infinoted --security-polity=no-tls
+
+
+Connecting to an Infinote Server
+---------------------
+Open a 'New Connection' dialog by going to File->New Connection.  Enter A name
+for the connection, the hostname (or IP address) of the server, and the port it
+is running on (usually 6523).  You will then be able to browse the connection in
+the 'Remote Browser' tab.
 
