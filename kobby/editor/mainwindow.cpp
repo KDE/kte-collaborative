@@ -137,6 +137,7 @@ void MainWindow::setupUi()
     leftTabWidget->addTab( localBrowserView,
         KIcon("folder.png"),
         i18n("Local Browser") );
+    leftTabWidget->setCurrentIndex(1);
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
     mainHorizSplitter->addWidget( leftTabWidget );
