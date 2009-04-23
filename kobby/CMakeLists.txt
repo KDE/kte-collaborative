@@ -66,4 +66,5 @@ kde4_add_executable( kobby ${KOBBY_SRCS} )
 
 target_link_libraries( kobby ${KOBBY_LIBRARIES} )
 
-install( TARGETS kobby ${INSTALL_TARGETS_DEFAULT_ARGS} )
+install( TARGETS kobby DESTINATION ${BIN_INSTALL_DIR} )
+
