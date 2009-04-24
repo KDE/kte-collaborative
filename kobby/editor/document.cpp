@@ -23,10 +23,12 @@ namespace Kobby
 Document::Document( KTextEditor::Document &kDocument )
     : m_kDocument( &kDocument )
 {
+    m_kDocument->setParent( 0 );
 }
 
 Document::~Document()
 {
+    delete m_kDocument;
 }
 
 KTextEditor::Document *Document::kDocument() const

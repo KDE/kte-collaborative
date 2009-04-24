@@ -16,6 +16,7 @@ DocumentItem::DocumentItem( Document &doc )
 
 DocumentItem::~DocumentItem()
 {
+    delete m_document;
 }
 
 int DocumentItem::type() const
@@ -31,8 +32,6 @@ Document &DocumentItem::document() const
 DocumentModel::DocumentModel( QObject *parent )
     : QStandardItemModel( parent )
 {
-    connect( this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)),
-        this, SLOT(slotRowsAboutRemoved(QModelIndex,int,int)) );
 }
 
 void DocumentModel::insertDocument( Document &document )
@@ -40,18 +39,6 @@ void DocumentModel::insertDocument( Document &document )
     DocumentItem *item = new DocumentItem( document );
     appendRow( item );
     emit( documentAdded( document ) );
-}
-
-void DocumentModel::slotRowsAboutRemoved( const QModelIndex &parent, int start, int end )
-{
-    QStandardItem *item = itemFromIndex( index( start, 0, parent ) );
-    if( item->type() != DocumentItem::KobbyDocument )
-    {
-        kDebug() << "Removing non-document item from document model!";
-        return;
-    }
-    DocumentItem *docItem = dynamic_cast<DocumentItem*>(item);
-    emit( documentAboutToBeRemoved(docItem->document()) );
 }
 
 }

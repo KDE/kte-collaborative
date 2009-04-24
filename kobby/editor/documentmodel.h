@@ -45,10 +45,6 @@ class DocumentModel
     public Q_SLOTS:
         void insertDocument( Document &document );
 
-    private Q_SLOTS:
-        void slotRowsAboutRemoved( const QModelIndex &parent,
-            int start, int end );
-
 };
 
 }
