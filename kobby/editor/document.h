@@ -47,7 +47,7 @@ class Document
         virtual QString name();
     
     private:
-        KTextEditor::Document *m_kDocument;
+        QPointer<KTextEditor::Document> m_kDocument;
 
 };
 

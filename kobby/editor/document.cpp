@@ -28,7 +28,8 @@ Document::Document( KTextEditor::Document &kDocument )
 
 Document::~Document()
 {
-    delete m_kDocument;
+    if( m_kDocument )
+        delete m_kDocument.data();
 }
 
 KTextEditor::Document *Document::kDocument() const
@@ -49,7 +50,7 @@ QString Document::name()
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     const QString &encoding,
     QObject *parent )
-    : QInfinity::AbstractTextBuffer( encoding, parent )
+    : QInfinity::AbstractTextBuffer( encoding, 0 )
     , Document( kDocument )
     , blockLocalInsert( false )
     , blockLocalRemove( false )
