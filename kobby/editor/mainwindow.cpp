@@ -252,16 +252,17 @@ void MainWindow::slotConnectionConnected( Connection *conn )
 void MainWindow::restoreSettings()
 {
     QList<int> sizes;
-    sizes = KobbySettings::mainWindowGeometry();
-    if( sizes.size() == 4 )
-        setGeometry( sizes[0], sizes[1], sizes[2], sizes[3] );
+    setGeometry( KobbySettings::mainWindowX(),
+        KobbySettings::mainWindowY(),
+        KobbySettings::mainWindowWidth(),
+        KobbySettings::mainWindowHeight() );
     sizes = KobbySettings::mainWindowHorizSplitterSizes();
     if( sizes.size() )
         mainHorizSplitter->setSizes( sizes );
     else
     {
         sizes.empty();
-        sizes << 1 << 10;
+        sizes << 200 << 450;
         mainHorizSplitter->setSizes( sizes );
     }
 
@@ -273,8 +274,10 @@ void MainWindow::saveSettings()
 {
     QList<int> sizes;
 
-    sizes << x() << y() << width() << height();
-    KobbySettings::setMainWindowGeometry( sizes );
+    KobbySettings::setMainWindowX( x() );
+    KobbySettings::setMainWindowY( y() );
+    KobbySettings::setMainWindowWidth( width() );
+    KobbySettings::setMainWindowHeight( height() );
     KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
 }

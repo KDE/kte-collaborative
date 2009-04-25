@@ -7,8 +7,21 @@
 	<kcfgfile name="kobbyrc"/>
 
 	<group name="ui">
-		<entry name="MainWindowGeometry" type="IntList">
-			<label>Main Window location and size.</label>
+		<entry name="MainWindowWidth" type="Int">
+			<label>Width of the Main Window.</label>
+			<default>650</default>
+		</entry>
+		<entry name="MainWindowHeight" type="Int">
+			<label>Height of the Main Window.</label>
+			<default>600</default>
+		</entry>
+		<entry name="MainWindowX" type="Int">
+			<label>X location of Main Window.</label>
+			<default>0</default>
+		</entry>
+		<entry name="MainWindowY" type="Int">
+			<label>Y location of Main Window.</label>
+			<default>0</default>
 		</entry>
 		<entry name="MainWindowHorizSplitterSizes" type="IntList">
 			<label>Sizes of main horizontal splitter.</label>

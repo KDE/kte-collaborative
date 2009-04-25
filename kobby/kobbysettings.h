@@ -16,22 +16,79 @@ class KobbySettings : public KConfigSkeleton
     ~KobbySettings();
 
     /**
-      Set Main Window location and size.
+      Set Width of the Main Window.
     */
     static
-    void setMainWindowGeometry( const QList<int> & v )
+    void setMainWindowWidth( int v )
     {
-      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowGeometry" ) ))
-        self()->mMainWindowGeometry = v;
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowWidth" ) ))
+        self()->mMainWindowWidth = v;
     }
 
     /**
-      Get Main Window location and size.
+      Get Width of the Main Window.
     */
     static
-    QList<int> mainWindowGeometry()
+    int mainWindowWidth()
     {
-      return self()->mMainWindowGeometry;
+      return self()->mMainWindowWidth;
+    }
+
+    /**
+      Set Height of the Main Window.
+    */
+    static
+    void setMainWindowHeight( int v )
+    {
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowHeight" ) ))
+        self()->mMainWindowHeight = v;
+    }
+
+    /**
+      Get Height of the Main Window.
+    */
+    static
+    int mainWindowHeight()
+    {
+      return self()->mMainWindowHeight;
+    }
+
+    /**
+      Set X location of Main Window.
+    */
+    static
+    void setMainWindowX( int v )
+    {
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowX" ) ))
+        self()->mMainWindowX = v;
+    }
+
+    /**
+      Get X location of Main Window.
+    */
+    static
+    int mainWindowX()
+    {
+      return self()->mMainWindowX;
+    }
+
+    /**
+      Set Y location of Main Window.
+    */
+    static
+    void setMainWindowY( int v )
+    {
+      if (!self()->isImmutable( QString::fromLatin1 ( "MainWindowY" ) ))
+        self()->mMainWindowY = v;
+    }
+
+    /**
+      Get Y location of Main Window.
+    */
+    static
+    int mainWindowY()
+    {
+      return self()->mMainWindowY;
     }
 
     /**
@@ -116,7 +173,10 @@ class KobbySettings : public KConfigSkeleton
 
 
     // ui
-    QList<int> mMainWindowGeometry;
+    int mMainWindowWidth;
+    int mMainWindowHeight;
+    int mMainWindowX;
+    int mMainWindowY;
     QList<int> mMainWindowHorizSplitterSizes;
 
     // profile

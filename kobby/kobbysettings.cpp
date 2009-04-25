@@ -35,11 +35,18 @@ KobbySettings::KobbySettings(  )
   s_globalKobbySettings->q = this;
   setCurrentGroup( QLatin1String( "ui" ) );
 
-  QList<int> defaultMainWindowGeometry;
-
-  KConfigSkeleton::ItemIntList  *itemMainWindowGeometry;
-  itemMainWindowGeometry = new KConfigSkeleton::ItemIntList( currentGroup(), QLatin1String( "MainWindowGeometry" ), mMainWindowGeometry, defaultMainWindowGeometry );
-  addItem( itemMainWindowGeometry, QLatin1String( "MainWindowGeometry" ) );
+  KConfigSkeleton::ItemInt  *itemMainWindowWidth;
+  itemMainWindowWidth = new KConfigSkeleton::ItemInt( currentGroup(), QLatin1String( "MainWindowWidth" ), mMainWindowWidth, 650 );
+  addItem( itemMainWindowWidth, QLatin1String( "MainWindowWidth" ) );
+  KConfigSkeleton::ItemInt  *itemMainWindowHeight;
+  itemMainWindowHeight = new KConfigSkeleton::ItemInt( currentGroup(), QLatin1String( "MainWindowHeight" ), mMainWindowHeight, 600 );
+  addItem( itemMainWindowHeight, QLatin1String( "MainWindowHeight" ) );
+  KConfigSkeleton::ItemInt  *itemMainWindowX;
+  itemMainWindowX = new KConfigSkeleton::ItemInt( currentGroup(), QLatin1String( "MainWindowX" ), mMainWindowX, 0 );
+  addItem( itemMainWindowX, QLatin1String( "MainWindowX" ) );
+  KConfigSkeleton::ItemInt  *itemMainWindowY;
+  itemMainWindowY = new KConfigSkeleton::ItemInt( currentGroup(), QLatin1String( "MainWindowY" ), mMainWindowY, 0 );
+  addItem( itemMainWindowY, QLatin1String( "MainWindowY" ) );
   QList<int> defaultMainWindowHorizSplitterSizes;
 
   KConfigSkeleton::ItemIntList  *itemMainWindowHorizSplitterSizes;
