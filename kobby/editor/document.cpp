@@ -111,7 +111,6 @@ void KDocumentTextBuffer::joinFailed( GError *error )
     QString errorString = i18n("Joining failed: ");
     errorString.append( error->message );
     KMessageBox::error( 0, errorString, i18n("Joining Failed") );
-    deleteLater();
 }
 
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,

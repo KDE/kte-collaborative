@@ -75,6 +75,9 @@ class KDocumentTextBuffer
             QInfinity::User *user );
         QString name();
 
+    Q_SIGNALS:
+        void error( QString message, bool close );
+
     public Q_SLOTS:
         void joinFailed( GError *error );
 

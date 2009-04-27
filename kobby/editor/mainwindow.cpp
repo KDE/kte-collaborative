@@ -32,6 +32,7 @@
 #include <KLocalizedString>
 #include <KTabWidget>
 #include <KMessageBox>
+#include <KFileDialog>
 #include <KUrl>
 
 #include <KTextEditor/View>
@@ -161,6 +162,8 @@ void MainWindow::setupActions()
         docBuilder, SLOT(openBlank()) );
     connect( newConnectionAction, SIGNAL(triggered(bool)),
         this, SLOT(slotNewConnection()) );
+    connect( openAction, SIGNAL(triggered(bool)),
+        this, SLOT(slotOpenFile()) );
     connect( settingsAction, SIGNAL(triggered(bool)),
         this, SLOT(slotShowSettingsDialog()) );
 
@@ -179,6 +182,13 @@ void MainWindow::slotNewConnection()
     connect( dialog, SIGNAL(createConnection(const QString&, unsigned int)),
         this, SLOT(slotCreateConnection(const QString&, unsigned int)) );
     dialog->setVisible( true );
+}
+
+void MainWindow::slotOpenFile()
+{
+    QString url = KFileDialog::getOpenFileName();
+    if( !url.isEmpty() )
+        docBuilder->openUrl( url );
 }
 
 void MainWindow::slotCreateConnection( const QString &hostname,

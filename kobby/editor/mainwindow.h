@@ -52,6 +52,7 @@ class MainWindow
         void slotNewConnection();
         void slotCreateConnection( const QString &hostname,
             unsigned int port );
+        void slotOpenFile();
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
