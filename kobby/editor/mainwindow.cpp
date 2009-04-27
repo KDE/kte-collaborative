@@ -196,7 +196,7 @@ void MainWindow::slotConnectionError( Connection *conn,
     QString errMsg )
 {
     Q_UNUSED(conn);
-    QString str = i18n("Error with connecton: ");
+    QString str = i18n("Connection error: ");
     str += errMsg;
     KMessageBox::error( this, str );
     slotNewConnection();

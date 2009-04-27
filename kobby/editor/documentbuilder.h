@@ -32,7 +32,7 @@ class KDocumentTextBuffer;
 /**
  * @brief Handles the creation of documents.
  *
- * The DocumentBuilder handles the creation of
+ * The DocumentBuilder handles asynchronous creation of
  * KTextEditor::Document's from multiple sources.  It
  * also creates and stores wrapper objects for the created
  * doucuments if needed.
@@ -57,11 +57,25 @@ class DocumentBuilder
         KDocumentTextBuffer *createKDocumentTextBuffer( const QString &encoding );
 
     Q_SIGNALS:
+        /**
+         * @brief A new document has been created.
+         */
         void documentCreated( Document &document );
 
     public Q_SLOTS:
+        /**
+         * @brief Open a blank local document.
+         */
         void openBlank();
+
+        /**
+         * @brief Open Infinote document represented by index.
+         */
         void openInfDocmuent( const QModelIndex &index );
+
+        /**
+         * @brief Open document from url
+         */
         void openUrl( const KUrl &url );
 
     private Q_SLOTS:
