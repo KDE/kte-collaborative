@@ -75,6 +75,8 @@ class KDocumentTextBuffer
             QInfinity::User *user );
         QString name();
 
+    public Q_SLOTS:
+        void joinFailed( GError *error );
 
     private Q_SLOTS:
         void localTextInserted( KTextEditor::Document *document,

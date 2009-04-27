@@ -5,6 +5,8 @@
 #include <QPointer>
 #include <QHash>
 
+typedef struct _GError GError;
+
 class QModelIndex;
 class KUrl;
 
@@ -82,6 +84,7 @@ class DocumentBuilder
         void sessionSubscribed( const QInfinity::BrowserIter &iter,
             QPointer<QInfinity::SessionProxy> sessProxy );
         void slotSessionSynchronized();
+        void slotSessionSynchronizationFailed( GError *error );
         void slotBrowserAdded( QInfinity::Browser &browser );
     
     private:

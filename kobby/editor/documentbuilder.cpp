@@ -2,6 +2,8 @@
 #include "document.h"
 #include "kobbysettings.h"
 
+#include <glib/gerror.h>
+
 #include <libqinfinity/session.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
@@ -13,6 +15,8 @@
 
 #include <KTextEditor/Editor>
 #include <KTextEditor/Document>
+#include <KLocalizedString>
+#include <KMessageBox>
 #include <KUrl>
 #include <KDebug>
 
@@ -91,6 +95,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
         sessionToProxy[session] = sessProxy;
         connect( session, SIGNAL(synchronizationComplete()),
             this, SLOT(slotSessionSynchronized()) );
+        connect( session, SIGNAL(synchronizationFailed( GError* )),
+            this, SLOT(slotSessionSynchronizationFailed( GError* )) );
     }
 
     QInfinity::Buffer *infBuff = session->buffer();
@@ -104,6 +110,14 @@ void DocumentBuilder::slotSessionSynchronized()
 {
     QInfinity::Session *session = dynamic_cast<QInfinity::Session*>(sender());
     sessionSynchronized( session );
+}
+
+void DocumentBuilder::slotSessionSynchronizationFailed( GError *error )
+{
+    QString errorMsg = i18n("Syncronization Failed: ");
+    errorMsg.append( error->message );
+
+    KMessageBox::error( 0, i18n("Syncronization failed"), errorMsg );
 }
 
 void DocumentBuilder::sessionSynchronized( QInfinity::Session *session )
@@ -120,6 +134,8 @@ void DocumentBuilder::sessionSynchronized( QInfinity::Session *session )
         0 );
     connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
         kbuff, SLOT(setUser(QPointer<QInfinity::User>)) );
+    connect( req, SIGNAL(failed(GError*)),
+        kbuff, SLOT(joinFailed(GError*)) );
 }
 
 void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )
