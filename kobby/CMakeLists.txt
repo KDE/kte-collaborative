@@ -4,15 +4,11 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-project(kobby)
-
-find_package(KDE4 REQUIRED)
 find_package(Libqinfinity REQUIRED)
 set(KDE_MIN_VERSION "4.2.0")
 
-subdirs( data )
 
-set( KOBBY_INCLUDES
+set(KOBBY_INCLUDES
 	${KDE4_INCLUDES}
 	${LIBQINFINITY_INCLUDES}
 	${CMAKE_SOURCE_DIR}
@@ -22,7 +18,7 @@ set( KOBBY_INCLUDES
 	${CMAKE_BINARY_DIR}/kobby
 )
 
-set( KOBBY_LIBRARIES
+set(KOBBY_LIBRARIES
 	${KDE4_KDEUI_LIBS}
 	${KDE4_KIO_LIBS}
 	${KDE4_KFILE_LIBS}
@@ -50,21 +46,22 @@ set( KOBBY_SRCS
 	editor/main.cpp
 )
 
-set( KOBBY_UI
+set(KOBBY_UI
 	dialogs/createconnectionwidget.ui
 	dialogs/createitemwidget.ui
 	dialogs/profilesettingswidget.ui
 	dialogs/networksettingswidget.ui
 )
 
-INCLUDE_DIRECTORIES( ${KOBBY_INCLUDES} )
+INCLUDE_DIRECTORIES(${KOBBY_INCLUDES} )
 
-kde4_add_ui_files( KOBBY_SRCS ${KOBBY_UI} )
-kde4_add_kcfg_files( KOBBY_SRCS data/kobbysettings.kcfgc )
-kde4_add_executable( kobby ${KOBBY_SRCS} )
+kde4_add_ui_files(KOBBY_SRCS ${KOBBY_UI} )
+kde4_add_kcfg_files(KOBBY_SRCS data/kobbysettings.kcfgc )
+kde4_add_executable(kobby ${KOBBY_SRCS} )
 
 
-target_link_libraries( kobby ${KOBBY_LIBRARIES} )
+target_link_libraries(kobby ${KOBBY_LIBRARIES} )
 
-install( TARGETS kobby DESTINATION ${BIN_INSTALL_DIR} )
+install(TARGETS kobby DESTINATION ${BIN_INSTALL_DIR} )
 
+subdirs( data )
