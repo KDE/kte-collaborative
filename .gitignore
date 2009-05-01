@@ -20,4 +20,5 @@ ui_*
 *.kdev*
 kobby/kobby
 tags
+*.cbp
 
