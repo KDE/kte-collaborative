@@ -15,19 +15,17 @@
 
 #include <libqinfinity/defaulttextplugin.h>
 #include <libqinfinity/browser.h>
+#include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseritemfactory.h>
 #include <libqinfinity/xmppconnection.h>
 
+#include <KApplication>
 #include <KAction>
 #include <KActionCollection>
-#include <KApplication>
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include <KConfigDialog>
-#include <KLocale>
-#include <KMessageBox>
 #include <KXMLGUIFactory>
-#include <KDebug>
 #include <KPageWidgetItem>
 #include <KLocalizedString>
 #include <KTabWidget>

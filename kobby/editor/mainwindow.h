@@ -1,13 +1,7 @@
 #ifndef KOBBY_EDITOR_MAINWINDOW_H
 #define KOBBY_EDITOR_MAINWINDOW_H
 
-#include <libqinfinity/browsermodel.h>
-#include <libqinfinity/sessionproxy.h>
-
 #include <KParts/MainWindow>
-
-#include <QPointer>
-#include <QMap>
 
 class KTabWidget;
 class KUrl;
@@ -17,6 +11,8 @@ class QSplitter;
 namespace QInfinity
 {
     class ConnectionItem;
+    class BrowserModel;
+    class SessionProxy;
 }
 
 namespace KTextEditor

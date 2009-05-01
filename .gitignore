@@ -22,4 +22,5 @@ ui_*
 kobby/kobby
 tags
 *.cbp
+qtcreator-build
 
