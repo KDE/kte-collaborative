@@ -17,7 +17,7 @@ CreateItemDialog::CreateItemDialog( QString title,
     ui->setupUi( mainWidget );
     ui->itemNameLabel->setText( label );
     setMainWidget( mainWidget );
-    setWindowIconText( title );
+    setWindowTitle( title );
 }
 
 QString CreateItemDialog::name() const
