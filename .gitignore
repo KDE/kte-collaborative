@@ -23,4 +23,5 @@ kobby/kobby
 tags
 *.cbp
 qtcreator-build
+CMakeLists.txt.user
 

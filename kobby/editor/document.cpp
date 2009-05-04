@@ -67,7 +67,7 @@ QString Document::name()
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     const QString &encoding,
     QObject *parent )
-    : QInfinity::AbstractTextBuffer( encoding, 0 )
+    : QInfinity::AbstractTextBuffer( encoding, parent )
     , Document( kDocument )
     , blockLocalInsert( false )
     , blockLocalRemove( false )

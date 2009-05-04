@@ -43,7 +43,7 @@ QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *
 {
     KDocumentTextBuffer *document = m_builder->createKDocumentTextBuffer( "UTF-8" );
     KDocumentTextBuffer *buffer = new KDocumentTextBuffer( *document->kDocument(),
-        "UTF-8", this );
+        "UTF-8", 0 ); // Setting the parent causes race condition with closing buffer
     QInfinity::TextSession *session = new QInfinity::TextSession( *commMgr,
         *buffer,
         *syncGroup,
