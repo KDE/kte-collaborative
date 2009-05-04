@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ProfileSettingsWidget</class>
- <widget class="QWidget" name="ProfileSettingsWidget" >
-  <property name="geometry" >
+ <widget class="QWidget" name="ProfileSettingsWidget">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,41 +10,34 @@
     <height>93</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox" >
-     <property name="title" >
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
       <string/>
      </property>
-     <layout class="QGridLayout" name="gridLayout" >
-      <item row="0" column="0" >
-       <widget class="QLabel" name="nicknameLabel" >
-        <property name="text" >
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="nicknameLabel">
+        <property name="text">
          <string>Nickname:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1" >
-       <widget class="QLineEdit" name="kcfg_NickName" />
+      <item row="0" column="1" rowspan="2" colspan="2">
+       <widget class="QLineEdit" name="kcfg_NickName"/>
       </item>
-      <item row="1" column="0" >
-       <widget class="QLabel" name="label_2" >
-        <property name="text" >
-         <string>Color</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" >
-       <layout class="QHBoxLayout" name="horizontalLayout" >
+      <item row="1" column="2" rowspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <spacer name="horizontalSpacer" >
-          <property name="orientation" >
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>118</width>
             <height>25</height>
@@ -52,110 +46,26 @@
          </spacer>
         </item>
         <item>
-         <widget class="KColorCombo" name="kcolorcombo" >
-          <item>
-           <property name="text" >
-            <string>Custom...</string>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-          <item>
-           <property name="text" >
-            <string/>
-           </property>
-          </item>
-         </widget>
+         <widget class="KColorButton" name="kcfg_UserColor"/>
         </item>
        </layout>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Color</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer" >
-     <property name="orientation" >
+    <spacer name="verticalSpacer">
+     <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeHint" stdset="0" >
+     <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
        <height>81</height>
@@ -167,9 +77,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KColorCombo</class>
-   <extends>QComboBox</extends>
-   <header>kcolorcombo.h</header>
+   <class>KColorButton</class>
+   <extends>QPushButton</extends>
+   <header>kcolorbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
