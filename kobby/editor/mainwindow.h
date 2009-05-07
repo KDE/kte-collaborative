@@ -98,9 +98,7 @@ class MainWindow
         KTextEditor::View *merged_view;
 
         // Actions
-        KAction *newDocumentAction;
         KAction *newConnectionAction;
-        KAction *openAction;
         KAction *settingsAction;
 
 };

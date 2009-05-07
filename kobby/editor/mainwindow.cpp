@@ -170,30 +170,24 @@ void MainWindow::setupActions()
     /* TODO:
        Close action is unconnected
      */
-    newDocumentAction = new KAction( i18n("New"), this );
     newConnectionAction = new KAction( i18n("New Connection"), this );
-    openAction = new KAction( i18n("Open"), this );
     settingsAction = new KAction( i18n("Configure Kobby"), this );
 
-    newDocumentAction->setIcon( KIcon("document-new.png") );
     newConnectionAction->setIcon( KIcon("network-connect.png") );
-    openAction->setIcon( KIcon("document-open.png") );
 
-    connect( newDocumentAction, SIGNAL(triggered(bool)),
-        docBuilder, SLOT(openBlank()) );
     connect( newConnectionAction, SIGNAL(triggered(bool)),
         this, SLOT(slotNewConnection()) );
-    connect( openAction, SIGNAL(triggered(bool)),
-        this, SLOT(slotOpenFile()) );
     connect( settingsAction, SIGNAL(triggered(bool)),
         this, SLOT(slotShowSettingsDialog()) );
 
     KStandardAction::quit(kapp, SLOT(quit()),
         actionCollection());
 
-    actionCollection()->addAction( "document_new", newDocumentAction );
+    actionCollection()->addAction( KStandardAction::New, "document_new",
+        docBuilder, SLOT(openBlank()) )->setWhatsThis( i18n( "Open a new blank document." ) );
     actionCollection()->addAction( "connection_new", newConnectionAction );
-    actionCollection()->addAction( "document_open", openAction );
+    actionCollection()->addAction( KStandardAction::Open, "document_open",
+        this, SLOT(slotOpenFile()) )->setWhatsThis( i18n( "Select a document to open." ) );
     actionCollection()->addAction( KStandardAction::Close, "document_close" );
     actionCollection()->addAction( "settings_kobby", settingsAction );
 }
