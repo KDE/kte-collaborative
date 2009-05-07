@@ -101,7 +101,7 @@ MainWindow::MainWindow( QWidget *parent )
     textPlugin = new NotePlugin( *docBuilder, this );
     browserModel->addPlugin( *textPlugin );
 
-    setXMLFile( "kobby/kobbyui.rc" );
+    setXMLFile( "kobbyui.rc" );
     setupUi();
     setupActions();
     createShellGUI( true );
@@ -110,6 +110,7 @@ MainWindow::MainWindow( QWidget *parent )
     mergeView( docTabWidget->activeView() );
 
     restoreSettings();
+
 }
 
 MainWindow::~MainWindow()
@@ -164,6 +165,9 @@ void MainWindow::setupUi()
 
 void MainWindow::setupActions()
 {
+    /* TODO:
+       Close action is unconnected
+     */
     newDocumentAction = new KAction( i18n("New"), this );
     newConnectionAction = new KAction( i18n("New Connection"), this );
     openAction = new KAction( i18n("Open"), this );
@@ -185,9 +189,10 @@ void MainWindow::setupActions()
     KStandardAction::quit(kapp, SLOT(quit()),
         actionCollection());
 
-    actionCollection()->addAction( "new_document", newDocumentAction );
-    actionCollection()->addAction( "new_connection", newConnectionAction );
-    actionCollection()->addAction( "open_local", openAction );
+    actionCollection()->addAction( "document_new", newDocumentAction );
+    actionCollection()->addAction( "connection_new", newConnectionAction );
+    actionCollection()->addAction( "document_open", openAction );
+    actionCollection()->addAction( KStandardAction::Close, "document_close" );
     actionCollection()->addAction( "settings_kobby", settingsAction );
 }
 

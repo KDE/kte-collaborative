@@ -2,12 +2,26 @@
 <kpartgui name="kobby" version="1">
 
 <MenuBar>
-	<Menu name="file"><text>&amp;File</text>
-		<Action name="new_document" />
-		<Action name="new_connection" />
-		<Action name="open_local" />
+	<Menu name="file" noMerge="1"><text>&amp;File</text>
+		<Action name="document_new" />
+		<Action name="connection_new" />
 		<Separator />
+
+		<Action name="document_open" />
+		<Separator />
+
+		<DefineGroup name="save_merge" append="save_merge" />
+		<Separator />
+
+		<DefineGroup name="revert_merge" append="revert_merge"/>
+		<DefineGroup name="print_merge" append="print_merge"/>
+		<Separator/>
+
+		<Action name="document_close" />
+		<DefineGroup name="close_merge" append="close_merge"/>
 		<Merge/>
+
+		<Action name="file_quit"/>
 	</Menu>
 	<Merge/>
 	<Menu name="settings"><text>&amp;Settings</text>
@@ -17,8 +31,20 @@
 </MenuBar>
 
 <ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
-	<Action name="new_document" />
-	<Action name="open_local" />
+	<Action name="document_new" />
+	<Action name="document_open" />
+	<Separator />
+	<DefineGroup name="file_operations" />
+	<Separator />
+	<DefineGroup name="print_merge" />
+	<Separator />
+	<Action name="document_close" />
+	<Separator />
+	<DefineGroup name="edit_operations" />
+	<Separator />
+	<DefineGroup name="find_operations" />
+	<Separator />
+	<DefineGroup name="zoom_operations" />
 </ToolBar>
 
 </kpartgui>
