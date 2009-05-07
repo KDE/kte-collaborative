@@ -111,6 +111,8 @@ MainWindow::MainWindow( QWidget *parent )
 
     restoreSettings();
 
+    // Start with connection dialog open
+    slotNewConnection();
 }
 
 MainWindow::~MainWindow()
