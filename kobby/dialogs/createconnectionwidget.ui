@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>CreateConnectionWidget</class>
- <widget class="QWidget" name="CreateConnectionWidget" >
-  <property name="geometry" >
+ <widget class="QWidget" name="CreateConnectionWidget">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,29 +10,29 @@
     <height>102</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Create Connection</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="descriptionLabel" >
-     <property name="text" >
+    <widget class="QLabel" name="descriptionLabel">
+     <property name="text">
       <string>Create new connection:</string>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="nameLabel" >
-       <property name="text" >
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
         <string>Name:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="nameLineEdit" >
-       <property name="maxLength" >
+      <widget class="QLineEdit" name="nameLineEdit">
+       <property name="maxLength">
         <number>200</number>
        </property>
       </widget>
@@ -39,31 +40,34 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="hostnameLabel" >
-       <property name="text" >
+      <widget class="QLabel" name="hostnameLabel">
+       <property name="text">
         <string>Hostname:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="hostnameLineEdit" >
-       <property name="maxLength" >
+      <widget class="QLineEdit" name="hostnameLineEdit">
+       <property name="maxLength">
         <number>200</number>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="portLabel" >
-       <property name="text" >
+      <widget class="QLabel" name="portLabel">
+       <property name="text">
         <string>Port:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="portLineEdit" >
-       <property name="maxLength" >
+      <widget class="QLineEdit" name="portLineEdit">
+       <property name="text">
+        <string>6523</string>
+       </property>
+       <property name="maxLength">
         <number>8</number>
        </property>
       </widget>
@@ -71,11 +75,11 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer" >
-     <property name="orientation" >
+    <spacer name="verticalSpacer">
+     <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeHint" stdset="0" >
+     <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
        <height>0</height>
