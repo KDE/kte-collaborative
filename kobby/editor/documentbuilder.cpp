@@ -104,55 +104,23 @@ void DocumentBuilder::openUrl( const KUrl &url )
 void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     QPointer<QInfinity::SessionProxy> sessProxy )
 {
-    QInfinity::Session *session = sessProxy->session();
-    if( session->status() == QInfinity::Session::Running )
-        sessionSynchronized( session );
-    else if( session->status() == QInfinity::Session::Synchronizing )
+    QInfinity::TextSession *textSession = dynamic_cast<QInfinity::TextSession*>(sessProxy->session().data());
+    if( !textSession )
     {
-        sessionToProxy[session] = sessProxy;
-        connect( session, SIGNAL(synchronizationComplete()),
-            this, SLOT(slotSessionSynchronized()) );
-        connect( session, SIGNAL(synchronizationFailed( GError* )),
-            this, SLOT(slotSessionSynchronizationFailed( GError* )) );
+        kDebug() << "Session is not a InfText session.  This usually means "
+            << "the connection is not using the kobby plugin.";
+        return;
     }
-
-    QInfinity::Buffer *infBuff = session->buffer();
-    KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
-    QInfinity::BrowserIter bi( iter );
-    kbuff->setName( bi.name() );
-    emit(documentCreated(*kbuff));
-}
-
-void DocumentBuilder::slotSessionSynchronized()
-{
-    QInfinity::Session *session = dynamic_cast<QInfinity::Session*>(sender());
-    sessionSynchronized( session );
-}
-
-void DocumentBuilder::slotSessionSynchronizationFailed( GError *error )
-{
-    QString errorMsg = i18n("Syncronization Failed: ");
-    errorMsg.append( error->message );
-
-    KMessageBox::error( 0, i18n("Syncronization failed"), errorMsg );
-}
-
-void DocumentBuilder::sessionSynchronized( QInfinity::Session *session )
-{
-    QInfinity::Buffer *infBuff = session->buffer();
+    QInfinity::Buffer *infBuff = textSession->buffer();
     KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
     if( !kbuff )
     {
-        kDebug() << "Non kobby buffer, cannot join.";
+        kDebug() << "Could not retrieve Kobby buffer from session.  This "
+            << "usually means the connection is not using the kobby plugin.";
         return;
     }
-    QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( sessionToProxy[session],
-        KobbySettings::nickName(),
-        0 );
-    connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
-        kbuff, SLOT(setUser(QPointer<QInfinity::User>)) );
-    connect( req, SIGNAL(failed(GError*)),
-        kbuff, SLOT(joinFailed(GError*)) );
+    InfTextDocument *infDoc = new InfTextDocument( *sessProxy, *textSession, *kbuff );
+    emit(documentCreated( *infDoc ));
 }
 
 void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )

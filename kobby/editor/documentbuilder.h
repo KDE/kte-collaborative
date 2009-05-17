@@ -100,8 +100,6 @@ class DocumentBuilder
     private Q_SLOTS:
         void sessionSubscribed( const QInfinity::BrowserIter &iter,
             QPointer<QInfinity::SessionProxy> sessProxy );
-        void slotSessionSynchronized();
-        void slotSessionSynchronizationFailed( GError *error );
         void slotBrowserAdded( QInfinity::Browser &browser );
     
     private:

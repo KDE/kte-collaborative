@@ -34,11 +34,14 @@
 #include <KMessageBox>
 #include <KDebug>
 
+#include <QString>
+
 namespace Kobby
 {
 
 Document::Document( KTextEditor::Document &kDocument )
     : m_kDocument( &kDocument )
+    , m_loadState( Document::Unloaded )
 {
     m_kDocument->setParent( 0 );
 }
@@ -64,15 +67,37 @@ QString Document::name()
     return m_kDocument->documentName();
 }
 
+Document::LoadState Document::loadState() const
+{
+    return m_loadState;
+}
+
+void Document::setLoadState( Document::LoadState state )
+{
+    if( state != LoadState() )
+    {
+        m_loadState = state;
+        emit( loadStateChanged( this, state ) );
+        if( state == Document::Complete )
+            emit( loadingComplete( this ) );
+    }
+}
+
+void Document::throwFatalError( const QString &message )
+{
+    emit( fatalError( this, message ) );
+    deleteLater();
+}
+
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     const QString &encoding,
     QObject *parent )
     : QInfinity::AbstractTextBuffer( encoding, parent )
-    , Document( kDocument )
     , blockLocalInsert( false )
     , blockLocalRemove( false )
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
+    , m_kDocument( &kDocument )
 {
     connect( &kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
@@ -84,9 +109,9 @@ KDocumentTextBuffer::~KDocumentTextBuffer()
 {
 }
 
-void KDocumentTextBuffer::setName( const QString &name )
+KTextEditor::Document *KDocumentTextBuffer::kDocument() const
 {
-    m_name = name;
+    return m_kDocument;
 }
 
 void KDocumentTextBuffer::onInsertText( unsigned int offset,
@@ -118,11 +143,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         blockRemoteRemove = false;
 }
 
-QString KDocumentTextBuffer::name()
-{
-    return m_name;
-}
-
 void KDocumentTextBuffer::joinFailed( GError *error )
 {
     QString errorString = i18n("Joining failed: ");
@@ -134,16 +154,21 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     unsigned int offset;
-    if( !blockLocalInsert && m_user )
+    if( !blockLocalInsert )
     {
-        offset = cursorToOffset( range.start() );
-        QInfinity::TextChunk chunk( "UTF-8" );
-        QString text = kDocument()->text( range );
-        if( text[0] == '\n' ) // hack
-            text = '\n';
-        chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
-        blockRemoteInsert = true;
-        insertChunk( offset, chunk, m_user );
+        if( !m_user.isNull() )
+        {
+            offset = cursorToOffset( range.start() );
+            QInfinity::TextChunk chunk( "UTF-8" );
+            QString text = kDocument()->text( range );
+            if( text[0] == '\n' ) // hack
+                text = '\n';
+            chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
+            blockRemoteInsert = true;
+            insertChunk( offset, chunk, m_user );
+        }
+        else
+            kDebug() << "Could not insert text: No local user set.";
     }
     else
         blockLocalInsert = false;
@@ -152,12 +177,17 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
-    if( !blockLocalRemove && m_user )
+    if( !blockLocalRemove )
     {
-        unsigned int offset = cursorToOffset( range.start() );
-        unsigned int end = cursorToOffset( range.end() );
-        blockRemoteRemove = true;
-        eraseText( offset, end-offset, m_user );
+        if( !m_user.isNull() )
+        {
+            unsigned int offset = cursorToOffset( range.start() );
+            unsigned int end = cursorToOffset( range.end() );
+            blockRemoteRemove = true;
+            eraseText( offset, end-offset, m_user );
+        }
+        else
+            kDebug() << "Could not remove text: No local user set.";
     }
     else
         blockLocalRemove = false;
@@ -166,7 +196,6 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
 void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
 {
     m_user = user;
-    kDocument()->setReadWrite( true );
 }
 
 unsigned int KDocumentTextBuffer::cursorToOffset( const KTextEditor::Cursor &cursor )
@@ -185,6 +214,89 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
     for( i = 0; offset > kDocument()->lineLength( i ); i++ )
         offset -= kDocument()->lineLength( i ) + 1; // Subtract newline
     return KTextEditor::Cursor( i, offset );
+}
+
+/* Accepting the session and buffer as parameters, although we
+   could obtain them from the session proxy, ensures some type
+   safety. */
+InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
+    QInfinity::TextSession &session,
+    KDocumentTextBuffer &buffer )
+    : Document( *(buffer.kDocument()) )
+    , m_sessionProxy( &proxy )
+    , m_session( &session )
+    , m_buffer( &buffer )
+{
+    m_session->setParent( this );
+    m_sessionProxy->setParent( this );
+    synchronize();
+}
+
+InfTextDocument::~InfTextDocument()
+{
+    m_session->close();
+}
+
+void InfTextDocument::slotSynchronized()
+{
+    if( m_session->status() == QInfinity::Session::Running )
+    {
+        setLoadState( Document::SynchronizationComplete );
+        joinSession();
+    }
+    else
+    {
+        throwFatalError( i18n("Synchronization ended but session is not running.") );
+    }
+}
+
+void InfTextDocument::slotSynchronizationFailed( GError *gerror )
+{
+    QString emsg = i18n( "Synchronization Failed: " );
+    emsg.append( gerror->message );
+    throwFatalError( emsg );
+}
+
+void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
+{
+    m_buffer->setUser( user );
+    setLoadState( Document::JoiningComplete );
+    setLoadState( Document::Complete );
+    kDebug() << "Join finished" << user;
+}
+
+void InfTextDocument::slotJoinFailed( GError *gerror )
+{
+    QString emsg = i18n( "Could not join session: " );
+    emsg.append( gerror->message );
+    throwFatalError( emsg );
+    kDebug() << "Join failed: " << emsg;
+}
+
+void InfTextDocument::synchronize()
+{
+    if( m_session->status() == QInfinity::Session::Running )
+        slotSynchronized();
+    else if( m_session->status() == QInfinity::Session::Synchronizing )
+    {
+        setLoadState( Document::Synchronizing );
+        connect( m_session, SIGNAL(synchronizationComplete()),
+            this, SLOT(slotSynchronized()) );
+        connect( m_session, SIGNAL(synchronizationFailed( GError* )),
+            this, SLOT(slotSynchronizationFailed( GError* )) );
+    }
+}
+
+void InfTextDocument::joinSession()
+{
+    setLoadState( Document::Joining );
+    QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
+        KobbySettings::nickName(),
+        10 );
+    connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
+        this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
+    connect( req, SIGNAL(failed(GError*)),
+        this, SLOT(slotJoinFailed(GError*)) );
 }
 
 }

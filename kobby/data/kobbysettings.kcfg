@@ -31,7 +31,7 @@
 	<group name="profile">
 		<entry name="NickName" type="String">
 			<label>Nick Name other users see.</label>
-			<default>JohnDoe</default>
+			<default></default>
 		</entry>
 		<entry name="UserColor" type="Color">
 			<label>Color user appears as on server.</label>

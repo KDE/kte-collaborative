@@ -111,6 +111,12 @@ MainWindow::MainWindow( QWidget *parent )
 
     restoreSettings();
 
+    // Display welcome dialog if no username set
+    if( KobbySettings::nickName().isEmpty() )
+    {
+
+    }
+
     // Start with connection dialog open
     slotNewConnection();
 }
@@ -161,6 +167,7 @@ void MainWindow::setupUi()
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
     mainHorizSplitter->addWidget( leftTabWidget );
     mainHorizSplitter->addWidget( docTabWidget );
+    mainHorizSplitter->setStretchFactor( 0, QSizePolicy::Fixed );
 
     setCentralWidget( mainHorizSplitter );
 }

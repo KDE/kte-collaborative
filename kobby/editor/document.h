@@ -23,7 +23,9 @@
 #include <QObject>
 #include <QPointer>
 
-#include <glib/gerror.h>
+typedef struct _GError GError;
+
+class QString;
 
 namespace KTextEditor
 {
@@ -39,6 +41,7 @@ namespace QInfinity
     class User;
     class TextChunk;
     class TextBuffer;
+    class TextSession;
     class BrowserIter;
 }
 
@@ -51,29 +54,88 @@ namespace Kobby
  * Abstracting the document interface allows us to create
  * an interface for views to perform operations on doucments
  * without knowing the type of document being represented.
+ *
+ * If using this class, you must monitor for fatalError, which
+ * will notify of deletion of the Document.
  */
 class Document
+    : public QObject
 {
-
+    Q_OBJECT
+    
     public:
+        enum LoadState
+        {
+            Unloaded, // Loading has not begun
+            Synchronizing,
+            SynchronizationComplete,
+            Joining,
+            JoiningComplete,
+            Complete // Loading is complete
+        };
+        
         Document( KTextEditor::Document &kDocument );
         virtual ~Document();
 
+        /**
+         * @brief Get KTextEditor::Document being represented.
+         */
         KTextEditor::Document *kDocument() const;
+        
+        /**
+         * @brief Save document.
+         */
         virtual bool save();
+        
+        /**
+         * @brief Name of document.
+         */
         virtual QString name();
+        
+        /**
+         * @brief State of document loading.
+         * 
+         * Initial state is Unloaded.
+         */
+        Document::LoadState loadState() const;
+        
+    Q_SIGNALS:
+        void loadStateChanged( Document *document,
+            Document::LoadState loadState );
+        
+        /**
+         * @brief Document completed loading.
+         *
+         * This signal will be emitted directly after a
+         * loadStateChanged signal.
+         */
+        void loadingComplete( Document *document );
+        
+        /**
+         * @brief Fatal error has occoured with the document.
+         *
+         * After this signal is recieved references to the
+         * document instance are likely no longer valid.
+         */
+        void fatalError( Document *document,
+            QString message );
+    
+    protected:
+        void setLoadState( Document::LoadState );
+        void throwFatalError( const QString &message );
     
     private:
         QPointer<KTextEditor::Document> m_kDocument;
+        Document::LoadState m_loadState;
 
 };
 
 /**
  * @brief Links together the InfTextBuffer and KTextEditor::Document
  */
+
 class KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
-    , public Document
 {
     Q_OBJECT;
 
@@ -83,14 +145,14 @@ class KDocumentTextBuffer
             QObject *parent = 0 );
         ~KDocumentTextBuffer();
 
-        void setName( const QString &name );
+        KTextEditor::Document *kDocument() const;
         void onInsertText( unsigned int offset,
             const QInfinity::TextChunk &chunk,
             QInfinity::User *user );
         void onEraseText( unsigned int offset,
             unsigned int length,
             QInfinity::User *user );
-        QString name();
+        void setUser( QPointer<QInfinity::User> user );
 
     Q_SIGNALS:
         void error( QString message, bool close );
@@ -103,7 +165,6 @@ class KDocumentTextBuffer
             const KTextEditor::Range &range );
         void localTextRemoved( KTextEditor::Document *document,
             const KTextEditor::Range &range );
-        void setUser( QPointer<QInfinity::User> user );
 
     private:
         unsigned int cursorToOffset( const KTextEditor::Cursor &cursor );
@@ -113,9 +174,45 @@ class KDocumentTextBuffer
         bool blockLocalRemove;
         bool blockRemoteInsert;
         bool blockRemoteRemove;
+        KTextEditor::Document *m_kDocument;
         QPointer<QInfinity::User> m_user;
-        QString m_name;
 
+};
+
+/**
+ * @brief Implementation of Document for InfText infinote plugin.
+ */
+class InfTextDocument
+    : public Document
+{
+    Q_OBJECT
+    
+    public:
+        /**
+         * @brief Create InfTextDocument.
+         *
+         * Takes ownership of passed session and sessionProxy.
+         */
+        InfTextDocument( QInfinity::SessionProxy &sessionProxy,
+            QInfinity::TextSession &sesion,
+            KDocumentTextBuffer &buffer );
+        ~InfTextDocument();
+    
+    private Q_SLOTS:
+        void slotSynchronized();
+        void slotSynchronizationFailed( GError *gerror );
+        void slotJoinFinished( QPointer<QInfinity::User> );
+        void slotJoinFailed( GError *gerror );
+    
+    private:
+        void synchronize();
+        void joinSession();
+        void joinUser();
+        
+        QInfinity::SessionProxy *m_sessionProxy;
+        QInfinity::TextSession *m_session;
+        KDocumentTextBuffer *m_buffer;
+    
 };
 
 }
