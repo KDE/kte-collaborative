@@ -35,6 +35,8 @@
 #include <KDebug>
 
 #include <QString>
+#include <QTextCodec>
+#include <QTextEncoder>
 
 namespace Kobby
 {
@@ -118,11 +120,14 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
+    Q_UNUSED(user)
+
     if( !blockRemoteInsert )
     {
         KTextEditor::Cursor startCursor = offsetToCursor( offset );
         blockLocalInsert = true;
-        kDocument()->insertText( startCursor, chunk.text() );
+        QString str = codec()->toUnicode( chunk.text() );
+        kDocument()->insertText( startCursor, str );
     }
     else
         blockRemoteInsert = false;
@@ -132,6 +137,8 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )
 {
+    Q_UNUSED(user)
+
     if( !blockRemoteRemove )
     {
         KTextEditor::Cursor startCursor = offsetToCursor( offset );
@@ -153,19 +160,27 @@ void KDocumentTextBuffer::joinFailed( GError *error )
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    Q_UNUSED(document)
+
     unsigned int offset;
     if( !blockLocalInsert )
     {
         if( !m_user.isNull() )
         {
             offset = cursorToOffset( range.start() );
-            QInfinity::TextChunk chunk( "UTF-8" );
+            QInfinity::TextChunk chunk( encoding() );
             QString text = kDocument()->text( range );
             if( text[0] == '\n' ) // hack
                 text = '\n';
-            chunk.insertText( 0, text.toUtf8(), text.length(), m_user->id() );
-            blockRemoteInsert = true;
-            insertChunk( offset, chunk, m_user );
+            if( encoder() )
+            {
+                QByteArray encodedText = codec()->fromUnicode( text );
+                chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+                blockRemoteInsert = true;
+                insertChunk( offset, chunk, m_user );
+            }
+            else
+                kDebug() << "No encoder for text codec.";
         }
         else
             kDebug() << "Could not insert text: No local user set.";
@@ -177,6 +192,8 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    Q_UNUSED(document)
+
     if( !blockLocalRemove )
     {
         if( !m_user.isNull() )
