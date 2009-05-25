@@ -45,7 +45,6 @@
 #include <KXMLGUIFactory>
 #include <KPageWidgetItem>
 #include <KLocalizedString>
-#include <KTabWidget>
 #include <KMessageBox>
 #include <KFileDialog>
 #include <KUrl>
@@ -61,6 +60,7 @@
 #include <QTabWidget>
 #include <QStatusBar>
 #include <QHostInfo>
+#include <QToolBox>
 
 #include <KDebug>
 
@@ -150,22 +150,21 @@ void MainWindow::setupUi()
 
     documentListView = new DocumentListView( *docModel, this );
 
-    // Setup Left Tab Bar
-    leftTabWidget = new KTabWidget( this );
-    leftTabWidget->setTabPosition( QTabWidget::West );
-    leftTabWidget->addTab( documentListView,
+    // Setup Left ToolBox
+    leftToolBox = new QToolBox( this );
+    leftToolBox->addItem( documentListView,
         KIcon("document-preview.png"),
         i18n("Documents") );
-    leftTabWidget->addTab( remoteBrowserView,
+    leftToolBox->addItem( remoteBrowserView,
         KIcon("document-open-remote.png"),
         i18n("Remote Browser") );
-    leftTabWidget->addTab( localBrowserView,
+    leftToolBox->addItem( localBrowserView,
         KIcon("folder.png"),
         i18n("Local Browser") );
-    leftTabWidget->setCurrentIndex(1);
+
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
-    mainHorizSplitter->addWidget( leftTabWidget );
+    mainHorizSplitter->addWidget( leftToolBox );
     mainHorizSplitter->addWidget( docTabWidget );
     mainHorizSplitter->setStretchFactor( 0, QSizePolicy::Fixed );
 

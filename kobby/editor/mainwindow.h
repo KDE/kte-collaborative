@@ -20,10 +20,10 @@
 
 #include <KParts/MainWindow>
 
-class KTabWidget;
 class KUrl;
 class QLabel;
 class QSplitter;
+class QToolBox;
 
 namespace QInfinity
 {
@@ -89,7 +89,7 @@ class MainWindow
 
         // Ui
         QSplitter *mainHorizSplitter;
-        KTabWidget *leftTabWidget;
+        QToolBox *leftToolBox;
         RemoteBrowserView *remoteBrowserView;
         LocalBrowserView *localBrowserView;
         DocumentListView *documentListView;
