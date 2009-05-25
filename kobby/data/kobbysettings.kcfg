@@ -26,6 +26,11 @@
 		<entry name="MainWindowHorizSplitterSizes" type="IntList">
 			<label>Sizes of main horizontal splitter.</label>
 		</entry>
+
+		<entry name="ConnectDialogOnStart" type="Bool">
+			<label>Show Create Connection dialog on application start.</label>
+			 <default>true</default>
+		</entry>
 	</group>
 
 	<group name="profile">

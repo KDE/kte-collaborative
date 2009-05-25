@@ -117,8 +117,11 @@ MainWindow::MainWindow( QWidget *parent )
 
     }
 
-    // Start with connection dialog open
-    slotNewConnection();
+    if( KobbySettings::connectDialogOnStart() )
+    {
+        // Start with connection dialog open
+        slotNewConnection();
+    }
 }
 
 MainWindow::~MainWindow()

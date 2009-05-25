@@ -37,6 +37,7 @@ class SettingsDialog
 
         KPageWidgetItem *profilePage;
         KPageWidgetItem *networkPage;
+        KPageWidgetItem *uiPage;
 
 };
 
