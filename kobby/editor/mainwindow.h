@@ -20,6 +20,8 @@
 
 #include <KParts/MainWindow>
 
+#include <QPointer>
+
 class KUrl;
 class QLabel;
 class QSplitter;
@@ -69,15 +71,13 @@ class MainWindow
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
-        void slotViewDestroyed( QObject *obj );
-        void slotViewRemoved( KTextEditor::View &view );
+        void slotTextViewActivated( KTextEditor::View *view );
     
     private:
         void setupUi();
         void setupActions();
         void restoreSettings();
         void saveSettings();
-        void mergeView( KTextEditor::View *view );
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;
@@ -95,7 +95,7 @@ class MainWindow
         DocumentListView *documentListView;
         DocumentTabWidget *docTabWidget;
         QLabel *statusLabel;
-        KTextEditor::View *merged_view;
+        QPointer<KTextEditor::View> mergedTextView;
 
         // Actions
         KAction *newConnectionAction;

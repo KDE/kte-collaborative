@@ -50,6 +50,12 @@ class DocumentTabWidget
     Q_SIGNALS:
         void viewRemoved( KTextEditor::View &view );
         void viewAdded( KTextEditor::View &view );
+        /**
+         * @brief Active view has been changed.
+         *
+         * Emits 0 if no view is active.
+         */
+        void viewActivated( KTextEditor::View *view );
 
     public Q_SLOTS:
         /**
@@ -66,6 +72,7 @@ class DocumentTabWidget
         void closeWidget( QWidget *widget );
         void addDocument( KTextEditor::Document &document, QString name );
         void removeDocument( KTextEditor::Document &document );
+        void slotCurrentTabChanged( int index );
 
 };
 

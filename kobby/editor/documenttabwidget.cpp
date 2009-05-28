@@ -35,6 +35,8 @@ DocumentTabWidget::DocumentTabWidget( QWidget *parent )
 {
     connect( this, SIGNAL(closeRequest( QWidget* )),
         this, SLOT(closeWidget( QWidget* )) );
+    connect( this, SIGNAL(currentChanged( int )),
+        this, SLOT(slotCurrentTabChanged( int )) );
     setCloseButtonEnabled( true );
 }
 
@@ -44,6 +46,8 @@ DocumentTabWidget::~DocumentTabWidget()
 
 KTextEditor::View *DocumentTabWidget::viewAt( int index )
 {
+    if( index == -1 )
+        return 0;
     return dynamic_cast<KTextEditor::View*>(widget( index ));
 }
 
@@ -79,6 +83,12 @@ void DocumentTabWidget::addDocument( KTextEditor::Document &document, QString na
 
 void DocumentTabWidget::removeDocument( KTextEditor::Document &document )
 {
+}
+
+void DocumentTabWidget::slotCurrentTabChanged( int index )
+{
+    KTextEditor::View *activeView = viewAt( index );
+    emit( viewActivated( activeView ) );
 }
 
 }

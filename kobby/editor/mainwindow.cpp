@@ -70,6 +70,7 @@ namespace Kobby
 {
 
 MainWindow::MainWindow( QWidget *parent )
+    : mergedTextView( 0 )
 {
     Q_UNUSED( parent );
 
@@ -94,8 +95,8 @@ MainWindow::MainWindow( QWidget *parent )
         docTabWidget, SLOT(addDocument(Document&)) );
     connect( docModel, SIGNAL(documentAboutToBeRemoved(Document&)),
         docTabWidget, SLOT(removeDocument(Document&)) );
-    connect( docTabWidget, SIGNAL(viewRemoved(KTextEditor::View&)),
-        this, SLOT(slotViewRemoved(KTextEditor::View&)) );
+    connect( docTabWidget, SIGNAL(viewActivated( KTextEditor::View * )),
+        this, SLOT(slotTextViewActivated( KTextEditor::View * )) );
 
     // Setup the QInfinity BrowserModel
     textPlugin = new NotePlugin( *docBuilder, this );
@@ -107,7 +108,6 @@ MainWindow::MainWindow( QWidget *parent )
     createShellGUI( true );
 
     docBuilder->openBlank();
-    mergeView( docTabWidget->activeView() );
 
     restoreSettings();
 
@@ -237,34 +237,19 @@ void MainWindow::slotConnectionError( Connection *conn,
     slotNewConnection();
 }
 
-void MainWindow::slotViewDestroyed( QObject *obj )
+void MainWindow::slotTextViewActivated( KTextEditor::View *view )
 {
-    slotViewRemoved( *dynamic_cast<KTextEditor::View*>(obj) );
-}
-
-void MainWindow::slotViewRemoved( KTextEditor::View &view )
-{
-    KTextEditor::View *tmpView;
-    kDebug() << "Removing view " << docTabWidget->count();
-    if( merged_view == &view )
+    if( mergedTextView && mergedTextView != view )
     {
-        guiFactory()->removeClient( &view );
-        tmpView = docTabWidget->activeView();
-        if( !tmpView || (tmpView == merged_view && docTabWidget->count() <= 1))
-        {
-            if( true )
-            {
-                docBuilder->openBlank();
-                tmpView = docTabWidget->activeView();
-                if( !tmpView )
-                {
-                    kDebug() << "Unable to create new view to merge.";
-                    return;
-                }
-            }
-        }
-        mergeView( tmpView );
+        // We need to unmerge current view
+        guiFactory()->removeClient( mergedTextView );
     }
+    if( view )
+    {
+        // Merge new view
+        guiFactory()->addClient( view );
+    }
+    mergedTextView = view;
 }
 
 void MainWindow::slotShowSettingsDialog()
@@ -315,14 +300,6 @@ void MainWindow::saveSettings()
     KobbySettings::setMainWindowHeight( height() );
     KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
-}
-
-void MainWindow::mergeView( KTextEditor::View *view )
-{
-    merged_view = view;
-    connect( view, SIGNAL(destroyed(QObject*)),
-        this, SLOT(slotViewDestroyed(QObject*)) );
-    guiFactory()->addClient( view );
 }
 
 }
