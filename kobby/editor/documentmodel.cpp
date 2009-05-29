@@ -25,6 +25,27 @@
 namespace Kobby
 {
 
+class DocumentItem
+    : public QObject
+    , public QStandardItem
+{
+    public:
+        enum Type
+        {
+            KobbyDocument = 1001
+        };
+
+        DocumentItem( Document &doc );
+        ~DocumentItem();
+
+        int type() const;
+        Document &document() const;
+
+    private:
+        Document *m_document;
+
+};
+
 DocumentItem::DocumentItem( Document &doc )
     : m_document( &doc )
 {
