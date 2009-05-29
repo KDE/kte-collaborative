@@ -30,6 +30,7 @@ namespace Kobby
 {
 
 class Document;
+class DocumentItem;
 
 class DocumentModel
     : public QStandardItemModel
@@ -39,7 +40,7 @@ class DocumentModel
     public:
         DocumentModel( QObject *parent = 0 );
 
-        Document *kDocumentWrapper( KTextEditor::Document &kDoc );
+        void removeKDocument( KTextEditor::Document &kDoc );
 
     Q_SIGNALS:
         void documentAdded( Document &document );
@@ -50,10 +51,9 @@ class DocumentModel
 
     private Q_SLOTS:
         void slotRowsAboutToBeRemoved( const QModelIndex& parent, int start, int end );
-        void slotDocumentAboutToBeRemoved( Document &document );
 
     private:
-        QHash<KTextEditor::Document*, Document*> m_kDocumentWrappers;
+        QHash<KTextEditor::Document*, DocumentItem*> m_kDocumentItemWrappers;
 };
 
 }

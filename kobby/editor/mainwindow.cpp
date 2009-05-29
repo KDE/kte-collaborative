@@ -200,7 +200,8 @@ void MainWindow::setupActions()
     actionCollection()->addAction( "connection_new", newConnectionAction );
     actionCollection()->addAction( KStandardAction::Open, "document_open",
         this, SLOT(slotOpenFile()) )->setWhatsThis( i18n( "Select a document to open." ) );
-    actionCollection()->addAction( KStandardAction::Close, "document_close" );
+    actionCollection()->addAction( KStandardAction::Close, "document_close",
+        this, SLOT(slotCloseActive()) )->setWhatsThis( i18n( "Close active document." ) );
     actionCollection()->addAction( "settings_kobby", settingsAction );
 }
 
@@ -238,6 +239,15 @@ void MainWindow::slotConnectionError( Connection *conn,
     str += errMsg;
     KMessageBox::error( this, str );
     slotNewConnection();
+}
+
+void MainWindow::slotCloseActive()
+{
+    KTextEditor::View *activeView = docTabWidget->activeView();
+    if( activeView )
+    {
+        docModel->removeKDocument( *activeView->document() );
+    }
 }
 
 void MainWindow::slotTextViewActivated( KTextEditor::View *view )

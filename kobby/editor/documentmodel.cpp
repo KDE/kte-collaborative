@@ -70,19 +70,21 @@ Document &DocumentItem::document() const
 DocumentModel::DocumentModel( QObject *parent )
     : QStandardItemModel( parent )
 {
-    connect( this, SIGNAL(rowsAboutToBeRemoved( const QModelIndex&, int, int )),
-        this, SLOT(slotRowsAboutToBeRemoved( const QModelIndex&, int, int )) );
 }
 
-Document *DocumentModel::kDocumentWrapper( KTextEditor::Document &kDoc )
+void DocumentModel::removeKDocument(KTextEditor::Document& kDoc)
 {
-    return m_kDocumentWrappers[&kDoc];
+    DocumentItem *di = m_kDocumentItemWrappers[&kDoc];
+    if( di )
+    {
+        removeRow( di->row(), QModelIndex() );
+    }
 }
 
 void DocumentModel::insertDocument( Document &document )
 {
-    m_kDocumentWrappers[document.kDocument()] = &document;
     DocumentItem *item = new DocumentItem( document );
+    m_kDocumentItemWrappers[document.kDocument()] = item;
     appendRow( item );
     emit( documentAdded( document ) );
 }
@@ -98,6 +100,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         if( rm )
         {
             emit(documentAboutToBeRemoved(rm->document()));
+            m_kDocumentItemWrappers.remove(rm->document().kDocument());
         }
         else
         {
@@ -106,12 +109,6 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         start++;
     }
 }
-
-void DocumentModel::slotDocumentAboutToBeRemoved( Document& document )
-{
-    m_kDocumentWrappers.remove( document.kDocument() );
-}
-
 
 }
 

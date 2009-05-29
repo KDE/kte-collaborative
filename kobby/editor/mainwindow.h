@@ -71,6 +71,7 @@ class MainWindow
         void slotShowSettingsDialog();
         void slotConnectionConnected( Connection *conn );
         void slotConnectionError( Connection *conn, QString );
+        void slotCloseActive();
         void slotTextViewActivated( KTextEditor::View *view );
     
     private:
