@@ -107,14 +107,17 @@ MainWindow::MainWindow( QWidget *parent )
     setupActions();
     createShellGUI( true );
 
-    docBuilder->openBlank();
-
     restoreSettings();
 
-    // Display welcome dialog if no username set
+    if( KobbySettings::blankDocumentOnStart() )
+    {
+        // Open blank document on start
+        docBuilder->openBlank();
+    }
+
     if( KobbySettings::nickName().isEmpty() )
     {
-
+        // Display welcome dialog if no username set
     }
 
     if( KobbySettings::connectDialogOnStart() )
