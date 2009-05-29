@@ -19,7 +19,12 @@
 #define KOBBY_DOCUMENT_MODEL_H
 
 #include <QStandardItemModel>
-#include <QStandardItem>
+#include <QHash>
+
+namespace KTextEditor
+{
+    class Document;
+}
 
 namespace Kobby
 {
@@ -34,6 +39,8 @@ class DocumentModel
     public:
         DocumentModel( QObject *parent = 0 );
 
+        Document *kDocumentWrapper( KTextEditor::Document &kDoc );
+
     Q_SIGNALS:
         void documentAdded( Document &document );
         void documentAboutToBeRemoved( Document &document );
@@ -41,6 +48,11 @@ class DocumentModel
     public Q_SLOTS:
         void insertDocument( Document &document );
 
+    private Q_SLOTS:
+        void slotRowsAboutToBeRemoved( const QModelIndex& parent, int start, int end );
+
+    private:
+        QHash<KTextEditor::Document*, Document*> m_kDocumentWrappers;
 };
 
 }

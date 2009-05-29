@@ -70,6 +70,13 @@ Document &DocumentItem::document() const
 DocumentModel::DocumentModel( QObject *parent )
     : QStandardItemModel( parent )
 {
+    connect( this, SIGNAL(rowsAboutToBeRemoved( const QModelIndex&, int, int )),
+        this, SLOT(slotRowsAboutToBeRemoved( const QModelIndex&, int, int )) );
+}
+
+Document *DocumentModel::kDocumentWrapper( KTextEditor::Document &kDoc )
+{
+    
 }
 
 void DocumentModel::insertDocument( Document &document )
@@ -77,6 +84,26 @@ void DocumentModel::insertDocument( Document &document )
     DocumentItem *item = new DocumentItem( document );
     appendRow( item );
     emit( documentAdded( document ) );
+}
+
+void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
+    int start,
+    int end )
+{
+    DocumentItem *rm;
+    while( start <= end )
+    {
+        rm = dynamic_cast<DocumentItem*>(item(start));
+        if( rm )
+        {
+            emit(documentAboutToBeRemoved(rm->document()));
+        }
+        else
+        {
+            kDebug() << "Row removed from document model not of DocumentItem type!";
+        }
+        start++;
+    }
 }
 
 }
