@@ -76,11 +76,12 @@ DocumentModel::DocumentModel( QObject *parent )
 
 Document *DocumentModel::kDocumentWrapper( KTextEditor::Document &kDoc )
 {
-    
+    return m_kDocumentWrappers[&kDoc];
 }
 
 void DocumentModel::insertDocument( Document &document )
 {
+    m_kDocumentWrappers[document.kDocument()] = &document;
     DocumentItem *item = new DocumentItem( document );
     appendRow( item );
     emit( documentAdded( document ) );
@@ -105,6 +106,12 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         start++;
     }
 }
+
+void DocumentModel::slotDocumentAboutToBeRemoved( Document& document )
+{
+    m_kDocumentWrappers.remove( document.kDocument() );
+}
+
 
 }
 
