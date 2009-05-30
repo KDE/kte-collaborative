@@ -52,6 +52,8 @@ class DocumentModel
 
     private Q_SLOTS:
         void slotRowsAboutToBeRemoved( const QModelIndex& parent, int start, int end );
+        void slotDocumentFatalError( Document *document,
+            QString message );
 
     private:
         QHash<KTextEditor::Document*, DocumentItem*> m_kDocumentItemWrappers;

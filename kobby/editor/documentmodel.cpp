@@ -54,7 +54,8 @@ DocumentItem::DocumentItem( Document &doc )
 
 DocumentItem::~DocumentItem()
 {
-    delete m_document;
+    // This may be destroyed in Document::fatalError
+    m_document->deleteLater();
 }
 
 int DocumentItem::type() const
@@ -94,6 +95,8 @@ void DocumentModel::insertDocument( Document &document )
 {
     DocumentItem *item = new DocumentItem( document );
     m_kDocumentItemWrappers[document.kDocument()] = item;
+    connect( &document, SIGNAL(fatalError( Document*, QString )),
+        this, SLOT(slotDocumentFatalError( Document*, QString )) );
     appendRow( item );
     emit( documentAdded( document ) );
 }
@@ -118,6 +121,12 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         start++;
     }
 }
+
+void DocumentModel::slotDocumentFatalError(Kobby::Document* document, QString message)
+{
+    removeKDocument( *document->kDocument() );
+}
+
 
 }
 
