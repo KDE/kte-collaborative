@@ -91,6 +91,15 @@ Document *DocumentModel::documentFromIndex(const QModelIndex& index)
         return 0;
 }
 
+Document *DocumentModel::documentFromKDoc( KTextEditor::Document &kDoc )
+{
+    DocumentItem *di = m_kDocumentItemWrappers[&kDoc];
+    if( di )
+        return &di->document();
+    else
+        return 0;
+}
+
 void DocumentModel::insertDocument( Document &document )
 {
     DocumentItem *item = new DocumentItem( document );

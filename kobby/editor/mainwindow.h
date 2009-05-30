@@ -74,12 +74,15 @@ class MainWindow
         void slotCloseActive();
         void slotTextViewActivated( KTextEditor::View *view );
         void slotDocumentFatalError( Document *doc, QString message );
+        void slotUndo();
+        void slotRedo();
     
     private:
         void setupUi();
         void setupActions();
         void restoreSettings();
         void saveSettings();
+        Document *activeDocument();
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;

@@ -266,6 +266,30 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
     {
         // Merge new view
         guiFactory()->addClient( view );
+
+        // HACK: We need to steal undo/redo from the view if its collaborative.
+        Document *newDoc = docModel->documentFromKDoc( *view->document() );
+        if( newDoc && newDoc->isCollaborative() )
+        {
+            QAction *act = view->action( "edit_undo" );
+            if( !act )
+                kDebug() << "Could not steal undo action from KTextEditor::View.";
+            else
+            {
+                act->disconnect();
+                connect( act, SIGNAL(triggered(bool)),
+                    this, SLOT(slotUndo()) );
+            }
+            act = view->action( "edit_redo" );
+            if( !act )
+                kDebug() << "Could not steal redo action from KTextEditor::View.";
+            else
+            {
+                act->disconnect();
+                connect( act, SIGNAL(triggered(bool)),
+                    this, SLOT(slotRedo()) );
+            }
+        }
     }
     mergedTextView = view;
 }
@@ -293,6 +317,15 @@ void MainWindow::slotConnectionConnected( Connection *conn )
     // We are using our subclassed QInfinity ConnectionItem
     item = browserModel->addConnection( *conn->xmppConnection(), conn->name() );
     dynamic_cast<Kobby::ConnectionItem*>(item)->setConnection( conn );
+}
+
+void MainWindow::slotUndo()
+{
+    
+}
+
+void MainWindow::slotRedo()
+{
 }
 
 void MainWindow::restoreSettings()
@@ -326,6 +359,16 @@ void MainWindow::saveSettings()
     KobbySettings::setMainWindowHeight( height() );
     KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
+}
+
+Document *MainWindow::activeDocument()
+{
+    if( mergedTextView )
+    {
+        return docModel->documentFromKDoc( *mergedTextView->document() );
+    }
+    else
+        return 0;
 }
 
 }

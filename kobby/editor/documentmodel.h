@@ -53,6 +53,8 @@ class DocumentModel
          */
         Document *documentFromIndex( const QModelIndex &index );
 
+        Document *documentFromKDoc( KTextEditor::Document &kDoc );
+
     Q_SIGNALS:
         /**
          * @brief A Document has been added.

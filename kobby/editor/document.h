@@ -98,6 +98,8 @@ class Document
          * Initial state is Unloaded.
          */
         Document::LoadState loadState() const;
+
+        bool isCollaborative() const;
         
     Q_SIGNALS:
         void loadStateChanged( Document *document,
@@ -123,10 +125,12 @@ class Document
     protected:
         void setLoadState( Document::LoadState );
         void throwFatalError( const QString &message );
+        void setCollaborative( bool is_collaborative );
     
     private:
         QPointer<KTextEditor::Document> m_kDocument;
         Document::LoadState m_loadState;
+        bool m_isCollaborative;
 
 };
 

@@ -44,6 +44,7 @@ namespace Kobby
 Document::Document( KTextEditor::Document &kDocument )
     : m_kDocument( &kDocument )
     , m_loadState( Document::Unloaded )
+    , m_isCollaborative( false )
 {
     m_kDocument->setParent( 0 );
 }
@@ -74,6 +75,12 @@ Document::LoadState Document::loadState() const
     return m_loadState;
 }
 
+bool Document::isCollaborative() const
+{
+    return m_isCollaborative;
+}
+
+
 void Document::setLoadState( Document::LoadState state )
 {
     if( state != LoadState() )
@@ -90,6 +97,12 @@ void Document::throwFatalError( const QString &message )
     emit( fatalError( this, message ) );
     deleteLater();
 }
+
+void Document::setCollaborative(bool is_collaborative)
+{
+    m_isCollaborative = is_collaborative;
+}
+
 
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     const QString &encoding,
@@ -244,6 +257,7 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
     , m_session( &session )
     , m_buffer( &buffer )
 {
+    setCollaborative( true );
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
     synchronize();
