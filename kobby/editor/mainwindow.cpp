@@ -155,6 +155,8 @@ void MainWindow::setupUi()
         docBuilder, SLOT(openUrl(const KUrl&)) );
 
     documentListView = new DocumentListView( *docModel, this );
+    connect( documentListView, SIGNAL(documentDoubleClicked(Document&)),
+        docTabWidget, SLOT(addDocument(Document&)) );
 
     // Setup Left ToolBox
     leftToolBox = new QToolBox( this );
@@ -202,7 +204,7 @@ void MainWindow::setupActions()
         this, SLOT(slotOpenFile()) )->setWhatsThis( i18n( "Select a document to open." ) );
     actionCollection()->addAction( KStandardAction::Close, "document_close",
         this, SLOT(slotCloseActive()) )->setWhatsThis( i18n( "Close active document." ) );
-    actionCollection()->addAction( "settings_kobby", settingsAction );
+    actionCollection()->addAction( "settings_kobby", settingsAction )->setWhatsThis( i18n( "Kobby settings." ) );
 }
 
 void MainWindow::slotNewConnection()

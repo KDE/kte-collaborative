@@ -62,11 +62,19 @@ void DocumentListView::closeSelected()
     }
 }
 
+void DocumentListView::slotDoubleClicked( const QModelIndex &index ) 
+{
+    Document *doc = docModel->documentFromIndex( index );
+    if( doc )
+        emit( documentDoubleClicked( *doc ) );
+}
+
 void DocumentListView::setupUi()
 {
     QHBoxLayout *layout = new QHBoxLayout( this );
     listView = new QListView( this );
     listView->setModel( docModel );
+    listView->setEditTriggers( QAbstractItemView::NoEditTriggers );
     layout->addWidget( listView );
     setLayout( layout );
 }
@@ -78,6 +86,8 @@ void DocumentListView::setupActions()
     closeAction->setEnabled( true );
     connect( closeAction, SIGNAL(triggered(bool)),
         this, SLOT(closeSelected()) );
+    connect( listView, SIGNAL(doubleClicked(const QModelIndex&)),
+        this, SLOT(slotDoubleClicked(const QModelIndex&)) );
 }
 
 }

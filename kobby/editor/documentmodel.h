@@ -41,6 +41,7 @@ class DocumentModel
         DocumentModel( QObject *parent = 0 );
 
         void removeKDocument( KTextEditor::Document &kDoc );
+        Document *documentFromIndex( const QModelIndex &index );
 
     Q_SIGNALS:
         void documentAdded( Document &document );

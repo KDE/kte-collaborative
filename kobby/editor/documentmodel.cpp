@@ -81,6 +81,15 @@ void DocumentModel::removeKDocument(KTextEditor::Document& kDoc)
     }
 }
 
+Document *DocumentModel::documentFromIndex(const QModelIndex& index)
+{
+    DocumentItem *di = dynamic_cast<DocumentItem*>(itemFromIndex( index ));
+    if( di )
+        return &di->document();
+    else
+        return 0;
+}
+
 void DocumentModel::insertDocument( Document &document )
 {
     DocumentItem *item = new DocumentItem( document );

@@ -59,7 +59,7 @@ class DocumentTabWidget
 
     public Q_SLOTS:
         /**
-         * @brief Create new view of document and add as a new tab.
+         * @brief Create new view of doc, or activate already existing view.
          */
         void addDocument( Document &doc );
 

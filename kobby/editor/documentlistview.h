@@ -24,11 +24,13 @@ class KAction;
 class KMenu;
 class QListView;
 class QContextMenuEvent;
+class QModelIndex;
 
 namespace Kobby
 {
 
 class DocumentModel;
+class Document;
 
 class DocumentListView
     : public QWidget
@@ -39,11 +41,15 @@ class DocumentListView
         DocumentListView( DocumentModel &model,
             QWidget *parent = 0 );
 
+    Q_SIGNALS:
+        void documentDoubleClicked( Document &doc );
+
     protected:
         void contextMenuEvent( QContextMenuEvent *e );
 
     private Q_SLOTS:
         void closeSelected();
+        void slotDoubleClicked( const QModelIndex &index );
 
     private:
         void setupUi();

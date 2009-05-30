@@ -58,7 +58,30 @@ KTextEditor::View *DocumentTabWidget::activeView()
 
 void DocumentTabWidget::addDocument( Document &doc )
 {
-    addDocument( *doc.kDocument(), doc.name()  );
+    KTextEditor::Document *kDoc = doc.kDocument();
+    bool view_found = false;
+
+    if( kDoc->views().isEmpty() )
+        addDocument( *kDoc, doc.name()  );
+    else
+    {
+        // We should have a view for the document
+        int i;
+        for( i = 0; i < count(); i++ )
+        {
+            KTextEditor::View *tv = viewAt( i );
+            if( tv && tv->document() == kDoc )
+            {
+                setCurrentIndex( i );
+                view_found = true;
+            }
+        }
+        if( !view_found )
+        {
+            // Couldnt find a view to activate, make new one
+            addDocument( *kDoc, doc.name()  );
+        }
+    }
 }
 
 void DocumentTabWidget::removeDocument( Document &doc )
