@@ -32,6 +32,9 @@ namespace Kobby
 class Document;
 class DocumentItem;
 
+/**
+ * @brief Handles storage and deletion of all Documents.
+ */
 class DocumentModel
     : public QStandardItemModel
 {
@@ -40,14 +43,32 @@ class DocumentModel
     public:
         DocumentModel( QObject *parent = 0 );
 
+        /**
+         * @brief Remove Document wrapping kDoc from model.
+         */
         void removeKDocument( KTextEditor::Document &kDoc );
+
+        /**
+         * @brief Retrieve Document at index.
+         */
         Document *documentFromIndex( const QModelIndex &index );
 
     Q_SIGNALS:
+        /**
+         * @brief A Document has been added.
+         */
         void documentAdded( Document &document );
+        /**
+         * @brief A Document is about to be removed.
+         */
         void documentAboutToBeRemoved( Document &document );
 
     public Q_SLOTS:
+        /**
+         * @brief Appends document to model.
+         *
+         * Model takes ownership of document.
+         */
         void insertDocument( Document &document );
 
     private Q_SLOTS:
