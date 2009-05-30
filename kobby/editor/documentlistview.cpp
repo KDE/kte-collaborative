@@ -62,11 +62,11 @@ void DocumentListView::closeSelected()
     }
 }
 
-void DocumentListView::slotDoubleClicked( const QModelIndex &index ) 
+void DocumentListView::slotClicked( const QModelIndex &index ) 
 {
     Document *doc = docModel->documentFromIndex( index );
     if( doc )
-        emit( documentDoubleClicked( *doc ) );
+        emit( documentActivated( *doc ) );
 }
 
 void DocumentListView::setupUi()
@@ -86,8 +86,8 @@ void DocumentListView::setupActions()
     closeAction->setEnabled( true );
     connect( closeAction, SIGNAL(triggered(bool)),
         this, SLOT(closeSelected()) );
-    connect( listView, SIGNAL(doubleClicked(const QModelIndex&)),
-        this, SLOT(slotDoubleClicked(const QModelIndex&)) );
+    connect( listView, SIGNAL(clicked(const QModelIndex&)),
+        this, SLOT(slotClicked(const QModelIndex&)) );
 }
 
 }

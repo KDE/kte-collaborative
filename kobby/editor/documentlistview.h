@@ -42,14 +42,14 @@ class DocumentListView
             QWidget *parent = 0 );
 
     Q_SIGNALS:
-        void documentDoubleClicked( Document &doc );
+        void documentActivated( Document &doc );
 
     protected:
         void contextMenuEvent( QContextMenuEvent *e );
 
     private Q_SLOTS:
         void closeSelected();
-        void slotDoubleClicked( const QModelIndex &index );
+        void slotClicked( const QModelIndex &index );
 
     private:
         void setupUi();

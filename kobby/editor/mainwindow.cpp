@@ -155,7 +155,7 @@ void MainWindow::setupUi()
         docBuilder, SLOT(openUrl(const KUrl&)) );
 
     documentListView = new DocumentListView( *docModel, this );
-    connect( documentListView, SIGNAL(documentDoubleClicked(Document&)),
+    connect( documentListView, SIGNAL(documentActivated(Document&)),
         docTabWidget, SLOT(addDocument(Document&)) );
 
     // Setup Left ToolBox
