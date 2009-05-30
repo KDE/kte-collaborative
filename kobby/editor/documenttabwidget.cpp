@@ -112,6 +112,8 @@ void DocumentTabWidget::slotCurrentTabChanged( int index )
 {
     KTextEditor::View *activeView = viewAt( index );
     emit( viewActivated( activeView ) );
+    if( activeView )
+        activeView->setFocus( Qt::OtherFocusReason );
 }
 
 }
