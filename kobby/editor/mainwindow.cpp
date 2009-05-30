@@ -321,11 +321,20 @@ void MainWindow::slotConnectionConnected( Connection *conn )
 
 void MainWindow::slotUndo()
 {
-    
+    Document *doc = activeDocument();
+    if( !doc )
+        kDebug() << "Undo requested but no active document!";
+    else
+        doc->undo();
 }
 
 void MainWindow::slotRedo()
 {
+    Document *doc = activeDocument();
+    if( !doc )
+        kDebug() << "Redo requested but no active document!";
+    else
+        doc->redo();
 }
 
 void MainWindow::restoreSettings()

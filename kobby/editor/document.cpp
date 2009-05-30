@@ -70,6 +70,16 @@ QString Document::name()
     return m_kDocument->documentName();
 }
 
+void Document::undo()
+{
+    // Shouldnt be called for non-collaborative documents
+}
+
+void Document::redo()
+{
+    // Shouldnt be called for non-collaborative documents
+}
+
 Document::LoadState Document::loadState() const
 {
     return m_loadState;
@@ -268,6 +278,14 @@ InfTextDocument::~InfTextDocument()
     m_session->close();
 }
 
+void InfTextDocument::undo()
+{
+}
+
+void InfTextDocument::redo()
+{
+}
+
 void InfTextDocument::slotSynchronized()
 {
     if( m_session->status() == QInfinity::Session::Running )
@@ -291,6 +309,7 @@ void InfTextDocument::slotSynchronizationFailed( GError *gerror )
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
     m_buffer->setUser( user );
+    m_user = user;
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
     kDebug() << "Join finished" << user;

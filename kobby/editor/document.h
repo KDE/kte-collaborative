@@ -91,6 +91,9 @@ class Document
          * @brief Name of document.
          */
         virtual QString name();
+
+        virtual void undo();
+        virtual void redo();
         
         /**
          * @brief State of document loading.
@@ -198,6 +201,9 @@ class InfTextDocument
             QInfinity::TextSession &sesion,
             KDocumentTextBuffer &buffer );
         ~InfTextDocument();
+
+        void undo();
+        void redo();
     
     private Q_SLOTS:
         void slotSynchronized();
@@ -213,6 +219,7 @@ class InfTextDocument
         QInfinity::SessionProxy *m_sessionProxy;
         QInfinity::TextSession *m_session;
         KDocumentTextBuffer *m_buffer;
+        QPointer<QInfinity::User> m_user;
     
 };
 
