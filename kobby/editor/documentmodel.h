@@ -58,6 +58,12 @@ class DocumentModel
          * @brief A Document has been added.
          */
         void documentAdded( Document &document );
+
+        /**
+         * @brief A fatal error has occoured with a document.
+         */
+        void documentFatalError( Document *doc, QString reason );
+
         /**
          * @brief A Document is about to be removed.
          */

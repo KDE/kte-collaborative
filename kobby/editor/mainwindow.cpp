@@ -95,6 +95,8 @@ MainWindow::MainWindow( QWidget *parent )
         docTabWidget, SLOT(addDocument(Document&)) );
     connect( docModel, SIGNAL(documentAboutToBeRemoved(Document&)),
         docTabWidget, SLOT(removeDocument(Document&)) );
+    connect( docModel, SIGNAL(documentFatalError( Document*, QString )),
+        this, SLOT(slotDocumentFatalError( Document*, QString )) );
     connect( docTabWidget, SIGNAL(viewActivated( KTextEditor::View * )),
         this, SLOT(slotTextViewActivated( KTextEditor::View * )) );
 
@@ -254,6 +256,7 @@ void MainWindow::slotCloseActive()
 
 void MainWindow::slotTextViewActivated( KTextEditor::View *view )
 {
+    // Make sure the correct view is merged
     if( mergedTextView && mergedTextView != view )
     {
         // We need to unmerge current view
@@ -265,6 +268,14 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
         guiFactory()->addClient( view );
     }
     mergedTextView = view;
+}
+
+void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )
+{
+    Q_UNUSED(doc)
+    QString str = i18n("Document error: ");
+    str.append( message );
+    KMessageBox::error( this, str );
 }
 
 void MainWindow::slotShowSettingsDialog()

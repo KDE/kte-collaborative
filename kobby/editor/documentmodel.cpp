@@ -97,6 +97,8 @@ void DocumentModel::insertDocument( Document &document )
     m_kDocumentItemWrappers[document.kDocument()] = item;
     connect( &document, SIGNAL(fatalError( Document*, QString )),
         this, SLOT(slotDocumentFatalError( Document*, QString )) );
+    connect( &document, SIGNAL(fatalError( Document*, QString )),
+        this, SIGNAL(documentFatalError( Document*, QString )) );
     appendRow( item );
     emit( documentAdded( document ) );
 }

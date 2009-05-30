@@ -73,6 +73,7 @@ class MainWindow
         void slotConnectionError( Connection *conn, QString );
         void slotCloseActive();
         void slotTextViewActivated( KTextEditor::View *view );
+        void slotDocumentFatalError( Document *doc, QString message );
     
     private:
         void setupUi();
