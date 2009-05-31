@@ -2,7 +2,8 @@
 <kpartgui name="kobby" version="1">
 
 <MenuBar>
-	<Menu name="file" noMerge="1"><text>&amp;File</text>
+	<Menu name="file">
+		<text context="@title:menu">&amp;File</text>
 		<Action name="document_new" />
 		<Action name="connection_new" />
 		<Separator />
@@ -23,11 +24,24 @@
 
 		<Action name="file_quit"/>
 	</Menu>
+	
+	<Menu name="edit">
+		<text context="@title:menu">&amp;Edit</text>
+		<DefineGroup append="edit_undo_merge" name="edit_undo_merge"/>
+		<DefineGroup append="edit_paste_merge" name="edit_paste_merge"/>
+		<DefineGroup append="edit_select_merge" name="edit_select_merge"/>
+		<DefineGroup append="edit_find_merge" name="edit_find_merge"/>
+		<DefineGroup name="edit_formatting"/>
+		<Separator/>
+		<Merge/>
+	</Menu>
+	
 	<Merge/>
 	<Menu name="settings"><text>&amp;Settings</text>
 		<Action name="settings_kobby" />
 		<Merge/>
 	</Menu>
+	
 </MenuBar>
 
 <ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
