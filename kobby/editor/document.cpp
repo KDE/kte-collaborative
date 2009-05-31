@@ -22,7 +22,7 @@
 #include <libqinfinity/session.h>
 #include <libqinfinity/textsession.h>
 #include <libqinfinity/userrequest.h>
-#include <libqinfinity/user.h>
+#include <libqinfinity/adopteduser.h>
 #include <libqinfinity/textbuffer.h>
 #include <libqinfinity/textchunk.h>
 #include <libqinfinity/browseriter.h>
@@ -30,6 +30,7 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/Range>
 #include <KTextEditor/Cursor>
+#include <KTextEditor/View>
 #include <KLocalizedString>
 #include <KMessageBox>
 #include <KDebug>
@@ -37,6 +38,7 @@
 #include <QString>
 #include <QTextCodec>
 #include <QTextEncoder>
+#include <QAction>
 
 namespace Kobby
 {
@@ -70,26 +72,10 @@ QString Document::name()
     return m_kDocument->documentName();
 }
 
-void Document::undo()
-{
-    // Shouldnt be called for non-collaborative documents
-}
-
-void Document::redo()
-{
-    // Shouldnt be called for non-collaborative documents
-}
-
 Document::LoadState Document::loadState() const
 {
     return m_loadState;
 }
-
-bool Document::isCollaborative() const
-{
-    return m_isCollaborative;
-}
-
 
 void Document::setLoadState( Document::LoadState state )
 {
@@ -266,10 +252,14 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
     , m_sessionProxy( &proxy )
     , m_session( &session )
     , m_buffer( &buffer )
+    , insert_count( 0 )
+    , undo_count( 0 )
 {
     setCollaborative( true );
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
+    connect( kDocument(), SIGNAL(viewCreated(KTextEditor::Document*, KTextEditor::View*)),
+        this, SLOT(slotViewCreated(KTextEditor::Document*, KTextEditor::View*)) );
     synchronize();
 }
 
@@ -280,10 +270,14 @@ InfTextDocument::~InfTextDocument()
 
 void InfTextDocument::undo()
 {
+    if( m_user )
+        m_session->undo( *m_user );
 }
 
 void InfTextDocument::redo()
 {
+    if( m_user )
+        m_session->redo( *m_user );
 }
 
 void InfTextDocument::slotSynchronized()
@@ -309,10 +303,10 @@ void InfTextDocument::slotSynchronizationFailed( GError *gerror )
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
     m_buffer->setUser( user );
-    m_user = user;
+    m_user = dynamic_cast<QInfinity::AdoptedUser*>(user.data());
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
-    kDebug() << "Join finished" << user;
+    kDebug() << "Join successful.";
 }
 
 void InfTextDocument::slotJoinFailed( GError *gerror )
@@ -321,6 +315,29 @@ void InfTextDocument::slotJoinFailed( GError *gerror )
     emsg.append( gerror->message );
     throwFatalError( emsg );
     kDebug() << "Join failed: " << emsg;
+}
+
+void InfTextDocument::slotViewCreated( KTextEditor::Document *kDoc,
+    KTextEditor::View *kView )
+{
+    Q_UNUSED(kDoc)
+    // HACK: Steal the undo/redo actions
+    QAction *act = kView->action( "edit_undo" );
+    if( act )
+    {
+        undo_actions.append( act );
+        act->disconnect();
+        connect( act, SIGNAL(triggered(bool)),
+            this, SLOT(undo()) );
+    }
+    act = kView->action( "edit_redo" );
+    if( act )
+    {
+        redo_actions.append( act );
+        act->disconnect();
+        connect( act, SIGNAL(triggered(bool)),
+            this, SLOT(redo()) );
+    }
 }
 
 void InfTextDocument::synchronize()

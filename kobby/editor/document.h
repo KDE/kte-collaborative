@@ -26,12 +26,14 @@
 typedef struct _GError GError;
 
 class QString;
+class QAction;
 
 namespace KTextEditor
 {
     class Document;
     class Range;
     class Cursor;
+    class View;
 }
 
 namespace QInfinity
@@ -39,6 +41,7 @@ namespace QInfinity
     class Session;
     class SessionProxy;
     class User;
+    class AdoptedUser;
     class TextChunk;
     class TextBuffer;
     class TextSession;
@@ -91,9 +94,6 @@ class Document
          * @brief Name of document.
          */
         virtual QString name();
-
-        virtual void undo();
-        virtual void redo();
         
         /**
          * @brief State of document loading.
@@ -102,8 +102,6 @@ class Document
          */
         Document::LoadState loadState() const;
 
-        bool isCollaborative() const;
-        
     Q_SIGNALS:
         void loadStateChanged( Document *document,
             Document::LoadState loadState );
@@ -202,6 +200,7 @@ class InfTextDocument
             KDocumentTextBuffer &buffer );
         ~InfTextDocument();
 
+    public Q_SLOTS:
         void undo();
         void redo();
     
@@ -210,16 +209,23 @@ class InfTextDocument
         void slotSynchronizationFailed( GError *gerror );
         void slotJoinFinished( QPointer<QInfinity::User> );
         void slotJoinFailed( GError *gerror );
+        void slotViewCreated( KTextEditor::Document *kDoc,
+            KTextEditor::View *kView );
     
     private:
         void synchronize();
         void joinSession();
-        void joinUser();
         
         QInfinity::SessionProxy *m_sessionProxy;
         QInfinity::TextSession *m_session;
         KDocumentTextBuffer *m_buffer;
-        QPointer<QInfinity::User> m_user;
+        QPointer<QInfinity::AdoptedUser> m_user;
+
+        // Manage undo/redo
+        QList<QAction*> undo_actions;
+        QList<QAction*> redo_actions;
+        unsigned int insert_count;
+        unsigned int undo_count;
     
 };
 

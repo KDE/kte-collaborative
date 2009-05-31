@@ -266,30 +266,6 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
     {
         // Merge new view
         guiFactory()->addClient( view );
-
-        // HACK: We need to steal undo/redo from the view if its collaborative.
-        Document *newDoc = docModel->documentFromKDoc( *view->document() );
-        if( newDoc && newDoc->isCollaborative() )
-        {
-            QAction *act = view->action( "edit_undo" );
-            if( !act )
-                kDebug() << "Could not steal undo action from KTextEditor::View.";
-            else
-            {
-                act->disconnect();
-                connect( act, SIGNAL(triggered(bool)),
-                    this, SLOT(slotUndo()) );
-            }
-            act = view->action( "edit_redo" );
-            if( !act )
-                kDebug() << "Could not steal redo action from KTextEditor::View.";
-            else
-            {
-                act->disconnect();
-                connect( act, SIGNAL(triggered(bool)),
-                    this, SLOT(slotRedo()) );
-            }
-        }
     }
     mergedTextView = view;
 }
@@ -317,24 +293,6 @@ void MainWindow::slotConnectionConnected( Connection *conn )
     // We are using our subclassed QInfinity ConnectionItem
     item = browserModel->addConnection( *conn->xmppConnection(), conn->name() );
     dynamic_cast<Kobby::ConnectionItem*>(item)->setConnection( conn );
-}
-
-void MainWindow::slotUndo()
-{
-    Document *doc = activeDocument();
-    if( !doc )
-        kDebug() << "Undo requested but no active document!";
-    else
-        doc->undo();
-}
-
-void MainWindow::slotRedo()
-{
-    Document *doc = activeDocument();
-    if( !doc )
-        kDebug() << "Redo requested but no active document!";
-    else
-        doc->redo();
 }
 
 void MainWindow::restoreSettings()
