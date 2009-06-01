@@ -21,6 +21,7 @@
 #include <QWidget>
 #include <QModelIndexList>
 
+class QStackedLayout;
 class QTreeView;
 class QModelIndex;
 class QItemSelection;
@@ -34,6 +35,7 @@ namespace QInfinity
 {
     class NotePlugin;
     class BrowserModel;
+    class XmlConnection;
 }
 
 namespace Kobby
@@ -90,6 +92,35 @@ class RemoteBrowserView
         KAction *openAction;
         KAction *deleteAction;
         KMenu *contextMenu;
+};
+
+/**
+ * @brief Proxy of RemoteBrowserView which displays help if there are no connections.
+ */
+class RemoteBrowserProxy
+    : public QWidget
+{
+    Q_OBJECT
+
+    public:
+        RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
+            QInfinity::BrowserModel &model,
+            QWidget *parent = 0 );
+
+        RemoteBrowserView &remoteView() const;
+
+    Q_SIGNALS:
+        void createConnection();
+
+    private Q_SLOTS:
+        void connectionAdded( QInfinity::XmlConnection &connection );
+        void connectionRemoved( QInfinity::XmlConnection &connection );
+
+    private:
+        QStackedLayout *stackedLayout;
+        RemoteBrowserView *m_remoteView;
+        QWidget *noActiveWidget;
+
 };
 
 }

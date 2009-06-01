@@ -44,7 +44,7 @@ namespace KTextEditor
 namespace Kobby
 {
 
-class RemoteBrowserView;
+class RemoteBrowserProxy;
 class LocalBrowserView;
 class DocumentUsersBrowser;
 class DocumentListView;
@@ -95,7 +95,7 @@ class MainWindow
         QSplitter *mainHorizSplitter;
         QToolBox *leftToolBox;
         DocumentUsersBrowser *usersBrowser;
-        RemoteBrowserView *remoteBrowserView;
+        RemoteBrowserProxy *remoteBrowserView;
         LocalBrowserView *localBrowserView;
         DocumentListView *documentListView;
         DocumentTabWidget *docTabWidget;

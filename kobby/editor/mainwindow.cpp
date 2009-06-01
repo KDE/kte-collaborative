@@ -148,12 +148,14 @@ void MainWindow::setupUi()
     usersBrowser = new DocumentUsersBrowser( *docModel, this );
 
     // Setup RemoteBrowserView
-    remoteBrowserView = new RemoteBrowserView( *textPlugin,
+    remoteBrowserView = new RemoteBrowserProxy( *textPlugin,
         *browserModel, this );
+    connect( &remoteBrowserView->remoteView(), SIGNAL(createConnection()),
+        this, SLOT(slotNewConnection()) );
+    connect( &remoteBrowserView->remoteView(), SIGNAL(openItem(const QModelIndex&)),
+        docBuilder, SLOT(openInfDocmuent(const QModelIndex&)) );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
-    connect( remoteBrowserView, SIGNAL(openItem(const QModelIndex&)),
-        docBuilder, SLOT(openInfDocmuent(const QModelIndex&)) );
 
     // Setup LocalBrowserView
     localBrowserView = new LocalBrowserView( this );
@@ -178,6 +180,7 @@ void MainWindow::setupUi()
     leftToolBox->addItem( usersBrowser,
         KIcon("meeting-organizer.png"),
         i18n("Users") );
+    leftToolBox->setCurrentWidget( remoteBrowserView );
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
     mainHorizSplitter->addWidget( leftToolBox );

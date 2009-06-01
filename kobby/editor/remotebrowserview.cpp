@@ -27,9 +27,13 @@
 #include <KLocalizedString>
 #include <KToolBar>
 #include <KMenu>
+#include <KPushButton>
 
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QStackedLayout>
+#include <QLabel>
 #include <QItemSelection>
 #include <QModelIndexList>
 #include <QDebug>
@@ -39,6 +43,65 @@
 
 namespace Kobby
 {
+
+RemoteBrowserProxy::RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
+    QInfinity::BrowserModel &model,
+    QWidget *parent )
+{
+    // Create Remote View
+    m_remoteView = new RemoteBrowserView( plugin, model, parent );
+
+    // Create No Connections Widget
+    noActiveWidget = new QWidget( this );
+    KIcon icon = KIcon( "help-hint.png" );
+    // Icon
+    QLabel *iconLabel = new QLabel();
+    iconLabel->setPixmap( icon.pixmap( QSize( 32, 32 ) ) );
+    iconLabel->setAlignment( Qt::AlignHCenter );
+    // Text
+    QLabel *label = new QLabel( i18n( "You must create a connection before browsing remote documents." ) );
+    label->setWordWrap( true );
+    // Button
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    KPushButton *button = new KPushButton( KIcon("network-connect.png"), i18n("Create Connection") );
+    connect( button, SIGNAL(clicked(bool)), this, SIGNAL(createConnection()) );
+    buttonLayout->addStretch();
+    buttonLayout->addWidget( button );
+    buttonLayout->addStretch();
+    QVBoxLayout *vlayout = new QVBoxLayout( noActiveWidget );
+    QVBoxLayout *labelLayout = new QVBoxLayout();
+    labelLayout->addWidget( iconLabel );
+    labelLayout->addWidget( label );
+    labelLayout->addLayout( buttonLayout );
+    vlayout->addStretch();
+    vlayout->addLayout( labelLayout );
+    vlayout->addStretch();
+    noActiveWidget->setLayout( vlayout);
+
+    // Setup Stacked Widget
+    stackedLayout = new QStackedLayout( this );
+    stackedLayout->addWidget( noActiveWidget );
+    stackedLayout->addWidget( m_remoteView );
+    setLayout( stackedLayout );
+
+    stackedLayout->setCurrentWidget( noActiveWidget );
+    connect( &model, SIGNAL(connectionAdded(QInfinity::XmlConnection&)),
+        this, SLOT(connectionAdded(QInfinity::XmlConnection&)) );
+}
+
+RemoteBrowserView &RemoteBrowserProxy::remoteView() const
+{
+    return *m_remoteView;
+}
+
+void RemoteBrowserProxy::connectionAdded( QInfinity::XmlConnection &conn )
+{
+    stackedLayout->setCurrentWidget( m_remoteView );
+}
+
+void RemoteBrowserProxy::connectionRemoved( QInfinity::XmlConnection &conn )
+{
+}
 
 RemoteBrowserView::RemoteBrowserView( QInfinity::NotePlugin &plugin,
     QInfinity::BrowserModel &model,
