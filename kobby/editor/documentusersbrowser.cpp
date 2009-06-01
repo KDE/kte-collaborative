@@ -15,34 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KOBBY_DOCUMENT_USERS_BROWSER_H
-#define KOBBY_DOCUMENT_USERS_BROWSER_H
+#include "documentusersbrowser.h"
+#include "documentmodel.h"
 
-#include <QWidget>
+#include "documentusersbrowser.moc"
 
 namespace Kobby
 {
 
-class Document;
-class DocumentModel;
-
-class DocumentUsersBrowser
-    : public QWidget
+DocumentUsersBrowser::DocumentUsersBrowser( DocumentModel &docModel,
+    QWidget *parent )
+    : QWidget( parent )
+    , m_docModel( &docModel )
 {
-    Q_OBJECT
-
-    public:
-        DocumentUsersBrowser( DocumentModel &docModel,
-            QWidget *parent = 0 );
-
-    public Q_SLOTS:
-        void setActiveDocument( Document &document );
-
-    private:
-        DocumentModel *m_docModel;
-
-};
-
 }
 
-#endif
+void DocumentUsersBrowser::setActiveDocument( Document &document )
+{
+}
+
+}

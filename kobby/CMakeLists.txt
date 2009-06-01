@@ -38,6 +38,7 @@ set( KOBBY_SRCS
 	editor/documentmodel.cpp
 	editor/remotebrowserview.cpp
 	editor/localbrowserview.cpp
+	editor/documentusersbrowser.cpp
 	editor/documentlistview.cpp
 	editor/documenttabwidget.cpp
 	editor/connection.cpp
