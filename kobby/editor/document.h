@@ -137,8 +137,11 @@ class Document
 
 /**
  * @brief Links together the InfTextBuffer and KTextEditor::Document
+ *
+ * The KDocumentTextBuffer ties together remote and local insertion
+ * and removal operations.  It is also responsible for maintaining
+ * undo/redo stats (insertionCount and undoCount).
  */
-
 class KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
 {
@@ -159,6 +162,16 @@ class KDocumentTextBuffer
             QInfinity::User *user );
         void setUser( QPointer<QInfinity::User> user );
 
+        void resetUndoRedo();
+        void performingUndo();
+        void performingRedo();
+        unsigned int insertCount() const;
+        unsigned int undoCount() const;
+
+    Q_SIGNALS:
+        void canUndo( bool enable );
+        void canRedo( bool enable );
+
     public Q_SLOTS:
         void joinFailed( GError *error );
 
@@ -171,6 +184,7 @@ class KDocumentTextBuffer
     private:
         unsigned int cursorToOffset( const KTextEditor::Cursor &cursor );
         KTextEditor::Cursor offsetToCursor( unsigned int offset );
+        void textOpPerformed();
 
         bool blockLocalInsert;
         bool blockLocalRemove;
@@ -179,10 +193,18 @@ class KDocumentTextBuffer
         KTextEditor::Document *m_kDocument;
         QPointer<QInfinity::User> m_user;
 
+        // Undo/Redo management
+        unsigned int m_insertCount;
+        unsigned int m_undoCount;
+        bool undo_lock;
+        bool redo_lock;
+
 };
 
 /**
  * @brief Implementation of Document for InfText infinote plugin.
+ *
+ * Ties local operations/acitons into QInfinity::Session operations.
  */
 class InfTextDocument
     : public Document
@@ -209,8 +231,10 @@ class InfTextDocument
         void slotSynchronizationFailed( GError *gerror );
         void slotJoinFinished( QPointer<QInfinity::User> );
         void slotJoinFailed( GError *gerror );
-        void slotViewCreated( KTextEditor::Document *kDoc,
-            KTextEditor::View *kView );
+        void slotViewCreated( KTextEditor::Document *doc,
+            KTextEditor::View *view );
+        void slotCanUndo( bool enable );
+        void slotCanRedo( bool enable );
     
     private:
         void synchronize();
@@ -221,12 +245,10 @@ class InfTextDocument
         KDocumentTextBuffer *m_buffer;
         QPointer<QInfinity::AdoptedUser> m_user;
 
-        // Manage undo/redo
-        QList<QAction*> undo_actions;
-        QList<QAction*> redo_actions;
-        unsigned int insert_count;
-        unsigned int undo_count;
-    
+        // Undo/Redo actions
+        QList<QAction*> undoActions;
+        QList<QAction*> redoActions;
+
 };
 
 }

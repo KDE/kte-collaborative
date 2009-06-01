@@ -109,6 +109,10 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
     , m_kDocument( &kDocument )
+    , m_insertCount( 0 )
+    , m_undoCount( 0 )
+    , undo_lock( false )
+    , redo_lock( false )
 {
     connect( &kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
@@ -171,6 +175,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 {
     Q_UNUSED(document)
 
+    textOpPerformed();
     unsigned int offset;
     if( !blockLocalInsert )
     {
@@ -203,6 +208,7 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
 {
     Q_UNUSED(document)
 
+    textOpPerformed();
     if( !blockLocalRemove )
     {
         if( !m_user.isNull() )
@@ -224,6 +230,72 @@ void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
     m_user = user;
 }
 
+void KDocumentTextBuffer::resetUndoRedo()
+{
+    kDebug() << "reset";
+    if( m_insertCount )
+    {
+        m_insertCount = 0;
+        emit( canUndo( false ) );
+    }
+    if( m_undoCount )
+    {
+        m_undoCount = 0;
+        emit( canRedo( false ) );
+    }
+}
+
+void KDocumentTextBuffer::performingUndo()
+{
+    kDebug() << "performing undo, count: " << m_insertCount;
+    undo_lock = true;
+    if( m_insertCount )
+    {
+        m_insertCount--;
+    }
+    if( !m_insertCount )
+    {
+        emit( canUndo( false ) );
+    }
+    if( m_undoCount )
+        m_undoCount++;
+    else
+    {
+        m_undoCount++;
+        emit( canRedo( true ) );
+    }
+}
+
+void KDocumentTextBuffer::performingRedo()
+{
+    redo_lock = true;
+    if( !m_insertCount )
+    {
+        m_insertCount++;
+        emit( canUndo( true ) );
+    }
+    else
+        m_insertCount++;
+    if( m_undoCount )
+    {
+        m_undoCount--;
+    }
+    if( !m_undoCount )
+    {
+        emit( canRedo( false ) );
+    }
+}
+
+unsigned int KDocumentTextBuffer::insertCount() const
+{
+    return m_insertCount;
+}
+
+unsigned int KDocumentTextBuffer::undoCount() const
+{
+    return m_undoCount;
+}
+
 unsigned int KDocumentTextBuffer::cursorToOffset( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
@@ -242,6 +314,34 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
     return KTextEditor::Cursor( i, offset );
 }
 
+void KDocumentTextBuffer::textOpPerformed()
+{
+    kDebug() << "text op";
+    if( undo_lock )
+    {
+        undo_lock = false;
+    }
+    else if( redo_lock )
+    {
+        redo_lock = false;
+    }
+    else
+    {
+        if( !m_insertCount )
+        {
+            m_insertCount++;
+            emit( canUndo( true ) );
+        }
+        else
+            m_insertCount++;
+        if( m_undoCount )
+        {
+            m_undoCount = 0;
+            emit( canRedo( false ) );
+        }
+    }
+}
+
 /* Accepting the session and buffer as parameters, although we
    could obtain them from the session proxy, ensures some type
    safety. */
@@ -252,14 +352,16 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
     , m_sessionProxy( &proxy )
     , m_session( &session )
     , m_buffer( &buffer )
-    , insert_count( 0 )
-    , undo_count( 0 )
 {
     setCollaborative( true );
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
-    connect( kDocument(), SIGNAL(viewCreated(KTextEditor::Document*, KTextEditor::View*)),
-        this, SLOT(slotViewCreated(KTextEditor::Document*, KTextEditor::View*)) );
+    connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
+        this, SLOT(slotViewCreated( KTextEditor::Document*, KTextEditor::View* )) );
+    connect( &buffer, SIGNAL(canUndo( bool )),
+        this, SLOT(slotCanUndo( bool )) );
+    connect( &buffer, SIGNAL(canRedo( bool )),
+        this, SLOT(slotCanRedo( bool )) );
     synchronize();
 }
 
@@ -270,12 +372,14 @@ InfTextDocument::~InfTextDocument()
 
 void InfTextDocument::undo()
 {
+    m_buffer->performingUndo();
     if( m_user )
         m_session->undo( *m_user );
 }
 
 void InfTextDocument::redo()
 {
+    m_buffer->performingRedo();
     if( m_user )
         m_session->redo( *m_user );
 }
@@ -286,6 +390,7 @@ void InfTextDocument::slotSynchronized()
     {
         setLoadState( Document::SynchronizationComplete );
         joinSession();
+        m_buffer->resetUndoRedo();
     }
     else
     {
@@ -317,26 +422,45 @@ void InfTextDocument::slotJoinFailed( GError *gerror )
     kDebug() << "Join failed: " << emsg;
 }
 
-void InfTextDocument::slotViewCreated( KTextEditor::Document *kDoc,
-    KTextEditor::View *kView )
+void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
+    KTextEditor::View *view )
 {
-    Q_UNUSED(kDoc)
+    Q_UNUSED(doc)
     // HACK: Steal the undo/redo actions
-    QAction *act = kView->action( "edit_undo" );
+    QAction *act = view->action( "edit_undo" );
     if( act )
     {
-        undo_actions.append( act );
+        undoActions.append( act );
         act->disconnect();
         connect( act, SIGNAL(triggered(bool)),
             this, SLOT(undo()) );
     }
-    act = kView->action( "edit_redo" );
+    act = view->action( "edit_redo" );
     if( act )
     {
-        redo_actions.append( act );
+        redoActions.append( act );
         act->disconnect();
         connect( act, SIGNAL(triggered(bool)),
             this, SLOT(redo()) );
+    }
+}
+
+void InfTextDocument::slotCanUndo( bool enable )
+{
+    kDebug() << "set undo " << enable;
+    QAction *act;
+    foreach( act, undoActions )
+    {
+        act->setEnabled( enable );
+    }
+}
+
+void InfTextDocument::slotCanRedo( bool enable )
+{
+    QAction *act;
+    foreach( act, redoActions )
+    {
+        act->setEnabled( enable );
     }
 }
 
