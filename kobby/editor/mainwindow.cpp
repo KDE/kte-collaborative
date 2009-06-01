@@ -20,6 +20,7 @@
 #include "settingsdialog.h"
 #include "remotebrowserview.h"
 #include "localbrowserview.h"
+#include "documentusersbrowser.h"
 #include "documentlistview.h"
 #include "documenttabwidget.h"
 #include "documentmodel.h"
@@ -143,6 +144,9 @@ void MainWindow::setupUi()
     statusBar->addWidget( statusLabel );
     setStatusBar( statusBar );
 
+    // Setup UsersBrowser
+    usersBrowser = new DocumentUsersBrowser( *docModel, this );
+
     // Setup RemoteBrowserView
     remoteBrowserView = new RemoteBrowserView( *textPlugin,
         *browserModel, this );
@@ -171,7 +175,9 @@ void MainWindow::setupUi()
     leftToolBox->addItem( localBrowserView,
         KIcon("folder.png"),
         i18n("Local Browser") );
-
+    leftToolBox->addItem( usersBrowser,
+        KIcon("meeting-organizer.png"),
+        i18n("Users") );
 
     mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
     mainHorizSplitter->addWidget( leftToolBox );

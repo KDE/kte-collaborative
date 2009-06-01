@@ -18,6 +18,12 @@
 #include "documentusersbrowser.h"
 #include "documentmodel.h"
 
+#include <KLocalizedString>
+
+#include <QStackedLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+
 #include "documentusersbrowser.moc"
 
 namespace Kobby
@@ -28,6 +34,16 @@ DocumentUsersBrowser::DocumentUsersBrowser( DocumentModel &docModel,
     : QWidget( parent )
     , m_docModel( &docModel )
 {
+    QWidget *noActiveWidget = new QWidget( this );
+    QVBoxLayout *noActiveLayout = new QVBoxLayout( noActiveWidget );
+    QLabel *label = new QLabel( 
+        i18n( "You must be editing a collaborative document to see active users." ) );
+    label->setWordWrap( true );
+    noActiveLayout->addWidget( label );
+    noActiveWidget->setLayout( noActiveLayout );
+    QStackedLayout *mainLayout = new QStackedLayout( this );
+    mainLayout->addWidget( noActiveWidget );
+    setLayout( mainLayout );
 }
 
 void DocumentUsersBrowser::setActiveDocument( Document &document )

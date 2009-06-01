@@ -40,6 +40,7 @@ class DocumentUsersBrowser
 
     private:
         DocumentModel *m_docModel;
+        QWidget *noActiveWidget;
 
 };
 

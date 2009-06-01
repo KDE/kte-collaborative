@@ -46,6 +46,7 @@ namespace Kobby
 
 class RemoteBrowserView;
 class LocalBrowserView;
+class DocumentUsersBrowser;
 class DocumentListView;
 class DocumentTabWidget;
 class Connection;
@@ -93,6 +94,7 @@ class MainWindow
         // Ui
         QSplitter *mainHorizSplitter;
         QToolBox *leftToolBox;
+        DocumentUsersBrowser *usersBrowser;
         RemoteBrowserView *remoteBrowserView;
         LocalBrowserView *localBrowserView;
         DocumentListView *documentListView;
