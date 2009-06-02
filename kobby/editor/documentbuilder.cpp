@@ -119,7 +119,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
             << "usually means the connection is not using the kobby plugin.";
         return;
     }
-    InfTextDocument *infDoc = new InfTextDocument( *sessProxy, *textSession, *kbuff );
+    QInfinity::BrowserIter titr = iter;
+    InfTextDocument *infDoc = new InfTextDocument( *sessProxy, *textSession, *kbuff, titr.name() );
     emit(documentCreated( *infDoc ));
 }
 

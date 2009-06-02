@@ -46,7 +46,6 @@ namespace Kobby
 Document::Document( KTextEditor::Document &kDocument )
     : m_kDocument( &kDocument )
     , m_loadState( Document::Unloaded )
-    , m_isCollaborative( false )
 {
     m_kDocument->setParent( 0 );
 }
@@ -67,7 +66,7 @@ bool Document::save()
     return m_kDocument->documentSave();
 }
 
-QString Document::name()
+QString Document::name() const
 {
     return m_kDocument->documentName();
 }
@@ -93,12 +92,6 @@ void Document::throwFatalError( const QString &message )
     emit( fatalError( this, message ) );
     deleteLater();
 }
-
-void Document::setCollaborative(bool is_collaborative)
-{
-    m_isCollaborative = is_collaborative;
-}
-
 
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     const QString &encoding,
@@ -347,13 +340,14 @@ void KDocumentTextBuffer::textOpPerformed()
    safety. */
 InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
     QInfinity::TextSession &session,
-    KDocumentTextBuffer &buffer )
+    KDocumentTextBuffer &buffer,
+    const QString &name )
     : Document( *(buffer.kDocument()) )
     , m_sessionProxy( &proxy )
     , m_session( &session )
     , m_buffer( &buffer )
+    , m_name( name )
 {
-    setCollaborative( true );
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
     connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
@@ -368,6 +362,11 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
 InfTextDocument::~InfTextDocument()
 {
     m_session->close();
+}
+
+QString InfTextDocument::name() const
+{
+    return m_name;
 }
 
 void InfTextDocument::undo()

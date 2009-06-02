@@ -93,7 +93,7 @@ class Document
         /**
          * @brief Name of document.
          */
-        virtual QString name();
+        virtual QString name() const;
         
         /**
          * @brief State of document loading.
@@ -126,12 +126,10 @@ class Document
     protected:
         void setLoadState( Document::LoadState );
         void throwFatalError( const QString &message );
-        void setCollaborative( bool is_collaborative );
     
     private:
         QPointer<KTextEditor::Document> m_kDocument;
         Document::LoadState m_loadState;
-        bool m_isCollaborative;
 
 };
 
@@ -219,9 +217,12 @@ class InfTextDocument
          */
         InfTextDocument( QInfinity::SessionProxy &sessionProxy,
             QInfinity::TextSession &sesion,
-            KDocumentTextBuffer &buffer );
+            KDocumentTextBuffer &buffer,
+            const QString &name );
         ~InfTextDocument();
 
+        QString name() const;
+        
     public Q_SLOTS:
         void undo();
         void redo();
@@ -244,6 +245,7 @@ class InfTextDocument
         QInfinity::TextSession *m_session;
         KDocumentTextBuffer *m_buffer;
         QPointer<QInfinity::AdoptedUser> m_user;
+        QString m_name;
 
         // Undo/Redo actions
         QList<QAction*> undoActions;
