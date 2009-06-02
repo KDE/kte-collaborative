@@ -196,14 +196,14 @@ void MainWindow::setupActions()
        Close action is unconnected
      */
     newConnectionAction = new KAction( i18n("New Connection"), this );
-    settingsAction = new KAction( i18n("Configure Kobby"), this );
+    settingsAction = KStandardAction::preferences( this, SLOT(slotShowSettingsDialog()),
+        actionCollection() );
+    settingsAction->setWhatsThis( i18n( "Kobby settings." ) );
 
     newConnectionAction->setIcon( KIcon("network-connect.png") );
 
     connect( newConnectionAction, SIGNAL(triggered(bool)),
         this, SLOT(slotNewConnection()) );
-    connect( settingsAction, SIGNAL(triggered(bool)),
-        this, SLOT(slotShowSettingsDialog()) );
 
     KStandardAction::quit(kapp, SLOT(quit()),
         actionCollection());
@@ -215,7 +215,6 @@ void MainWindow::setupActions()
         this, SLOT(slotOpenFile()) )->setWhatsThis( i18n( "Select a document to open." ) );
     actionCollection()->addAction( KStandardAction::Close, "document_close",
         this, SLOT(slotCloseActive()) )->setWhatsThis( i18n( "Close active document." ) );
-    actionCollection()->addAction( "settings_kobby", settingsAction )->setWhatsThis( i18n( "Kobby settings." ) );
 }
 
 void MainWindow::slotNewConnection()

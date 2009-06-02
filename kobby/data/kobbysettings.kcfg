@@ -29,7 +29,7 @@
 
 		<entry name="ConnectDialogOnStart" type="Bool">
 			<label>Show Create Connection dialog on application start.</label>
-			 <default>true</default>
+			 <default>false</default>
 		</entry>
 
 		<entry name="BlankDocumentOnStart" type="Bool">

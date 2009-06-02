@@ -59,7 +59,7 @@ RemoteBrowserProxy::RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
     iconLabel->setPixmap( icon.pixmap( QSize( 32, 32 ) ) );
     iconLabel->setAlignment( Qt::AlignHCenter );
     // Text
-    QLabel *label = new QLabel( i18n( "You must create a connection before browsing remote documents." ) );
+    QLabel *label = new QLabel( i18n( "You must connect to an infinote server before browsing collaborative documents." ) );
     label->setWordWrap( true );
     // Button
     QHBoxLayout *buttonLayout = new QHBoxLayout();
