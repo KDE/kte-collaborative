@@ -181,10 +181,17 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 text = '\n';
             if( encoder() )
             {
-                QByteArray encodedText = codec()->fromUnicode( text );
-                chunk.insertText( 0, encodedText, text.length(), m_user->id() );
-                blockRemoteInsert = true;
-                insertChunk( offset, chunk, m_user );
+                if( text.isEmpty() )
+                {
+                    kDebug() << "Skipping empty insert.";
+                }
+                else
+                {
+                    QByteArray encodedText = codec()->fromUnicode( text );
+                    chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+                    blockRemoteInsert = true;
+                    insertChunk( offset, chunk, m_user );
+                }
             }
             else
                 kDebug() << "No encoder for text codec.";
@@ -208,8 +215,12 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
         {
             unsigned int offset = cursorToOffset( range.start() );
             unsigned int end = cursorToOffset( range.end() );
+            unsigned int len = end - offset;
             blockRemoteRemove = true;
-            eraseText( offset, end-offset, m_user );
+            if( len )
+                eraseText( offset, end-offset, m_user );
+            else
+                kDebug() << "0 legth delete operation. Skipping.";
         }
         else
             kDebug() << "Could not remove text: No local user set.";
@@ -240,7 +251,6 @@ void KDocumentTextBuffer::resetUndoRedo()
 
 void KDocumentTextBuffer::performingUndo()
 {
-    kDebug() << "performing undo, count: " << m_insertCount;
     undo_lock = true;
     if( m_insertCount )
     {
@@ -309,7 +319,6 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
 
 void KDocumentTextBuffer::textOpPerformed()
 {
-    kDebug() << "text op";
     if( undo_lock )
     {
         undo_lock = false;
