@@ -30,7 +30,9 @@ int main( int argc, char **argv )
         ki18n( "kobby" ), "1.0",
         ki18n( "Collaborative text editing environment." ),
         KAboutData::License_GPL,
-        ki18n( "Copyright (c) 2008-2009 Gregory Haynes" ) );
+        ki18n( "Copyright (c) 2008-2009 Gregory Haynes" ),
+        ki18n(""),
+        "http://greghaynes.github.com/kobby", "kobby@groups.google.com" );
     aboutData.addAuthor( ki18n("Gregory Haynes"), ki18n( "Creator, Maintainer" ), "greg@greghaynes.net" );
     
     KCmdLineArgs::init( argc, argv, &aboutData );
