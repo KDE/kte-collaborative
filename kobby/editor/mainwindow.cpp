@@ -156,6 +156,8 @@ void MainWindow::setupUi()
         docBuilder, SLOT(openInfDocmuent(const QModelIndex&)) );
     connect( remoteBrowserView, SIGNAL(createConnection()),
         this, SLOT(slotNewConnection()) );
+    connect( remoteBrowserView, SIGNAL(createConnection(const QString&, unsigned int)),
+        this, SLOT(slotCreateConnection(const QString&, unsigned int)) );
 
     // Setup LocalBrowserView
     localBrowserView = new LocalBrowserView( this );

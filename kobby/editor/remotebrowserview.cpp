@@ -38,7 +38,6 @@
 #include <QModelIndexList>
 #include <QDebug>
 #include <QContextMenuEvent>
-
 #include "remotebrowserview.moc"
 
 namespace Kobby
@@ -48,6 +47,10 @@ RemoteBrowserProxy::RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
     QInfinity::BrowserModel &model,
     QWidget *parent )
 {
+    // Set up zeroconf browsing, looking for infinote servers
+    startZeroconfScan();
+        
+
     // Create Remote View
     m_remoteView = new RemoteBrowserView( plugin, model, parent );
 
@@ -113,6 +116,7 @@ RemoteBrowserView::RemoteBrowserView( QInfinity::NotePlugin &plugin,
     , contextMenu( 0 )
 {
     m_treeView->setModel( &model );
+    m_protocols["._infinote._tcp"] = "infinote";
     setupActions();
     setupToolbar();
 
@@ -222,6 +226,25 @@ void RemoteBrowserView::slotSelectionChanged( const QItemSelection &selected,
     deleteAction->setEnabled( canDeleteItem( selected.indexes() ) );
 }
 
+void RemoteBrowserProxy::resolveNameAdd( DNSSD::RemoteService::Ptr pointer )
+{
+    if( pointer->resolve() )
+    {
+        emit( createConnection( pointer->hostName(),
+            pointer->port() ) );
+    }
+}
+
+void RemoteBrowserProxy::resolveNameDelete( DNSSD::RemoteService::Ptr pointer )
+{
+    if( pointer->resolve() )
+    {
+        qDebug() << "delete name " << pointer->hostName();
+        emit( deleteConnection( pointer->hostName(),
+            pointer->port() ) );
+    }
+}
+
 void RemoteBrowserView::setupActions()
 {
     createConnectionAction = new KAction( i18n("New Connection"), this );
@@ -270,6 +293,16 @@ void RemoteBrowserView::setupToolbar()
     toolBar->addAction( createFolderAction );
     toolBar->addAction( openAction );
     toolBar->addAction( deleteAction );
+}
+
+void RemoteBrowserProxy::startZeroconfScan()
+{
+    z_browser = new DNSSD::ServiceBrowser( "_infinote._tcp" );
+    QObject::connect(z_browser,SIGNAL(serviceAdded(DNSSD::RemoteService::Ptr)),
+            this,SLOT(resolveNameAdd(DNSSD::RemoteService::Ptr)) );
+    QObject::connect(z_browser,SIGNAL(serviceRemoved(DNSSD::RemoteService::Ptr)),
+            this,SLOT(resolveNameDelete(DNSSD::RemoteService::Ptr)) );
+    z_browser->startBrowse();
 }
 
 bool RemoteBrowserView::canCreateDocument( QModelIndexList selected )

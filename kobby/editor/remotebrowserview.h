@@ -21,6 +21,9 @@
 #include <QWidget>
 #include <QModelIndexList>
 
+#include <DNSSD/RemoteService>
+#include <DNSSD/ServiceBrowser>
+
 class QStackedLayout;
 class QTreeView;
 class QModelIndex;
@@ -71,7 +74,6 @@ class RemoteBrowserView
         void slotDelete();
         void slotSelectionChanged( const QItemSelection &selected,
             const QItemSelection &deselected );
-    
     private:
         void setupActions();
         void setupToolbar();
@@ -92,6 +94,10 @@ class RemoteBrowserView
         KAction *openAction;
         KAction *deleteAction;
         KMenu *contextMenu;
+        
+        QHash<QString, QString> m_protocols;
+
+
 };
 
 /**
@@ -108,18 +114,26 @@ class RemoteBrowserProxy
             QWidget *parent = 0 );
 
         RemoteBrowserView &remoteView() const;
+        
+        void startZeroconfScan();
 
     Q_SIGNALS:
         void createConnection();
+        void createConnection( const QString, unsigned int );
+        void deleteConnection( const QString, unsigned int );
 
     private Q_SLOTS:
         void connectionAdded( QInfinity::XmlConnection &connection );
         void connectionRemoved( QInfinity::XmlConnection &connection );
+        void resolveNameAdd( DNSSD::RemoteService::Ptr pointer );
+        void resolveNameDelete( DNSSD::RemoteService::Ptr pointer );
+    
 
     private:
         QStackedLayout *stackedLayout;
         RemoteBrowserView *m_remoteView;
         QWidget *noActiveWidget;
+        DNSSD::ServiceBrowser* z_browser;
 
 };
 
