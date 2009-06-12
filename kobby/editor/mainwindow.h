@@ -82,6 +82,7 @@ class MainWindow
         void restoreSettings();
         void saveSettings();
         Document *activeDocument();
+        bool needsSetupDialog();
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;

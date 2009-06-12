@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "kobbysettings.h"
 #include "settingsdialog.h"
+#include "setupdialog.h"
 #include "remotebrowserview.h"
 #include "localbrowserview.h"
 #include "documentusersbrowser.h"
@@ -118,9 +119,14 @@ MainWindow::MainWindow( QWidget *parent )
         docBuilder->openBlank();
     }
 
-    if( KobbySettings::nickName().isEmpty() )
+    if( needsSetupDialog() )
     {
         // Display welcome dialog if no username set
+        SetupDialog *dialog = new SetupDialog( this );
+        if( !dialog->exec() )
+            close();
+        else
+            delete dialog;
     }
 
     if( KobbySettings::connectDialogOnStart() )
@@ -346,6 +352,14 @@ Document *MainWindow::activeDocument()
     }
     else
         return 0;
+}
+
+bool MainWindow::needsSetupDialog()
+{
+    if( KobbySettings::nickName().isEmpty() )
+        return true;
+    else
+        return false;
 }
 
 }

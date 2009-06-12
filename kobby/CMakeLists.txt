@@ -34,6 +34,7 @@ set( KOBBY_SRCS
 	dialogs/createconnectiondialog.cpp
 	dialogs/createitemdialog.cpp
 	dialogs/settingsdialog.cpp
+	dialogs/setupdialog.cpp
 
 	editor/noteplugin.cpp
 	editor/document.cpp
@@ -56,6 +57,8 @@ set(KOBBY_UI
 	dialogs/profilesettingswidget.ui
 	dialogs/networksettingswidget.ui
 	dialogs/uisettingswidget.ui
+	dialogs/setuppagewidget.ui
+	dialogs/profilesetupwidget.ui
 )
 
 INCLUDE_DIRECTORIES(${KOBBY_INCLUDES} )
