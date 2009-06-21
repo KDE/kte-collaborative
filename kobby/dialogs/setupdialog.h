@@ -20,10 +20,18 @@
 
 #include <KAssistantDialog>
 
+#include <QWidget>
+
+class QLineEdit;
+
+namespace Ui
+{
+    class ProfileSetupWidget;
+    class SetupPageWidget;
+}
+
 namespace Kobby
 {
-
-class ProfileSetupPage;
 
 class SetupDialog
     : public KAssistantDialog
@@ -34,10 +42,13 @@ class SetupDialog
         SetupDialog( QWidget *parent = 0 );
 
     private Q_SLOTS:
+        void slotFinished();
         void slotProfileTextEntered( const QString &text );
 
     private:
-        ProfileSetupPage *profilePage;
+        Ui::ProfileSetupWidget *profileUi;
+        Ui::SetupPageWidget *setupUi;
+        QWidget *profilePage;
         KPageWidgetItem *profilePageItem;
 
 };

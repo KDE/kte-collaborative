@@ -15,11 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "mainwindow.h"
+#include "setupdialog.h"
+#include "kobbysettings.h"
+
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
 
-#include <kobby/editor/mainwindow.h>
 
 #include <libqinfinity/init.h>
 
@@ -39,9 +42,18 @@ int main( int argc, char **argv )
     KApplication app;
 
     QInfinity::init();
-    
     Kobby::MainWindow *mainWindow = new Kobby::MainWindow();
-    mainWindow->show();
+    if( Kobby::KobbySettings::nickName().isEmpty() )
+    {
+        Kobby::SetupDialog *dialog = new Kobby::SetupDialog( mainWindow );
+        mainWindow->connect( dialog, SIGNAL(finished()),
+            mainWindow, SLOT(show()) );
+        dialog->show();
+    }
+    else
+    {    
+        mainWindow->show();
+    }
     
     ret = app.exec();
     QInfinity::deinit();

@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Chose a nick name and hostname which will identify you to other users.</string>
+      <string>Chose a nickname and hostname which will identify you to other users.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

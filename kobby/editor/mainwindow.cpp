@@ -119,16 +119,6 @@ MainWindow::MainWindow( QWidget *parent )
         docBuilder->openBlank();
     }
 
-    if( needsSetupDialog() )
-    {
-        // Display welcome dialog if no username set
-        SetupDialog *dialog = new SetupDialog( this );
-        if( !dialog->exec() )
-            close();
-        else
-            delete dialog;
-    }
-
     if( KobbySettings::connectDialogOnStart() )
     {
         // Start with connection dialog open

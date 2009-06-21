@@ -21,63 +21,43 @@
 #include <KDebug>
 
 #include <QWidget>
+#include <QLineEdit>
 
 #include "ui_setuppagewidget.h"
 #include "ui_profilesetupwidget.h"
+
 #include "setupdialog.moc"
 
 namespace Kobby
 {
 
-class SetupPage
-    : public QWidget
-    , private Ui::SetupPageWidget
-{
-
-    public:
-        SetupPage();
-
-};
-
-class ProfileSetupPage
-    : public QWidget
-    , public Ui::ProfileSetupWidget
-{
-
-    public:
-        ProfileSetupPage();
-
-};
-
-SetupPage::SetupPage()
-    : QWidget()
-{
-    setupUi( this );
-}
-
-ProfileSetupPage::ProfileSetupPage()
-    : QWidget()
-{
-    setupUi( this );
-    nicknameEdit->setText( KobbySettings::nickName() );
-    hostnameEdit->setText( KobbySettings::hostName() );
-}
-
 SetupDialog::SetupDialog( QWidget *parent )
     : KAssistantDialog( parent )
+    , profileUi( new Ui::ProfileSetupWidget )
+    , setupUi( new Ui::SetupPageWidget )
 {
-    profilePage = new ProfileSetupPage;
-    connect( profilePage->nicknameEdit, SIGNAL(textChanged(const QString&)),
-        this, SLOT(slotProfileTextEntered(const QString&)) );
-    addPage( new SetupPage, "Welcome!" );
-    profilePageItem = addPage( new ProfileSetupPage, "Profile Settings" );
+    profilePage = new QWidget();
+    QWidget *setupPage = new QWidget();
+    profileUi->setupUi( profilePage );
+    setupUi->setupUi( setupPage );
+    profileUi->nicknameEdit->setText( KobbySettings::nickName() );
+    profileUi->hostnameEdit->setText( KobbySettings::hostName() );
+    connect( profileUi->nicknameEdit, SIGNAL(textChanged( const QString& )),
+        this, SLOT(slotProfileTextEntered( const QString& )) );
+    addPage( setupPage, "Welcome!" );
+    profilePageItem = addPage( profilePage, "Profile Settings" );
+    slotProfileTextEntered( QString() );
+}
+
+void SetupDialog::slotFinished()
+{
 }
 
 void SetupDialog::slotProfileTextEntered( const QString &text )
 {
     Q_UNUSED(text)
     kDebug() << "Text entered.";
-    if( !profilePage->nicknameEdit->text().isEmpty() )
+    if( !profileUi->nicknameEdit->text().isEmpty() )
     {
         setValid( profilePageItem, true );
     }
