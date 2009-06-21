@@ -119,6 +119,13 @@ MainWindow::MainWindow( QWidget *parent )
         docBuilder->openBlank();
     }
 
+    if( needsSetupDialog() )
+    {
+        SetupDialog *dialog = new SetupDialog( this );
+        if( !dialog->exec() )
+            deleteLater();
+    }
+
     if( KobbySettings::connectDialogOnStart() )
     {
         // Start with connection dialog open

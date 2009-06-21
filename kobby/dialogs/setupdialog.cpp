@@ -56,7 +56,6 @@ void SetupDialog::slotFinished()
 void SetupDialog::slotProfileTextEntered( const QString &text )
 {
     Q_UNUSED(text)
-    kDebug() << "Text entered.";
     if( !profileUi->nicknameEdit->text().isEmpty() )
     {
         setValid( profilePageItem, true );

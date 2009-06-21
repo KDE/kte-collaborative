@@ -43,17 +43,7 @@ int main( int argc, char **argv )
 
     QInfinity::init();
     Kobby::MainWindow *mainWindow = new Kobby::MainWindow();
-    if( Kobby::KobbySettings::nickName().isEmpty() )
-    {
-        Kobby::SetupDialog *dialog = new Kobby::SetupDialog( mainWindow );
-        mainWindow->connect( dialog, SIGNAL(finished()),
-            mainWindow, SLOT(show()) );
-        dialog->show();
-    }
-    else
-    {    
-        mainWindow->show();
-    }
+    mainWindow->show();
     
     ret = app.exec();
     QInfinity::deinit();
