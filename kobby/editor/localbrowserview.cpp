@@ -54,7 +54,7 @@ void LocalBrowserView::slotFileSelected( const QModelIndex &index )
 
 void LocalBrowserView::slotViewChanged( QAbstractItemView *newView )
 {
-    connect( newView, SIGNAL(doubleClicked(const QModelIndex&)),
+    connect( newView, SIGNAL(activated(const QModelIndex&)),
         this, SLOT(slotFileSelected(const QModelIndex&)) );
 }
 
@@ -73,9 +73,7 @@ void LocalBrowserView::setupUi()
     navToolBar->setToolButtonStyle( Qt::ToolButtonIconOnly );
     navToolBar->addAction( action("up") );
     navToolBar->addAction( action("back") );
-    navToolBar->addAction( action("forward") );
     navToolBar->addAction( action("home") );
-    navToolBar->addAction( action("reload") );
     navToolBar->addAction( action("mkdir") );
     navToolBar->addAction( action("view menu") );
 
