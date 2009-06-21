@@ -44,6 +44,8 @@ SetupDialog::SetupDialog( QWidget *parent )
     profileUi->hostnameEdit->setText( KobbySettings::hostName() );
     connect( profileUi->nicknameEdit, SIGNAL(textChanged( const QString& )),
         this, SLOT(slotProfileTextEntered( const QString& )) );
+    connect( this, SIGNAL(finished()),
+        this, SLOT(slotFinished()) );
     addPage( setupPage, "Welcome!" );
     profilePageItem = addPage( profilePage, "Profile Settings" );
     slotProfileTextEntered( QString() );
@@ -51,6 +53,8 @@ SetupDialog::SetupDialog( QWidget *parent )
 
 void SetupDialog::slotFinished()
 {
+    KobbySettings::setNickName( profileUi->nicknameEdit->text() );
+    KobbySettings::setHostName( profileUi->hostnameEdit->text() );
 }
 
 void SetupDialog::slotProfileTextEntered( const QString &text )
