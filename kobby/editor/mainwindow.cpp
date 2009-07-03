@@ -261,7 +261,7 @@ void MainWindow::slotCloseActive()
     KTextEditor::View *activeView = docTabWidget->activeView();
     if( activeView )
     {
-        docModel->removeKDocument( *activeView->document() );
+        docModel->removeDocument( *activeView->document() );
     }
 }
 

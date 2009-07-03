@@ -56,11 +56,7 @@ void DocumentListView::contextMenuEvent( QContextMenuEvent *e )
 void DocumentListView::closeSelected()
 {
     QList<QModelIndex> selected = listView->selectionModel()->selectedIndexes();
-    QModelIndex index;
-    foreach( index, selected );
-    {
-        docModel->removeRow( index.row() );
-    }
+    docModel->removeDocuments( selected );
 }
 
 void DocumentListView::slotClicked( const QModelIndex &index ) 

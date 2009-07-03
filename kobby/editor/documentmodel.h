@@ -34,6 +34,9 @@ class DocumentItem;
 
 /**
  * @brief Handles storage and deletion of all Documents.
+ *
+ * Use the removeDocument methods for document removal 
+ * to ensure users are warned before closing documents.
  */
 class DocumentModel
     : public QStandardItemModel
@@ -45,8 +48,21 @@ class DocumentModel
 
         /**
          * @brief Remove Document wrapping kDoc from model.
+         *
+         * Will decide if a confirm dialog is needed unless
+         * dont_warn is true.
          */
-        void removeKDocument( KTextEditor::Document &kDoc );
+        void removeDocument( KTextEditor::Document &kDoc,
+            bool dont_warn = false );
+
+        /**
+         * @brief Remove Documents.
+         *
+         * Will decide if a confirm dialog is needed unless
+         * dont_warn is true.
+         */
+        void removeDocuments( QList<QModelIndex> indexes,
+            bool dont_warn = false );
 
         /**
          * @brief Retrieve Document at index.
