@@ -41,11 +41,8 @@
 #include <KApplication>
 #include <KAction>
 #include <KActionCollection>
-#include <KSharedConfig>
-#include <KConfigGroup>
 #include <KConfigDialog>
 #include <KXMLGUIFactory>
-#include <KPageWidgetItem>
 #include <KLocalizedString>
 #include <KMessageBox>
 #include <KFileDialog>
