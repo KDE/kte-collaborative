@@ -28,6 +28,7 @@
 #include <KToolBar>
 #include <KMenu>
 #include <KPushButton>
+#include <KMessageBox>
 
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -206,6 +207,14 @@ void RemoteBrowserView::slotDelete()
     if( !m_treeView->selectionModel()->hasSelection() )
         return;
     QList<QModelIndex> indexes = m_treeView->selectionModel()->selectedIndexes();
+
+    if( !indexes.isEmpty() )
+    {
+        if( KMessageBox::warningYesNo( this, QString("You are about to delete ") + QString::number(indexes.size()) + QString(" files.  Are you sure you want to do this?") ) == KMessageBox::No )
+            return;
+
+    }
+
     QList<QModelIndex>::Iterator indexItr;
     QStandardItem *item;
     for( indexItr = indexes.begin(); indexItr != indexes.end(); indexItr++ )
