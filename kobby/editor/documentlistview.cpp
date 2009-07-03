@@ -18,6 +18,7 @@
 #include "documentlistview.h"
 #include "documentmodel.h"
 
+#include <KActionCollection>
 #include <KAction>
 #include <KIcon>
 #include <KLocalizedString>
@@ -81,11 +82,8 @@ void DocumentListView::setupUi()
 
 void DocumentListView::setupActions()
 {
-    closeAction = new KAction( KIcon("dialog-close.png"),
-        i18n("Close"), this );
+    closeAction = KStandardAction::close( this, SLOT(closeSelected()), this );
     closeAction->setEnabled( true );
-    connect( closeAction, SIGNAL(triggered(bool)),
-        this, SLOT(closeSelected()) );
     connect( listView, SIGNAL(clicked(const QModelIndex&)),
         this, SLOT(slotClicked(const QModelIndex&)) );
 }
