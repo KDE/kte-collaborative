@@ -18,6 +18,7 @@
 #include "documentmodel.h"
 #include "document.h"
 
+#include <KMessageBox>
 #include <KDebug>
 
 #include "documentmodel.moc"
@@ -78,7 +79,9 @@ void DocumentModel::removeKDocument(KTextEditor::Document& kDoc)
     DocumentItem *di = m_kDocumentItemWrappers[&kDoc];
     if( di )
     {
-        removeRow( di->row(), QModelIndex() );
+        if( KMessageBox::warningYesNo(0, "Are you sure you want to "\
+            "close this document?") == KMessageBox::Yes )
+            removeRow( di->row(), QModelIndex() );
     }
 }
 
