@@ -49,7 +49,6 @@ RemoteBrowserProxy::RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
 {
     // Set up zeroconf browsing, looking for infinote servers
     startZeroconfScan();
-        
 
     // Create Remote View
     m_remoteView = new RemoteBrowserView( plugin, model, parent );

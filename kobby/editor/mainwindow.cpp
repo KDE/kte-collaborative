@@ -193,6 +193,7 @@ void MainWindow::setupUi()
     mainHorizSplitter->setStretchFactor( 0, QSizePolicy::Fixed );
 
     setCentralWidget( mainHorizSplitter );
+    setAutoSaveSettings( "MainWindow", true );
 }
 
 void MainWindow::setupActions()
@@ -311,10 +312,6 @@ void MainWindow::slotConnectionConnected( Connection *conn )
 void MainWindow::restoreSettings()
 {
     QList<int> sizes;
-    setGeometry( KobbySettings::mainWindowX(),
-        KobbySettings::mainWindowY(),
-        KobbySettings::mainWindowWidth(),
-        KobbySettings::mainWindowHeight() );
     sizes = KobbySettings::mainWindowHorizSplitterSizes();
     if( sizes.size() )
         mainHorizSplitter->setSizes( sizes );
@@ -332,11 +329,6 @@ void MainWindow::restoreSettings()
 void MainWindow::saveSettings()
 {
     QList<int> sizes;
-
-    KobbySettings::setMainWindowX( x() );
-    KobbySettings::setMainWindowY( y() );
-    KobbySettings::setMainWindowWidth( width() );
-    KobbySettings::setMainWindowHeight( height() );
     KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
 }
