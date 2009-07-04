@@ -145,7 +145,7 @@ void MainWindow::setupUi()
     setStatusBar( statusBar );
 
     // Setup UsersBrowser
-    usersBrowser = new DocumentUsersBrowser( *docModel, this );
+    usersBrowser = new DocumentUsersBrowser( this );
 
     // Setup RemoteBrowserView
     remoteBrowserView = new RemoteBrowserProxy( *textPlugin,
@@ -251,7 +251,7 @@ void MainWindow::slotConnectionError( Connection *conn,
     QString errMsg )
 {
     Q_UNUSED(conn);
-    QString str = i18n("Connection error: %s", errMsg);
+    QString str = i18n("Connection error: %1", errMsg);
     KMessageBox::error( this, str );
     slotNewConnection();
 }
