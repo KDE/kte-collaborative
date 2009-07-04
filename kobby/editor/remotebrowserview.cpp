@@ -57,12 +57,13 @@ RemoteBrowserProxy::RemoteBrowserProxy( QInfinity::NotePlugin &plugin,
     // Create No Connections Widget
     noActiveWidget = new QWidget( this );
     KIcon icon = KIcon( "help-hint.png" );
+
     // Icon
     QLabel *iconLabel = new QLabel();
     iconLabel->setPixmap( icon.pixmap( QSize( 32, 32 ) ) );
     iconLabel->setAlignment( Qt::AlignHCenter );
     // Text
-    QLabel *label = new QLabel( i18n( "You must connect to an infinote server before browsing collaborative documents." ) );
+    QLabel *label = new QLabel( i18n("You must connect to an infinote server before browsing collaborative documents.") );
     label->setWordWrap( true );
     // Button
     QHBoxLayout *buttonLayout = new QHBoxLayout();
@@ -157,8 +158,8 @@ void RemoteBrowserView::slotNewDocument()
     CreateItemDialog *dialog;
     if( canCreateDocument( indexes ) )
     {
-        dialog = new CreateItemDialog( "Create Note",
-            "Note name:", this );
+        dialog = new CreateItemDialog( i18n("Create Note"),
+            i18n("Note name:"), this );
         if( dialog->exec() )
             browserModel->createNote( indexes[0],
                 *m_plugin, dialog->name() );
@@ -174,8 +175,8 @@ void RemoteBrowserView::slotNewFolder()
     CreateItemDialog *dialog;
     if( canCreateFolder( indexes ) )
     {
-        dialog = new CreateItemDialog( "Create Folder",
-            "Folder Name:", this );
+        dialog = new CreateItemDialog( i18n("Create Folder"),
+            i18n("Folder Name:"), this );
         if( dialog->exec() )
             browserModel->createDirectory( indexes[0], dialog->name() );
         delete dialog;
@@ -210,7 +211,17 @@ void RemoteBrowserView::slotDelete()
 
     if( !indexes.isEmpty() )
     {
-        if( KMessageBox::warningYesNo( this, QString("You are about to delete ") + QString::number(indexes.size()) + QString(" files.  Are you sure you want to do this?") ) == KMessageBox::No )
+        QString confMsg;
+        if( indexes.length() > 1 )
+        {
+            confMsg.append( i18n("You are about to delete %1 files.", indexes.length()) );
+            confMsg.append( "  " );
+            confMsg.append( i18n("Are you sure you want to do this?") );
+        }
+        else
+            confMsg.append( i18n("Are you sure you want to delete this file?") );
+
+        if( KMessageBox::warningYesNo( this, confMsg ) == KMessageBox::No )
             return;
 
     }

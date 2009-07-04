@@ -81,8 +81,8 @@ void DocumentModel::removeDocument( KTextEditor::Document& kDoc,
     DocumentItem *di = m_kDocumentItemWrappers[&kDoc];
     if( di )
     {
-        if( !dont_warn && KMessageBox::warningYesNo( 0, "Are you sure you want to "\
-            "close this document?") == KMessageBox::Yes )
+        if( !dont_warn && KMessageBox::warningYesNo( 0, i18n( "Are you sure you want to "\
+            "close this document?" ) ) == KMessageBox::Yes )
             removeRow( di->row(), QModelIndex() );
     }
 }
@@ -90,10 +90,18 @@ void DocumentModel::removeDocument( KTextEditor::Document& kDoc,
 void DocumentModel::removeDocuments( QList<QModelIndex> indexes,
     bool dont_warn )
 {
-    QString confirm = i18n( "You are about to close " ) +
-        QString::number(indexes.length()) + i18n( " documents.  " )
-        + i18n( "Are you sure you want to do this?" );
-    if( !dont_warn && KMessageBox::warningYesNo( 0, confirm ) == KMessageBox::Yes )
+    QString warnMsg;
+
+    if( indexes.length() > 1 )
+    {
+        warnMsg.append( i18n( "You are about to close %1 documents.", indexes.length() ) );
+        warnMsg.append( " " );
+        warnMsg.append( i18n( "Are you sure you want to do this?" ) );
+    }
+    else
+        warnMsg.append( i18n( "Are you sure you want to close this document?" ) );
+
+    if( !dont_warn && KMessageBox::warningYesNo( 0, warnMsg ) == KMessageBox::Yes )
     {
         QModelIndex index, parent;
         foreach( index, indexes )
