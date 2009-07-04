@@ -199,6 +199,7 @@ void MainWindow::setupActions()
        Close action is unconnected
      */
     newConnectionAction = new KAction( i18n("New Connection"), this );
+    newConnectionAction->setWhatsThis( i18n("Create a new connection.") );
     settingsAction = KStandardAction::preferences( this, SLOT(slotShowSettingsDialog()),
         actionCollection() );
     settingsAction->setWhatsThis( i18n( "Kobby settings." ) );
@@ -215,9 +216,9 @@ void MainWindow::setupActions()
         docBuilder, SLOT(openBlank()) )->setWhatsThis( i18n( "Open a new blank document." ) );
     actionCollection()->addAction( "connection_new", newConnectionAction );
     actionCollection()->addAction( KStandardAction::Open, "document_open",
-        this, SLOT(slotOpenFile()) )->setWhatsThis( i18n( "Select a document to open." ) );
+        this, SLOT(slotOpenFile()) )->setWhatsThis( i18n("Select a document to open.") );
     actionCollection()->addAction( KStandardAction::Close, "document_close",
-        this, SLOT(slotCloseActive()) )->setWhatsThis( i18n( "Close active document." ) );
+        this, SLOT(slotCloseActive()) )->setWhatsThis( i18n("Close active document.") );
 }
 
 void MainWindow::slotNewConnection()
@@ -250,8 +251,7 @@ void MainWindow::slotConnectionError( Connection *conn,
     QString errMsg )
 {
     Q_UNUSED(conn);
-    QString str = i18n("Connection error: ");
-    str += errMsg;
+    QString str = i18n("Connection error: %s", errMsg);
     KMessageBox::error( this, str );
     slotNewConnection();
 }
@@ -284,14 +284,13 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
 void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )
 {
     Q_UNUSED(doc)
-    QString str = i18n("Document error: ");
-    str.append( message );
+    QString str = i18n("An error has occoured with the document: %s", message);
     KMessageBox::error( this, str );
 }
 
 void MainWindow::slotShowSettingsDialog()
 {
-    if( KConfigDialog::showDialog("Kobby Settings") )
+    if( KConfigDialog::showDialog(i18n("Kobby Settings")) )
         return;
 
     SettingsDialog *dialog = new SettingsDialog( this );
