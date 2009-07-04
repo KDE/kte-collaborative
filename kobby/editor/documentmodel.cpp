@@ -51,13 +51,14 @@ class DocumentItem
 DocumentItem::DocumentItem( Document &doc )
     : m_document( &doc )
 {
+    m_document->setParent( this );
     setText( doc.name() );
 }
 
 DocumentItem::~DocumentItem()
 {
     // This may be destroyed in Document::fatalError
-    m_document->deleteLater();
+    m_document->leave();
 }
 
 int DocumentItem::type() const
@@ -132,6 +133,7 @@ Document *DocumentModel::documentFromKDoc( KTextEditor::Document &kDoc )
 
 void DocumentModel::insertDocument( Document &document )
 {
+    // Item takes ownership of document
     DocumentItem *item = new DocumentItem( document );
     m_kDocumentItemWrappers[document.kDocument()] = item;
     connect( &document, SIGNAL(fatalError( Document*, QString )),

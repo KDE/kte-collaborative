@@ -19,12 +19,20 @@
 #define KOBBY_DOCUMENT_USERS_BROWSER_H
 
 #include <QWidget>
+#include <QHash>
+
+class QListView;
+class QStackedLayout;
+
+namespace QInfinity
+{
+    class UsersModel;
+}
 
 namespace Kobby
 {
 
 class Document;
-class DocumentModel;
 
 class DocumentUsersBrowser
     : public QWidget
@@ -32,15 +40,18 @@ class DocumentUsersBrowser
     Q_OBJECT
 
     public:
-        DocumentUsersBrowser( DocumentModel &docModel,
-            QWidget *parent = 0 );
+        DocumentUsersBrowser( QWidget *parent = 0 );
+        ~DocumentUsersBrowser();
 
     public Q_SLOTS:
         void setActiveDocument( Document &document );
 
     private:
-        DocumentModel *m_docModel;
         QWidget *noActiveWidget;
+        QWidget *browserWidget;
+        QStackedLayout *mainLayout;
+        QListView *browserList;
+        QHash<Document*, QInfinity::UsersModel*> documentToModel;
 
 };
 

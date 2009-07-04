@@ -77,6 +77,12 @@ class Document
             Complete // Loading is complete
         };
         
+        enum DocType
+        {
+            KDocument = 1,
+            InfText = 2
+        };
+
         Document( KTextEditor::Document &kDocument );
         virtual ~Document();
 
@@ -101,6 +107,10 @@ class Document
          * Initial state is Unloaded.
          */
         Document::LoadState loadState() const;
+
+        virtual int type() const;
+
+        virtual void leave() { }
 
     Q_SIGNALS:
         void loadStateChanged( Document *document,
@@ -222,6 +232,9 @@ class InfTextDocument
         ~InfTextDocument();
 
         QString name() const;
+        int type() const;
+        QPointer<QInfinity::TextSession> infSession() const;
+        void leave();
         
     public Q_SLOTS:
         void undo();

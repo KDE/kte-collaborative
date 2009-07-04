@@ -76,6 +76,11 @@ Document::LoadState Document::loadState() const
     return m_loadState;
 }
 
+int Document::type() const
+{
+    return Document::KDocument;
+}
+
 void Document::setLoadState( Document::LoadState state )
 {
     if( state != LoadState() )
@@ -376,6 +381,22 @@ InfTextDocument::~InfTextDocument()
 QString InfTextDocument::name() const
 {
     return m_name;
+}
+
+int InfTextDocument::type() const
+{
+    return Document::InfText;
+}
+
+QPointer<QInfinity::TextSession> InfTextDocument::infSession() const
+{
+    return m_session;
+}
+
+void InfTextDocument::leave()
+{
+    if( m_user )
+        m_session->setUserStatus( *m_user, QInfinity::User::Unavailable );
 }
 
 void InfTextDocument::undo()

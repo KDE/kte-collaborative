@@ -133,6 +133,9 @@ MainWindow::MainWindow( QWidget *parent )
 MainWindow::~MainWindow()
 {
     saveSettings();
+    delete docTabWidget;
+    delete usersBrowser;
+    delete docModel;
 }
 
 void MainWindow::setupUi()
@@ -279,6 +282,9 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
         guiFactory()->addClient( view );
     }
     mergedTextView = view;
+
+    Document *activeDoc = docModel->documentFromKDoc( *view->document() );
+    usersBrowser->setActiveDocument( *activeDoc );
 }
 
 void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )

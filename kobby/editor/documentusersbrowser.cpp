@@ -16,12 +16,16 @@
  */
 
 #include "documentusersbrowser.h"
-#include "documentmodel.h"
+#include "document.h"
+
+#include <libqinfinity/usersmodel.h>
+#include <libqinfinity/textsession.h>
 
 #include <KLocalizedString>
 
 #include <QStackedLayout>
 #include <QVBoxLayout>
+#include <QListView>
 #include <QLabel>
 
 #include "documentusersbrowser.moc"
@@ -29,25 +33,55 @@
 namespace Kobby
 {
 
-DocumentUsersBrowser::DocumentUsersBrowser( DocumentModel &docModel,
-    QWidget *parent )
+DocumentUsersBrowser::DocumentUsersBrowser( QWidget *parent )
     : QWidget( parent )
-    , m_docModel( &docModel )
 {
-    QWidget *noActiveWidget = new QWidget( this );
+    // Create no active widget
+    noActiveWidget = new QWidget( this );
     QVBoxLayout *noActiveLayout = new QVBoxLayout( noActiveWidget );
     QLabel *label = new QLabel( 
         i18n( "You must be editing a collaborative document to see active users." ) );
     label->setWordWrap( true );
     noActiveLayout->addWidget( label );
     noActiveWidget->setLayout( noActiveLayout );
-    QStackedLayout *mainLayout = new QStackedLayout( this );
+
+    // Create browser widget
+    browserWidget = new QWidget( this );
+    browserList = new QListView();
+    QVBoxLayout *browserLayout = new QVBoxLayout( browserWidget );
+    browserLayout->addWidget( browserList );
+
+    mainLayout = new QStackedLayout( this );
     mainLayout->addWidget( noActiveWidget );
+    mainLayout->addWidget( browserWidget );
+    mainLayout->setCurrentWidget( noActiveWidget );
     setLayout( mainLayout );
+}
+
+DocumentUsersBrowser::~DocumentUsersBrowser()
+{
 }
 
 void DocumentUsersBrowser::setActiveDocument( Document &document )
 {
+    QInfinity::UsersModel *newModel;
+    if( document.type() == Document::KDocument )
+    {
+        mainLayout->setCurrentWidget( noActiveWidget );
+    }
+    else
+    {
+        if( !documentToModel.contains( &document ) )
+        {
+            newModel = new QInfinity::UsersModel( *(dynamic_cast<InfTextDocument*>(&document)->infSession()), this );
+            documentToModel[&document] = newModel;
+        }
+        else
+            newModel = documentToModel[&document];
+        
+        browserList->setModel( newModel );
+        mainLayout->setCurrentWidget( browserWidget );
+    }
 }
 
 }
