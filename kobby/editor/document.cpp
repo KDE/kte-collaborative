@@ -95,7 +95,6 @@ void Document::setLoadState( Document::LoadState state )
 void Document::throwFatalError( const QString &message )
 {
     emit( fatalError( this, message ) );
-    deleteLater();
 }
 
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
@@ -415,16 +414,9 @@ void InfTextDocument::redo()
 
 void InfTextDocument::slotSynchronized()
 {
-    if( m_session->status() == QInfinity::Session::Running )
-    {
-        setLoadState( Document::SynchronizationComplete );
-        joinSession();
-        m_buffer->resetUndoRedo();
-    }
-    else
-    {
-        throwFatalError( i18n("Synchronization ended but session is not running.") );
-    }
+    setLoadState( Document::SynchronizationComplete );
+    joinSession();
+    m_buffer->resetUndoRedo();
 }
 
 void InfTextDocument::slotSynchronizationFailed( GError *gerror )
@@ -509,14 +501,20 @@ void InfTextDocument::synchronize()
 
 void InfTextDocument::joinSession()
 {
-    setLoadState( Document::Joining );
-    QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
-        KobbySettings::nickName(),
-        10 );
-    connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
-        this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
-    connect( req, SIGNAL(failed(GError*)),
-        this, SLOT(slotJoinFailed(GError*)) );
+    if( m_session->status() == QInfinity::Session::Running )
+    {
+        setLoadState( Document::Joining );
+        QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
+            KobbySettings::nickName(),
+            10 );
+        connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
+            this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
+        connect( req, SIGNAL(failed(GError*)),
+            this, SLOT(slotJoinFailed(GError*)) );
+    }
+    else
+        connect( m_session, SIGNAL(statusChanged()),
+            this, SLOT(joinSession()) );
 }
 
 }

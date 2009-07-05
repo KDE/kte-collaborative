@@ -249,10 +249,10 @@ class InfTextDocument
             KTextEditor::View *view );
         void slotCanUndo( bool enable );
         void slotCanRedo( bool enable );
+        void joinSession();
     
     private:
         void synchronize();
-        void joinSession();
         
         QInfinity::SessionProxy *m_sessionProxy;
         QInfinity::TextSession *m_session;

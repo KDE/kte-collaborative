@@ -22,6 +22,8 @@
 #include <KLocalizedString>
 #include <KDebug>
 
+#include <QPointer>
+
 #include "documentmodel.moc"
 
 namespace Kobby
@@ -51,14 +53,13 @@ class DocumentItem
 DocumentItem::DocumentItem( Document &doc )
     : m_document( &doc )
 {
-    m_document->setParent( this );
     setText( doc.name() );
 }
 
 DocumentItem::~DocumentItem()
 {
     // This may be destroyed in Document::fatalError
-    m_document->leave();
+    m_document->deleteLater();
 }
 
 int DocumentItem::type() const
@@ -82,7 +83,7 @@ void DocumentModel::removeDocument( KTextEditor::Document& kDoc,
     DocumentItem *di = m_kDocumentItemWrappers[&kDoc];
     if( di )
     {
-        if( !dont_warn && KMessageBox::warningYesNo( 0, i18n( "Are you sure you want to "\
+        if( dont_warn || KMessageBox::warningYesNo( 0, i18n( "Are you sure you want to "\
             "close this document?" ) ) == KMessageBox::Yes )
             removeRow( di->row(), QModelIndex() );
     }
@@ -102,7 +103,7 @@ void DocumentModel::removeDocuments( QList<QModelIndex> indexes,
     else
         warnMsg.append( i18n( "Are you sure you want to close this document?" ) );
 
-    if( !dont_warn && KMessageBox::warningYesNo( 0, warnMsg ) == KMessageBox::Yes )
+    if( dont_warn || KMessageBox::warningYesNo( 0, warnMsg ) == KMessageBox::Yes )
     {
         QModelIndex index, parent;
         foreach( index, indexes )
@@ -167,7 +168,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
 
 void DocumentModel::slotDocumentFatalError( Kobby::Document* document, QString message )
 {
-    removeDocument( *document->kDocument() );
+    removeDocument( *document->kDocument(), true );
 }
 
 

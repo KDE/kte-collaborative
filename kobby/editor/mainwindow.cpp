@@ -290,7 +290,7 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
 void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )
 {
     Q_UNUSED(doc)
-    QString str = i18n("An error has occoured with the document: %s", message);
+    QString str = i18n("An error has occoured with the document: %1", message);
     KMessageBox::error( this, str );
 }
 

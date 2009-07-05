@@ -18,24 +18,66 @@
 #include "documentusersbrowser.h"
 #include "document.h"
 
+#include <libqinfinity/user.h>
 #include <libqinfinity/usersmodel.h>
 #include <libqinfinity/textsession.h>
 
 #include <KLocalizedString>
+#include <KIcon>
 
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QListView>
 #include <QLabel>
+#include <QSortFilterProxyModel>
 
 #include "documentusersbrowser.moc"
 
 namespace Kobby
 {
 
+class UserItem
+    : public QInfinity::UserItem
+{
+
+    public:
+        UserItem( QInfinity::User &user );
+
+};
+
+class UserItemFactory
+    : public QInfinity::UserItemFactory
+{
+
+    QInfinity::UserItem *createUserItem( QInfinity::User &user );
+
+};
+
+UserItem::UserItem( QInfinity::User &user )
+    : QInfinity::UserItem( user )
+{
+    if( user.status() == QInfinity::User::Active )
+        setIcon( KIcon("user-online.png") );
+    else if( user.status() == QInfinity::User::Inactive )
+        setIcon( KIcon("user-away.png") );
+    else
+        setIcon( KIcon("user-offline.png") );
+
+    setEditable( false );
+    setColumnCount( 1 );
+}
+
+QInfinity::UserItem *UserItemFactory::createUserItem( QInfinity::User &user )
+{
+    UserItem *item = new UserItem( user );
+    return item;
+}
+
 DocumentUsersBrowser::DocumentUsersBrowser( QWidget *parent )
     : QWidget( parent )
 {
+    itemFactory = new UserItemFactory();
+
     // Create no active widget
     noActiveWidget = new QWidget( this );
     QVBoxLayout *noActiveLayout = new QVBoxLayout( noActiveWidget );
@@ -65,6 +107,7 @@ DocumentUsersBrowser::~DocumentUsersBrowser()
 void DocumentUsersBrowser::setActiveDocument( Document &document )
 {
     QInfinity::UsersModel *newModel;
+    QSortFilterProxyModel *filter;
     if( document.type() == Document::KDocument )
     {
         mainLayout->setCurrentWidget( noActiveWidget );
@@ -73,15 +116,22 @@ void DocumentUsersBrowser::setActiveDocument( Document &document )
     {
         if( !documentToModel.contains( &document ) )
         {
-            newModel = new QInfinity::UsersModel( *(dynamic_cast<InfTextDocument*>(&document)->infSession()), this );
-            documentToModel[&document] = newModel;
+            newModel = new QInfinity::UsersModel( *(dynamic_cast<InfTextDocument*>(&document)->infSession()), itemFactory, this );
+            filter = new QSortFilterProxyModel( this );
+            filter->setSourceModel( newModel );
+            documentToModel[&document] = filter;
         }
         else
-            newModel = documentToModel[&document];
+            filter = documentToModel[&document];
         
-        browserList->setModel( newModel );
+        browserList->setModel( filter );
         mainLayout->setCurrentWidget( browserWidget );
     }
+}
+
+void DocumentUsersBrowser::removeDocument( Document &document )
+{
+    
 }
 
 }

@@ -23,16 +23,13 @@
 
 class QListView;
 class QStackedLayout;
-
-namespace QInfinity
-{
-    class UsersModel;
-}
+class QSortFilterProxyModel;
 
 namespace Kobby
 {
 
 class Document;
+class UserItemFactory;
 
 class DocumentUsersBrowser
     : public QWidget
@@ -45,13 +42,15 @@ class DocumentUsersBrowser
 
     public Q_SLOTS:
         void setActiveDocument( Document &document );
+        void removeDocument( Document &document );
 
     private:
         QWidget *noActiveWidget;
         QWidget *browserWidget;
         QStackedLayout *mainLayout;
         QListView *browserList;
-        QHash<Document*, QInfinity::UsersModel*> documentToModel;
+        QHash<Document*, QSortFilterProxyModel*> documentToModel;
+        UserItemFactory *itemFactory;
 
 };
 
