@@ -21,6 +21,8 @@
 
 #include <KTextEditor/Document>
 
+#include <QDebug>
+
 #include <libqinfinity/textsession.h>
 
 #include <libinfinity/common/inf-user-table.h>

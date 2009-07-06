@@ -503,8 +503,12 @@ void InfTextDocument::joinSession()
 {
     if( m_session->status() == QInfinity::Session::Running )
     {
+        // We dont want this being called again
+        disconnect( this, SLOT(joinSession()) );
+        
         setLoadState( Document::Joining );
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
+            *m_session,
             KobbySettings::nickName(),
             10 );
         connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),

@@ -30,6 +30,8 @@
 #include <libqinfinity/session.h>
 #include <libqinfinity/textsession.h>
 
+#include <libinfinity/client/infc-session-proxy.h>
+
 #include <KTextEditor/Editor>
 #include <KTextEditor/Document>
 #include <KLocalizedString>
@@ -105,12 +107,14 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     QPointer<QInfinity::SessionProxy> sessProxy )
 {
     QInfinity::TextSession *textSession = dynamic_cast<QInfinity::TextSession*>(sessProxy->session().data());
-    if( !textSession )
+    
+    if( !textSession || !INF_TEXT_IS_SESSION(textSession->gobject()) )
     {
-        kDebug() << "Session is not a InfText session.  This usually means "
+        kDebug() << "Session is not an InfText session.  This usually means "
             << "the connection is not using the kobby plugin.";
         return;
     }
+
     QInfinity::Buffer *infBuff = textSession->buffer();
     KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
     if( !kbuff )

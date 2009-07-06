@@ -254,8 +254,8 @@ class InfTextDocument
     private:
         void synchronize();
         
-        QInfinity::SessionProxy *m_sessionProxy;
-        QInfinity::TextSession *m_session;
+        QPointer<QInfinity::SessionProxy> m_sessionProxy;
+        QPointer<QInfinity::TextSession> m_session;
         KDocumentTextBuffer *m_buffer;
         QPointer<QInfinity::AdoptedUser> m_user;
         QString m_name;
