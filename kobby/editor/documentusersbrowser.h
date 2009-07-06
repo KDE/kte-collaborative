@@ -21,7 +21,7 @@
 #include <QWidget>
 #include <QHash>
 
-class QListView;
+class QTableView;
 class QStackedLayout;
 class QSortFilterProxyModel;
 
@@ -53,7 +53,7 @@ class DocumentUsersBrowser
         QWidget *noActiveWidget;
         QWidget *browserWidget;
         QStackedLayout *mainLayout;
-        QListView *browserList;
+        QTableView *browserList;
         QHash<Document*, QSortFilterProxyModel*> documentToModel;
         UserItemFactory *itemFactory;
 

@@ -27,7 +27,8 @@
 
 #include <QStackedLayout>
 #include <QVBoxLayout>
-#include <QListView>
+#include <QTableView>
+#include <QHeaderView>
 #include <QLabel>
 #include <QSortFilterProxyModel>
 
@@ -89,7 +90,11 @@ DocumentUsersBrowser::DocumentUsersBrowser( QWidget *parent )
 
     // Create browser widget
     browserWidget = new QWidget( this );
-    browserList = new QListView();
+    browserList = new QTableView();
+    browserList->setSortingEnabled( true );
+    browserList->sortByColumn( 0, Qt::DescendingOrder );
+    browserList->setGridStyle( Qt::NoPen );
+    browserList->verticalHeader()->hide();
     QVBoxLayout *browserLayout = new QVBoxLayout( browserWidget );
     browserLayout->addWidget( browserList );
 
