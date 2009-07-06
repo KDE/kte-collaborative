@@ -21,15 +21,36 @@
 #include <QWidget>
 #include <QHash>
 
+#include <libqinfinity/usersmodel.h>
+
 class QTableView;
 class QStackedLayout;
 class QSortFilterProxyModel;
+
+namespace QInfinity
+{
+    class User;
+}
 
 namespace Kobby
 {
 
 class Document;
 class UserItemFactory;
+
+class UserItem
+    : public QObject
+    , public QInfinity::UserItem
+{
+    Q_OBJECT
+
+    public:
+        UserItem( QInfinity::User &user );
+
+    private Q_SLOTS:
+        void statusChanged();
+
+};
 
 class DocumentUsersBrowser
     : public QWidget

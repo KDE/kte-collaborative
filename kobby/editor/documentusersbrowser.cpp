@@ -37,19 +37,9 @@
 namespace Kobby
 {
 
-class UserItem
-    : public QInfinity::UserItem
-{
-
-    public:
-        UserItem( QInfinity::User &user );
-
-};
-
 class UserItemFactory
     : public QInfinity::UserItemFactory
 {
-
     QInfinity::UserItem *createUserItem( QInfinity::User &user );
 
 };
@@ -57,15 +47,23 @@ class UserItemFactory
 UserItem::UserItem( QInfinity::User &user )
     : QInfinity::UserItem( user )
 {
-    if( user.status() == QInfinity::User::Active )
-        setIcon( KIcon("user-online.png") );
-    else if( user.status() == QInfinity::User::Inactive )
-        setIcon( KIcon("user-away.png") );
-    else
-        setIcon( KIcon("user-offline.png") );
+    connect( &user, SIGNAL(statusChanged()),
+        this, SLOT(statusChanged()) );
+
+    statusChanged();
 
     setEditable( false );
     setColumnCount( 1 );
+}
+
+void UserItem::statusChanged()
+{
+    if( user().status() == QInfinity::User::Active )
+        setIcon( KIcon("user-online.png") );
+    else if( user().status() == QInfinity::User::Inactive )
+        setIcon( KIcon("user-away.png") );
+    else
+        setIcon( KIcon("user-offline.png") );
 }
 
 QInfinity::UserItem *UserItemFactory::createUserItem( QInfinity::User &user )
