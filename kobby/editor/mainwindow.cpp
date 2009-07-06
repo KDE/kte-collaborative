@@ -276,15 +276,19 @@ void MainWindow::slotTextViewActivated( KTextEditor::View *view )
         // We need to unmerge current view
         guiFactory()->removeClient( mergedTextView );
     }
+    
     if( view )
     {
         // Merge new view
         guiFactory()->addClient( view );
+        Document *activeDoc = docModel->documentFromKDoc( *view->document() );
+        usersBrowser->setActiveDocument( activeDoc );
+    }
+    else
+    {
+        usersBrowser->setActiveDocument( 0 );
     }
     mergedTextView = view;
-
-    Document *activeDoc = docModel->documentFromKDoc( *view->document() );
-    usersBrowser->setActiveDocument( *activeDoc );
 }
 
 void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )

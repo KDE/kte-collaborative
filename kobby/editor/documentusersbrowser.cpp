@@ -104,25 +104,25 @@ DocumentUsersBrowser::~DocumentUsersBrowser()
 {
 }
 
-void DocumentUsersBrowser::setActiveDocument( Document &document )
+void DocumentUsersBrowser::setActiveDocument( Document *document )
 {
     QInfinity::UsersModel *newModel;
     QSortFilterProxyModel *filter;
-    if( document.type() == Document::KDocument )
+    if( !document || document->type() == Document::KDocument )
     {
         mainLayout->setCurrentWidget( noActiveWidget );
     }
     else
     {
-        if( !documentToModel.contains( &document ) )
+        if( !documentToModel.contains( document ) )
         {
-            newModel = new QInfinity::UsersModel( *(dynamic_cast<InfTextDocument*>(&document)->infSession()), itemFactory, this );
+            newModel = new QInfinity::UsersModel( *(dynamic_cast<InfTextDocument*>(document)->infSession()), itemFactory, this );
             filter = new QSortFilterProxyModel( this );
             filter->setSourceModel( newModel );
-            documentToModel[&document] = filter;
+            documentToModel[document] = filter;
         }
         else
-            filter = documentToModel[&document];
+            filter = documentToModel[document];
         
         browserList->setModel( filter );
         mainLayout->setCurrentWidget( browserWidget );

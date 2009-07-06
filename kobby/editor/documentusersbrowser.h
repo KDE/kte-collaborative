@@ -41,7 +41,12 @@ class DocumentUsersBrowser
         ~DocumentUsersBrowser();
 
     public Q_SLOTS:
-        void setActiveDocument( Document &document );
+        /**
+         * @brief Set document as current.
+         *
+         * If document is 0 no active document is assumed.
+         */
+        void setActiveDocument( Document *document );
         void removeDocument( Document &document );
 
     private:
