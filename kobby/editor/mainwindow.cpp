@@ -234,15 +234,19 @@ void MainWindow::slotNewConnection()
 
 void MainWindow::slotOpenFile()
 {
-    QString url = KFileDialog::getOpenFileName();
-    if( !url.isEmpty() )
-        docBuilder->openUrl( url );
+    KFileDialog *dialog = new KFileDialog( KUrl("~"), "", this );
+    dialog->setMode( KFile::Files | KFile::ExistingOnly );
+    if( dialog->exec() )
+    {
+        docBuilder->openUrl( dialog->selectedUrl() );
+    }
+    delete dialog;
 }
 
 void MainWindow::slotCreateConnection( const QString &hostname,
     unsigned int port )
 {
-    Connection *conn = new Connection( hostname, port, this );
+    Connection *conn = new Connection( hostname, port, 0 );
     connect( conn, SIGNAL(connected(Connection*)),
         this, SLOT(slotConnectionConnected(Connection*)) );
     connect( conn, SIGNAL(error(Connection*, QString)),
