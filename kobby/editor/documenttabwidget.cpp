@@ -98,6 +98,8 @@ void DocumentTabWidget::closeWidget( QWidget *cw )
 void DocumentTabWidget::addDocument( KTextEditor::Document &document, QString name )
 {
     KTextEditor::View *view = document.createView( this );
+    connect( &document, SIGNAL(documentNameChanged(KTextEditor::Document*)),
+        this, SLOT(slotDocumentNameChanged(KTextEditor::Document*)) );
     int tab;
     tab = addTab( view, name );
     setCurrentIndex( tab );
@@ -114,6 +116,15 @@ void DocumentTabWidget::slotCurrentTabChanged( int index )
     emit( viewActivated( activeView ) );
     if( activeView )
         activeView->setFocus( Qt::OtherFocusReason );
+}
+
+void DocumentTabWidget::slotDocumentNameChanged( KTextEditor::Document *document )
+{
+    if( document )
+    {
+        int index = indexOf( document->activeView() );
+        setTabText( index, document->documentName() );
+    }
 }
 
 }

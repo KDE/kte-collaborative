@@ -73,6 +73,7 @@ class DocumentTabWidget
         void addDocument( KTextEditor::Document &document, QString name );
         void removeDocument( KTextEditor::Document &document );
         void slotCurrentTabChanged( int index );
+        void slotDocumentNameChanged( KTextEditor::Document *document );
 
 };
 
