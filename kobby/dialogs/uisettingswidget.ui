@@ -17,7 +17,7 @@
    <item>
     <widget class="QCheckBox" name="kcfg_ConnectDialogOnStart">
      <property name="text">
-      <string>Show Create Connection diolag on start.</string>
+      <string>Show "Create Connection" dialog on start.</string>
      </property>
     </widget>
    </item>
