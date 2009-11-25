@@ -35,6 +35,7 @@ CreateConnectionDialog::CreateConnectionDialog( QWidget *parent )
     setMainWidget( mainWidget );
     setWindowIcon( KIcon("network-connect.png") );
     setCaption( i18n("Create Connection") );
+    ui->hostnameLineEdit->setFocus(Qt::MouseFocusReason);
     setupActions();
     sizeHint();
 }
