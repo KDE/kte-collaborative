@@ -44,6 +44,8 @@ class DocumentModel
     Q_OBJECT;
 
     public:
+        static DocumentModel *instance();
+
         DocumentModel( QObject *parent = 0 );
 
         /**

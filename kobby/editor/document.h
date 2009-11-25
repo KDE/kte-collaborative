@@ -111,6 +111,7 @@ class Document
         virtual int type() const;
 
         virtual void leave() { }
+        void throwFatalError( const QString &message );
 
     Q_SIGNALS:
         void loadStateChanged( Document *document,
@@ -135,8 +136,7 @@ class Document
     
     protected:
         void setLoadState( Document::LoadState );
-        void throwFatalError( const QString &message );
-    
+
     private:
         QPointer<KTextEditor::Document> m_kDocument;
         Document::LoadState m_loadState;
@@ -162,6 +162,7 @@ class KDocumentTextBuffer
         ~KDocumentTextBuffer();
 
         KTextEditor::Document *kDocument() const;
+        Document *document();
         void onInsertText( unsigned int offset,
             const QInfinity::TextChunk &chunk,
             QInfinity::User *user );
@@ -179,6 +180,7 @@ class KDocumentTextBuffer
     Q_SIGNALS:
         void canUndo( bool enable );
         void canRedo( bool enable );
+        void fatalError( const QString &message );
 
     public Q_SLOTS:
         void joinFailed( GError *error );

@@ -86,7 +86,7 @@ MainWindow::MainWindow( QWidget *parent )
 
     // Setup Document Management
     docTabWidget = new DocumentTabWidget( this );
-    docModel = new DocumentModel( this );
+    docModel = DocumentModel::instance();
     docBuilder = new DocumentBuilder( *editor, *browserModel, this );
     connect( docBuilder, SIGNAL(documentCreated(Document&)),
         docModel, SLOT(insertDocument(Document&)) );

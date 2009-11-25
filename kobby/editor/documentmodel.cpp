@@ -72,6 +72,14 @@ Document &DocumentItem::document() const
     return *m_document;
 }
 
+DocumentModel *DocumentModel::instance()
+{
+    static DocumentModel *inst;
+    if(!inst)
+        inst = new DocumentModel();
+    return inst;
+}
+
 DocumentModel::DocumentModel( QObject *parent )
     : QStandardItemModel( parent )
 {

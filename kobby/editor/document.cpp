@@ -16,6 +16,7 @@
  */
 
 #include "document.h"
+#include "documentmodel.h"
 #include "kobbysettings.h"
 
 #include <libqinfinity/sessionproxy.h>
@@ -126,6 +127,11 @@ KTextEditor::Document *KDocumentTextBuffer::kDocument() const
     return m_kDocument;
 }
 
+Document *KDocumentTextBuffer::document()
+{
+    return DocumentModel::instance()->documentFromKDoc(*kDocument());
+}
+
 void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
@@ -181,7 +187,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
             offset = cursorToOffset( range.start() );
             QInfinity::TextChunk chunk( encoding() );
             QString text = kDocument()->text( range );
-            if( text[0] == '\n' ) // hack
+            if( text[0] == '\n' ) // FIXME hack
                 text = '\n';
             if( encoder() )
             {
@@ -192,9 +198,18 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 else
                 {
                     QByteArray encodedText = codec()->fromUnicode( text );
-                    chunk.insertText( 0, encodedText, text.length(), m_user->id() );
-                    blockRemoteInsert = true;
-                    insertChunk( offset, chunk, m_user );
+                    if( encodedText.size() == 0 )
+                    {
+                        kDebug() << "Got empty encoded text from non empty string"
+                            << "Skipping insertion";
+                        this->document()->throwFatalError( i18n("Document state compromised") );
+                    }
+                    else
+                    {
+                        chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+                        blockRemoteInsert = true;
+                        insertChunk( offset, chunk, m_user );
+                    }
                 }
             }
             else
