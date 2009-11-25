@@ -100,11 +100,13 @@ RemoteBrowserView &RemoteBrowserProxy::remoteView() const
 
 void RemoteBrowserProxy::connectionAdded( QInfinity::XmlConnection &conn )
 {
+    Q_UNUSED(conn);
     stackedLayout->setCurrentWidget( m_remoteView );
 }
 
 void RemoteBrowserProxy::connectionRemoved( QInfinity::XmlConnection &conn )
 {
+    Q_UNUSED(conn);
 }
 
 RemoteBrowserView::RemoteBrowserView( QInfinity::NotePlugin &plugin,

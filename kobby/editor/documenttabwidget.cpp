@@ -86,6 +86,7 @@ void DocumentTabWidget::addDocument( Document &doc )
 
 void DocumentTabWidget::removeDocument( Document &doc )
 {
+    Q_UNUSED(doc);
 }
 
 void DocumentTabWidget::closeWidget( QWidget *cw )
@@ -108,6 +109,7 @@ void DocumentTabWidget::addDocument( KTextEditor::Document &document, QString na
 
 void DocumentTabWidget::removeDocument( KTextEditor::Document &document )
 {
+    Q_UNUSED(document)
 }
 
 void DocumentTabWidget::slotCurrentTabChanged( int index )

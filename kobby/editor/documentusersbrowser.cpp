@@ -134,7 +134,7 @@ void DocumentUsersBrowser::setActiveDocument( Document *document )
 
 void DocumentUsersBrowser::removeDocument( Document &document )
 {
-    
+    Q_UNUSED(document);
 }
 
 }

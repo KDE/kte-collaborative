@@ -157,6 +157,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
     int start,
     int end )
 {
+    Q_UNUSED(parent);
     DocumentItem *rm;
     while( start <= end )
     {
@@ -176,6 +177,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
 
 void DocumentModel::slotDocumentFatalError( Kobby::Document* document, QString message )
 {
+    Q_UNUSED(message);
     removeDocument( *document->kDocument(), true );
 }
 
