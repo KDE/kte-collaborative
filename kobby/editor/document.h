@@ -186,6 +186,9 @@ class KDocumentTextBuffer
         void joinFailed( GError *error );
 
     private Q_SLOTS:
+        void localTextChanged( KTextEditor::Document *document,
+            const KTextEditor::Range &oldRange,
+            const KTextEditor::Range &newRange );
         void localTextInserted( KTextEditor::Document *document,
             const KTextEditor::Range &range );
         void localTextRemoved( KTextEditor::Document *document,

@@ -112,6 +112,10 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     , undo_lock( false )
     , redo_lock( false )
 {
+    connect( &kDocument, SIGNAL(textChanged(KTextEditor::Document*,
+            const KTextEditor::Range&, const KTextEditor::Range&)),
+        this, SLOT(localTextChanged(KTextEditor::Document*,
+            const KTextEditor::Range&, const KTextEditor::Range&)) );
     connect( &kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
     connect( &kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
@@ -173,6 +177,16 @@ void KDocumentTextBuffer::joinFailed( GError *error )
     KMessageBox::error( 0, errorString, i18n("Joining Failed") );
 }
 
+// TODO handle this
+void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
+    const KTextEditor::Range &oldRange,
+    const KTextEditor::Range &newRange )
+{
+    Q_UNUSED(document);
+    Q_UNUSED(oldRange);
+    Q_UNUSED(newRange);
+}
+
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
@@ -226,6 +240,7 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     Q_UNUSED(document)
+    KTextEditor::Range chkRange;
 
     textOpPerformed();
     if( !blockLocalRemove )
@@ -330,10 +345,13 @@ unsigned int KDocumentTextBuffer::cursorToOffset( const KTextEditor::Cursor &cur
 
 KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
 {
+    int soff = 0;
+    if( offset > 0 )
+        soff = offset;
     int i;
-    for( i = 0; offset > kDocument()->lineLength( i ); i++ )
-        offset -= kDocument()->lineLength( i ) + 1; // Subtract newline
-    return KTextEditor::Cursor( i, offset );
+    for( i = 0; soff > kDocument()->lineLength( i ); i++ )
+        soff -= kDocument()->lineLength( i ) + 1; // Subtract newline
+    return KTextEditor::Cursor( i, soff );
 }
 
 void KDocumentTextBuffer::textOpPerformed()
