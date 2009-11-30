@@ -89,8 +89,10 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
         kDebug() << "Cannot open non-node item.";
         return;
     }
-
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
+    if(nodeItem->isDirectory())
+        return;
+
     Document *doc = DocumentModel::instance()->documentFromNodeItem(*nodeItem);
     if( doc )
         emit(documentCreated( *doc ));
