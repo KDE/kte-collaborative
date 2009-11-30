@@ -237,7 +237,7 @@ void MainWindow::slotNewConnection()
 void MainWindow::slotOpenFile()
 {
     KFileDialog *dialog = new KFileDialog( KUrl("~"), "", this );
-    dialog->setWindowTitle( i18n("Kobby - Open Local File") );
+    dialog->setWindowTitle( i18n("Open Local File - Kobby") );
     dialog->setMode( KFile::Files | KFile::ExistingOnly );
     if( dialog->exec() )
     {
