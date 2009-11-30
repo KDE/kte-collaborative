@@ -18,6 +18,9 @@
 #include "documentmodel.h"
 #include "document.h"
 
+#include <libqinfinity/browseriter.h>
+#include <libqinfinity/browseritemfactory.h>
+
 #include <KMessageBox>
 #include <KLocalizedString>
 #include <KDebug>
@@ -39,20 +42,30 @@ class DocumentItem
             KobbyDocument = 1001
         };
 
-        DocumentItem( Document &doc );
+        DocumentItem( Document &doc,
+            unsigned int node_id = 0 );
         ~DocumentItem();
 
         int type() const;
         Document &document() const;
+        bool collaborative() const;
+
+        /* Only valid if collaborative() is true */
+        unsigned int nodeId() const;
 
     private:
         Document *m_document;
+        bool m_collaborative;
+        int m_nodeId;
 
 };
 
-DocumentItem::DocumentItem( Document &doc )
+DocumentItem::DocumentItem( Document &doc,
+    unsigned int node_id )
     : m_document( &doc )
+    , m_nodeId( node_id )
 {
+    m_collaborative = doc.type() == Document::InfText;
     setText( doc.name() );
 }
 
@@ -70,6 +83,16 @@ int DocumentItem::type() const
 Document &DocumentItem::document() const
 {
     return *m_document;
+}
+
+bool DocumentItem::collaborative() const
+{
+    return m_collaborative;
+}
+
+unsigned int DocumentItem::nodeId() const
+{
+    return m_nodeId;
 }
 
 DocumentModel *DocumentModel::instance()
@@ -140,10 +163,27 @@ Document *DocumentModel::documentFromKDoc( KTextEditor::Document &kDoc )
         return 0;
 }
 
-void DocumentModel::insertDocument( Document &document )
+Document *DocumentModel::documentFromNodeItem( QInfinity::NodeItem &item )
+{
+    DocumentItem *di = m_infNodeToDocumentItem[item.iter().id()];
+    if( di )
+        return &di->document();
+    else
+        return 0;
+}
+
+void DocumentModel::insertDocument( Document &document,
+    const QInfinity::BrowserIter *iter )
 {
     // Item takes ownership of document
-    DocumentItem *item = new DocumentItem( document );
+    DocumentItem *item;
+    if( !iter )
+        item = new DocumentItem( document );
+    else
+    {
+        item = new DocumentItem( document, iter->id() );
+        m_infNodeToDocumentItem[item->nodeId()] = item;
+    }
     m_kDocumentItemWrappers[document.kDocument()] = item;
     connect( &document, SIGNAL(fatalError( Document*, QString )),
         this, SLOT(slotDocumentFatalError( Document*, QString )) );
@@ -166,6 +206,10 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         {
             emit(documentAboutToBeRemoved(rm->document()));
             m_kDocumentItemWrappers.remove(rm->document().kDocument());
+            if( rm->collaborative() )
+            {
+                m_infNodeToDocumentItem.remove(rm->nodeId());
+            }
         }
         else
         {
@@ -180,7 +224,6 @@ void DocumentModel::slotDocumentFatalError( Kobby::Document* document, QString m
     Q_UNUSED(message);
     removeDocument( *document->kDocument(), true );
 }
-
 
 }
 

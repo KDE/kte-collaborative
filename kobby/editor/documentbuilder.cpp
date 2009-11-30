@@ -127,7 +127,7 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     }
     QInfinity::BrowserIter titr = iter;
     InfTextDocument *infDoc = new InfTextDocument( *sessProxy, *textSession, *kbuff, titr.name() );
-    emit(documentCreated( *infDoc ));
+    emit(documentCreated( *infDoc, &iter ));
 }
 
 void DocumentBuilder::slotBrowserAdded( QInfinity::Browser &browser )

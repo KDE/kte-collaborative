@@ -88,8 +88,10 @@ MainWindow::MainWindow( QWidget *parent )
     docTabWidget = new DocumentTabWidget( this );
     docModel = DocumentModel::instance();
     docBuilder = new DocumentBuilder( *editor, *browserModel, this );
-    connect( docBuilder, SIGNAL(documentCreated(Document&)),
-        docModel, SLOT(insertDocument(Document&)) );
+    connect( docBuilder, SIGNAL(documentCreated(Document&,
+            const QInfinity::BrowserIter*)),
+        docModel, SLOT(insertDocument(Document&,
+            const QInfinity::BrowserIter*)) );
     connect( docModel, SIGNAL(documentAdded(Document&)),
         docTabWidget, SLOT(addDocument(Document&)) );
     connect( docModel, SIGNAL(documentAboutToBeRemoved(Document&)),

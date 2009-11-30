@@ -21,6 +21,12 @@
 #include <QStandardItemModel>
 #include <QHash>
 
+namespace QInfinity
+{
+    class BrowserIter;
+    class NodeItem;
+}
+
 namespace KTextEditor
 {
     class Document;
@@ -73,6 +79,11 @@ class DocumentModel
 
         Document *documentFromKDoc( KTextEditor::Document &kDoc );
 
+        /**
+         * Returns 0 on error. 
+         */
+        Document *documentFromNodeItem( QInfinity::NodeItem &item );
+
     Q_SIGNALS:
         /**
          * @brief A Document has been added.
@@ -95,7 +106,8 @@ class DocumentModel
          *
          * Model takes ownership of document.
          */
-        void insertDocument( Document &document );
+        void insertDocument( Document &document,
+            const QInfinity::BrowserIter *iter );
 
     private Q_SLOTS:
         void slotRowsAboutToBeRemoved( const QModelIndex& parent, int start, int end );
@@ -104,6 +116,8 @@ class DocumentModel
 
     private:
         QHash<KTextEditor::Document*, DocumentItem*> m_kDocumentItemWrappers;
+        QHash<unsigned int, DocumentItem*> m_infNodeToDocumentItem;
+
 };
 
 }

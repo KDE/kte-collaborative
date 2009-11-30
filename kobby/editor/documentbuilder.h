@@ -79,7 +79,8 @@ class DocumentBuilder
         /**
          * @brief A new document has been created.
          */
-        void documentCreated( Document &document );
+        void documentCreated( Document &document,
+            const QInfinity::BrowserIter *iter = 0 );
 
     public Q_SLOTS:
         /**
