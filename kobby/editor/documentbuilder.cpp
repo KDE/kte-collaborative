@@ -91,6 +91,8 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
     QInfinity::BrowserIter nodeItr = nodeItem->iter();
+
+    // Document view  will be added from session subscribe_begin emission
     nodeItr.browser()->subscribeSession( nodeItr );
 }
 
