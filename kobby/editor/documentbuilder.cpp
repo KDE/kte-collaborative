@@ -17,6 +17,7 @@
 
 #include "documentbuilder.h"
 #include "document.h"
+#include "documentmodel.h"
 #include "kobbysettings.h"
 
 #include <glib/gerror.h>
@@ -90,10 +91,16 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
     }
 
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
-    QInfinity::BrowserIter nodeItr = nodeItem->iter();
+    Document *doc = DocumentModel::instance()->documentFromNodeItem(*nodeItem);
+    if( doc )
+        emit(documentCreated( *doc ));
+    else
+    {
+        QInfinity::BrowserIter nodeItr = nodeItem->iter();
 
-    // Document view  will be added from session subscribe_begin emission
-    nodeItr.browser()->subscribeSession( nodeItr );
+        // Document view  will be added from session subscribe_begin emission
+        nodeItr.browser()->subscribeSession( nodeItr );
+    }
 }
 
 void DocumentBuilder::openUrl( const KUrl &url )

@@ -204,13 +204,7 @@ void RemoteBrowserView::slotOpen()
 
 void RemoteBrowserView::slotOpen( const QModelIndex &index )
 {
-    DocumentModel *dm = DocumentModel::instance();
-    QStandardItem *item = browserModel->itemFromIndex(index);
-    QInfinity::NodeItem *ni = dynamic_cast<QInfinity::NodeItem*>(item);
-    if( item && dm->documentFromNodeItem(*ni) )
-        KMessageBox::error( this, i18n("Document is already open.") );
-    else
-        emit( openItem( index ) );
+    emit( openItem( index ) );
 }
 
 void RemoteBrowserView::slotDelete()
