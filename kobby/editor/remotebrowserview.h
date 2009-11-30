@@ -97,7 +97,6 @@ class RemoteBrowserView
         
         QHash<QString, QString> m_protocols;
 
-
 };
 
 /**

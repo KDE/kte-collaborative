@@ -48,6 +48,7 @@ class DocumentItem
 
         int type() const;
         Document &document() const;
+        void setCollaborative(bool val);
         bool collaborative() const;
 
         /* Only valid if collaborative() is true */
@@ -63,9 +64,9 @@ class DocumentItem
 DocumentItem::DocumentItem( Document &doc,
     unsigned int node_id )
     : m_document( &doc )
+    , m_collaborative( false )
     , m_nodeId( node_id )
 {
-    m_collaborative = doc.type() == Document::InfText;
     setText( doc.name() );
 }
 
@@ -83,6 +84,11 @@ int DocumentItem::type() const
 Document &DocumentItem::document() const
 {
     return *m_document;
+}
+
+void DocumentItem::setCollaborative(bool val)
+{
+    m_collaborative = val;
 }
 
 bool DocumentItem::collaborative() const
@@ -106,6 +112,10 @@ DocumentModel *DocumentModel::instance()
 DocumentModel::DocumentModel( QObject *parent )
     : QStandardItemModel( parent )
 {
+    connect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,
+            int, int)),
+        this, SLOT(slotRowsAboutToBeRemoved(const QModelIndex&,
+            int, int)));
 }
 
 void DocumentModel::removeDocument( KTextEditor::Document& kDoc,
@@ -182,6 +192,7 @@ void DocumentModel::insertDocument( Document &document,
     else
     {
         item = new DocumentItem( document, iter->id() );
+        item->setCollaborative(true);
         m_infNodeToDocumentItem[item->nodeId()] = item;
     }
     m_kDocumentItemWrappers[document.kDocument()] = item;
