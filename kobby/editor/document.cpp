@@ -240,6 +240,9 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     Q_UNUSED(document)
+    unsigned int offset;
+    unsigned int end;
+    unsigned int len;
     KTextEditor::Range chkRange;
 
     textOpPerformed();
@@ -247,12 +250,17 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     {
         if( !m_user.isNull() )
         {
-            unsigned int offset = cursorToOffset( range.start() );
-            unsigned int end = cursorToOffset( range.end() );
-            unsigned int len = end - offset;
+            offset = cursorToOffset( range.start() );
+            if( range.start().line() != range.end().line() )
+                len = 1;
+            else
+            {
+                end = cursorToOffset( range.end() );
+                len = end - offset;
+            }
             blockRemoteRemove = true;
-            if( len )
-                eraseText( offset, end-offset, m_user );
+            if( len > 0 )
+                eraseText( offset, len, m_user );
             else
                 kDebug() << "0 legth delete operation. Skipping.";
         }
