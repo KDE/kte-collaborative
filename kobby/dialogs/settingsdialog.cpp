@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,7 +71,7 @@ class UiSettings
 };
 
 SettingsDialog::SettingsDialog( QWidget *parent )
-    : KConfigDialog( parent, "Kobby Settings", KobbySettings::self() )
+    : KConfigDialog( parent, i18n("Kobby Settings"), KobbySettings::self() )
 {
     setupUi();
 }

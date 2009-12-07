@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,6 +23,7 @@
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
+#include <KLocalizedString>
 
 
 #include <libqinfinity/init.h>
@@ -34,7 +36,7 @@ int main( int argc, char **argv )
         ki18n( "Collaborative text editing environment." ),
         KAboutData::License_GPL,
         ki18n( "Copyright (c) 2008-2009 Gregory Haynes" ),
-        ki18n(""),
+        KLocalizedString(),
         "http://kobby.greghaynes.net", "kobby@groups.google.com" );
     aboutData.addAuthor( ki18n("Gregory Haynes"), ki18n( "Creator, Maintainer" ), "greg@greghaynes.net" );
     

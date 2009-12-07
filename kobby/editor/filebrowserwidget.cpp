@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,6 +31,7 @@
 #include <KIcon>
 #include <KAction>
 #include <KDebug>
+#include <KLocale>
 
 #include <QList>
 #include <QString>
@@ -61,7 +63,7 @@ void FileBrowserWidget::createFolder( QInfinity::BrowserFolderItem &parent,
     Infinity::ClientBrowser *browser = iter.getBrowser();
     if( !browser )
     {
-        kDebug() << "parent iterator for adding folder does not reference a browser!";
+        kDebug() << i18n("Parent iterator for adding folder does not reference a browser!");
         return;
     }
 
@@ -87,7 +89,7 @@ void FileBrowserWidget::slotItemActivated( const QModelIndex &index )
 
     if( !standardItem )
     {
-        kDebug() << "Got invalid item when locating activated index!";
+        kDebug() << i18n("Got invalid item when locating activated index!");
         return;
     }
 
@@ -157,7 +159,7 @@ void FileBrowserWidget::slotDeleteSelected()
         item = fileModel->itemFromIndex( *itr );
         if( !item )
         {
-            kDebug() << "Got bad item back to delete, skipping.";
+            kDebug() << i18n("Got bad item back to delete, skipping.");
             continue;
         }
 
@@ -229,13 +231,13 @@ void FileBrowserWidget::slotCreateNote()
 
 void FileBrowserWidget::setupUi()
 {
-    createFolderAction = new KAction( KIcon( "folder-new.png" ) , tr("Create Folder"), this );
+    createFolderAction = new KAction( KIcon( "folder-new.png" ) , i18n("Create Folder"), this );
     createFolderAction->setEnabled( false );
-    createNoteAction = new KAction( KIcon( "document-new.png" ), tr("Create Note"), this );
+    createNoteAction = new KAction( KIcon( "document-new.png" ), i18n("Create Note"), this );
     createNoteAction->setEnabled( false );
-    joinNoteAction = new KAction( KIcon( "document-open.png" ), tr("Join Note"), this );
+    joinNoteAction = new KAction( KIcon( "document-open.png" ), i18n("Join Note"), this );
     joinNoteAction->setEnabled( false );
-    deleteItemAction = new KAction( KIcon( "edit-delete.png" ), tr("delete"), this );
+    deleteItemAction = new KAction( KIcon( "edit-delete.png" ), i18n("delete"), this );
     deleteItemAction->setEnabled( false );
 
     QVBoxLayout *vertLayout = new QVBoxLayout( this );

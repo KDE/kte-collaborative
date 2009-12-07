@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -207,15 +208,15 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
             {
                 if( text.isEmpty() )
                 {
-                    kDebug() << "Skipping empty insert.";
+                    kDebug() << i18n("Skipping empty insert.");
                 }
                 else
                 {
                     QByteArray encodedText = codec()->fromUnicode( text );
                     if( encodedText.size() == 0 )
                     {
-                        kDebug() << "Got empty encoded text from non empty string"
-                            << "Skipping insertion";
+                        kDebug() << i18n("Got empty encoded text from non empty string"\
+                            "Skipping insertion");
                         this->document()->throwFatalError( i18n("Document state compromised") );
                     }
                     else
@@ -227,10 +228,10 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 }
             }
             else
-                kDebug() << "No encoder for text codec.";
+                kDebug() << i18n("No encoder for text codec.");
         }
         else
-            kDebug() << "Could not insert text: No local user set.";
+            kDebug() << i18n("Could not insert text: No local user set.");
     }
     else
         blockLocalInsert = false;
@@ -262,10 +263,10 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
             if( len > 0 )
                 eraseText( offset, len, m_user );
             else
-                kDebug() << "0 legth delete operation. Skipping.";
+                kDebug() << i18n("0 legth delete operation. Skipping.");
         }
         else
-            kDebug() << "Could not remove text: No local user set.";
+            kDebug() << i18n("Could not remove text: No local user set.");
     }
     else
         blockLocalRemove = false;
@@ -481,7 +482,7 @@ void InfTextDocument::slotJoinFailed( GError *gerror )
     QString emsg = i18n( "Could not join session: " );
     emsg.append( gerror->message );
     throwFatalError( emsg );
-    kDebug() << "Join failed: " << emsg;
+    kDebug() << i18n("Join failed: %1", emsg);
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
@@ -509,7 +510,7 @@ void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
 
 void InfTextDocument::slotCanUndo( bool enable )
 {
-    kDebug() << "set undo " << enable;
+    kDebug() << i18n("set undo %1", enable);
     QAction *act;
     foreach( act, undoActions )
     {

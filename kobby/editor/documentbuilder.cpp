@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -86,7 +87,7 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 
     if( stdItem->type() != QInfinity::BrowserItemFactory::NodeItem )
     {
-        kDebug() << "Cannot open non-node item.";
+        kDebug() << i18n("Cannot open non-node item.");
         return;
     }
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
@@ -121,8 +122,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     
     if( !textSession || !INF_TEXT_IS_SESSION(textSession->gobject()) )
     {
-        kDebug() << "Session is not an InfText session.  This usually means "
-            << "the connection is not using the kobby plugin.";
+        kDebug() << i18n("Session is not an InfText session.  This usually means " \
+            "the connection is not using the kobby plugin.");
         return;
     }
 
@@ -130,8 +131,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
     if( !kbuff )
     {
-        kDebug() << "Could not retrieve Kobby buffer from session.  This "
-            << "usually means the connection is not using the kobby plugin.";
+        kDebug() << i18n("Could not retrieve Kobby buffer from session.  This " \
+            "usually means the connection is not using the kobby plugin.");
         return;
     }
     QInfinity::BrowserIter titr = iter;

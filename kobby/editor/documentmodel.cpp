@@ -224,7 +224,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         }
         else
         {
-            kDebug() << "Row removed from document model not of DocumentItem type!";
+            kDebug() << i18n("Row removed from document model not of DocumentItem type!");
         }
         start++;
     }

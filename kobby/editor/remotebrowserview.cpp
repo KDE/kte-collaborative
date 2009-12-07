@@ -1,5 +1,6 @@
 /*
  * Copyright 2009  Gregory Haynes <greg@greghaynes.net>
+ * Copyright 2009  Ryan Kavanagh <ryanakca@kubuntu.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -170,7 +171,7 @@ void RemoteBrowserView::slotNewDocument()
         delete dialog;
     }
     else
-        qDebug() << "Create document handler called but we have invalid selection.";
+        qDebug() << i18n("Create document handler called but we have invalid selection.");
 }
 
 void RemoteBrowserView::slotNewFolder()
@@ -186,7 +187,7 @@ void RemoteBrowserView::slotNewFolder()
         delete dialog;
     }
     else
-        qDebug() << "Create folder handler called but we have invalid selection.";
+        qDebug() << i18n("Create folder handler called but we have invalid selection.");
 }
 
 void RemoteBrowserView::slotOpen()
@@ -199,7 +200,7 @@ void RemoteBrowserView::slotOpen()
             slotOpen( *itr );
     }
     else
-        qDebug() << "Open handler called but we have invalid selection.";
+        qDebug() << i18n("Open handler called but we have invalid selection.");
 }
 
 void RemoteBrowserView::slotOpen( const QModelIndex &index )
@@ -262,7 +263,7 @@ void RemoteBrowserProxy::resolveNameDelete( DNSSD::RemoteService::Ptr pointer )
 {
     if( pointer->resolve() )
     {
-        qDebug() << "delete name " << pointer->hostName();
+        qDebug() << i18n("delete name %1", pointer->hostName());
         emit( deleteConnection( pointer->hostName(),
             pointer->port() ) );
     }
