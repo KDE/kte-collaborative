@@ -1,0 +1,13 @@
+To update the translations, run the messages.sh .
+
+To add a language, run the folling from the po/ directory:
+
+XX="XX" sh -c 'mkdir $XX && touch $XX/kobby.po && echo "file(GLOB _po_files *.po)
+GETTEXT_PROCESS_PO_FILES( $XX ALL INSTALL_DESTINATION ${LOCALE_INSTALL_DIR} ${_po_files} )" > $XX/CMakeLists.txt && \
+echo "add_subdirectory( "$XX" )" >> CMakeLists.txt' && sh messages.sh
+
+(where LANG_CODE is a valid ISO 639 language code)
+
+I recommend using Lokalize to translate.
+
+ -- Ryan Kavanagh <ryanakca@kubuntu.org>  Sun, 6 Dec 2009 20:44:00 -0500
