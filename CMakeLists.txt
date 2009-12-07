@@ -8,4 +8,8 @@ SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules )
 find_package(KDE4 REQUIRED)
 include(KDE4Defaults)
 
+find_package(Msgfmt REQUIRED)
+find_package(Gettext REQUIRED)
+add_subdirectory( po )
+
 SUBDIRS(kobby)
