@@ -1,0 +1,521 @@
+# French translation Copyright  Ryan Kavanagh <ryanakca@kubuntu.org>, 2009.
+# Ryan Kavanagh <ryanakca@kubuntu.org>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugs.kde.org\n"
+"POT-Creation-Date: 2009-12-06 21:35-0500\n"
+"PO-Revision-Date: 2009-12-06 20:40-0500\n"
+"Last-Translator: Ryan Kavanagh <ryanakca@kubuntu.org>\n"
+"Language-Team: Français <kde-i18n-doc@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. i18n: file: dialogs/createconnectionwidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, CreateConnectionWidget)
+#. i18n: file: dialogs/noconnectionswidget.ui:32
+#. i18n: ectx: property (text), widget (KPushButton, kpushbutton)
+#: dialogs/createconnectiondialog.cpp:38 editor/remotebrowserview.cpp:73
+#: ui_createconnectionwidget.h:114 rc.cpp:45 rc.cpp:92
+msgid "Create Connection"
+msgstr "Créer une connexion"
+
+#: dialogs/settingsdialog.cpp:74 editor/mainwindow.cpp:311
+msgid "Kobby Settings"
+msgstr "Configuration pour Kobby"
+
+#: dialogs/settingsdialog.cpp:81
+msgid "Profile"
+msgstr "Profil"
+
+#: dialogs/settingsdialog.cpp:83
+msgid "Network"
+msgstr "Réseau"
+
+#: dialogs/settingsdialog.cpp:85
+msgid "User Interface"
+msgstr "Interface d'utilisateur"
+
+#: editor/documentbuilder.cpp:90
+msgid "Cannot open non-node item."
+msgstr "Impossible d'ouvrir un élément qui n'est pas un nœud."
+
+#: editor/documentbuilder.cpp:125
+#, fuzzy
+msgid ""
+"Session is not an InfText session.  This usually means the connection is not "
+"using the kobby plugin."
+msgstr ""
+"La session n'est pas une session InfText. Ceci veut habituellement dire "
+
+#: editor/documentbuilder.cpp:134
+#, fuzzy
+msgid ""
+"Could not retrieve Kobby buffer from session.  This usually means the "
+"connection is not using the kobby plugin."
+msgstr "Impossible de récupérer le tampon Kobby de la session. Ceci "
+
+#: editor/document.cpp:176
+msgid "Joining failed: "
+msgstr "Échec de connexion: "
+
+#: editor/document.cpp:178
+msgid "Joining Failed"
+msgstr "Échec de connexion"
+
+#: editor/document.cpp:211
+msgid "Skipping empty insert."
+msgstr "Ignore une entrée vide."
+
+#: editor/document.cpp:218
+msgid "Got empty encoded text from non empty stringSkipping insertion"
+msgstr ""
+"Reçu du texte encodé vide d'une insertion stringSkipping qui n'est pas vide"
+
+#: editor/document.cpp:220
+msgid "Document state compromised"
+msgstr "L'état du document est compromis"
+
+#: editor/document.cpp:231
+msgid "No encoder for text codec."
+msgstr "Pas d'encodeur pour le codec de texte"
+
+#: editor/document.cpp:234
+msgid "Could not insert text: No local user set."
+msgstr "Impossible d'insérer du text. Aucun utilisateur local de défini."
+
+#: editor/document.cpp:266
+msgid "0 legth delete operation. Skipping."
+msgstr "Supprimation de longueur 0. Ignoré."
+
+#: editor/document.cpp:269
+msgid "Could not remove text: No local user set."
+msgstr ""
+
+#: editor/document.cpp:466
+msgid "Synchronization Failed: "
+msgstr ""
+
+#: editor/document.cpp:482
+msgid "Could not join session: "
+msgstr ""
+
+#: editor/document.cpp:485
+msgid "Join failed: %1"
+msgstr ""
+
+#: editor/document.cpp:513
+msgid "set undo %1"
+msgstr ""
+
+#: editor/documentmodel.cpp:128 editor/documentmodel.cpp:146
+msgid "Are you sure you want to close this document?"
+msgstr ""
+
+#: editor/documentmodel.cpp:141
+msgid "You are about to close %1 documents."
+msgstr ""
+
+#: editor/documentmodel.cpp:143 editor/remotebrowserview.cpp:224
+msgid "Are you sure you want to do this?"
+msgstr ""
+
+#: editor/documentmodel.cpp:228
+msgid "Row removed from document model not of DocumentItem type!"
+msgstr ""
+
+#: editor/documentusersbrowser.cpp:85
+msgid "You must be editing a collaborative document to see active users."
+msgstr ""
+
+#: editor/filebrowserwidget.cpp:66
+msgid "Parent iterator for adding folder does not reference a browser!"
+msgstr ""
+
+#: editor/filebrowserwidget.cpp:92
+msgid "Got invalid item when locating activated index!"
+msgstr ""
+
+#: editor/filebrowserwidget.cpp:162
+msgid "Got bad item back to delete, skipping."
+msgstr "Reçu un mauvais élément pour supprimer, ignoré."
+
+#: editor/filebrowserwidget.cpp:234 editor/remotebrowserview.cpp:183
+msgid "Create Folder"
+msgstr "Créer un dossier"
+
+#: editor/filebrowserwidget.cpp:236 editor/remotebrowserview.cpp:166
+msgid "Create Note"
+msgstr "Créer une note"
+
+#: editor/filebrowserwidget.cpp:238
+msgid "Join Note"
+msgstr "Ajouter une note "
+
+#: editor/filebrowserwidget.cpp:240
+msgid "delete"
+msgstr "supprimer"
+
+#: editor/main.cpp:35
+msgid "Kobby"
+msgstr "Kobby"
+
+#: editor/main.cpp:36
+msgid "Collaborative text editing environment."
+msgstr "Environnement d'édition de text collaboratif"
+
+#: editor/main.cpp:38
+msgid "Copyright (c) 2008-2009 Gregory Haynes"
+msgstr ""
+
+#: editor/main.cpp:41
+msgid "Gregory Haynes"
+msgstr ""
+
+#: editor/main.cpp:41
+msgid "Creator, Maintainer"
+msgstr "Créateur, Mainteneur"
+
+#: editor/mainwindow.cpp:80
+msgid ""
+"A KDE text-editor component could not be found;\n"
+"please check your KDE installation."
+msgstr ""
+"Un module d'éditeur de texte KDE ne pouvait pas être trouvé.\n"
+"SVP vérifier votre installation KDE."
+
+#: editor/mainwindow.cpp:181
+msgid "Documents"
+msgstr "Documents"
+
+#: editor/mainwindow.cpp:184
+msgid "Remote Browser"
+msgstr "Navigateur distant"
+
+#: editor/mainwindow.cpp:187
+msgid "Local Browser"
+msgstr "Navigateur local"
+
+#: editor/mainwindow.cpp:190
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: editor/mainwindow.cpp:207 editor/remotebrowserview.cpp:274
+msgid "New Connection"
+msgstr "Nouvelle connexion"
+
+#: editor/mainwindow.cpp:208
+msgid "Create a new connection."
+msgstr "Créer une nouvelle connection"
+
+#: editor/mainwindow.cpp:211
+msgid "Kobby settings."
+msgstr "Configuration pour Kobby."
+
+#: editor/mainwindow.cpp:222
+msgid "Open a new blank document."
+msgstr "Ouvrir un nouveau document vide"
+
+#: editor/mainwindow.cpp:225
+msgid "Select a document to open."
+msgstr "Sélectionner un document à ouvrir"
+
+#: editor/mainwindow.cpp:227
+msgid "Close active document."
+msgstr "Fermer le document actuel"
+
+#: editor/mainwindow.cpp:241
+msgid "Open Local File - Kobby"
+msgstr "Ouvrir un fichier local - Kobby"
+
+#: editor/mainwindow.cpp:265
+msgid "Connection error: %1"
+msgstr "Erreur de connexion: %1"
+
+#: editor/mainwindow.cpp:305
+msgid "An error has occoured with the document: %1"
+msgstr "Une erreur a eu lieu dans le document: %1"
+
+#: editor/remotebrowserview.cpp:69
+msgid ""
+"You must connect to an infinote server before browsing collaborative "
+"documents."
+msgstr ""
+"Vous devez vous joindre à un serveur infinote avant de naviguer des "
+"documents collaboratifs."
+
+#: editor/remotebrowserview.cpp:167
+msgid "Note name:"
+msgstr "Nom de la note:"
+
+#: editor/remotebrowserview.cpp:174
+msgid "Create document handler called but we have invalid selection."
+msgstr ""
+"Le gestionnaire de création de document a été appelé mais nous avons une "
+"sélection invalide."
+
+#: editor/remotebrowserview.cpp:184
+msgid "Folder Name:"
+msgstr "Nom du dossier:"
+
+#: editor/remotebrowserview.cpp:190
+msgid "Create folder handler called but we have invalid selection."
+msgstr ""
+"Le gestionnaire de création de dossier a été appelé mais nous avons une "
+"sélection invalide."
+
+#: editor/remotebrowserview.cpp:203
+msgid "Open handler called but we have invalid selection."
+msgstr ""
+"Le gestionnaire d'ouverture a été appelé mais nous avons une sélection "
+"invalide."
+
+#: editor/remotebrowserview.cpp:222
+msgid "You are about to delete %1 files."
+msgstr "Vous allez supprimer %1 fichiers."
+
+#: editor/remotebrowserview.cpp:227
+msgid "Are you sure you want to delete this file?"
+msgstr "Voulez-vous vraiment supprimer ce fichier?"
+
+#: editor/remotebrowserview.cpp:266
+msgid "delete name %1"
+msgstr "supprimer le nom %1"
+
+#: editor/remotebrowserview.cpp:275
+msgid "New Document"
+msgstr "Nouveau document"
+
+#: editor/remotebrowserview.cpp:276
+msgid "New Folder"
+msgstr "Nouveau dossier"
+
+#: editor/remotebrowserview.cpp:277
+msgid "Open Document"
+msgstr "Ouvrir un document"
+
+#: editor/remotebrowserview.cpp:278
+msgid "Delete"
+msgstr "Supprimer"
+
+#. i18n: file: dialogs/createconnectionwidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, descriptionLabel)
+#: ui_createconnectionwidget.h:115 rc.cpp:48
+msgid "Create new connection:"
+msgstr ""
+
+#. i18n: file: dialogs/createconnectionwidget.ui:29
+#. i18n: ectx: property (text), widget (QLabel, nameLabel)
+#: ui_createconnectionwidget.h:116 rc.cpp:51
+msgid "Name:"
+msgstr ""
+
+#. i18n: file: dialogs/createconnectionwidget.ui:47
+#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
+#. i18n: file: dialogs/networksettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
+#. i18n: file: dialogs/profilesetupwidget.ui:42
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#: ui_createconnectionwidget.h:117 ui_networksettingswidget.h:67
+#: ui_profilesetupwidget.h:89 rc.cpp:54 rc.cpp:81 rc.cpp:113
+msgid "Hostname:"
+msgstr ""
+
+#. i18n: file: dialogs/createconnectionwidget.ui:61
+#. i18n: ectx: property (text), widget (QLabel, portLabel)
+#: ui_createconnectionwidget.h:118 rc.cpp:57
+msgid "Port:"
+msgstr ""
+
+#. i18n: file: dialogs/createconnectionwidget.ui:68
+#. i18n: ectx: property (text), widget (QLineEdit, portLineEdit)
+#: ui_createconnectionwidget.h:119 rc.cpp:60
+msgid "6523"
+msgstr ""
+
+#. i18n: file: dialogs/createitemwidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, CreateItemWidget)
+#. i18n: file: dialogs/createnotewidget.ui:13
+#. i18n: ectx: property (windowTitle), widget (QWidget, CreateNoteWidget)
+#. i18n: file: dialogs/networksettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, NetworkSettingsWidget)
+#. i18n: file: dialogs/noconnectionswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, Form)
+#. i18n: file: dialogs/profilesettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSettingsWidget)
+#. i18n: file: dialogs/profilesetupwidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSetupWidget)
+#. i18n: file: dialogs/uisettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, UiSettingsWidget)
+#: ui_createitemwidget.h:73 ui_networksettingswidget.h:66
+#: ui_profilesettingswidget.h:91 ui_profilesetupwidget.h:86
+#: ui_uisettingswidget.h:65 rc.cpp:63 rc.cpp:69 rc.cpp:78 rc.cpp:84 rc.cpp:95
+#: rc.cpp:104 rc.cpp:122
+msgid "Form"
+msgstr ""
+
+#. i18n: file: dialogs/createitemwidget.ui:22
+#. i18n: ectx: property (text), widget (QLabel, itemNameLabel)
+#: ui_createitemwidget.h:74 rc.cpp:66
+msgid "Item Name:"
+msgstr ""
+
+#. i18n: file: dialogs/profilesettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, nicknameLabel)
+#. i18n: file: dialogs/profilesetupwidget.ui:32
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: ui_profilesettingswidget.h:92 ui_profilesetupwidget.h:88 rc.cpp:98
+#: rc.cpp:110
+msgid "Nickname:"
+msgstr ""
+
+#. i18n: file: dialogs/profilesettingswidget.ui:30
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#: ui_profilesettingswidget.h:93 rc.cpp:101
+msgid "Color"
+msgstr ""
+
+#. i18n: file: dialogs/profilesetupwidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, label_3)
+#: ui_profilesetupwidget.h:87 rc.cpp:107
+msgid "Chose a nickname and hostname which will identify you to other users."
+msgstr ""
+
+#. i18n: file: dialogs/setuppagewidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, SetupPageWidget)
+#: ui_setuppagewidget.h:54 rc.cpp:116
+msgid "Setup Assistant"
+msgstr ""
+
+#. i18n: file: dialogs/setuppagewidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: ui_setuppagewidget.h:55 rc.cpp:119
+msgid "This setup assistant will guide you through the Kobby configuration."
+msgstr ""
+
+#. i18n: file: dialogs/uisettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ConnectDialogOnStart)
+#: ui_uisettingswidget.h:66 rc.cpp:125
+msgid "Show \"Create Connection\" dialog on start."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:36
+#. i18n: ectx: label, entry (BlankDocumentOnStart), group (ui)
+#. i18n: file: dialogs/uisettingswidget.ui:27
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_BlankDocumentOnStart)
+#: ui_uisettingswidget.h:67 rc.cpp:21 rc.cpp:128
+msgid "Open blank document on start."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:11
+#. i18n: ectx: label, entry (MainWindowWidth), group (ui)
+#: rc.cpp:3
+msgid "Width of the Main Window."
+msgstr "Largeur de la fenêtre principale."
+
+#. i18n: file: data/kobbysettings.kcfg:15
+#. i18n: ectx: label, entry (MainWindowHeight), group (ui)
+#: rc.cpp:6
+msgid "Height of the Main Window."
+msgstr "Hauteur de la fenêtre principale."
+
+#. i18n: file: data/kobbysettings.kcfg:19
+#. i18n: ectx: label, entry (MainWindowX), group (ui)
+#: rc.cpp:9
+msgid "X location of Main Window."
+msgstr "Emplacement X de la fenêtre principale."
+
+#. i18n: file: data/kobbysettings.kcfg:23
+#. i18n: ectx: label, entry (MainWindowY), group (ui)
+#: rc.cpp:12
+msgid "Y location of Main Window."
+msgstr "Emplacement Y de la fenêtre principale."
+
+#. i18n: file: data/kobbysettings.kcfg:27
+#. i18n: ectx: label, entry (MainWindowHorizSplitterSizes), group (ui)
+#: rc.cpp:15
+msgid "Sizes of main horizontal splitter."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:31
+#. i18n: ectx: label, entry (ConnectDialogOnStart), group (ui)
+#: rc.cpp:18
+msgid "Show Create Connection dialog on application start."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:43
+#. i18n: ectx: label, entry (NickName), group (profile)
+#: rc.cpp:24
+msgid "Nick Name other users see."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:47
+#. i18n: ectx: label, entry (UserColor), group (profile)
+#: rc.cpp:27
+msgid "Color user appears as on server."
+msgstr ""
+
+#. i18n: file: data/kobbysettings.kcfg:53
+#. i18n: ectx: label, entry (HostName), group (network)
+#: rc.cpp:30
+msgid "Hostname of local computer."
+msgstr ""
+
+#. i18n: file: data/kobbyui.rc:6
+#. i18n: ectx: Menu (file)
+#: rc.cpp:33
+msgctxt "@title:menu"
+msgid "&File"
+msgstr ""
+
+#. i18n: file: data/kobbyui.rc:29
+#. i18n: ectx: Menu (edit)
+#: rc.cpp:36
+msgctxt "@title:menu"
+msgid "&Edit"
+msgstr ""
+
+#. i18n: file: data/kobbyui.rc:40
+#. i18n: ectx: Menu (settings)
+#: rc.cpp:39
+msgid "&Settings"
+msgstr ""
+
+#. i18n: file: data/kobbyui.rc:47
+#. i18n: ectx: ToolBar (mainToolBar)
+#: rc.cpp:42
+msgid "Main Toolbar"
+msgstr ""
+
+#. i18n: file: dialogs/createnotewidget.ui:26
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: rc.cpp:72
+msgid "Note Name:"
+msgstr ""
+
+#. i18n: file: dialogs/createnotewidget.ui:38
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox_2)
+#: rc.cpp:75
+msgid "Plugin"
+msgstr ""
+
+#. i18n: file: dialogs/noconnectionswidget.ui:22
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: rc.cpp:87
+msgid ""
+"You must create a connection to begin editing collaborative documents.\n"
+"\n"
+msgstr ""
+
+#: rc.cpp:129
+msgctxt "NAME OF TRANSLATORS"
+msgid "Your names"
+msgstr "Ryan Kavanagh"
+
+#: rc.cpp:130
+msgctxt "EMAIL OF TRANSLATORS"
+msgid "Your emails"
+msgstr "ryanakca@kubuntu.org"
