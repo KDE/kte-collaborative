@@ -55,6 +55,12 @@ class DocumentModel
         DocumentModel( QObject *parent = 0 );
 
         /**
+         * @brief Convenience method for removeDocument
+         */
+        void removeDocument( Document &doc,
+            bool dont_warn = false );
+
+        /**
          * @brief Remove Document wrapping kDoc from model.
          *
          * Will decide if a confirm dialog is needed unless

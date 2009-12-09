@@ -118,6 +118,12 @@ DocumentModel::DocumentModel( QObject *parent )
             int, int)));
 }
 
+void DocumentModel::removeDocument( Document &doc,
+    bool dont_warn )
+{
+    removeDocument( *doc.kDocument(), dont_warn );
+}
+
 void DocumentModel::removeDocument( KTextEditor::Document& kDoc,
     bool dont_warn )
 {
