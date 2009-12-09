@@ -215,7 +215,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                     QByteArray encodedText = codec()->fromUnicode( text );
                     if( encodedText.size() == 0 )
                     {
-                        kDebug() << i18n("Got empty encoded text from non empty string"\
+                        kDebug() << i18n("Got empty encoded text from non empty string "\
                             "Skipping insertion");
                         this->document()->throwFatalError( i18n("Document state compromised") );
                     }
