@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugs.kde.org\n"
-"POT-Creation-Date: 2009-12-09 10:24-0500\n"
-"PO-Revision-Date: 2009-12-09 11:09-0500\n"
+"POT-Creation-Date: 2009-12-09 11:11-0500\n"
+"PO-Revision-Date: 2009-12-09 11:12-0500\n"
 "Last-Translator: Ryan Kavanagh <ryanakca@kubuntu.org>\n"
 "Language-Team: Français <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -72,9 +72,10 @@ msgid "Skipping empty insert."
 msgstr "Ignore une entrée vide."
 
 #: editor/document.cpp:218
-msgid "Got empty encoded text from non empty stringSkipping insertion"
+msgid "Got empty encoded text from non empty string Skipping insertion"
 msgstr ""
-"Reçu du texte encodé vide d'une insertion string qui n'est pas vide. Insertion ignoré"
+"Reçu du texte encodé vide d'une insertion string qui n'est pas vide. "
+"Insertion ignoré"
 
 #: editor/document.cpp:220
 msgid "Document state compromised"
@@ -534,5 +535,4 @@ msgstr "Ryan Kavanagh"
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr "ryanakca@kubuntu.org"
-
 
