@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugs.kde.org\n"
-"POT-Creation-Date: 2009-12-06 21:35-0500\n"
+"POT-Creation-Date: 2009-12-09 10:24-0500\n"
 "PO-Revision-Date: 2009-12-06 20:40-0500\n"
 "Last-Translator: Ryan Kavanagh <ryanakca@kubuntu.org>\n"
 "Language-Team: Français <kde-i18n-doc@kde.org>\n"
@@ -18,12 +18,12 @@ msgstr ""
 #. i18n: ectx: property (windowTitle), widget (QWidget, CreateConnectionWidget)
 #. i18n: file: dialogs/noconnectionswidget.ui:32
 #. i18n: ectx: property (text), widget (KPushButton, kpushbutton)
-#: dialogs/createconnectiondialog.cpp:38 editor/remotebrowserview.cpp:73
-#: ui_createconnectionwidget.h:114 rc.cpp:45 rc.cpp:92
+#: dialogs/createconnectiondialog.cpp:37 editor/remotebrowserview.cpp:73
+#: rc.cpp:45 rc.cpp:92
 msgid "Create Connection"
 msgstr "Créer une connexion"
 
-#: dialogs/settingsdialog.cpp:74 editor/mainwindow.cpp:311
+#: dialogs/settingsdialog.cpp:74 editor/mainwindow.cpp:310
 msgid "Kobby Settings"
 msgstr "Configuration pour Kobby"
 
@@ -111,23 +111,23 @@ msgstr ""
 msgid "set undo %1"
 msgstr ""
 
-#: editor/documentmodel.cpp:128 editor/documentmodel.cpp:146
+#: editor/documentmodel.cpp:127 editor/documentmodel.cpp:145
 msgid "Are you sure you want to close this document?"
 msgstr ""
 
-#: editor/documentmodel.cpp:141
+#: editor/documentmodel.cpp:140
 msgid "You are about to close %1 documents."
 msgstr ""
 
-#: editor/documentmodel.cpp:143 editor/remotebrowserview.cpp:224
+#: editor/documentmodel.cpp:142 editor/remotebrowserview.cpp:224
 msgid "Are you sure you want to do this?"
 msgstr ""
 
-#: editor/documentmodel.cpp:228
+#: editor/documentmodel.cpp:227
 msgid "Row removed from document model not of DocumentItem type!"
 msgstr ""
 
-#: editor/documentusersbrowser.cpp:85
+#: editor/documentusersbrowser.cpp:84
 msgid "You must be editing a collaborative document to see active users."
 msgstr ""
 
@@ -179,7 +179,7 @@ msgstr ""
 msgid "Creator, Maintainer"
 msgstr "Créateur, Mainteneur"
 
-#: editor/mainwindow.cpp:80
+#: editor/mainwindow.cpp:79
 msgid ""
 "A KDE text-editor component could not be found;\n"
 "please check your KDE installation."
@@ -187,55 +187,55 @@ msgstr ""
 "Un module d'éditeur de texte KDE ne pouvait pas être trouvé.\n"
 "SVP vérifier votre installation KDE."
 
-#: editor/mainwindow.cpp:181
+#: editor/mainwindow.cpp:180
 msgid "Documents"
 msgstr "Documents"
 
-#: editor/mainwindow.cpp:184
+#: editor/mainwindow.cpp:183
 msgid "Remote Browser"
 msgstr "Navigateur distant"
 
-#: editor/mainwindow.cpp:187
+#: editor/mainwindow.cpp:186
 msgid "Local Browser"
 msgstr "Navigateur local"
 
-#: editor/mainwindow.cpp:190
+#: editor/mainwindow.cpp:189
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: editor/mainwindow.cpp:207 editor/remotebrowserview.cpp:274
+#: editor/mainwindow.cpp:206 editor/remotebrowserview.cpp:274
 msgid "New Connection"
 msgstr "Nouvelle connexion"
 
-#: editor/mainwindow.cpp:208
+#: editor/mainwindow.cpp:207
 msgid "Create a new connection."
 msgstr "Créer une nouvelle connection"
 
-#: editor/mainwindow.cpp:211
+#: editor/mainwindow.cpp:210
 msgid "Kobby settings."
 msgstr "Configuration pour Kobby."
 
-#: editor/mainwindow.cpp:222
+#: editor/mainwindow.cpp:221
 msgid "Open a new blank document."
 msgstr "Ouvrir un nouveau document vide"
 
-#: editor/mainwindow.cpp:225
+#: editor/mainwindow.cpp:224
 msgid "Select a document to open."
 msgstr "Sélectionner un document à ouvrir"
 
-#: editor/mainwindow.cpp:227
+#: editor/mainwindow.cpp:226
 msgid "Close active document."
 msgstr "Fermer le document actuel"
 
-#: editor/mainwindow.cpp:241
+#: editor/mainwindow.cpp:240
 msgid "Open Local File - Kobby"
 msgstr "Ouvrir un fichier local - Kobby"
 
-#: editor/mainwindow.cpp:265
+#: editor/mainwindow.cpp:264
 msgid "Connection error: %1"
 msgstr "Erreur de connexion: %1"
 
-#: editor/mainwindow.cpp:305
+#: editor/mainwindow.cpp:304
 msgid "An error has occoured with the document: %1"
 msgstr "Une erreur a eu lieu dans le document: %1"
 
@@ -301,115 +301,6 @@ msgstr "Ouvrir un document"
 msgid "Delete"
 msgstr "Supprimer"
 
-#. i18n: file: dialogs/createconnectionwidget.ui:20
-#. i18n: ectx: property (text), widget (QLabel, descriptionLabel)
-#: ui_createconnectionwidget.h:115 rc.cpp:48
-msgid "Create new connection:"
-msgstr ""
-
-#. i18n: file: dialogs/createconnectionwidget.ui:29
-#. i18n: ectx: property (text), widget (QLabel, nameLabel)
-#: ui_createconnectionwidget.h:116 rc.cpp:51
-msgid "Name:"
-msgstr ""
-
-#. i18n: file: dialogs/createconnectionwidget.ui:47
-#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
-#. i18n: file: dialogs/networksettingswidget.ui:20
-#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
-#. i18n: file: dialogs/profilesetupwidget.ui:42
-#. i18n: ectx: property (text), widget (QLabel, label_2)
-#: ui_createconnectionwidget.h:117 ui_networksettingswidget.h:67
-#: ui_profilesetupwidget.h:89 rc.cpp:54 rc.cpp:81 rc.cpp:113
-msgid "Hostname:"
-msgstr ""
-
-#. i18n: file: dialogs/createconnectionwidget.ui:61
-#. i18n: ectx: property (text), widget (QLabel, portLabel)
-#: ui_createconnectionwidget.h:118 rc.cpp:57
-msgid "Port:"
-msgstr ""
-
-#. i18n: file: dialogs/createconnectionwidget.ui:68
-#. i18n: ectx: property (text), widget (QLineEdit, portLineEdit)
-#: ui_createconnectionwidget.h:119 rc.cpp:60
-msgid "6523"
-msgstr ""
-
-#. i18n: file: dialogs/createitemwidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, CreateItemWidget)
-#. i18n: file: dialogs/createnotewidget.ui:13
-#. i18n: ectx: property (windowTitle), widget (QWidget, CreateNoteWidget)
-#. i18n: file: dialogs/networksettingswidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, NetworkSettingsWidget)
-#. i18n: file: dialogs/noconnectionswidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, Form)
-#. i18n: file: dialogs/profilesettingswidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSettingsWidget)
-#. i18n: file: dialogs/profilesetupwidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSetupWidget)
-#. i18n: file: dialogs/uisettingswidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, UiSettingsWidget)
-#: ui_createitemwidget.h:73 ui_networksettingswidget.h:66
-#: ui_profilesettingswidget.h:91 ui_profilesetupwidget.h:86
-#: ui_uisettingswidget.h:65 rc.cpp:63 rc.cpp:69 rc.cpp:78 rc.cpp:84 rc.cpp:95
-#: rc.cpp:104 rc.cpp:122
-msgid "Form"
-msgstr ""
-
-#. i18n: file: dialogs/createitemwidget.ui:22
-#. i18n: ectx: property (text), widget (QLabel, itemNameLabel)
-#: ui_createitemwidget.h:74 rc.cpp:66
-msgid "Item Name:"
-msgstr ""
-
-#. i18n: file: dialogs/profilesettingswidget.ui:20
-#. i18n: ectx: property (text), widget (QLabel, nicknameLabel)
-#. i18n: file: dialogs/profilesetupwidget.ui:32
-#. i18n: ectx: property (text), widget (QLabel, label)
-#: ui_profilesettingswidget.h:92 ui_profilesetupwidget.h:88 rc.cpp:98
-#: rc.cpp:110
-msgid "Nickname:"
-msgstr ""
-
-#. i18n: file: dialogs/profilesettingswidget.ui:30
-#. i18n: ectx: property (text), widget (QLabel, label_2)
-#: ui_profilesettingswidget.h:93 rc.cpp:101
-msgid "Color"
-msgstr ""
-
-#. i18n: file: dialogs/profilesetupwidget.ui:20
-#. i18n: ectx: property (text), widget (QLabel, label_3)
-#: ui_profilesetupwidget.h:87 rc.cpp:107
-msgid "Chose a nickname and hostname which will identify you to other users."
-msgstr ""
-
-#. i18n: file: dialogs/setuppagewidget.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, SetupPageWidget)
-#: ui_setuppagewidget.h:54 rc.cpp:116
-msgid "Setup Assistant"
-msgstr ""
-
-#. i18n: file: dialogs/setuppagewidget.ui:20
-#. i18n: ectx: property (text), widget (QLabel, label)
-#: ui_setuppagewidget.h:55 rc.cpp:119
-msgid "This setup assistant will guide you through the Kobby configuration."
-msgstr ""
-
-#. i18n: file: dialogs/uisettingswidget.ui:20
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ConnectDialogOnStart)
-#: ui_uisettingswidget.h:66 rc.cpp:125
-msgid "Show \"Create Connection\" dialog on start."
-msgstr ""
-
-#. i18n: file: data/kobbysettings.kcfg:36
-#. i18n: ectx: label, entry (BlankDocumentOnStart), group (ui)
-#. i18n: file: dialogs/uisettingswidget.ui:27
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_BlankDocumentOnStart)
-#: ui_uisettingswidget.h:67 rc.cpp:21 rc.cpp:128
-msgid "Open blank document on start."
-msgstr ""
-
 #. i18n: file: data/kobbysettings.kcfg:11
 #. i18n: ectx: label, entry (MainWindowWidth), group (ui)
 #: rc.cpp:3
@@ -446,6 +337,15 @@ msgstr ""
 msgid "Show Create Connection dialog on application start."
 msgstr ""
 
+#. i18n: file: data/kobbysettings.kcfg:36
+#. i18n: ectx: label, entry (BlankDocumentOnStart), group (ui)
+#. i18n: file: dialogs/uisettingswidget.ui:27
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_BlankDocumentOnStart)
+#: rc.cpp:21 rc.cpp:128
+#, fuzzy
+msgid "Open blank document on start."
+msgstr "Ouvrir un nouveau document vide"
+
 #. i18n: file: data/kobbysettings.kcfg:43
 #. i18n: ectx: label, entry (NickName), group (profile)
 #: rc.cpp:24
@@ -481,8 +381,9 @@ msgstr ""
 #. i18n: file: data/kobbyui.rc:40
 #. i18n: ectx: Menu (settings)
 #: rc.cpp:39
+#, fuzzy
 msgid "&Settings"
-msgstr ""
+msgstr "Configuration pour Kobby"
 
 #. i18n: file: data/kobbyui.rc:47
 #. i18n: ectx: ToolBar (mainToolBar)
@@ -490,11 +391,74 @@ msgstr ""
 msgid "Main Toolbar"
 msgstr ""
 
+#. i18n: file: dialogs/createconnectionwidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, descriptionLabel)
+#: rc.cpp:48
+#, fuzzy
+msgid "Create new connection:"
+msgstr "Créer une nouvelle connection"
+
+#. i18n: file: dialogs/createconnectionwidget.ui:29
+#. i18n: ectx: property (text), widget (QLabel, nameLabel)
+#: rc.cpp:51
+#, fuzzy
+msgid "Name:"
+msgstr "Nom de la note:"
+
+#. i18n: file: dialogs/createconnectionwidget.ui:47
+#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
+#. i18n: file: dialogs/networksettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, hostnameLabel)
+#. i18n: file: dialogs/profilesetupwidget.ui:42
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#: rc.cpp:54 rc.cpp:81 rc.cpp:113
+#, fuzzy
+msgid "Hostname:"
+msgstr "Nom de la note:"
+
+#. i18n: file: dialogs/createconnectionwidget.ui:61
+#. i18n: ectx: property (text), widget (QLabel, portLabel)
+#: rc.cpp:57
+msgid "Port:"
+msgstr ""
+
+#. i18n: file: dialogs/createconnectionwidget.ui:68
+#. i18n: ectx: property (text), widget (QLineEdit, portLineEdit)
+#: rc.cpp:60
+msgid "6523"
+msgstr ""
+
+#. i18n: file: dialogs/createitemwidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, CreateItemWidget)
+#. i18n: file: dialogs/createnotewidget.ui:13
+#. i18n: ectx: property (windowTitle), widget (QWidget, CreateNoteWidget)
+#. i18n: file: dialogs/networksettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, NetworkSettingsWidget)
+#. i18n: file: dialogs/noconnectionswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, Form)
+#. i18n: file: dialogs/profilesettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSettingsWidget)
+#. i18n: file: dialogs/profilesetupwidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, ProfileSetupWidget)
+#. i18n: file: dialogs/uisettingswidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, UiSettingsWidget)
+#: rc.cpp:63 rc.cpp:69 rc.cpp:78 rc.cpp:84 rc.cpp:95 rc.cpp:104 rc.cpp:122
+msgid "Form"
+msgstr ""
+
+#. i18n: file: dialogs/createitemwidget.ui:22
+#. i18n: ectx: property (text), widget (QLabel, itemNameLabel)
+#: rc.cpp:66
+#, fuzzy
+msgid "Item Name:"
+msgstr "Nom de la note:"
+
 #. i18n: file: dialogs/createnotewidget.ui:26
 #. i18n: ectx: property (text), widget (QLabel, label)
 #: rc.cpp:72
+#, fuzzy
 msgid "Note Name:"
-msgstr ""
+msgstr "Nom de la note:"
 
 #. i18n: file: dialogs/createnotewidget.ui:38
 #. i18n: ectx: property (title), widget (QGroupBox, groupBox_2)
@@ -505,9 +469,51 @@ msgstr ""
 #. i18n: file: dialogs/noconnectionswidget.ui:22
 #. i18n: ectx: property (text), widget (QLabel, label)
 #: rc.cpp:87
+#, fuzzy
 msgid ""
 "You must create a connection to begin editing collaborative documents.\n"
 "\n"
+msgstr ""
+"Vous devez vous joindre à un serveur infinote avant de naviguer des "
+"documents collaboratifs."
+
+#. i18n: file: dialogs/profilesettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, nicknameLabel)
+#. i18n: file: dialogs/profilesetupwidget.ui:32
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: rc.cpp:98 rc.cpp:110
+#, fuzzy
+msgid "Nickname:"
+msgstr "Nom de la note:"
+
+#. i18n: file: dialogs/profilesettingswidget.ui:30
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#: rc.cpp:101
+msgid "Color"
+msgstr ""
+
+#. i18n: file: dialogs/profilesetupwidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, label_3)
+#: rc.cpp:107
+msgid "Chose a nickname and hostname which will identify you to other users."
+msgstr ""
+
+#. i18n: file: dialogs/setuppagewidget.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, SetupPageWidget)
+#: rc.cpp:116
+msgid "Setup Assistant"
+msgstr ""
+
+#. i18n: file: dialogs/setuppagewidget.ui:20
+#. i18n: ectx: property (text), widget (QLabel, label)
+#: rc.cpp:119
+msgid "This setup assistant will guide you through the Kobby configuration."
+msgstr ""
+
+#. i18n: file: dialogs/uisettingswidget.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ConnectDialogOnStart)
+#: rc.cpp:125
+msgid "Show \"Create Connection\" dialog on start."
 msgstr ""
 
 #: rc.cpp:129
