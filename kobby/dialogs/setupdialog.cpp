@@ -56,6 +56,7 @@ void SetupDialog::slotFinished()
     KobbySettings::setNickName( profileUi->nicknameEdit->text() );
     KobbySettings::setHostName( profileUi->hostnameEdit->text() );
     KobbySettings::setUserColor( profileUi->colorCombo->color() );
+    KobbySettings::self()->writeConfig();
 }
 
 void SetupDialog::slotProfileTextEntered( const QString &text )

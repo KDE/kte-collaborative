@@ -120,9 +120,10 @@ MainWindow::MainWindow( QWidget *parent )
 
     if( needsSetupDialog() )
     {
-        SetupDialog *dialog = new SetupDialog( this );
+        SetupDialog *dialog = new SetupDialog();
         if( !dialog->exec() )
             deleteLater();
+        delete dialog;
     }
 
     if( KobbySettings::connectDialogOnStart() )
