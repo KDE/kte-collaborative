@@ -55,15 +55,14 @@ void SetupDialog::slotFinished()
 {
     KobbySettings::setNickName( profileUi->nicknameEdit->text() );
     KobbySettings::setHostName( profileUi->hostnameEdit->text() );
+    KobbySettings::setUserColor( profileUi->colorCombo->color() );
 }
 
 void SetupDialog::slotProfileTextEntered( const QString &text )
 {
     Q_UNUSED(text)
     if( !profileUi->nicknameEdit->text().isEmpty() )
-    {
         setValid( profilePageItem, true );
-    }
     else
         setValid( profilePageItem, false );
 }

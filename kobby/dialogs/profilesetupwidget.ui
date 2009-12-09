@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>450</width>
+    <height>150</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="descriptionLabel">
      <property name="text">
-      <string>Chose a nickname and hostname which will identify you to other users.</string>
+      <string>Chose a nickname, color, and hostname which will identify you to other users.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -27,17 +27,32 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="nicknameLabel">
        <property name="text">
         <string>Nickname:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="nicknameEdit"/>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLineEdit" name="nicknameEdit"/>
+       </item>
+       <item>
+        <widget class="KColorCombo" name="colorCombo">
+         <property name="color">
+          <color>
+           <red>50</red>
+           <green>50</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="hostnameLabel">
        <property name="text">
         <string>Hostname:</string>
        </property>
@@ -50,6 +65,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KColorCombo</class>
+   <extends>QComboBox</extends>
+   <header>kcolorcombo.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
