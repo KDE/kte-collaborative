@@ -359,7 +359,8 @@ Document *MainWindow::activeDocument()
 
 bool MainWindow::needsSetupDialog()
 {
-    if( KobbySettings::nickName().isEmpty() )
+    if( KobbySettings::nickName().isEmpty()
+        || KobbySettings::hostName().isEmpty() )
         return true;
     else
         return false;
