@@ -22,18 +22,59 @@
 #include "ui_closedocswidget.h"
 #include "closedocsdialog.moc"
 
-#include <QTableWidget>
-#include <QTableWidgetItem>
+#include <QListWidget>
+#include <QListWidgetItem>
 
 namespace Kobby
 {
+
+class CloseDocumentItem
+    : public QListWidgetItem
+{
+
+    public:
+        CloseDocumentItem( Document &doc );
+
+        Document &document();
+
+    private:
+        Document *m_doc;
+
+};
+
+CloseDocumentItem::CloseDocumentItem( Document &doc )
+    : QListWidgetItem ()
+    , m_doc( &doc )
+{
+    setText( doc.name() );
+}
+
+Document &CloseDocumentItem::document()
+{
+    return *m_doc;
+}
 
 CloseDocsDialog::CloseDocsDialog(DocumentModel &docModel,
     QWidget *parent )
     : KDialog( parent )
     , ui( new Ui::CloseDocsWidget )
 {
+    QWidget *mw = new QWidget( this );
+    Document *doc;
+    QList<Document*> doclist;    
+    CloseDocumentItem *docItem;
+
+    ui->setupUi( mw );
     
+    doclist = docModel.dirtyDocs();
+    foreach(doc, doclist)
+    {
+        docItem = new CloseDocumentItem( *doc );
+        docItem->setCheckState( Qt::Checked );
+        ui->localDocList->addItem( docItem );
+    }
+    
+    setMainWidget( mw );
 }
 
 }

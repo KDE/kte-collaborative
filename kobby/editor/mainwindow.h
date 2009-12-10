@@ -76,6 +76,9 @@ class MainWindow
         void slotTextViewActivated( KTextEditor::View *view );
         void slotDocumentFatalError( Document *doc, QString message );
         void slotQuit();
+
+    protected:
+        bool queryClose();
     
     private:
         void setupUi();
@@ -84,6 +87,7 @@ class MainWindow
         void saveSettings();
         Document *activeDocument();
         bool needsSetupDialog();
+        bool tryQuit();
 
         // Libqinfinity
         QInfinity::BrowserModel *browserModel;

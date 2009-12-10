@@ -309,13 +309,13 @@ void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )
 
 void MainWindow::slotQuit()
 {
-    CloseDocsDialog *cd = new CloseDocsDialog( *docModel, this );
-    if( cd->exec() )
-    {
+    if( tryQuit() )
         kapp->quit();
-    }
-    else
-        delete cd;
+}
+
+bool MainWindow::queryClose()
+{
+    return tryQuit();
 }
 
 void MainWindow::slotShowSettingsDialog()
@@ -376,6 +376,18 @@ bool MainWindow::needsSetupDialog()
         return true;
     else
         return false;
+}
+
+bool MainWindow::tryQuit()
+{
+    CloseDocsDialog *cd = new CloseDocsDialog( *docModel, this );
+    if( !cd->exec() )
+    {
+        delete cd;
+        return false;
+    }
+    delete cd;
+    return true;
 }
 
 }
