@@ -90,6 +90,16 @@ class DocumentModel
          */
         Document *documentFromNodeItem( QInfinity::NodeItem &item );
 
+        /**
+         * @brief Local documents that have been modified without save.
+         */
+        QList<Document*> dirtyDocs();
+
+        /**
+         * @brief Collaborative documents.
+         */
+        QList<Document*> collabDocs();
+
     Q_SIGNALS:
         /**
          * @brief A Document has been added.

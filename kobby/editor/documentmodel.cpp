@@ -188,6 +188,29 @@ Document *DocumentModel::documentFromNodeItem( QInfinity::NodeItem &item )
         return 0;
 }
 
+QList<Document*> DocumentModel::dirtyDocs()
+{
+    QList<Document*> li;
+    Document *doc;
+    DocumentItem *docItem;
+    QStandardItem *stdItem;
+    QStandardItem *rootItem = invisibleRootItem();
+    int i;
+    for(i = 0;(stdItem = rootItem->child(i, 0));i++)
+    {
+        docItem = dynamic_cast<DocumentItem*>(stdItem);
+        if( !docItem )
+        {
+            kDebug() << i18n( "Non DocumentItem in DocumentModel." );
+            continue;
+        }
+        doc = &docItem->document();
+        if( doc->type() == Document::KDocument )
+            li.append( doc );
+    }
+    return li;
+}
+
 void DocumentModel::insertDocument( Document &document,
     const QInfinity::BrowserIter *iter )
 {

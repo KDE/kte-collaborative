@@ -75,6 +75,7 @@ class MainWindow
         void slotCloseActive();
         void slotTextViewActivated( KTextEditor::View *view );
         void slotDocumentFatalError( Document *doc, QString message );
+        void slotQuit();
     
     private:
         void setupUi();

@@ -35,6 +35,7 @@ set( KOBBY_SRCS
 	dialogs/createitemdialog.cpp
 	dialogs/settingsdialog.cpp
 	dialogs/setupdialog.cpp
+	dialogs/closedocsdialog.cpp
 
 	editor/noteplugin.cpp
 	editor/document.cpp
@@ -59,6 +60,7 @@ set(KOBBY_UI
 	dialogs/uisettingswidget.ui
 	dialogs/setuppagewidget.ui
 	dialogs/profilesetupwidget.ui
+	dialogs/closedocswidget.ui
 )
 
 INCLUDE_DIRECTORIES(${KOBBY_INCLUDES} )

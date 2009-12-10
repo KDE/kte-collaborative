@@ -29,6 +29,7 @@
 #include "document.h"
 #include "connection.h"
 #include "createconnectiondialog.h"
+#include "closedocsdialog.h"
 #include "itemfactory.h"
 #include "noteplugin.h"
 
@@ -215,7 +216,7 @@ void MainWindow::setupActions()
     connect( newConnectionAction, SIGNAL(triggered(bool)),
         this, SLOT(slotNewConnection()) );
 
-    KStandardAction::quit(kapp, SLOT(quit()),
+    KStandardAction::quit(this, SLOT(slotQuit()),
         actionCollection());
 
     actionCollection()->addAction( KStandardAction::New, "document_new",
@@ -304,6 +305,17 @@ void MainWindow::slotDocumentFatalError( Kobby::Document* doc, QString message )
     Q_UNUSED(doc)
     QString str = i18n("An error has occoured with the document: %1", message);
     KMessageBox::error( this, str );
+}
+
+void MainWindow::slotQuit()
+{
+    CloseDocsDialog *cd = new CloseDocsDialog( *docModel, this );
+    if( cd->exec() )
+    {
+        kapp->quit();
+    }
+    else
+        delete cd;
 }
 
 void MainWindow::slotShowSettingsDialog()
