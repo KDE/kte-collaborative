@@ -28,7 +28,7 @@ namespace Ui
 namespace Kobby
 {
 
-class DocumentModel;
+class Document;
 
 class CloseDocsDialog
     : public KDialog
@@ -36,7 +36,8 @@ class CloseDocsDialog
     Q_OBJECT
 
     public:
-        CloseDocsDialog( DocumentModel &docModel,
+        CloseDocsDialog( QList<Document*> &dirtyDocs,
+            QList<Document*> &collabDocs,
             QWidget *parent = 0 );
 
     private Q_SLOTS:

@@ -57,29 +57,27 @@ Document &CloseDocumentItem::document()
     return *m_doc;
 }
 
-CloseDocsDialog::CloseDocsDialog(DocumentModel &docModel,
+CloseDocsDialog::CloseDocsDialog(QList<Document*> &localDocList,
+    QList<Document*> &collabDocList,
     QWidget *parent )
     : KDialog( parent )
     , ui( new Ui::CloseDocsWidget )
 {
     QWidget *mw = new QWidget( this );
     Document *doc;
-    QList<Document*> doclist;    
     CloseDocumentItem *docItem;
 
     setWindowTitle( i18n( "Confirm exit" ) );
     ui->setupUi( mw );
     
-    doclist = docModel.dirtyDocs();
-    foreach(doc, doclist)
+    foreach(doc, localDocList)
     {
         docItem = new CloseDocumentItem( *doc );
         docItem->setCheckState( Qt::Checked );
         ui->localDocList->addItem( docItem );
     }
 
-    doclist = docModel.collabDocs();
-    foreach(doc, doclist)
+    foreach(doc, collabDocList)
     {
         docItem = new CloseDocumentItem( *doc );
         ui->collabDocList->addItem( docItem );

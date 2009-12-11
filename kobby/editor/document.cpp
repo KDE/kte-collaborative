@@ -48,8 +48,14 @@ namespace Kobby
 Document::Document( KTextEditor::Document &kDocument )
     : m_kDocument( &kDocument )
     , m_loadState( Document::Unloaded )
+    , m_dirty( false )
 {
     m_kDocument->setParent( 0 );
+    connect( m_kDocument, SIGNAL(textChanged( KTextEditor::Document* )),
+        this, SLOT(textChanged( KTextEditor::Document* )) );
+    connect( m_kDocument, SIGNAL(documentSavedOrUploaded( KTextEditor::Document*,
+            bool )),
+        this, SLOT(documentSaved( KTextEditor::Document*, bool )) );
 }
 
 Document::~Document()
@@ -83,6 +89,11 @@ int Document::type() const
     return Document::KDocument;
 }
 
+bool Document::isDirty()
+{
+    return m_dirty;
+}
+
 void Document::setLoadState( Document::LoadState state )
 {
     if( state != LoadState() )
@@ -92,6 +103,17 @@ void Document::setLoadState( Document::LoadState state )
         if( state == Document::Complete )
             emit( loadingComplete( this ) );
     }
+}
+
+void Document::textChanged( KTextEditor::Document *doc )
+{
+    m_dirty = true;
+}
+
+void Document::documentSaved( KTextEditor::Document *doc,
+    bool saveAs )
+{
+    m_dirty = false;
 }
 
 void Document::throwFatalError( const QString &message )

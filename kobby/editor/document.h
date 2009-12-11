@@ -108,9 +108,13 @@ class Document
          */
         Document::LoadState loadState() const;
 
+
         virtual int type() const;
 
         virtual void leave() { }
+
+        bool isDirty();
+
         void throwFatalError( const QString &message );
 
     Q_SIGNALS:
@@ -137,9 +141,15 @@ class Document
     protected:
         void setLoadState( Document::LoadState );
 
+    private Q_SLOTS:
+        void textChanged( KTextEditor::Document *document );
+        void documentSaved( KTextEditor::Document *document,
+            bool saveAs );
+
     private:
         QPointer<KTextEditor::Document> m_kDocument;
         Document::LoadState m_loadState;
+        bool m_dirty;
 
 };
 

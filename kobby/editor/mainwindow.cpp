@@ -380,7 +380,14 @@ bool MainWindow::needsSetupDialog()
 
 bool MainWindow::tryQuit()
 {
-    CloseDocsDialog *cd = new CloseDocsDialog( *docModel, this );
+    QList<Document*> collabDocs, localDocs;
+    collabDocs = docModel->collabDocs();
+    localDocs = docModel->dirtyDocs();
+
+    if( collabDocs.size() == 0 && localDocs.size() == 0 )
+        return true;
+
+    CloseDocsDialog *cd = new CloseDocsDialog( localDocs, collabDocs, this );
     if( !cd->exec() )
     {
         delete cd;

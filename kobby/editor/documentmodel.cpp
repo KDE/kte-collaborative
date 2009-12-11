@@ -205,7 +205,8 @@ QList<Document*> DocumentModel::dirtyDocs()
             continue;
         }
         doc = &docItem->document();
-        if( doc->type() == Document::KDocument )
+        if( doc->type() == Document::KDocument
+            && doc->isDirty() )
             li.append( doc );
     }
     return li;
