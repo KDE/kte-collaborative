@@ -211,6 +211,29 @@ QList<Document*> DocumentModel::dirtyDocs()
     return li;
 }
 
+QList<Document*> DocumentModel::collabDocs()
+{
+    QList<Document*> li;
+    Document *doc;
+    DocumentItem *docItem;
+    QStandardItem *stdItem;
+    QStandardItem *rootItem = invisibleRootItem();
+    int i;
+    for(i = 0;(stdItem = rootItem->child(i, 0));i++)
+    {
+        docItem = dynamic_cast<DocumentItem*>(stdItem);
+        if( !docItem )
+        {
+            kDebug() << i18n( "Non DocumentItem in DocumentModel." );
+            continue;
+        }
+        doc = &docItem->document();
+        if( doc->type() == Document::InfText )
+            li.append( doc );
+    }
+    return li;
+}
+
 void DocumentModel::insertDocument( Document &document,
     const QInfinity::BrowserIter *iter )
 {

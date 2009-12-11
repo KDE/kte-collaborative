@@ -33,10 +33,16 @@ class DocumentModel;
 class CloseDocsDialog
     : public KDialog
 {
+    Q_OBJECT
 
     public:
         CloseDocsDialog( DocumentModel &docModel,
             QWidget *parent = 0 );
+
+    private Q_SLOTS:
+        void onCancel();
+        void onSave();
+        void onDontSave();
 
     private:
         Ui::CloseDocsWidget *ui;

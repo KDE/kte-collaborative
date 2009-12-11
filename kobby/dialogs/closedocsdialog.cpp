@@ -22,6 +22,9 @@
 #include "ui_closedocswidget.h"
 #include "closedocsdialog.moc"
 
+#include <KIcon>
+
+#include <QDialog>
 #include <QListWidget>
 #include <QListWidgetItem>
 
@@ -64,6 +67,7 @@ CloseDocsDialog::CloseDocsDialog(DocumentModel &docModel,
     QList<Document*> doclist;    
     CloseDocumentItem *docItem;
 
+    setWindowTitle( i18n( "Confirm exit" ) );
     ui->setupUi( mw );
     
     doclist = docModel.dirtyDocs();
@@ -73,8 +77,45 @@ CloseDocsDialog::CloseDocsDialog(DocumentModel &docModel,
         docItem->setCheckState( Qt::Checked );
         ui->localDocList->addItem( docItem );
     }
+
+    doclist = docModel.collabDocs();
+    foreach(doc, doclist)
+    {
+        docItem = new CloseDocumentItem( *doc );
+        ui->collabDocList->addItem( docItem );
+    }
+
+    setButtons( User1 | User2 | User3 );
+    setButtonText( User1, i18n( "Cancel Exit" ) );
+    setButtonText( User2, i18n( "Dont Save" ) );
+    setButtonText( User3, i18n( "Save" ) );
+
+    setButtonIcon( User1, KIcon("dialog-cancel.png") );
+    setButtonIcon( User3, KIcon("document-save.png") );
+
+    connect( this, SIGNAL(user1Clicked()),
+        this, SLOT(onCancel()) );
+    connect( this, SIGNAL(user2Clicked()),
+        this, SLOT(onDontSave()) );
+    connect( this, SIGNAL(user3Clicked()),
+        this, SLOT(onSave()) );
     
     setMainWidget( mw );
+}
+
+void CloseDocsDialog::onCancel()
+{
+    reject();
+}
+
+void CloseDocsDialog::onDontSave()
+{
+    accept();
+}
+
+void CloseDocsDialog::onSave()
+{
+    accept();
 }
 
 }
