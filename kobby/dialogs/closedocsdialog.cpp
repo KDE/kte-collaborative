@@ -115,6 +115,21 @@ void CloseDocsDialog::onDontSave()
 
 void CloseDocsDialog::onSave()
 {
+    QListWidgetItem *stdItem;
+    CloseDocumentItem *closeItem;
+    int i;
+    for(i = 0;(stdItem = ui->localDocList->item(i));i++)
+    {
+        closeItem = dynamic_cast<CloseDocumentItem*>(stdItem);
+        if(closeItem)
+        {
+            if(!closeItem->document().save())
+            {
+                reject();
+                return;
+            }
+        }
+    }
     accept();
 }
 
