@@ -40,12 +40,14 @@ NotePlugin::NotePlugin( DocumentBuilder &builder,
 }
 
 QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *commMgr,
+    QInfinity::Session::Status sess_status,
     QInfinity::CommunicationJoinedGroup *syncGroup,
     QInfinity::XmlConnection *syncConnection )
 {
     KDocumentTextBuffer *buffer = m_builder->createKDocumentTextBuffer( "UTF-8" );
     QInfinity::TextSession *session = new QInfinity::TextSession( *commMgr,
         *buffer,
+        sess_status,
         *syncGroup,
         *syncConnection );
     return session;

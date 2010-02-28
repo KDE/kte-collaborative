@@ -18,6 +18,7 @@
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
 
+#include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>
 
 namespace Kobby
@@ -37,6 +38,7 @@ class NotePlugin
             QObject *parent = 0 );
 
         QInfinity::Session *createSession( QInfinity::CommunicationManager *commMgr,
+            QInfinity::Session::Status sess_status,
             QInfinity::CommunicationJoinedGroup *syncGroup,
             QInfinity::XmlConnection *syncConnection );
 

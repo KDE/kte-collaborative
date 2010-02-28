@@ -466,14 +466,14 @@ void InfTextDocument::undo()
 {
     m_buffer->performingUndo();
     if( m_user )
-        m_session->undo( *m_user );
+        m_session->undo( *m_user, 1 );
 }
 
 void InfTextDocument::redo()
 {
     m_buffer->performingRedo();
     if( m_user )
-        m_session->redo( *m_user );
+        m_session->redo( *m_user, 1 );
 }
 
 void InfTextDocument::slotSynchronized()
