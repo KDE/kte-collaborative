@@ -35,7 +35,7 @@ int main( int argc, char **argv )
         ki18n( "Kobby" ), "1.0 RC 1",
         ki18n( "Collaborative text editing environment." ),
         KAboutData::License_GPL,
-        ki18n( "Copyright (c) 2008-2009 Gregory Haynes" ),
+        ki18n( "Copyright (c) 2008-2010 Gregory Haynes" ),
         KLocalizedString(),
         "http://kobby.greghaynes.net", "kobby@groups.google.com" );
     aboutData.addAuthor( ki18n("Gregory Haynes"), ki18n( "Creator, Maintainer" ), "greg@greghaynes.net" );
