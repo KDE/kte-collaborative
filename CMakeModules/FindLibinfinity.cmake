@@ -40,12 +40,12 @@ find_path( LIBINFINITY_INCLUDES
 		/usr/local/include
 		/opt/local/include
 	PATH_SUFFIXES
-		libinfinity-0.3
+		libinfinity-0.4
 )
 
 find_library( LIBINFINITY_LIBRARY
 	NAMES
-		infinity-0.3
+		infinity-0.4
 	PATHS
 		${_LIBINFINITY_LIBRARY_DIR}
 		/usr/lib
