@@ -21,7 +21,7 @@ else( LIBINFTEXT_LIBRARIES AND LIBINFTEXT_INCLUDES )
 	
 	if( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
 		include(UsePkgConfig)
-		pkgconfig(libinftext-0.3
+		pkgconfig(libinftext-0.4
 			_LIBINFTEXT_INCLUDE_DIR
 			_LIBINFTEXT_LIBRARY_DIR
 			_LIBINFTEXT_LINKER_FLAGS
@@ -38,12 +38,12 @@ else( LIBINFTEXT_LIBRARIES AND LIBINFTEXT_INCLUDES )
 			/usr/local/include
 			/opt/local/include
 		PATH_SUFFIXES
-			libinftext-0.3
+			libinftext-0.4
 	)
 	
 	find_library( LIBINFTEXT_LIBRARY
 		NAMES
-			inftext-0.3
+			inftext-0.4
 		PATHS
 			${_LIBINFTEXT_LIBRARY_DIR}
 			/usr/lib
