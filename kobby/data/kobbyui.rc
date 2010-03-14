@@ -35,9 +35,19 @@
 		<Separator/>
 		<Merge/>
 	</Menu>
-	
+
+	<Menu name="view">
+		<text content="@title:view">&amp;View</text>
+		<Action name="view_file_browser" />
+		<Action name="view_document_list" />
+		<action name="view_user_browser" />
+		<Separator/>
+		<Merge/>
+	</Menu>
+
 	<Merge/>
-	<Menu name="settings"><text>&amp;Settings</text>
+	<Menu name="settings">
+		<text>&amp;Settings</text>
 		<Action name="settings_kobby" />
 		<Merge/>
 	</Menu>

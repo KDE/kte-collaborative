@@ -65,6 +65,9 @@ class MainWindow
         MainWindow( QWidget *parent = 0 );
         ~MainWindow();
 
+    protected:
+        bool queryClose();
+
     private Q_SLOTS:
         void slotNewConnection();
         void slotCreateConnection( const QString &hostname,
@@ -77,9 +80,6 @@ class MainWindow
         void slotTextViewActivated( KTextEditor::View *view );
         void slotDocumentFatalError( Document *doc, QString message );
         void slotQuit();
-
-    protected:
-        bool queryClose();
     
     private:
         void setupUi();

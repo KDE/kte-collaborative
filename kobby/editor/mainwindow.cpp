@@ -178,6 +178,7 @@ void MainWindow::setupUi()
 
     // Setup browser dock widget
     fileBrowserDockWidget = new QDockWidget( i18n("File Browser"), this );
+    fileBrowserDockWidget->setObjectName( "FileBrowserDockWidget" );
     fileBrowserTabWidget = new KTabWidget( fileBrowserDockWidget );
     fileBrowserTabWidget->addTab( remoteBrowserView,
         KIcon("document-open-remote.png"),
@@ -189,8 +190,10 @@ void MainWindow::setupUi()
 
     // Create other dock widgets
     doclistDockWidget = new QDockWidget( i18n("Documents"), this );
+    doclistDockWidget->setObjectName( "DocumentsDockWidget" );
     doclistDockWidget->setWidget( documentListView );
     userlistDockWidget = new QDockWidget( i18n("Users"), this );
+    userlistDockWidget->setObjectName( "UserListDockWidget" );
     userlistDockWidget->setWidget( usersBrowser );
 
     // Setup main window
@@ -227,6 +230,11 @@ void MainWindow::setupActions()
         this, SLOT(slotOpenFile()) )->setWhatsThis( i18n("Select a document to open.") );
     actionCollection()->addAction( KStandardAction::Close, "document_close",
         this, SLOT(slotCloseActive()) )->setWhatsThis( i18n("Close active document.") );
+
+    // Dock Widget actions
+    actionCollection()->addAction( "view_file_browser", fileBrowserDockWidget->toggleViewAction() );
+    actionCollection()->addAction( "view_document_list", doclistDockWidget->toggleViewAction() );
+    actionCollection()->addAction( "view_user_browser", userlistDockWidget->toggleViewAction() );
 }
 
 void MainWindow::slotNewConnection()
