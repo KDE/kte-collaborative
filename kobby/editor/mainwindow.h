@@ -23,9 +23,10 @@
 #include <QPointer>
 
 class KUrl;
+class KTabWidget;
+
 class QLabel;
-class QSplitter;
-class QToolBox;
+class QDockWidget;
 
 namespace QInfinity
 {
@@ -98,8 +99,10 @@ class MainWindow
         DocumentBuilder *docBuilder;
 
         // Ui
-        QSplitter *mainHorizSplitter;
-        QToolBox *leftToolBox;
+        QDockWidget *fileBrowserDockWidget;
+        QDockWidget *doclistDockWidget;
+        QDockWidget *userlistDockWidget;
+        KTabWidget *fileBrowserTabWidget;
         DocumentUsersBrowser *usersBrowser;
         RemoteBrowserProxy *remoteBrowserView;
         LocalBrowserView *localBrowserView;

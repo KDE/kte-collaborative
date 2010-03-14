@@ -48,6 +48,7 @@
 #include <KMessageBox>
 #include <KFileDialog>
 #include <KUrl>
+#include <KTabWidget>
 
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
@@ -55,12 +56,12 @@
 #include <KTextEditor/Document>
 
 #include <QLabel>
-#include <QSplitter>
 #include <QTreeView>
 #include <QTabWidget>
 #include <QStatusBar>
 #include <QHostInfo>
 #include <QToolBox>
+#include <QDockWidget>
 
 #include <KDebug>
 
@@ -175,28 +176,28 @@ void MainWindow::setupUi()
     connect( documentListView, SIGNAL(documentActivated(Document&)),
         docTabWidget, SLOT(addDocument(Document&)) );
 
-    // Setup Left ToolBox
-    leftToolBox = new QToolBox( this );
-    leftToolBox->addItem( documentListView,
-        KIcon("document-preview.png"),
-        i18n("Documents") );
-    leftToolBox->addItem( remoteBrowserView,
+    // Setup browser dock widget
+    fileBrowserDockWidget = new QDockWidget( i18n("File Browser"), this );
+    fileBrowserTabWidget = new KTabWidget( fileBrowserDockWidget );
+    fileBrowserTabWidget->addTab( remoteBrowserView,
         KIcon("document-open-remote.png"),
-        i18n("Remote Browser") );
-    leftToolBox->addItem( localBrowserView,
+        i18n("Remote") );
+    fileBrowserTabWidget->addTab( localBrowserView,
         KIcon("folder.png"),
-        i18n("Local Browser") );
-    leftToolBox->addItem( usersBrowser,
-        KIcon("meeting-organizer.png"),
-        i18n("Users") );
-    leftToolBox->setCurrentWidget( remoteBrowserView );
+        i18n("Local") );
+    fileBrowserDockWidget->setWidget( fileBrowserTabWidget );
 
-    mainHorizSplitter = new QSplitter( Qt::Horizontal, this );
-    mainHorizSplitter->addWidget( leftToolBox );
-    mainHorizSplitter->addWidget( docTabWidget );
-    mainHorizSplitter->setStretchFactor( 0, QSizePolicy::Fixed );
+    // Create other dock widgets
+    doclistDockWidget = new QDockWidget( i18n("Documents"), this );
+    doclistDockWidget->setWidget( documentListView );
+    userlistDockWidget = new QDockWidget( i18n("Users"), this );
+    userlistDockWidget->setWidget( usersBrowser );
 
-    setCentralWidget( mainHorizSplitter );
+    // Setup main window
+    setCentralWidget( docTabWidget );
+    addDockWidget( Qt::LeftDockWidgetArea, doclistDockWidget );
+    addDockWidget( Qt::LeftDockWidgetArea, fileBrowserDockWidget );
+    addDockWidget( Qt::RightDockWidgetArea, userlistDockWidget );
     setAutoSaveSettings( "MainWindow", true );
 }
 
@@ -337,25 +338,12 @@ void MainWindow::slotConnectionConnected( Connection *conn )
 
 void MainWindow::restoreSettings()
 {
-    QList<int> sizes;
-    sizes = KobbySettings::mainWindowHorizSplitterSizes();
-    if( sizes.size() )
-        mainHorizSplitter->setSizes( sizes );
-    else
-    {
-        sizes.empty();
-        sizes << 200 << 450;
-        mainHorizSplitter->setSizes( sizes );
-    }
-
     if( KobbySettings::hostName().isEmpty() )
         KobbySettings::setHostName( QHostInfo::localHostName() );
 }
 
 void MainWindow::saveSettings()
 {
-    QList<int> sizes;
-    KobbySettings::setMainWindowHorizSplitterSizes( mainHorizSplitter->sizes() );
     KobbySettings::self()->writeConfig();
 }
 
