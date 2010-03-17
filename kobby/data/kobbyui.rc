@@ -12,6 +12,7 @@
 		<Separator />
 
 		<DefineGroup name="save_merge" append="save_merge" />
+		<Action name="document_upload" />
 		<Separator />
 
 		<DefineGroup name="revert_merge" append="revert_merge"/>
@@ -59,6 +60,7 @@
 	<Action name="document_open" />
 	<Separator />
 	<DefineGroup name="file_operations" />
+	<Action name="document_upload" />
 	<Separator />
 	<DefineGroup name="print_merge" />
 	<Separator />

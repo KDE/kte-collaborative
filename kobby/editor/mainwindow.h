@@ -114,6 +114,7 @@ class MainWindow
         // Actions
         KAction *newConnectionAction;
         KAction *settingsAction;
+        KAction *uploadDocumentAction;
         QAction *edit_undo;
         QAction *edit_redo;
 

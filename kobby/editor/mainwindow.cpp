@@ -231,6 +231,11 @@ void MainWindow::setupActions()
     actionCollection()->addAction( KStandardAction::Close, "document_close",
         this, SLOT(slotCloseActive()) )->setWhatsThis( i18n("Close active document.") );
 
+    uploadDocumentAction = new KAction( i18n("Upload Document"), this );
+    uploadDocumentAction->setWhatsThis( i18n("Send document to collaborative editing server.") );
+    uploadDocumentAction->setIcon( KIcon("document-export.png") );
+    actionCollection()->addAction( "document_upload", uploadDocumentAction );
+
     // Dock Widget actions
     actionCollection()->addAction( "view_file_browser", fileBrowserDockWidget->toggleViewAction() );
     actionCollection()->addAction( "view_document_list", doclistDockWidget->toggleViewAction() );

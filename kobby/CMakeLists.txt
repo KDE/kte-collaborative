@@ -36,6 +36,7 @@ set( KOBBY_SRCS
 	dialogs/settingsdialog.cpp
 	dialogs/setupdialog.cpp
 	dialogs/closedocsdialog.cpp
+	dialogs/uploaddocumentdialog.cpp
 
 	editor/noteplugin.cpp
 	editor/document.cpp
