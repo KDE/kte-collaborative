@@ -198,7 +198,7 @@ void MainWindow::setupUi()
 
     // Setup main window
     setCentralWidget( docTabWidget );
-    addDockWidget( Qt::LeftDockWidgetArea, doclistDockWidget );
+    addDockWidget( Qt::RightDockWidgetArea, doclistDockWidget );
     addDockWidget( Qt::LeftDockWidgetArea, fileBrowserDockWidget );
     addDockWidget( Qt::RightDockWidgetArea, userlistDockWidget );
     setAutoSaveSettings( "MainWindow", true );
