@@ -234,7 +234,6 @@ void MainWindow::setupActions()
     uploadDocumentAction = new KAction( i18n("Upload Document"), this );
     uploadDocumentAction->setWhatsThis( i18n("Send document to collaborative editing server.") );
     uploadDocumentAction->setIcon( KIcon("document-export.png") );
-    actionCollection()->addAction( "document_upload", uploadDocumentAction );
 
     // Dock Widget actions
     actionCollection()->addAction( "view_file_browser", fileBrowserDockWidget->toggleViewAction() );
