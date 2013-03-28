@@ -20,7 +20,7 @@
 
 #include <QObject>
 
-#include <glib/gerror.h>
+#include <glib.h>
 
 class QHostInfo;
 

@@ -21,7 +21,7 @@
 #include "documentmodel.h"
 #include "kobbysettings.h"
 
-#include <glib/gerror.h>
+#include <glib.h>
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/browsermodel.h>
