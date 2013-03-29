@@ -34,26 +34,65 @@
 #include <klocale.h>
 #include <kaboutdata.h>
 
+#include "editor/connection.h"
+#include "editor/document.h"
+#include "editor/collabsession.h"
+#include "editor/itemfactory.h"
+#include "editor/documentbuilder.h"
+#include "editor/remotebrowserview.h"
+#include "editor/noteplugin.h"
+#include <createitemdialog.h>
+#include <createconnectiondialog.h>
+
+#include <libqinfinity/init.h>
+#include <libqinfinity/user.h>
+#include <libqinfinity/browsermodel.h>
+#include <libqinfinity/browseritemfactory.h>
+#include <libqinfinity/browser.h>
+#include <libqinfinity/noteplugin.h>
+#include <libqinfinity/xmlconnection.h>
+#include <libqinfinity/xmppconnection.h>
+
 
 K_PLUGIN_FACTORY( KobbyPluginFactory, registerPlugin<KobbyPlugin>(); )
 K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_plugins",
                                                               ki18n("Collaborative Editing"), "1.0", ki18n("Collaborative Editing"), KAboutData::License_LGPL_V2 ) ) )
 
-
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
+  , m_isConnected(false)
 {
-    qDebug() << "loading kobby plugin";
+    kDebug() << "loading kobby plugin";
+    QInfinity::init();
+
+    m_connection = new Kobby::Connection("localhost", 6523, this);
+    connect(m_connection, SIGNAL(connected(Connection*)),
+            this, SLOT(connected(Connection*)));
+    m_connection->open();
+    kDebug() << "ok";
 }
 
 KobbyPlugin::~KobbyPlugin()
 {
 }
 
+void KobbyPlugin::connected(Kobby::Connection*)
+{
+    qDebug() << "connection established!";
+    m_isConnected = true;
+    foreach ( KobbyPluginView* view, m_views ) {
+        view->connected(m_connection);
+    }
+}
+
 void KobbyPlugin::addView(KTextEditor::View *view)
 {
-  KobbyPluginView *nview = new KobbyPluginView (view);
-  m_views.append (nview);
+    kDebug() << "adding view" << view;
+    KobbyPluginView *nview = new KobbyPluginView(view, m_connection);
+    if ( m_isConnected ) {
+        nview->connected(m_connection);
+    }
+    m_views.append (nview);
 }
 
 void KobbyPlugin::removeView(KTextEditor::View *view)
@@ -67,19 +106,49 @@ void KobbyPlugin::removeView(KTextEditor::View *view)
   }
 }
 
-KobbyPluginView::KobbyPluginView( KTextEditor::View *view)
+KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* connection)
   : QObject( view )
+  , m_connection(connection)
 {
-  setObjectName("kobby-plugin");
+    setObjectName("kobby-plugin");
+    m_view = view;
 
-  m_view = view;
+    connect(view, SIGNAL(selectionChanged(KTextEditor::View*)), this, SLOT(selectionChanged()));
+    connect(view->document(), SIGNAL(textInserted(KTextEditor::Document*, KTextEditor::Range)),
+            this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)));
+    connect(view->document(), SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
+            this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)));
 
-  connect(view, SIGNAL(selectionChanged(KTextEditor::View*)), this, SLOT(selectionChanged()));
+
+    m_browserModel = new QInfinity::BrowserModel( this );
+    m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
+    Kobby::DocumentBuilder* docBuilder = new Kobby::DocumentBuilder( *(view->document()->editor()), *m_browserModel, this );
+
+    m_textPlugin = new Kobby::NotePlugin( *docBuilder, this );
+    m_browserModel->addPlugin( *m_textPlugin );
+//     buffer->insertText(0, "view created", QString("view created").length());
+}
+
+void KobbyPluginView::connected(Kobby::Connection* connection)
+{
+    Kobby::RemoteBrowserProxy* remoteBrowserView = new Kobby::RemoteBrowserProxy( *m_textPlugin, *m_browserModel, 0 );
+    m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+    remoteBrowserView->show();
 }
 
 KobbyPluginView::~KobbyPluginView()
 {
 
+}
+
+void KobbyPluginView::textInserted(KTextEditor::Document* doc, KTextEditor::Range range)
+{
+    kDebug() << "text inserted:" << range << doc->textLines(range);
+}
+
+void KobbyPluginView::textRemoved(KTextEditor::Document* doc, KTextEditor::Range range)
+{
+    kDebug() << "text removed:" << range << doc->textLines(range);
 }
 
 KTextEditor::View* KobbyPluginView::view() const
@@ -89,7 +158,7 @@ KTextEditor::View* KobbyPluginView::view() const
 
 void KobbyPluginView::selectionChanged()
 {
-  qDebug() << "plugin: selection changed";
+    kDebug() << "plugin: selection changed" << "in view" << this;
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;

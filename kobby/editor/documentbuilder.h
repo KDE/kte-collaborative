@@ -59,7 +59,7 @@ class KDocumentTextBuffer;
 class DocumentBuilder
     : public QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         DocumentBuilder( KTextEditor::Editor &editor,

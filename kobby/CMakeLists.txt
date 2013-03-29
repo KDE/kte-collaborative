@@ -10,6 +10,15 @@ include(KDE4Defaults)
 
 set( kobby_PART_SRCS
     kobbyplugin.cpp
+    kobbysettings.cpp
+    editor/connection.cpp
+    editor/document.cpp
+    editor/documentmodel.cpp
+    editor/documentbuilder.cpp
+    editor/itemfactory.cpp
+    editor/noteplugin.cpp
+    editor/remotebrowserview.cpp
+    dialogs/createitemdialog.cpp
 )
 
 kde4_add_plugin(ktexteditor_kobby ${kobby_PART_SRCS})

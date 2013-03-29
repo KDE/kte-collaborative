@@ -26,38 +26,53 @@
 #include <kjob.h>
 #include <kurl.h>
 #include <kio/job.h>
+#include "editor/connection.h"
+#include <libqinfinity/browsermodel.h>
+
+using namespace Kobby;
 
 class KobbyPlugin : public KTextEditor::Plugin
 {
-  Q_OBJECT
+Q_OBJECT
 
-  public:
+public:
     explicit KobbyPlugin( QObject *parent = 0,
-                          const QVariantList &args = QVariantList() );
+                        const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
     void addView(KTextEditor::View *view);
     void removeView(KTextEditor::View *view);
 
 
-  private:
+private:
     QList<class KobbyPluginView*> m_views;
+    Kobby::Connection* m_connection;
+    bool m_isConnected;
+
+public slots:
+    void connected(Connection*);
 };
 
 class KobbyPluginView : public QObject
 {
   Q_OBJECT
   public:
-    explicit KobbyPluginView(KTextEditor::View *view);
+    explicit KobbyPluginView(KTextEditor::View *view, Kobby::Connection* connection);
     ~KobbyPluginView();
 
     KTextEditor::View* view() const;
 
   public Q_SLOTS:
     void selectionChanged();
+    void textInserted(KTextEditor::Document*,KTextEditor::Range);
+    void textRemoved(KTextEditor::Document*,KTextEditor::Range);
+    void connected(Kobby::Connection* connection);
 
   private:
     KTextEditor::View* m_view;
+    Kobby::Connection* m_connection;
+    QInfinity::BrowserModel* m_browserModel;
+    QInfinity::NotePlugin* m_textPlugin;
 };
 
 #endif // _KOBBY_PLUGIN_H_
