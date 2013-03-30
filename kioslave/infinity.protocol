@@ -1,0 +1,17 @@
+[Protocol]
+exec=kio_infinity
+protocol=inf
+input=none
+output=filesystem
+listing=Name,Type,Size,Date,Access,Owner,Group,Link,
+reading=true
+writing=true
+makedir=true
+deleting=true
+linking=false
+moving=false
+Icon=folder-remote
+maxInstances=20
+maxInstancesPerHost=1
+Description=Infinity kioslave
+X-DocPath=kioslave/fish/index.html

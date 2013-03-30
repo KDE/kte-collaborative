@@ -84,12 +84,14 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 {
     QStandardItem *stdItem = m_browserModel->itemFromIndex( index );
     QInfinity::NodeItem *nodeItem;
+    kDebug() << index.parent().isValid() << index.parent().row() << index.parent().column();
 
     if( stdItem->type() != QInfinity::BrowserItemFactory::NodeItem )
     {
-        kDebug() << i18n("Cannot open non-node item.");
+        kDebug() << "Cannot open non-node item" << index.row() << index.column() << stdItem->type() << index.isValid();
         return;
     }
+    kDebug() << "item ok";
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
     if(nodeItem->isDirectory())
         return;

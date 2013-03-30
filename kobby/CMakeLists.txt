@@ -4,7 +4,6 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-find_package(Libqinfinity REQUIRED)
 find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
 
