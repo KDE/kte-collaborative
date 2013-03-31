@@ -27,6 +27,7 @@
 #include <kurl.h>
 #include <kio/job.h>
 #include "editor/connection.h"
+#include "editor/documentbuilder.h"
 #include <libqinfinity/browsermodel.h>
 
 using namespace Kobby;
@@ -40,9 +41,9 @@ public:
                         const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
-    void addView(KTextEditor::View *view);
-    void removeView(KTextEditor::View *view);
-
+    virtual void addView(KTextEditor::View *view);
+    virtual void removeView(KTextEditor::View *view);
+    virtual void addDocument(KTextEditor::Document* document);
 
 private:
     QList<class KobbyPluginView*> m_views;
@@ -51,6 +52,7 @@ private:
 
 public slots:
     void connected(Connection*);
+    void documentUrlChanged(KTextEditor::Document*);
 };
 
 class KobbyPluginView : public QObject
@@ -73,6 +75,7 @@ class KobbyPluginView : public QObject
     Kobby::Connection* m_connection;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
+    Kobby::DocumentBuilder* m_docBuilder;
 };
 
 #endif // _KOBBY_PLUGIN_H_

@@ -27,21 +27,30 @@
 #include <klocale.h>
 #include <kencodingprober.h>
 #include <qcoreapplication.h>
+#include <qapplication.h>
 
 #include <kobby/editor/itemfactory.h>
+#include <noteplugin.h>
+#include <documentbuilder.h>
+#include <remotebrowserview.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/init.h>
 
+#include "malloc.h"
+#include <KTextEditor/View>
+
 using namespace KIO;
 
 extern "C" {
 
 int KDE_EXPORT kdemain( int argc, char **argv )
+// int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
+//     QApplication app(argc, argv);
     KComponentData componentData("infinity", "kio_infinity");
 
     qDebug() << "starting infinity kioslave";
@@ -50,11 +59,14 @@ int KDE_EXPORT kdemain( int argc, char **argv )
         exit(-1);
     }
 
+    QInfinity::init();
+
     InfinityProtocol slave(argv[2], argv[3]);
     slave.dispatchLoop();
+//     slave.listDir(KUrl("inf://localhost"));
 
     qDebug() << "slave exiting";
-    return 0;
+    return app.exec();
 }
 
 }
@@ -134,25 +146,53 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << "LIST DIR" << url;
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
-    QInfinity::init();
-
     m_connection = new Kobby::Connection(url.host(), 6523, this);
-    QEventLoop loop;
-    connect(m_connection, SIGNAL(connected(Connection*)),
-            &loop, SLOT(quit()));
-    m_connection->open();
-
-    // wait for connected event
-    loop.exec(QEventLoop::ExcludeUserInputEvents);
-
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
+    m_connection->open();
+
+    // TODO make synchronous properly
+    while ( ! m_connection->xmppConnection() ) {
+        QApplication::processEvents();
+    }
 
     m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+    kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
+
+    for ( int i = 0; i < 1000; i++ ) {
+        QApplication::processEvents();
+        usleep(1000);
+    }
+
+    Kobby::DocumentBuilder* m_docBuilder = new Kobby::DocumentBuilder( *(KTextEditor::Editor*)(0), *m_browserModel, this );
+
+    Kobby::NotePlugin* m_textPlugin = new Kobby::NotePlugin( *m_docBuilder, this );
+    m_browserModel->addPlugin( *m_textPlugin );
+
+    Kobby::RemoteBrowserProxy* remoteBrowserView = new Kobby::RemoteBrowserProxy( *m_textPlugin, *m_browserModel, 0 );
+    m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+//     connect(&remoteBrowserView->remoteView(), SIGNAL(openItem(QModelIndex)),
+//             m_docBuilder, SLOT(openInfDocmuent(QModelIndex)));
+    remoteBrowserView->show();
+    while ( QCoreApplication::hasPendingEvents() ) {
+        QCoreApplication::processEvents();
+    }
 
     QInfinity::Browser* browser = m_browserModel->browsers().first();
     QInfinity::BrowserIter iter(*browser);
     kDebug() << "connection root path:" << iter.path();
+
+    if ( ! iter.isExplored() ) {
+        InfcExploreRequest* request = iter.explore();
+        GError* error;
+        while ( ! infc_explore_request_finished(request, &error) ) {
+            kDebug() << "waiting for exploration";
+            // TODO meh
+            QCoreApplication::processEvents();
+        }
+    }
+    iter.child();
+    qDebug() << iter.path();
 
 
 //     QString title;
@@ -203,5 +243,5 @@ void InfinityProtocol::listDir(const KUrl &url)
 //     }
 //
 //     listEntries( uds_entry_list );
-    finished();
+//     finished();
 }

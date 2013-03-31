@@ -47,7 +47,6 @@ private:
     static InfinityProtocol* _self;
     Kobby::Connection* m_connection;
     QInfinity::BrowserModel* m_browserModel;
-
 };
 
 

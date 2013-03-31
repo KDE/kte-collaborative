@@ -33,6 +33,7 @@
 #include <kpluginloader.h>
 #include <klocale.h>
 #include <kaboutdata.h>
+#include <KTextEditor/Editor>
 
 #include "editor/connection.h"
 #include "editor/document.h"
@@ -41,6 +42,7 @@
 #include "editor/documentbuilder.h"
 #include "editor/remotebrowserview.h"
 #include "editor/noteplugin.h"
+#include "editor/documentmodel.h"
 #include <createitemdialog.h>
 #include <createconnectiondialog.h>
 
@@ -106,6 +108,18 @@ void KobbyPlugin::removeView(KTextEditor::View *view)
   }
 }
 
+void KobbyPlugin::addDocument(KTextEditor::Document* document)
+{
+    kDebug() << "opening document";
+    connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),
+            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
+}
+
+void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
+{
+    kDebug() << "new url:" << document->url();
+}
+
 KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* connection)
   : QObject( view )
   , m_connection(connection)
@@ -122,17 +136,18 @@ KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* co
 
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
-    Kobby::DocumentBuilder* docBuilder = new Kobby::DocumentBuilder( *(view->document()->editor()), *m_browserModel, this );
+    m_docBuilder = new Kobby::DocumentBuilder( *(view->document()->editor()), *m_browserModel, this );
 
-    m_textPlugin = new Kobby::NotePlugin( *docBuilder, this );
+    m_textPlugin = new Kobby::NotePlugin( *m_docBuilder, this );
     m_browserModel->addPlugin( *m_textPlugin );
-//     buffer->insertText(0, "view created", QString("view created").length());
 }
 
 void KobbyPluginView::connected(Kobby::Connection* connection)
 {
     Kobby::RemoteBrowserProxy* remoteBrowserView = new Kobby::RemoteBrowserProxy( *m_textPlugin, *m_browserModel, 0 );
     m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+    connect(&remoteBrowserView->remoteView(), SIGNAL(openItem(QModelIndex)),
+            m_docBuilder, SLOT(openInfDocmuent(QModelIndex)));
     remoteBrowserView->show();
 }
 
