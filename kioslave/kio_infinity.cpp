@@ -153,46 +153,41 @@ void InfinityProtocol::listDir(const KUrl &url)
 
     // TODO make synchronous properly
     while ( ! m_connection->xmppConnection() ) {
-        QApplication::processEvents();
+        QCoreApplication::processEvents();
     }
 
     m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
     kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
 
-    for ( int i = 0; i < 1000; i++ ) {
-        QApplication::processEvents();
-        usleep(1000);
-    }
-
-    Kobby::DocumentBuilder* m_docBuilder = new Kobby::DocumentBuilder( *(KTextEditor::Editor*)(0), *m_browserModel, this );
-
-    Kobby::NotePlugin* m_textPlugin = new Kobby::NotePlugin( *m_docBuilder, this );
-    m_browserModel->addPlugin( *m_textPlugin );
-
-    Kobby::RemoteBrowserProxy* remoteBrowserView = new Kobby::RemoteBrowserProxy( *m_textPlugin, *m_browserModel, 0 );
-    m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
-//     connect(&remoteBrowserView->remoteView(), SIGNAL(openItem(QModelIndex)),
-//             m_docBuilder, SLOT(openInfDocmuent(QModelIndex)));
-    remoteBrowserView->show();
-    while ( QCoreApplication::hasPendingEvents() ) {
+    QInfinity::Browser* browser = m_browserModel->browsers().first();
+    while ( browser->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
     }
 
-    QInfinity::Browser* browser = m_browserModel->browsers().first();
     QInfinity::BrowserIter iter(*browser);
     kDebug() << "connection root path:" << iter.path();
 
     if ( ! iter.isExplored() ) {
+        kDebug() << "exploring iter";
         InfcExploreRequest* request = iter.explore();
-        GError* error;
-        while ( ! infc_explore_request_finished(request, &error) ) {
+        while ( INFC_IS_EXPLORE_REQUEST(request) && ! infc_explore_request_get_finished(INFC_EXPLORE_REQUEST(request)) ) {
             kDebug() << "waiting for exploration";
-            // TODO meh
             QCoreApplication::processEvents();
         }
     }
     iter.child();
-    qDebug() << iter.path();
+
+    do {
+        UDSEntry entry;
+        entry.insert( KIO::UDSEntry::UDS_URL, iter.path() );
+        entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
+        entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, S_IFREG );
+        kDebug() << "listing" << iter.path();
+        listEntry(entry, false);
+    } while ( iter.next() );
+
+    listEntry(UDSEntry(), true);
+    finished();
 
 
 //     QString title;
