@@ -105,31 +105,10 @@ void InfinityProtocol::get(const KUrl& url )
 void InfinityProtocol::stat( const KUrl& url)
 {
     kDebug() << "ENTERING STAT " << url.url();
-/*
-    QString title, section;
-
-    if (!parseUrl(url.path(), title, section))
-    {
-        error(KIO::ERR_MALFORMED_URL, url.url());
-        return;
-    }
-
-    kDebug(7107) << "URL " << url.url() << " parsed to title='" << title << "' section=" << section;
 
     UDSEntry entry;
-    entry.insert(KIO::UDSEntry::UDS_NAME, title);
-    entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, S_IFREG);
-
-#if 0 // not useful, is it?
-    QString newUrl = "man:"+title;
-    if (!section.isEmpty())
-        newUrl += QString("(%1)").arg(section);
-    entry.insert(KIO::UDSEntry::UDS_URL, newUrl);
-#endif
-
-    entry.insert(KIO::UDSEntry::UDS_MIME_TYPE, QString::fromLatin1("text/html"));
-
-    statEntry(entry);*/
+    entry.insert(KIO::UDSEntry::UDS_MIME_TYPE, QString::fromLatin1("text/plain"));
+    statEntry(entry);
 
     finished();
 }
@@ -179,9 +158,9 @@ void InfinityProtocol::listDir(const KUrl &url)
 
     do {
         UDSEntry entry;
-        entry.insert( KIO::UDSEntry::UDS_URL, iter.path() );
+        entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.path() );
         entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
-        entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, S_IFREG );
+        entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
         kDebug() << "listing" << iter.path();
         listEntry(entry, false);
     } while ( iter.next() );
