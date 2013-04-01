@@ -47,8 +47,15 @@ class Connection
             QObject *parent = 0 );
         ~Connection();
 
+        // Prepares the connection by looking up the host name and populating
+        // the internals as soon as it is looked up.
+        void prepare();
+        // Opens a prepared connection. You must call prepare() and wait for the ready()
+        // signal before calling this.
         void open();
         QString name() const;
+        // Returns the xmpp connection if called after ready()
+        // was emitted, or 0 otherwise.
         QInfinity::XmppConnection *xmppConnection() const;
 
     Q_SIGNALS:
@@ -57,6 +64,10 @@ class Connection
         void disconnecting( Connection *conn );
         void disconnected( Connection *conn );
         void error( Connection *conn, QString message );
+        // This signal is emitted when the connection is ready to be opened,
+        // i.e. when the host name was looked up and everything is set up.
+        // When this signal is emitted, xmppConnection() becomes valid.
+        void ready();
 
     private Q_SLOTS:
         void slotHostnameLookedUp( const QHostInfo &hostInfo );

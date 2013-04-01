@@ -46,10 +46,16 @@ Connection::~Connection()
 {
 }
 
-void Connection::open()
+void Connection::prepare()
 {
     QHostInfo::lookupHost( m_hostname, this,
         SLOT(slotHostnameLookedUp(const QHostInfo&)) );
+}
+
+void Connection::open()
+{
+    Q_ASSERT(m_tcpConnection && "you must call prepare() and wait for the ready() signal to be emitted before calling open()");
+    m_tcpConnection->open();
 }
 
 QString Connection::name() const
@@ -89,7 +95,7 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
     connect( m_xmppConnection, SIGNAL(error( const GError* )),
         this, SLOT(slotError( const GError* )) );
 
-    m_tcpConnection->open();
+    emit ready();
 }
 
 void Connection::slotStatusChanged()
