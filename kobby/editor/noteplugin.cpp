@@ -20,6 +20,7 @@
 #include "documentbuilder.h"
 
 #include <KTextEditor/Document>
+#include <KTextEditor/Editor>
 
 #include <QDebug>
 
@@ -32,10 +33,10 @@
 namespace Kobby
 {
 
-NotePlugin::NotePlugin( DocumentBuilder &builder,
+NotePlugin::NotePlugin( KTextEditor::Editor* editor,
     QObject *parent )
     : QInfinity::NotePlugin( "InfText", parent )
-    , m_builder( &builder )
+    , m_editor( editor )
 {
 }
 
@@ -44,7 +45,7 @@ QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *
     QInfinity::CommunicationJoinedGroup *syncGroup,
     QInfinity::XmlConnection *syncConnection )
 {
-    KDocumentTextBuffer *buffer = m_builder->createKDocumentTextBuffer( "UTF-8" );
+    KDocumentTextBuffer *buffer = new KDocumentTextBuffer( *m_editor->createDocument( this ), "utf-8", this );
     QInfinity::TextSession *session = new QInfinity::TextSession( *commMgr,
         *buffer,
         sess_status,
