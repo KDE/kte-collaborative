@@ -52,6 +52,7 @@ public slots:
     void subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>);
     void userJoinCompleted(QPointer<QInfinity::User>);
     void sessionStatusChanged();
+    void joinUser();
 private:
     KTextEditor::Document* m_document;
     QInfinity::BrowserModel* m_browserModel;

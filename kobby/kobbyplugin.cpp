@@ -58,6 +58,8 @@
 #include <libqinfinity/userrequest.h>
 
 #include <kparts/part.h>
+#include <QApplication>
+#include <QTimer>
 
 
 K_PLUGIN_FACTORY( KobbyPluginFactory, registerPlugin<KobbyPlugin>(); )
@@ -259,16 +261,21 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     kDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
     m_proxy = proxy;
     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
-                    this, SLOT(sessionStatusChanged()));
+                     this, SLOT(sessionStatusChanged()));
 }
 
 void ManagedDocument::sessionStatusChanged()
 {
-    kDebug() << "session status changed";
+    kDebug() << "session status changed to " << m_proxy->session()->status();
     if ( m_proxy->session()->status() != QInfinity::Session::Running ) {
         kDebug() << "not running, ignoring event";
         return;
     }
+    QTimer::singleShot(0, this, SLOT(joinUser()));
+}
+
+void ManagedDocument::joinUser()
+{
     QInfinity::UserRequest* request = QInfinity::TextSession::joinUser(m_proxy,
                 *dynamic_cast<QInfinity::TextSession*>(m_proxy->session().data()), "b00n", 0.4);
     QObject::connect(request, SIGNAL(finished(QPointer<QInfinity::User>)),
@@ -277,6 +284,8 @@ void ManagedDocument::sessionStatusChanged()
 
 void ManagedDocument::userJoinCompleted(QPointer< QInfinity::User > )
 {
+    // delete the join request
+    QObject::sender()->deleteLater();
     kDebug() << "whee, new user joined";
 }
 
