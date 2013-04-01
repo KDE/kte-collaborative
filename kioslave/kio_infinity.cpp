@@ -125,17 +125,18 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << "LIST DIR" << url;
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
+    QEventLoop loop;
     m_connection = new Kobby::Connection(url.host(), 6523, this);
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
-    m_connection->open();
+    QObject::connect(m_connection, SIGNAL(ready()), &loop, SLOT(quit()));
+    m_connection->prepare();
 
     // TODO make synchronous properly
-    while ( ! m_connection->xmppConnection() ) {
-        QCoreApplication::processEvents();
-    }
-
+    loop.exec();
     m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+    m_connection->open();
+
     kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
 
     QInfinity::Browser* browser = m_browserModel->browsers().first();
