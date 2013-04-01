@@ -56,19 +56,18 @@ Q_OBJECT
 public:
     IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
         : m_browser(browser)
+        , m_currentIter(*m_browser)
     {
         m_remainingDirs << lookupPath.split('/').toVector();
     };
     static void finished_cb( InfcNodeRequest* request,
-                             const InfcBrowserIter* iter,
                              void* user_data )
     {
-        qDebug() << "iter explore finished";
-        static_cast<IterLookupHelper*>(user_data)->directoryExplored(iter);
+        static_cast<IterLookupHelper*>(user_data)->directoryExplored();
     }
 
     void begin() {
-        explore(QInfinity::BrowserIter(*m_browser));
+        explore(m_currentIter);
     };
 
 signals:
@@ -76,8 +75,8 @@ signals:
     void failed();
 
 protected:
-    void directoryExplored(const InfcBrowserIter* iter_) {
-        QInfinity::BrowserIter iter(iter_, INFC_BROWSER(m_browser->gobject()));
+    void directoryExplored() {
+        kDebug() << "directory explored";
         QString findEntry = m_remainingDirs.pop();
         // ... find matching item
         // found = ...
@@ -94,6 +93,7 @@ protected:
         if ( ! directory.isExplored() ) {
             kDebug() << "exploring iter";
             InfcExploreRequest* request = directory.explore();
+            m_currentIter = directory;
             g_signal_connect_after(request, "finished",
                                    G_CALLBACK(IterLookupHelper::finished_cb), (void*) this);
         }
@@ -101,6 +101,7 @@ protected:
 
     QStack<QString> m_remainingDirs;
     QInfinity::Browser* m_browser;
+    QInfinity::BrowserIter m_currentIter;
 };
 
 class KobbyPluginView;
