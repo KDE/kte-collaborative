@@ -58,7 +58,12 @@ public:
         : m_browser(browser)
         , m_currentIter(*m_browser)
     {
-        m_remainingDirs << lookupPath.split('/').toVector();
+        // remove starting slash
+        if ( lookupPath.startsWith('/') ) {
+            lookupPath = lookupPath.mid(1);
+        }
+        m_remainingComponents << lookupPath.split('/').toVector();
+        kDebug() << "finding iter for" << m_remainingComponents;
     };
     static void finished_cb( InfcNodeRequest* request,
                              void* user_data )
@@ -77,15 +82,26 @@ signals:
 protected:
     void directoryExplored() {
         kDebug() << "directory explored";
-        QString findEntry = m_remainingDirs.pop();
-        // ... find matching item
-        // found = ...
-        if ( m_remainingDirs.isEmpty() ) {
+        QString findEntry = m_remainingComponents.pop();
+        bool hasChildren = m_currentIter.child();
+        if ( ! hasChildren ) {
+            emit failed();
+            return;
+        }
+
+        do {
+            kDebug() << m_currentIter.name();
+            if ( m_currentIter.name() == findEntry ) {
+                break;
+            }
+        } while ( m_currentIter.next() );
+
+        if ( m_remainingComponents.isEmpty() ) {
             // no directories remain
-//             emit done(found);
+            emit done(m_currentIter);
         }
         else {
-//             explore(found);
+            explore(m_currentIter);
         }
     };
 
@@ -99,7 +115,7 @@ protected:
         }
     };
 
-    QStack<QString> m_remainingDirs;
+    QStack<QString> m_remainingComponents;
     QInfinity::Browser* m_browser;
     QInfinity::BrowserIter m_currentIter;
 };
