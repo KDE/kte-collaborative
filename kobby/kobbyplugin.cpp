@@ -46,6 +46,7 @@
 #include <createitemdialog.h>
 #include <createconnectiondialog.h>
 
+#include <libqinfinity/communicationjoinedgroup.h>
 #include <libqinfinity/init.h>
 #include <libqinfinity/user.h>
 #include <libqinfinity/browsermodel.h>
@@ -54,6 +55,7 @@
 #include <libqinfinity/noteplugin.h>
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/xmppconnection.h>
+#include <libqinfinity/userrequest.h>
 
 #include <kparts/part.h>
 
@@ -67,6 +69,7 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   , m_isConnected(false)
   , m_browserReady(false)
   , m_docBuilder(0)
+  , m_session(0)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
@@ -88,6 +91,15 @@ void KobbyPlugin::connectionPrepared()
                          this, SLOT(browserConnected(const QInfinity::Browser*)), Qt::UniqueConnection);
     }
     m_connection->open();
+}
+
+void KobbyPlugin::userJoinCompleted(QPointer< QInfinity::User > user)
+{
+    kDebug() << "user join completed";
+    foreach ( ManagedDocument* doc, m_managedDocuments ) {
+        KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(*(doc->document()), "utf-8");
+        buffer->setUser(user);
+    }
 }
 
 void KobbyPlugin::connected(Kobby::Connection* connection)
@@ -169,6 +181,7 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
         m_docBuilder = new Kobby::DocumentBuilder( *(document->editor()), *m_browserModel, this );
 
         m_textPlugin = new Kobby::NotePlugin( document->editor(), this );
+        m_communicationManager = new QInfinity::CommunicationManager();
         m_browserModel->addPlugin( *m_textPlugin );
     }
 
@@ -241,14 +254,41 @@ void ManagedDocument::subscribe()
     helper->begin();
 }
 
+void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QInfinity::SessionProxy > proxy)
+{
+    kDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
+    m_proxy = proxy;
+    QObject::connect(proxy->session(), SIGNAL(statusChanged()),
+                    this, SLOT(sessionStatusChanged()));
+}
+
+void ManagedDocument::sessionStatusChanged()
+{
+    kDebug() << "session status changed";
+    if ( m_proxy->session()->status() != QInfinity::Session::Running ) {
+        kDebug() << "not running, ignoring event";
+        return;
+    }
+    QInfinity::UserRequest* request = QInfinity::TextSession::joinUser(m_proxy,
+                *dynamic_cast<QInfinity::TextSession*>(m_proxy->session().data()), "b00n", 0.4);
+    QObject::connect(request, SIGNAL(finished(QPointer<QInfinity::User>)),
+                     this, SLOT(userJoinCompleted(QPointer<QInfinity::User>)));
+}
+
+void ManagedDocument::userJoinCompleted(QPointer< QInfinity::User > )
+{
+    kDebug() << "whee, new user joined";
+}
+
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 {
     // delete the lookup helper
     QObject::sender()->deleteLater();
     kDebug() << "finishing subscription with iter " << iter.path();
-    // TODO URGENT multiple connections
-    kDebug() << iter.infBrowserIter()->node;
-    m_browserModel->browsers().first()->subscribeSession(iter);
+    QPointer< QInfinity::Browser > browser = iter.browser();
+    QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
+                     this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)));
+    browser->subscribeSession(iter);
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;

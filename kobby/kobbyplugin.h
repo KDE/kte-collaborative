@@ -33,6 +33,7 @@
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseriter.h>
 #include <libqinfinity/browser.h>
+#include <libqinfinity/textsession.h>
 
 using namespace Kobby;
 
@@ -43,12 +44,19 @@ public:
     void subscribe();
     void unsubscribe();
     bool isSubscribed();
+    KTextEditor::Document* document() const {
+        return m_document;
+    };
 public slots:
     void finishSubscription(QInfinity::BrowserIter iter);
+    void subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>);
+    void userJoinCompleted(QPointer<QInfinity::User>);
+    void sessionStatusChanged();
 private:
     KTextEditor::Document* m_document;
     QInfinity::BrowserModel* m_browserModel;
     bool m_subscribed;
+    QPointer< QInfinity::SessionProxy > m_proxy;
 };
 
 class IterLookupHelper : public QObject {
@@ -144,6 +152,8 @@ private:
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
     Kobby::DocumentBuilder* m_docBuilder;
+    QInfinity::CommunicationManager* m_communicationManager;
+    QInfinity::TextSession* m_session;
 
 public slots:
     // This is called when the underlying connection is established.
@@ -155,6 +165,9 @@ public slots:
     void documentUrlChanged(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*,KTextEditor::Range);
     void textRemoved(KTextEditor::Document*,KTextEditor::Range);
+    void userJoinCompleted(QPointer<QInfinity::User>);
+
+    friend class ManagedDocument;
 };
 
 class KobbyPluginView : public QObject
