@@ -166,7 +166,7 @@ class KDocumentTextBuffer
     Q_OBJECT;
 
     public:
-        KDocumentTextBuffer( KTextEditor::Document &kDocument,
+        KDocumentTextBuffer( KTextEditor::Document* kDocument,
             const QString &encoding,
             QObject *parent = 0 );
         ~KDocumentTextBuffer();

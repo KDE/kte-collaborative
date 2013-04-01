@@ -98,7 +98,7 @@ void InfinityProtocol::get(const KUrl& url )
 
     // tell the mimetype
     mimeType("text/plain");
-    data("Hello World from kioslave!");
+    data("");
     finished();
 }
 

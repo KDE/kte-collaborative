@@ -20,6 +20,7 @@
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>
+#include "document.h"
 #include <KTextEditor/Editor>
 
 namespace Kobby
@@ -35,16 +36,17 @@ class NotePlugin
 {
 
     public:
-        NotePlugin( KTextEditor::Editor* editor,
+        NotePlugin( KTextEditor::Editor* editor, KDocumentTextBuffer* buffer,
             QObject *parent = 0 );
 
-        QInfinity::Session *createSession( QInfinity::CommunicationManager *commMgr,
+        QInfinity::Session *createSession(QInfinity::CommunicationManager *commMgr,
             QInfinity::Session::Status sess_status,
             QInfinity::CommunicationJoinedGroup *syncGroup,
             QInfinity::XmlConnection *syncConnection );
 
     private:
         KTextEditor::Editor* m_editor;
+        KDocumentTextBuffer* m_buffer;
 
 };
 

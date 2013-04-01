@@ -99,8 +99,7 @@ void KobbyPlugin::userJoinCompleted(QPointer< QInfinity::User > user)
 {
     kDebug() << "user join completed";
     foreach ( ManagedDocument* doc, m_managedDocuments ) {
-        KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(*(doc->document()), "utf-8");
-        buffer->setUser(user);
+        doc->m_textBuffer->setUser(user);
     }
 }
 
@@ -153,13 +152,13 @@ void KobbyPlugin::removeView(KTextEditor::View *view)
 
 void KobbyPlugin::addDocument(KTextEditor::Document* document)
 {
-    kDebug() << "adding document" << document;
+    kDebug() << "adding document" << document << document->url();
     m_managedDocuments.append(new ManagedDocument(document, m_browserModel));
 }
 
 void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
 {
-    kDebug() << "new url:" << document->url();
+    kDebug() << "new url:" << document->url() << document;
     if ( document->url().protocol() != "inf" ) {
         kDebug() << "not a collaborative document:" << document->url().url();
         return;
@@ -182,7 +181,14 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
         // But we don't get the editor instance earlier, so need to investigate why it is needed.
         m_docBuilder = new Kobby::DocumentBuilder( *(document->editor()), *m_browserModel, this );
 
-        m_textPlugin = new Kobby::NotePlugin( document->editor(), this );
+        KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(document, "utf-8");
+        foreach ( ManagedDocument* doc, m_managedDocuments ) {
+            if ( doc->document() == document ) {
+                doc->m_textBuffer = buffer;
+            }
+        }
+        m_textPlugin = new Kobby::NotePlugin( document->editor(), buffer,
+                                              this );
         m_communicationManager = new QInfinity::CommunicationManager();
         m_browserModel->addPlugin( *m_textPlugin );
     }
@@ -208,12 +214,12 @@ KobbyPluginView::~KobbyPluginView()
 
 void KobbyPlugin::textInserted(KTextEditor::Document* doc, KTextEditor::Range range)
 {
-    kDebug() << "text inserted:" << range << doc->textLines(range);
+    kDebug() << "text inserted:" << range << doc->textLines(range) << doc;
 }
 
 void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range range)
 {
-    kDebug() << "text removed:" << range << doc->textLines(range);
+    kDebug() << "text removed:" << range << doc->textLines(range) << doc;
 }
 
 KTextEditor::View* KobbyPluginView::view() const
@@ -232,7 +238,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, QInfinity::Bro
     , m_browserModel(model)
     , m_subscribed(false)
 {
-
+    kDebug() << "now managing document" << document << document->url();
 }
 
 void ManagedDocument::unsubscribe()
@@ -276,17 +282,18 @@ void ManagedDocument::sessionStatusChanged()
 
 void ManagedDocument::joinUser()
 {
-    QInfinity::UserRequest* request = QInfinity::TextSession::joinUser(m_proxy,
-                *dynamic_cast<QInfinity::TextSession*>(m_proxy->session().data()), "b00n", 0.4);
-    QObject::connect(request, SIGNAL(finished(QPointer<QInfinity::User>)),
-                     this, SLOT(userJoinCompleted(QPointer<QInfinity::User>)));
+//     QInfinity::UserRequest* request = QInfinity::TextSession::joinUser(m_proxy,
+//                 *dynamic_cast<QInfinity::TextSession*>(m_proxy->session().data()),
+//                                                        "b00n" + QString::number(QTime::currentTime().second()), 0.4);
+//     QObject::connect(request, SIGNAL(finished(QPointer<QInfinity::User>)),
+//                      this, SLOT(userJoinCompleted(QPointer<QInfinity::User>)));
 }
 
 void ManagedDocument::userJoinCompleted(QPointer< QInfinity::User > )
 {
     // delete the join request
-    QObject::sender()->deleteLater();
-    kDebug() << "whee, new user joined";
+//     QObject::sender()->deleteLater();
+//     kDebug() << "whee, new user joined";
 }
 
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)

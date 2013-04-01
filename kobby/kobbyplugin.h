@@ -47,6 +47,7 @@ public:
     KTextEditor::Document* document() const {
         return m_document;
     };
+    KDocumentTextBuffer* m_textBuffer;
 public slots:
     void finishSubscription(QInfinity::BrowserIter iter);
     void subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>);

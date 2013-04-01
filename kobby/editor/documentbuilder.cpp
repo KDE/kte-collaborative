@@ -69,7 +69,7 @@ DocumentBuilder::~DocumentBuilder()
 KDocumentTextBuffer *DocumentBuilder::createKDocumentTextBuffer(
     const QString &encoding )
 {
-    KDocumentTextBuffer *doc = new KDocumentTextBuffer( *editor->createDocument( this ),
+    KDocumentTextBuffer *doc = new KDocumentTextBuffer( editor->createDocument( this ),
         encoding, this );
     return doc;
 }

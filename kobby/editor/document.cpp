@@ -121,7 +121,7 @@ void Document::throwFatalError( const QString &message )
     emit( fatalError( this, message ) );
 }
 
-KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
+KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     const QString &encoding,
     QObject *parent )
     : QInfinity::AbstractTextBuffer( encoding, parent )
@@ -129,19 +129,20 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document &kDocument,
     , blockLocalRemove( false )
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
-    , m_kDocument( &kDocument )
+    , m_kDocument( kDocument )
     , m_insertCount( 0 )
     , m_undoCount( 0 )
     , undo_lock( false )
     , redo_lock( false )
 {
-    connect( &kDocument, SIGNAL(textChanged(KTextEditor::Document*,
+    kDebug() << "new text buffer for document" << kDocument;
+    connect( kDocument, SIGNAL(textChanged(KTextEditor::Document*,
             const KTextEditor::Range&, const KTextEditor::Range&)),
         this, SLOT(localTextChanged(KTextEditor::Document*,
             const KTextEditor::Range&, const KTextEditor::Range&)) );
-    connect( &kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
+    connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
-    connect( &kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
+    connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextRemoved(KTextEditor::Document*, const KTextEditor::Range&)) );
 }
 
@@ -163,6 +164,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
+    kDebug() << "insert text" << offset << chunk.text() << kDocument();
     Q_UNUSED(user)
 
     if( !blockRemoteInsert )
@@ -213,6 +215,7 @@ void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    kDebug() << "local text inserted" << kDocument();
     Q_UNUSED(document)
 
     textOpPerformed();
@@ -573,7 +576,7 @@ void InfTextDocument::joinSession()
         setLoadState( Document::Joining );
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
             *m_session,
-            KobbySettings::nickName(),
+            "b00n" + QString::number(QTime::currentTime().second()),
             10 );
         connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
             this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
