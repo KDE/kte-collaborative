@@ -66,6 +66,7 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
   , m_isConnected(false)
   , m_browserReady(false)
+  , m_docBuilder(0)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
@@ -232,7 +233,7 @@ bool ManagedDocument::isSubscribed()
 void ManagedDocument::subscribe()
 {
     kDebug() << "beginning subscription";
-    // TODO browsers.first is wrong
+    // TODO URGENT browsers.first is wrong
     IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash),
                                                     m_browserModel->browsers().first());
     connect(helper, SIGNAL(done(QInfinity::BrowserIter)),
@@ -244,7 +245,10 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 {
     // delete the lookup helper
     QObject::sender()->deleteLater();
-    kDebug() << "finishing subscription";
+    kDebug() << "finishing subscription with iter " << iter.path();
+    // TODO URGENT multiple connections
+    kDebug() << iter.infBrowserIter()->node;
+    m_browserModel->browsers().first()->subscribeSession(iter);
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;
