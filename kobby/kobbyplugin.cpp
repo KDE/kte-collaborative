@@ -65,6 +65,7 @@ K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktextedit
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
   , m_isConnected(false)
+  , m_browserReady(false)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
@@ -77,18 +78,36 @@ KobbyPlugin::~KobbyPlugin()
 {
 }
 
+void KobbyPlugin::connectionPrepared()
+{
+    kDebug() << "connection prepared, establishing connection";
+    m_browserModel->addConnection(*(m_connection->xmppConnection()), "Test connection");
+    foreach ( QInfinity::Browser* browser, m_browserModel->browsers() ) {
+        QObject::connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
+                         this, SLOT(browserConnected(const QInfinity::Browser*)), Qt::UniqueConnection);
+    }
+    m_connection->open();
+}
+
 void KobbyPlugin::connected(Kobby::Connection* connection)
 {
-    m_browserModel->addConnection(*(connection->xmppConnection()), "Test connection");
-    qDebug() << "connection established!";
+    kDebug() << "connection established!";
     m_isConnected = true;
+    subscribeNewDocuments();
+}
+
+void KobbyPlugin::browserConnected(const QInfinity::Browser* )
+{
+    kDebug() << "browser connected";
+    // TODO differentiate which connection the browser even belongs to!
+    m_browserReady = true;
     subscribeNewDocuments();
 }
 
 void KobbyPlugin::subscribeNewDocuments()
 {
-    kDebug() << "subscribing new documents; connected:" << m_isConnected;
-    if ( ! m_isConnected ) {
+    kDebug() << "subscribing new documents; connected (tcp/browser):" << m_isConnected << m_browserReady;
+    if ( ! m_browserReady ) {
         return;
     }
     foreach ( ManagedDocument* document, m_managedDocuments ) {
@@ -134,18 +153,23 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
     m_connection = new Kobby::Connection("localhost", 6523, this);
     connect(m_connection, SIGNAL(connected(Connection*)),
             this, SLOT(connected(Connection*)));
-    m_connection->open();
+    connect(m_connection, SIGNAL(ready()),
+            this, SLOT(connectionPrepared()));
+    m_connection->prepare();
 
     connect(document, SIGNAL(textInserted(KTextEditor::Document*, KTextEditor::Range)),
             this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)));
     connect(document, SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
             this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)));
 
-    m_docBuilder = new Kobby::DocumentBuilder( *(document->editor()), *m_browserModel, this );
+    if ( ! m_docBuilder ) {
+        // TODO this setup method sucks. Totally the wrong place to do it.
+        // But we don't get the editor instance earlier, so need to investigate why it is needed.
+        m_docBuilder = new Kobby::DocumentBuilder( *(document->editor()), *m_browserModel, this );
 
-    m_textPlugin = new Kobby::NotePlugin( document->editor(), this );
-    m_browserModel->addPlugin( *m_textPlugin );
-    kDebug() << "item count:" << m_browserModel->rowCount();
+        m_textPlugin = new Kobby::NotePlugin( document->editor(), this );
+        m_browserModel->addPlugin( *m_textPlugin );
+    }
 
     subscribeNewDocuments();
 

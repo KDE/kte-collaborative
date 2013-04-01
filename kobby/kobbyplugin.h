@@ -122,13 +122,19 @@ private:
     QList<KobbyPluginView*> m_views;
     QList<ManagedDocument*> m_managedDocuments;
     bool m_isConnected;
+    bool m_browserReady;
     Kobby::Connection* m_connection;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
     Kobby::DocumentBuilder* m_docBuilder;
 
 public slots:
+    // This is called when the underlying connection is established.
+    // It does not mean that the browser is ready to be used.
     void connected(Connection*);
+    // This is called when the browser is ready.
+    void browserConnected(const QInfinity::Browser*);
+    void connectionPrepared();
     void documentUrlChanged(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*,KTextEditor::Range);
     void textRemoved(KTextEditor::Document*,KTextEditor::Range);
