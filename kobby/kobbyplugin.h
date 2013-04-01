@@ -23,19 +23,90 @@
 #include <ktexteditor/view.h>
 
 #include <QtCore/QObject>
+#include <QStack>
 #include <kjob.h>
 #include <kurl.h>
 #include <kio/job.h>
 #include "editor/connection.h"
 #include "editor/documentbuilder.h"
+#include <libqinfinity/qgsignal.h>
 #include <libqinfinity/browsermodel.h>
+#include <libqinfinity/browseriter.h>
+#include <libqinfinity/browser.h>
 
 using namespace Kobby;
 
-class KobbyPlugin : public KTextEditor::Plugin
-{
+class ManagedDocument : public QObject {
 Q_OBJECT
+public:
+    ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* model);
+    void subscribe();
+    void unsubscribe();
+    bool isSubscribed();
+public slots:
+    void finishSubscription(QInfinity::BrowserIter iter);
+private:
+    KTextEditor::Document* m_document;
+    QInfinity::BrowserModel* m_browserModel;
+    bool m_subscribed;
+};
 
+class IterLookupHelper : public QObject {
+Q_OBJECT
+public:
+    IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
+        : m_browser(browser)
+    {
+        m_remainingDirs << lookupPath.split('/').toVector();
+    };
+    static void finished_cb( InfcNodeRequest* request,
+                             const InfcBrowserIter* iter,
+                             void* user_data )
+    {
+        qDebug() << "iter explore finished";
+        static_cast<IterLookupHelper*>(user_data)->directoryExplored(iter);
+    }
+
+    void begin() {
+        explore(QInfinity::BrowserIter(*m_browser));
+    };
+
+signals:
+    void done(QInfinity::BrowserIter found);
+    void failed();
+
+protected:
+    void directoryExplored(const InfcBrowserIter* iter_) {
+        QInfinity::BrowserIter iter(iter_, INFC_BROWSER(m_browser->gobject()));
+        QString findEntry = m_remainingDirs.pop();
+        // ... find matching item
+        // found = ...
+        if ( m_remainingDirs.isEmpty() ) {
+            // no directories remain
+//             emit done(found);
+        }
+        else {
+//             explore(found);
+        }
+    };
+
+    void explore(QInfinity::BrowserIter directory) {
+        if ( ! directory.isExplored() ) {
+            kDebug() << "exploring iter";
+            InfcExploreRequest* request = directory.explore();
+            g_signal_connect_after(request, "finished",
+                                   G_CALLBACK(IterLookupHelper::finished_cb), (void*) this);
+        }
+    };
+
+    QStack<QString> m_remainingDirs;
+    QInfinity::Browser* m_browser;
+};
+
+class KobbyPluginView;
+
+class KobbyPlugin : public KTextEditor::Plugin {
+Q_OBJECT
 public:
     explicit KobbyPlugin( QObject *parent = 0,
                         const QVariantList &args = QVariantList() );
@@ -45,14 +116,22 @@ public:
     virtual void removeView(KTextEditor::View *view);
     virtual void addDocument(KTextEditor::Document* document);
 
+    void subscribeNewDocuments();
+
 private:
-    QList<class KobbyPluginView*> m_views;
-    Kobby::Connection* m_connection;
+    QList<KobbyPluginView*> m_views;
+    QList<ManagedDocument*> m_managedDocuments;
     bool m_isConnected;
+    Kobby::Connection* m_connection;
+    QInfinity::BrowserModel* m_browserModel;
+    QInfinity::NotePlugin* m_textPlugin;
+    Kobby::DocumentBuilder* m_docBuilder;
 
 public slots:
     void connected(Connection*);
     void documentUrlChanged(KTextEditor::Document*);
+    void textInserted(KTextEditor::Document*,KTextEditor::Range);
+    void textRemoved(KTextEditor::Document*,KTextEditor::Range);
 };
 
 class KobbyPluginView : public QObject
@@ -66,16 +145,9 @@ class KobbyPluginView : public QObject
 
   public Q_SLOTS:
     void selectionChanged();
-    void textInserted(KTextEditor::Document*,KTextEditor::Range);
-    void textRemoved(KTextEditor::Document*,KTextEditor::Range);
-    void connected(Kobby::Connection* connection);
 
   private:
     KTextEditor::View* m_view;
-    Kobby::Connection* m_connection;
-    QInfinity::BrowserModel* m_browserModel;
-    QInfinity::NotePlugin* m_textPlugin;
-    Kobby::DocumentBuilder* m_docBuilder;
 };
 
 #endif // _KOBBY_PLUGIN_H_
