@@ -23,7 +23,7 @@
 #include <kio/global.h>
 #include <kio/slavebase.h>
 
-#include <kobby/editor/connection.h>
+#include <common/connection.h>
 #include <libqinfinity/browsermodel.h>
 
 class InfinityProtocol : public QObject, public KIO::SlaveBase

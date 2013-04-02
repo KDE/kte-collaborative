@@ -29,9 +29,9 @@
 #include <qcoreapplication.h>
 #include <qapplication.h>
 
-#include <kobby/editor/itemfactory.h>
-#include <noteplugin.h>
-#include <documentbuilder.h>
+#include <common/itemfactory.h>
+#include <common/noteplugin.h>
+#include <common/documentbuilder.h>
 #include <remotebrowserview.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>

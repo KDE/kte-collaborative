@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
+#include "kobbycommon_export.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>
@@ -31,7 +32,7 @@ class DocumentBuilder;
 /**
  * @brief Instantiates InfText sessions.
  */
-class NotePlugin
+class KOBBYCOMMON_EXPORT NotePlugin
     : public QInfinity::NotePlugin
 {
 

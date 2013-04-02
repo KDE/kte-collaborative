@@ -19,6 +19,7 @@
 #define KOBBY_ITEMFACTORY_H
 
 #include <libqinfinity/browseritemfactory.h>
+#include "kobbycommon_export.h"
 
 class KIcon;
 class QObject;
@@ -39,7 +40,7 @@ class Connection;
 /**
  * Subclass so we can store connections with their item
  */
-class ConnectionItem
+class KOBBYCOMMON_EXPORT ConnectionItem
     : public QInfinity::ConnectionItem
 {
 
@@ -59,7 +60,7 @@ class ConnectionItem
 
 
 
-class ItemFactory
+class KOBBYCOMMON_EXPORT ItemFactory
     : public QInfinity::BrowserItemFactory
 {
 

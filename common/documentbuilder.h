@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_DOCUMENTMANAGER_H
 #define KOBBY_DOCUMENTMANAGER_H
+#include "kobbycommon_export.h"
 
 #include <QObject>
 #include <QPointer>
@@ -56,7 +57,7 @@ class KDocumentTextBuffer;
  * also creates and stores wrapper objects for the created
  * doucuments if needed.
  */
-class DocumentBuilder
+class KOBBYCOMMON_EXPORT DocumentBuilder
     : public QObject
 {
     Q_OBJECT

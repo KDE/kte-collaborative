@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
+#include "kobbycommon_export.h"
 
 #include <QObject>
 
@@ -36,7 +37,7 @@ namespace Kobby
 /**
  * @brief Ties connection/creation monitoring to simple interface.
  */
-class Connection
+class KOBBYCOMMON_EXPORT Connection
     : public QObject
 {
     Q_OBJECT

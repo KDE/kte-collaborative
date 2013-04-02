@@ -1,4 +1,5 @@
 # Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
+# Copyright (c) 2013 Sven Brauch <svenbrauch@gmail.com>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
@@ -10,14 +11,6 @@ include(KDE4Defaults)
 set( kobby_PART_SRCS
     kobbyplugin.cpp
     kobbysettings.cpp
-    editor/connection.cpp
-    editor/document.cpp
-    editor/documentmodel.cpp
-    editor/documentbuilder.cpp
-    editor/itemfactory.cpp
-    editor/noteplugin.cpp
-    editor/remotebrowserview.cpp
-    dialogs/createitemdialog.cpp
 )
 
 kde4_add_plugin(ktexteditor_kobby ${kobby_PART_SRCS})
@@ -33,6 +26,7 @@ include_directories(
 )
 
 target_link_libraries( ktexteditor_kobby
+    kobbycommon
     ${KDE4_KDEUI_LIBS}
     ${KDE4_KIO_LIBS}
     ${KDE4_KFILE_LIBS}

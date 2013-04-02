@@ -16,7 +16,6 @@
  */
 
 #include "connection.h"
-#include "kobbysettings.h"
 
 #include <libqinfinity/ipaddress.h>
 #include <libqinfinity/tcpconnection.h>
@@ -84,7 +83,8 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
 
     m_xmppConnection = new QInfinity::XmppConnection( *m_tcpConnection,
         QInfinity::XmppConnection::Client,
-        KobbySettings::hostName(),
+#warning fixme
+        "localhost",
         m_hostname,
         QInfinity::XmppConnection::PreferTls,
         0, 0, 0,

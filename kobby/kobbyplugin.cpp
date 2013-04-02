@@ -35,14 +35,14 @@
 #include <kaboutdata.h>
 #include <KTextEditor/Editor>
 
-#include "editor/connection.h"
-#include "editor/document.h"
+#include "common/connection.h"
+#include "common/document.h"
 #include "editor/collabsession.h"
-#include "editor/itemfactory.h"
-#include "editor/documentbuilder.h"
+#include "common/itemfactory.h"
+#include "common/documentbuilder.h"
 #include "editor/remotebrowserview.h"
-#include "editor/noteplugin.h"
-#include "editor/documentmodel.h"
+#include "common/noteplugin.h"
+#include "common/documentmodel.h"
 #include <createitemdialog.h>
 #include <createconnectiondialog.h>
 
@@ -64,7 +64,7 @@
 
 K_PLUGIN_FACTORY( KobbyPluginFactory, registerPlugin<KobbyPlugin>(); )
 K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_plugins",
-                                                              ki18n("Collaborative Editing"), "1.0", ki18n("Collaborative Editing"), KAboutData::License_LGPL_V2 ) ) )
+                                          ki18n( "Collaborative Editing" ), "1.0", ki18n("Collaborative Editing"), KAboutData::License_LGPL_V2 ) ) )
 
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )

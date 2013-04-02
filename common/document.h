@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
+#include "kobbycommon_export.h"
 
 #include <libqinfinity/abstracttextbuffer.h>
 
@@ -61,7 +62,7 @@ namespace Kobby
  * If using this class, you must monitor for fatalError, which
  * will notify of deletion of the Document.
  */
-class Document
+class KOBBYCOMMON_EXPORT Document
     : public QObject
 {
     Q_OBJECT
@@ -160,10 +161,10 @@ class Document
  * and removal operations.  It is also responsible for maintaining
  * undo/redo stats (insertionCount and undoCount).
  */
-class KDocumentTextBuffer
+class KOBBYCOMMON_EXPORT KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         KDocumentTextBuffer( KTextEditor::Document* kDocument,
@@ -231,7 +232,7 @@ class KDocumentTextBuffer
  *
  * Ties local operations/acitons into QInfinity::Session operations.
  */
-class InfTextDocument
+class KOBBYCOMMON_EXPORT InfTextDocument
     : public Document
 {
     Q_OBJECT

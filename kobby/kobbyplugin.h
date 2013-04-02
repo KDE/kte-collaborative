@@ -27,8 +27,8 @@
 #include <kjob.h>
 #include <kurl.h>
 #include <kio/job.h>
-#include "editor/connection.h"
-#include "editor/documentbuilder.h"
+#include "common/connection.h"
+#include "common/documentbuilder.h"
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseriter.h>

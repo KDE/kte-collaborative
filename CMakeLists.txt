@@ -17,3 +17,4 @@ include(KDE4Defaults)
 
 add_subdirectory(kobby)
 add_subdirectory(kioslave)
+add_subdirectory(common)
