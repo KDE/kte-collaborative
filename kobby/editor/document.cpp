@@ -164,12 +164,12 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
-    kDebug() << "insert text" << offset << chunk.text() << kDocument();
+    kDebug() << "insert text" << offset << chunk.text() << kDocument() << "(" << chunk.length() << " chars )";
     Q_UNUSED(user)
 
     if( !blockRemoteInsert )
     {
-        KTextEditor::Cursor startCursor = offsetToCursor( offset );
+        KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         blockLocalInsert = true;
         QString str = codec()->toUnicode( chunk.text() );
         kDocument()->insertText( startCursor, str );
@@ -182,12 +182,13 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )
 {
+    kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset;
     Q_UNUSED(user)
 
     if( !blockRemoteRemove )
     {
-        KTextEditor::Cursor startCursor = offsetToCursor( offset );
-        KTextEditor::Cursor endCursor = offsetToCursor( offset+length );
+        KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
+        KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
         blockLocalRemove = true;
         kDocument()->removeText( KTextEditor::Range(startCursor, endCursor) );
     }
@@ -207,6 +208,7 @@ void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
     const KTextEditor::Range &oldRange,
     const KTextEditor::Range &newRange )
 {
+    kWarning() << "localTextChanged -- not implemented!";
     Q_UNUSED(document);
     Q_UNUSED(oldRange);
     Q_UNUSED(newRange);
@@ -215,7 +217,7 @@ void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
-    kDebug() << "local text inserted" << kDocument();
+    kDebug() << "local text inserted" << kDocument() << "(range" << range << ")";
     Q_UNUSED(document)
 
     textOpPerformed();
@@ -224,11 +226,11 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     {
         if( !m_user.isNull() )
         {
-            offset = cursorToOffset( range.start() );
+            offset = cursorToOffset_local( range.start() );
             QInfinity::TextChunk chunk( encoding() );
             QString text = kDocument()->text( range );
-            if( text[0] == '\n' ) // FIXME hack
-                text = '\n';
+//             if( text[0] == '\n' ) // FIXME hack // "hack"? you meant "breakage" :)
+//                 text = '\n';
             if( encoder() )
             {
                 if( text.isEmpty() )
@@ -253,10 +255,10 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 }
             }
             else
-                kDebug() << i18n("No encoder for text codec.");
+                kDebug() << "No encoder for text codec.";
         }
         else
-            kDebug() << i18n("Could not insert text: No local user set.");
+            kDebug() << "Could not insert text: No local user set.";
     }
     else
         blockLocalInsert = false;
@@ -265,6 +267,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    kDebug() << "local text removed:" << kDocument() << range;
     Q_UNUSED(document)
     unsigned int offset;
     unsigned int end;
@@ -276,22 +279,18 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     {
         if( !m_user.isNull() )
         {
-            offset = cursorToOffset( range.start() );
-            if( range.start().line() != range.end().line() )
-                len = 1;
-            else
-            {
-                end = cursorToOffset( range.end() );
-                len = end - offset;
-            }
+            offset = cursorToOffset_local( range.start() );
+            end = cursorToOffset_local( range.end() );
+            len = end - offset;
             blockRemoteRemove = true;
+            kDebug() << "ERASING TEXT with len" << len << "offset" << offset;
             if( len > 0 )
                 eraseText( offset, len, m_user );
             else
-                kDebug() << i18n("0 legth delete operation. Skipping.");
+                kDebug() << "0 legth delete operation. Skipping.";
         }
         else
-            kDebug() << i18n("Could not remove text: No local user set.");
+            kDebug() << "Could not remove text: No local user set.";
     }
     else
         blockLocalRemove = false;
@@ -367,25 +366,54 @@ unsigned int KDocumentTextBuffer::undoCount() const
     return m_undoCount;
 }
 
-unsigned int KDocumentTextBuffer::cursorToOffset( const KTextEditor::Cursor &cursor )
+unsigned int KDocumentTextBuffer::cursorToOffset_local( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
     int i, cursor_line = cursor.line();
+    QList<QByteArray> lines = slice(0, length())->text().split('\n');
     for( i = 0; i < cursor_line; i++ )
-        offset += kDocument()->lineLength( i ) + 1; // Add newline
+        offset += lines.at(i).length() + 1; // Add newline
     offset += cursor.column();
     return offset;
 }
 
-KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
+KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_local( unsigned int offset )
 {
     int soff = 0;
     if( offset > 0 )
         soff = offset;
     int i;
-    for( i = 0; soff > kDocument()->lineLength( i ); i++ ) {
-        soff -= kDocument()->lineLength( i ) + 1; // Subtract newline
-        if ( kDocument()->lineLength( i ) == -1 ) {
+    QList<QByteArray> lines = slice(0, length())->text().split('\n');
+    for( i = 0; soff > lines.at(i).length(); i++ ) {
+        soff -= lines.at(i).length() + 1; // Subtract newline
+        if ( i == lines.size() - 1 ) {
+            kWarning() << "oops, invalid offset?";
+            break;
+        }
+    }
+    return KTextEditor::Cursor( i, soff );
+}
+
+unsigned int KDocumentTextBuffer::cursorToOffset_remote( const KTextEditor::Cursor &cursor )
+{
+    unsigned int offset = 0;
+    int i, cursor_line = cursor.line();
+    for( i = 0; i < kDocument()->lineLength(i); i++ )
+        offset += kDocument()->lineLength(i) + 1; // Add newline
+    offset += cursor.column();
+    return offset;
+}
+
+KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_remote( unsigned int offset )
+{
+    int soff = 0;
+    if( offset > 0 )
+        soff = offset;
+    int i;
+    for( i = 0; soff > kDocument()->lineLength(i); i++ ) {
+        soff -= kDocument()->lineLength(i) + 1; // Subtract newline
+        if ( kDocument()->lineLength(i) == -1 ) {
+            kWarning() << "oops, invalid offset?";
             break;
         }
     }
@@ -511,7 +539,7 @@ void InfTextDocument::slotJoinFailed( GError *gerror )
     QString emsg = i18n( "Could not join session: " );
     emsg.append( gerror->message );
     throwFatalError( emsg );
-    kDebug() << i18n("Join failed: %1", emsg);
+    kDebug() << "Join failed: " << emsg;
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,

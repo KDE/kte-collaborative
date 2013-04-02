@@ -205,8 +205,10 @@ class KDocumentTextBuffer
             const KTextEditor::Range &range );
 
     private:
-        unsigned int cursorToOffset( const KTextEditor::Cursor &cursor );
-        KTextEditor::Cursor offsetToCursor( unsigned int offset );
+        unsigned int cursorToOffset_local( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_local( unsigned int offset );
+        unsigned int cursorToOffset_remote( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_remote( unsigned int offset );
         void textOpPerformed();
 
         bool blockLocalInsert;
