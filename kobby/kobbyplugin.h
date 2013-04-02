@@ -41,6 +41,7 @@ class ManagedDocument : public QObject {
 Q_OBJECT
 public:
     ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* model);
+    virtual ~ManagedDocument();
     void subscribe();
     void unsubscribe();
     bool isSubscribed();
@@ -99,9 +100,11 @@ protected:
             return;
         }
 
+        bool found = false;
         do {
             kDebug() << m_currentIter.name();
             if ( m_currentIter.name() == findEntry ) {
+                found = true;
                 break;
             }
         } while ( m_currentIter.next() );
@@ -110,9 +113,11 @@ protected:
             // no directories remain
             emit done(m_currentIter);
         }
-        else {
+        else if ( found ) {
             explore(m_currentIter);
         }
+        kWarning() << "explore failed!";
+        emit failed();
     };
 
     void explore(QInfinity::BrowserIter directory) {
@@ -142,6 +147,7 @@ public:
     virtual void addView(KTextEditor::View *view);
     virtual void removeView(KTextEditor::View *view);
     virtual void addDocument(KTextEditor::Document* document);
+    virtual void removeDocument(KTextEditor::Document* document);
 
     void subscribeNewDocuments();
 

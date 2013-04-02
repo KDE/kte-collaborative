@@ -383,8 +383,12 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor( unsigned int offset )
     if( offset > 0 )
         soff = offset;
     int i;
-    for( i = 0; soff > kDocument()->lineLength( i ); i++ )
+    for( i = 0; soff > kDocument()->lineLength( i ); i++ ) {
         soff -= kDocument()->lineLength( i ) + 1; // Subtract newline
+        if ( kDocument()->lineLength( i ) == -1 ) {
+            break;
+        }
+    }
     return KTextEditor::Cursor( i, soff );
 }
 

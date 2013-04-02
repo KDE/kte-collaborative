@@ -156,6 +156,16 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
     m_managedDocuments.append(new ManagedDocument(document, m_browserModel));
 }
 
+void KobbyPlugin::removeDocument(KTextEditor::Document* document)
+{
+    foreach ( ManagedDocument* doc, m_managedDocuments ) {
+        if ( doc->document() == document ) {
+            m_managedDocuments.removeOne(doc);
+            delete doc;
+        }
+    }
+}
+
 void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
 {
     kDebug() << "new url:" << document->url() << document;
@@ -241,6 +251,11 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, QInfinity::Bro
     kDebug() << "now managing document" << document << document->url();
 }
 
+ManagedDocument::~ManagedDocument()
+{
+    
+}
+
 void ManagedDocument::unsubscribe()
 {
     kDebug() << "should unsubscribe document";
@@ -253,7 +268,11 @@ bool ManagedDocument::isSubscribed()
 
 void ManagedDocument::subscribe()
 {
-    kDebug() << "beginning subscription";
+    if ( m_document->url().protocol() != "inf" ) {
+        // TODO URGENT urghghh
+        return;
+    }
+    kDebug() << "beginning subscription for" << m_document->url();
     // TODO URGENT browsers.first is wrong
     IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash),
                                                     m_browserModel->browsers().first());
