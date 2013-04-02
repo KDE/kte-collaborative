@@ -1,7 +1,7 @@
 include_directories(
     ${KDE4_INCLUDES}
     ${LIBQINFINITY_INCLUDES}
-    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/kobby
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/kobby/
     ${CMAKE_SOURCE_DIR}/kobby/editor/
