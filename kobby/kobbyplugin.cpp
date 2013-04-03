@@ -61,6 +61,8 @@
 #include <QApplication>
 #include <QTimer>
 
+// This is the default port for infinoted.
+static int defaultPort = 6523;
 
 K_PLUGIN_FACTORY( KobbyPluginFactory, registerPlugin<KobbyPlugin>(); )
 K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_plugins",
@@ -70,13 +72,15 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
   , m_isConnected(false)
   , m_browserReady(false)
-  , m_docBuilder(0)
   , m_session(0)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
+    m_textPlugin = new Kobby::NotePlugin( this );
+    m_communicationManager = new QInfinity::CommunicationManager();
+    m_browserModel->addPlugin( *m_textPlugin );
     kDebug() << "ok";
 }
 
@@ -84,30 +88,21 @@ KobbyPlugin::~KobbyPlugin()
 {
 }
 
-void KobbyPlugin::connectionPrepared()
+void KobbyPlugin::connectionPrepared(Connection* connection)
 {
     kDebug() << "connection prepared, establishing connection";
-    m_browserModel->addConnection(*(m_connection->xmppConnection()), "Test connection");
+    m_browserModel->addConnection(*(connection->xmppConnection()), connection->name());
     foreach ( QInfinity::Browser* browser, m_browserModel->browsers() ) {
         QObject::connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
                          this, SLOT(browserConnected(const QInfinity::Browser*)), Qt::UniqueConnection);
     }
-    m_connection->open();
-}
-
-void KobbyPlugin::userJoinCompleted(QPointer< QInfinity::User > user)
-{
-    kDebug() << "user join completed";
-    foreach ( ManagedDocument* doc, m_managedDocuments ) {
-        doc->m_textBuffer->setUser(user);
-    }
+    connection->open();
 }
 
 void KobbyPlugin::connected(Kobby::Connection* connection)
 {
     kDebug() << "connection established!";
     m_isConnected = true;
-    subscribeNewDocuments();
 }
 
 void KobbyPlugin::browserConnected(const QInfinity::Browser* )
@@ -131,38 +126,22 @@ void KobbyPlugin::subscribeNewDocuments()
     }
 }
 
-void KobbyPlugin::addView(KTextEditor::View *view)
-{
-    kDebug() << "adding view; document url:" << view->document()->url();
-    // set up document as soon as its url gets set correctly
-    connect(view->document(), SIGNAL(documentUrlChanged(KTextEditor::Document*)),
-            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
-}
-
-void KobbyPlugin::removeView(KTextEditor::View *view)
-{
-  foreach (KobbyPluginView *pluginView, m_views) {
-    if (pluginView->view() == view) {
-      m_views.removeAll(pluginView);
-      delete pluginView;
-      break;
-    }
-  }
-}
-
 void KobbyPlugin::addDocument(KTextEditor::Document* document)
 {
-    kDebug() << "adding document" << document << document->url();
-    m_managedDocuments.append(new ManagedDocument(document, m_browserModel));
+    kDebug() << "add document" << document << document->url();
+    // TODO this is not good semantically
+    documentUrlChanged(document);
 }
 
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 {
-    foreach ( ManagedDocument* doc, m_managedDocuments ) {
-        if ( doc->document() == document ) {
-            m_managedDocuments.removeOne(doc);
-            delete doc;
-        }
+    ManagedDocument* doc = m_managedDocuments.findDocument(document);
+    if ( doc ) {
+        m_managedDocuments.removeAll(doc);
+        delete doc;
+    }
+    else {
+        kWarning() << "tried to remove document" << document << "which is not being managed";
     }
 }
 
@@ -171,41 +150,64 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
     kDebug() << "new url:" << document->url() << document;
     if ( document->url().protocol() != "inf" ) {
         kDebug() << "not a collaborative document:" << document->url().url();
+        if ( m_managedDocuments.isManaged(document) ) {
+            kDebug() << "removing document" << document << "from manager";
+            ManagedDocument* doc = m_managedDocuments.findDocument(document);
+            m_managedDocuments.removeAll(doc);
+            delete doc;
+        }
+        return;
+    }
+    if ( m_managedDocuments.isManaged(document) ) {
+        kDebug() << document->url() << "is already being managed.";
         return;
     }
     kDebug() << "initializing collaborative session for document" << document->url();
-    m_connection = new Kobby::Connection("localhost", 6523, this);
-    connect(m_connection, SIGNAL(connected(Connection*)),
-            this, SLOT(connected(Connection*)));
-    connect(m_connection, SIGNAL(ready()),
-            this, SLOT(connectionPrepared()));
-    m_connection->prepare();
+
+    ManagedDocument* managed = new ManagedDocument(document, m_browserModel, m_textPlugin, this);
+    m_managedDocuments.append(managed);
+
+    eventuallyAddConnection(document->url());
 
     connect(document, SIGNAL(textInserted(KTextEditor::Document*, KTextEditor::Range)),
-            this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)));
+            this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)), Qt::UniqueConnection);
     connect(document, SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
-            this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)));
+            this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)), Qt::UniqueConnection);
 
-    if ( ! m_docBuilder ) {
-        // TODO this setup method sucks. Totally the wrong place to do it.
-        // But we don't get the editor instance earlier, so need to investigate why it is needed.
-        m_docBuilder = new Kobby::DocumentBuilder( *(document->editor()), *m_browserModel, this );
-
-        KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(document, "utf-8");
-        foreach ( ManagedDocument* doc, m_managedDocuments ) {
-            if ( doc->document() == document ) {
-                doc->m_textBuffer = buffer;
-            }
-        }
-        m_textPlugin = new Kobby::NotePlugin( document->editor(), buffer,
-                                              this );
-        m_communicationManager = new QInfinity::CommunicationManager();
-        m_browserModel->addPlugin( *m_textPlugin );
-    }
+    KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(document, "utf-8");
 
     subscribeNewDocuments();
+}
 
-//     browser->subscribeSession(browser);
+void KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
+{
+    int port = documentUrl.port();
+    port = port == -1 ? defaultPort : port;
+    QString connectionName = documentUrl.host() + ":" + port;
+    if ( ! m_connections.contains(connectionName) ) {
+        kDebug() << "adding connection" << connectionName << "because it doesn't exist";
+        Connection* c = new Kobby::Connection(documentUrl.host(), port, this);
+        connect(c, SIGNAL(connected(Connection*)),
+                this, SLOT(connected(Connection*)));
+        connect(c, SIGNAL(ready(Connection*)),
+                this, SLOT(connectionPrepared(Connection*)));
+        m_connections[connectionName] = c;
+        c->prepare();
+    }
+    else {
+        kDebug() << "connection" << connectionName << "requested but it exists already";
+    }
+}
+
+void KobbyPlugin::addView(KTextEditor::View* view)
+{
+    connect(view->document(), SIGNAL(documentUrlChanged(KTextEditor::Document*)),
+            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
+}
+
+void KobbyPlugin::removeView(KTextEditor::View* view)
+{
+    kDebug() << "removing view" << view;
 }
 
 KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* /*connection*/)
@@ -234,7 +236,7 @@ void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range ran
 
 KTextEditor::View* KobbyPluginView::view() const
 {
-  return m_view;
+    return m_view;
 }
 
 void KobbyPluginView::selectionChanged()

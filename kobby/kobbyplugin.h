@@ -27,8 +27,6 @@
 #include <kjob.h>
 #include <kurl.h>
 #include <kio/job.h>
-#include "common/connection.h"
-#include "common/documentbuilder.h"
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseriter.h>
@@ -50,6 +48,7 @@ public:
                         const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
+    // can add those again later in case we actually need the views
     virtual void addView(KTextEditor::View *view);
     virtual void removeView(KTextEditor::View *view);
     virtual void addDocument(KTextEditor::Document* document);
@@ -58,16 +57,18 @@ public:
     void subscribeNewDocuments();
 
 private:
-    QList<KobbyPluginView*> m_views;
-    QList<ManagedDocument*> m_managedDocuments;
+    void eventuallyAddConnection(const KUrl& documentUrl);
+
+    ManagedDocumentList m_managedDocuments;
     bool m_isConnected;
     bool m_browserReady;
-    Kobby::Connection* m_connection;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
-    Kobby::DocumentBuilder* m_docBuilder;
     QInfinity::CommunicationManager* m_communicationManager;
     QInfinity::TextSession* m_session;
+    // Maps connection names to connection instances;
+    // the connection name is host:port
+    QHash<QString, Kobby::Connection*> m_connections;
 
 public slots:
     // This is called when the underlying connection is established.
@@ -75,13 +76,10 @@ public slots:
     void connected(Connection*);
     // This is called when the browser is ready.
     void browserConnected(const QInfinity::Browser*);
-    void connectionPrepared();
+    void connectionPrepared(Connection*);
     void documentUrlChanged(KTextEditor::Document*);
-    void textInserted(KTextEditor::Document*,KTextEditor::Range);
-    void textRemoved(KTextEditor::Document*,KTextEditor::Range);
-    void userJoinCompleted(QPointer<QInfinity::User>);
-
-    friend class ManagedDocument;
+    void textInserted(KTextEditor::Document*, KTextEditor::Range);
+    void textRemoved(KTextEditor::Document*, KTextEditor::Range);
 };
 
 class KobbyPluginView : public QObject
