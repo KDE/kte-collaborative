@@ -46,11 +46,8 @@
 namespace Kobby
 {
 
-DocumentBuilder::DocumentBuilder( KTextEditor::Editor &editor,
-    QInfinity::BrowserModel &browserModel,
-    QObject *parent )
+DocumentBuilder::DocumentBuilder( QInfinity::BrowserModel &browserModel, QObject *parent )
     : QObject( parent )
-    , editor( &editor )
     , m_browserModel( &browserModel )
 {
     QInfinity::Browser *itr;

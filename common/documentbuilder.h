@@ -63,9 +63,7 @@ class KOBBYCOMMON_EXPORT DocumentBuilder
     Q_OBJECT
 
     public:
-        DocumentBuilder( KTextEditor::Editor &editor,
-            QInfinity::BrowserModel &browserModel,
-            QObject *parent = 0 );
+        DocumentBuilder( QInfinity::BrowserModel& browserModel, QObject* parent = 0 );
         ~DocumentBuilder();
 
         /**
@@ -107,7 +105,6 @@ class KOBBYCOMMON_EXPORT DocumentBuilder
     private:
         void sessionSynchronized( QInfinity::Session *session );
 
-        KTextEditor::Editor *editor;
         QInfinity::BrowserModel *m_browserModel;
         QHash<QInfinity::Session*, QInfinity::SessionProxy*> sessionToProxy;
 
