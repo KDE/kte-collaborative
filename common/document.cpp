@@ -18,6 +18,7 @@
 
 #include "document.h"
 #include "documentmodel.h"
+#include <common/ui/remotechangenotifier.h>
 
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>
@@ -173,6 +174,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         blockLocalInsert = true;
         QString str = codec()->toUnicode( chunk.text() );
         kDocument()->insertText( startCursor, str );
+        RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), startCursor, user->name());
     }
     else
         blockRemoteInsert = false;

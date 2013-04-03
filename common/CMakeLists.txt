@@ -18,6 +18,7 @@ set(
     itemfactory.cpp
     noteplugin.cpp
     utils.cpp
+    ui/remotechangenotifier.cpp
 )
 
 kde4_add_library(kobbycommon SHARED ${KOBBY_COMMON_SRCS})
@@ -28,6 +29,7 @@ target_link_libraries( kobbycommon
     ${KDE4_KDECORE_LIBS}
     ${KDE4_KDNSSD_LIBS}
     ${LIBQINFINITY_LIBRARIES}
+    ${QT_QTDECLARATIVE_LIBRARIES}
 )
 
 install(TARGETS kobbycommon DESTINATION lib)
