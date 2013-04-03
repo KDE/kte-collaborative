@@ -147,8 +147,14 @@ void InfinityProtocol::listDir(const KUrl &url)
         QCoreApplication::processEvents();
     }
 
-    QInfinity::BrowserIter iter(*browser);
-    kDebug() << "connection root path:" << iter.path();
+    KUrl clean(url);
+    clean.cleanPath(KUrl::SimplifyDirSeparators);
+    IterLookupHelper helper(clean.path(), browser);
+    connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
+    helper.begin();
+    // TODO
+    loop.exec();
+    QInfinity::BrowserIter iter = helper.result();
 
     if ( ! iter.isExplored() ) {
         kDebug() << "exploring iter";
@@ -158,68 +164,20 @@ void InfinityProtocol::listDir(const KUrl &url)
             QCoreApplication::processEvents();
         }
     }
-    iter.child();
+    bool hasChildren = iter.child();
 
-    do {
-        UDSEntry entry;
-        entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.path() );
-        entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
-        entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
-        kDebug() << "listing" << iter.path();
-        listEntry(entry, false);
-    } while ( iter.next() );
+    // If not, the directory is just empty.
+    if ( hasChildren ) {
+        do {
+            UDSEntry entry;
+            entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.name() );
+            entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
+            entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
+            kDebug() << "listing" << iter.path();
+            listEntry(entry, false);
+        } while ( iter.next() );
+    }
 
     listEntry(UDSEntry(), true);
     finished();
-
-
-//     QString title;
-//     QString section;
-//
-//     if ( !parseUrl(url.path(), title, section) ) {
-//         error( KIO::ERR_MALFORMED_URL, url.url() );
-//         return;
-//     }
-//
-//     // stat() and listDir() declared that everything is an html file.
-//     // However we can list man: and man:(1) as a directory (e.g. in dolphin).
-//     // But we cannot list man:ls as a directory, this makes no sense (#154173)
-//
-//     if (!title.isEmpty() && title != "/") {
-//     error(KIO::ERR_IS_FILE, url.url());
-//         return;
-//     }
-//
-//     UDSEntryList uds_entry_list;
-//
-//     if (section.isEmpty()) {
-//         for (QStringList::ConstIterator it = section_names.constBegin(); it != section_names.constEnd(); ++it) {
-//             UDSEntry     uds_entry;
-//
-//             QString name = "man:/(" + *it + ')';
-//             uds_entry.insert( KIO::UDSEntry::UDS_NAME, sectionName( *it ) );
-//             uds_entry.insert( KIO::UDSEntry::UDS_URL, name );
-//             uds_entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, S_IFDIR );
-//
-//             uds_entry_list.append( uds_entry );
-//         }
-//     }
-//
-//     QStringList list = findPages( section, QString(), false );
-//
-//     QStringList::Iterator it = list.begin();
-//     QStringList::Iterator end = list.end();
-//
-//     for ( ; it != end; ++it ) {
-//         stripExtension( &(*it) );
-//
-//         UDSEntry     uds_entry;
-//         uds_entry.insert( KIO::UDSEntry::UDS_NAME, *it );
-//         uds_entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, S_IFREG);
-//         uds_entry.insert(KIO::UDSEntry::UDS_MIME_TYPE, QString::fromLatin1("text/html"));
-//         uds_entry_list.append( uds_entry );
-//     }
-//
-//     listEntries( uds_entry_list );
-//     finished();
 }

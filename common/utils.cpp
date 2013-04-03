@@ -25,7 +25,7 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* brows
         , m_browser(browser)
         , m_currentIter(*m_browser)
 {
-    // remove starting slash
+    // remove starting and trailing slash
     if ( lookupPath.startsWith('/') ) {
         lookupPath = lookupPath.mid(1);
     }
@@ -49,10 +49,21 @@ void IterLookupHelper::explore(QInfinity::BrowserIter directory)
     }
 };
 
+QInfinity::BrowserIter IterLookupHelper::result() const
+{
+    return m_currentIter;
+}
+
 void IterLookupHelper::directoryExplored()
 {
     kDebug() << "directory explored";
     QString findEntry = m_remainingComponents.pop();
+    kDebug() << "finding:" << findEntry << " -- remaining:" << m_remainingComponents;
+    if ( findEntry.isEmpty() ) {
+        // the path is a directory; return the directory iter instead of a child
+        emit done(m_currentIter);
+        return;
+    }
     bool hasChildren = m_currentIter.child();
     if ( ! hasChildren ) {
         emit failed();

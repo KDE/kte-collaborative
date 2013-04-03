@@ -52,6 +52,7 @@ public:
     inline void begin() {
         explore(m_currentIter);
     };
+    QInfinity::BrowserIter result() const;
 
 signals:
     void done(QInfinity::BrowserIter found);
