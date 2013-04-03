@@ -33,21 +33,19 @@
 namespace Kobby
 {
 
-NotePlugin::NotePlugin( KTextEditor::Editor* editor, KDocumentTextBuffer* buffer,
-    QObject *parent )
+NotePlugin::NotePlugin( QObject *parent )
     : QInfinity::NotePlugin( "InfText", parent )
-    , m_editor( editor )
-    , m_buffer( buffer )
 {
 }
 
 QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *commMgr,
     QInfinity::Session::Status sess_status,
     QInfinity::CommunicationJoinedGroup *syncGroup,
-    QInfinity::XmlConnection *syncConnection )
+    QInfinity::XmlConnection *syncConnection,
+    void* userData )
 {
     QInfinity::TextSession *session = new QInfinity::TextSession( *commMgr,
-        *m_buffer,
+        *static_cast<KDocumentTextBuffer*>(userData),
         sess_status,
         *syncGroup,
         *syncConnection );

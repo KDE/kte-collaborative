@@ -37,17 +37,13 @@ class KOBBYCOMMON_EXPORT NotePlugin
 {
 
     public:
-        NotePlugin( KTextEditor::Editor* editor, KDocumentTextBuffer* buffer,
-            QObject *parent = 0 );
+        NotePlugin( QObject *parent = 0 );
 
         QInfinity::Session *createSession(QInfinity::CommunicationManager *commMgr,
             QInfinity::Session::Status sess_status,
             QInfinity::CommunicationJoinedGroup *syncGroup,
-            QInfinity::XmlConnection *syncConnection );
-
-    private:
-        KTextEditor::Editor* m_editor;
-        KDocumentTextBuffer* m_buffer;
+            QInfinity::XmlConnection *syncConnection,
+            void* userData );
 
 };
 
