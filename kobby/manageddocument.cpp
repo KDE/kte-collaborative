@@ -29,7 +29,7 @@
 
 #include <QTimer>
 
-#include "utils.h"
+#include "common/utils.h"
 
 using namespace QInfinity;
 

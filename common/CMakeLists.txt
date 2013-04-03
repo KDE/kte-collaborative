@@ -7,9 +7,7 @@ include_directories(
     ${LIBQINFINITY_INCLUDES}
     ${CMAKE_BINARY_DIR}/kobby
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/kobby/
-    ${CMAKE_SOURCE_DIR}/kobby/editor/
-    ${CMAKE_SOURCE_DIR}/kobby/dialogs/
+    ${CMAKE_SOURCE_DIR}/common/
 )
 
 set(
@@ -19,6 +17,7 @@ set(
     documentmodel.cpp
     itemfactory.cpp
     noteplugin.cpp
+    utils.cpp
 )
 
 kde4_add_library(kobbycommon SHARED ${KOBBY_COMMON_SRCS})

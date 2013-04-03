@@ -18,7 +18,6 @@
 
 #include "document.h"
 #include "documentmodel.h"
-#include "kobbysettings.h"
 
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>
@@ -40,6 +39,7 @@
 #include <QString>
 #include <QTextCodec>
 #include <QTextEncoder>
+#include <QTime>
 #include <QAction>
 
 namespace Kobby

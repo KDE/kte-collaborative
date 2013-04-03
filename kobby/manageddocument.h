@@ -25,6 +25,7 @@
 
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/sessionproxy.h>
+#include <libqinfinity/browseriter.h>
 
 #include <common/document.h>
 #include <common/connection.h>

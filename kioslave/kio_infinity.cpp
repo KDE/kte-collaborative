@@ -42,6 +42,8 @@
 #include "malloc.h"
 #include <KTextEditor/View>
 
+#include "common/utils.h"
+
 using namespace KIO;
 
 extern "C" {
@@ -126,7 +128,7 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
     QEventLoop loop;
-    m_connection = new Kobby::Connection(url.host(), 6523, this);
+    m_connection = new Kobby::Connection(url.host(), url.port() == -1 ? 6523 : url.port(), this);
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
     QObject::connect(m_connection, SIGNAL(ready(Connection*)), &loop, SLOT(quit()));

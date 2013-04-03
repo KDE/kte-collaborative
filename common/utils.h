@@ -18,6 +18,7 @@
 
 #ifndef KOBBY_UTILS_H
 #define KOBBY_UTILS_H
+#include "kobbycommon_export.h"
 
 #include <QObject>
 #include <QStack>
@@ -26,6 +27,7 @@
 #include <glib.h>
 
 #include <libqinfinity/browser.h>
+#include <libqinfinity/browseriter.h>
 
 // Helper class for finding the BrowserIter for a directory.
 // libinfinity works with documents (or directories) only as "iters",
@@ -41,7 +43,7 @@
 // operation is fast when it has been done before for the given path (excluding
 // the last entry), and network-slow if it has not (might need to display
 // a busy indicator while it's running).
-class IterLookupHelper : public QObject {
+class KOBBYCOMMON_EXPORT IterLookupHelper : public QObject {
 Q_OBJECT
 public:
     IterLookupHelper(QString lookupPath, QInfinity::Browser* browser);
