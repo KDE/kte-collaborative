@@ -24,6 +24,7 @@
 #include <kio/slavebase.h>
 
 #include <common/connection.h>
+#include <common/noteplugin.h>
 #include <libqinfinity/browsermodel.h>
 
 struct Peer {
@@ -56,6 +57,9 @@ public:
     virtual void listDir(const KUrl& url);
     virtual void put(const KUrl& url, int permissions, KIO::JobFlags flags);
 
+    QInfinity::BrowserIter iterForUrl(const KUrl& url);
+    QInfinity::Browser* browser() const;
+
     void doConnect(const Peer& peer);
 
     static InfinityProtocol* self();
@@ -64,6 +68,7 @@ private:
     static InfinityProtocol* _self;
     QSharedPointer<Kobby::Connection> m_connection;
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
+    QSharedPointer<Kobby::NotePlugin> m_notePlugin;
     Peer m_connectedTo;
 };
 

@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QStack>
+#include <QTimer>
 #include <KDebug>
 
 #include <glib.h>
@@ -49,14 +50,20 @@ public:
     IterLookupHelper(QString lookupPath, QInfinity::Browser* browser);
     static void finished_cb( InfcNodeRequest* request, void* user_data );
 
-    inline void begin() {
-        explore(m_currentIter);
+    inline void beginLater() {
+        QTimer::singleShot(0, this, SLOT(begin()));
     };
     QInfinity::BrowserIter result() const;
 
 signals:
     void done(QInfinity::BrowserIter found);
     void failed();
+
+public slots:
+    void begin() {
+        kDebug() << "beginning explore";
+        explore(m_currentIter);
+    };
 
 protected:
     void directoryExplored();

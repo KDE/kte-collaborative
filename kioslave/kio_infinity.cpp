@@ -77,8 +77,6 @@ InfinityProtocol* InfinityProtocol::_self = 0;
 
 InfinityProtocol::InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket)
     : QObject(), SlaveBase("inf", pool_socket, app_socket)
-    , m_connection(0)
-    , m_browserModel(0)
 {
     qDebug() << "constructing infinity kioslave";
     _self = this;
@@ -132,6 +130,9 @@ void InfinityProtocol::doConnect(const Peer& peer)
     m_connection->prepare();
     m_connectedTo = peer;
 
+    m_notePlugin = QSharedPointer<Kobby::NotePlugin>(new Kobby::NotePlugin( this ));
+    m_browserModel->addPlugin( *m_notePlugin );
+
     // TODO make synchronous properly
     loop.exec();
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
@@ -153,9 +154,30 @@ void InfinityProtocol::mimetype(const KUrl & /*url*/)
     finished();
 }
 
-void InfinityProtocol::put(const KUrl& url, int permissions, JobFlags flags)
+void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flags*/)
 {
+    kDebug() << "PUT" << url;
     doConnect(Peer(url.host(), url.port()));
+    QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
+    kDebug() << "adding note" << iter.path() << url.fileName();
+    browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    // TODO error handling and waiting
+    finished();
+}
+
+QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url)
+{
+    KUrl clean(url);
+    clean.cleanPath(KUrl::SimplifyDirSeparators);
+    IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser());
+    QEventLoop loop;
+    kDebug() << "connecting signal:" << connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
+    helper.beginLater();
+    // Using an event loop is okay in this case, because the kio slave doesn't get
+    // any signals from outside.
+    loop.exec();
+    kDebug() << "ok, found iter";
+    return helper.result();
 }
 
 void InfinityProtocol::listDir(const KUrl &url)
@@ -165,17 +187,7 @@ void InfinityProtocol::listDir(const KUrl &url)
 
     doConnect(Peer(url.host(), url.port()));
 
-    QInfinity::Browser* browser = m_browserModel->browsers().first();
-
-    KUrl clean(url);
-    clean.cleanPath(KUrl::SimplifyDirSeparators);
-    IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser);
-    QEventLoop loop;
-    kDebug() << "connecting signal:" << connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
-    helper.begin();
-    // TODO
-    loop.exec();
-    QInfinity::BrowserIter iter = helper.result();
+    QInfinity::BrowserIter iter = iterForUrl(url);
 
     if ( ! iter.isExplored() ) {
         kDebug() << "exploring iter";
@@ -202,3 +214,9 @@ void InfinityProtocol::listDir(const KUrl &url)
     listEntry(UDSEntry(), true);
     finished();
 }
+
+QInfinity::Browser* InfinityProtocol::browser() const
+{
+    return m_browserModel->browsers().first();
+}
+
