@@ -68,7 +68,6 @@ private:
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
     QInfinity::CommunicationManager* m_communicationManager;
-    QInfinity::TextSession* m_session;
     // Maps connection names to connection instances;
     // the connection name is host:port
     QHash<QString, Kobby::Connection*> m_connections;

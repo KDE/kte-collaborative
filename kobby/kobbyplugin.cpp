@@ -72,7 +72,6 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
   , m_isConnected(false)
   , m_browserReady(false)
-  , m_session(0)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
@@ -173,8 +172,6 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
             this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)), Qt::UniqueConnection);
     connect(document, SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
             this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)), Qt::UniqueConnection);
-
-    KDocumentTextBuffer* buffer = new Kobby::KDocumentTextBuffer(document, "utf-8");
 
     subscribeNewDocuments();
 }
