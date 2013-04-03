@@ -11,6 +11,7 @@ include(KDE4Defaults)
 set( kobby_PART_SRCS
     kobbyplugin.cpp
     kobbysettings.cpp
+    utils.cpp
 )
 
 kde4_add_plugin(ktexteditor_kobby ${kobby_PART_SRCS})
