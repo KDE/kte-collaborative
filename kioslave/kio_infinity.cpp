@@ -129,7 +129,7 @@ void InfinityProtocol::listDir(const KUrl &url)
     m_connection = new Kobby::Connection(url.host(), 6523, this);
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
-    QObject::connect(m_connection, SIGNAL(ready()), &loop, SLOT(quit()));
+    QObject::connect(m_connection, SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
     m_connection->prepare();
 
     // TODO make synchronous properly
