@@ -83,6 +83,7 @@ void ManagedDocument::subscribe()
     if ( m_document->url().protocol() != "inf" ) {
         return;
     }
+    m_subscribed = true;
     kDebug() << "beginning subscription for" << m_document->url();
     IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash), browser());
     connect(helper, SIGNAL(done(QInfinity::BrowserIter)),
@@ -92,6 +93,10 @@ void ManagedDocument::subscribe()
 
 void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QInfinity::SessionProxy > proxy)
 {
+    if ( iter.id() != m_iterId ) {
+        kDebug() << "subscription done, but not for this document";
+        return;
+    }
     kDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
     m_proxy = proxy;
 //     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
@@ -118,8 +123,9 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     kDebug() << "finishing subscription with iter " << iter.path();
     QPointer< QInfinity::Browser > browser = iter.browser();
     QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
-                     this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)));
+                     this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)), Qt::UniqueConnection);
     m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8");
+    m_iterId = iter.id();
     browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
 }
 

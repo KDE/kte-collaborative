@@ -623,7 +623,7 @@ void InfTextDocument::joinSession()
     }
     else
         connect( m_session, SIGNAL(statusChanged()),
-            this, SLOT(joinSession()) );
+            this, SLOT(joinSession()), Qt::UniqueConnection );
 }
 
 }
