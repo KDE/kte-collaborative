@@ -56,6 +56,7 @@ public:
     virtual void mimetype(const KUrl& url);
     virtual void listDir(const KUrl& url);
     virtual void put(const KUrl& url, int permissions, KIO::JobFlags flags);
+    virtual void mkdir(const KUrl& url, int permissions);
 
     QInfinity::BrowserIter iterForUrl(const KUrl& url);
     QInfinity::Browser* browser() const;

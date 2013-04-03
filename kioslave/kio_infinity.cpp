@@ -165,6 +165,15 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     finished();
 }
 
+void InfinityProtocol::mkdir(const KUrl& url, int permissions)
+{
+    doConnect(Peer(url.host(), url.port()));
+    QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
+    browser()->addSubdirectory(iter, url.fileName().toAscii().data());
+    // TODO error handling and waiting
+    finished();
+}
+
 QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url)
 {
     KUrl clean(url);
