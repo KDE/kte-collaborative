@@ -30,22 +30,41 @@
 
 QMap< QPair<KTextEditor::View*, QString>, QWidget* > RemoteChangeNotifier::existingWidgets;
 
+NotifierWidget::NotifierWidget(const QUrl& source, QWidget* parent)
+    : QDeclarativeView(source, parent)
+    , closeTimer(new QTimer(parent))
+{
+    closeTimer->setSingleShot(true);
+    closeTimer->setInterval(3000);
+    connect(closeTimer, SIGNAL(timeout()), this, SLOT(hide()));
+}
+
+// TODO use user's color instead -- or maybe not?
+// After all, this whole "select your color" stuff is of questionable use, and this works nicely.
+QColor colorForUsername(QString username) {
+    unsigned int hash = 0;
+    for ( int i = 0; i < username.size(); i++ ) {
+        hash += (17*i%31+1)*username.at(i).toAscii();
+    }
+    return QColor::fromHsv(hash % 359, 255, 255);
+};
+
 void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QString& username)
 {
     QWidget* useWidget = 0;
     QUrl src = QUrl("/home/sven/Projekte/kde/kobby/common/ui/notifywidget.qml");
+    bool added = false;
 
     QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, username);
     if ( existingWidgets.contains(key) ) {
         // move an existing widget
         useWidget = existingWidgets[key];
-        // set the source again to re-load the QML file + animations
-        static_cast<QDeclarativeView*>(useWidget)->setSource(src);
     }
     if ( ! useWidget ) {
         // create a new widget
         // this is for getting semi-transparent widgets
-        QDeclarativeView* widget = new QDeclarativeView(view);
+        // load the QML file which draws the user label
+        QDeclarativeView* widget = new NotifierWidget(src, view);
         QPalette p = widget->palette();
         p.setColor( QPalette::Window, Qt::transparent );
         widget->setPalette( p );
@@ -53,29 +72,35 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
         widget->setBackgroundBrush(QBrush(QColor(0, 0, 0, 0)));
         widget->setAutoFillBackground( true );
 
-        // load the QML file which draws the user label
-        widget->setSource(src);
+        // check if loading the QML file was successful, otherwise abort
         if ( ! widget->rootContext() ) {
             return;
         }
 
-
         useWidget = widget;
         existingWidgets[key] = widget;
+        added = true;
     }
 
-    QTimer::singleShot(3000, useWidget, SLOT(hide()));
-    kDebug() << "parent:" << useWidget->parent() << view;
-
     // TODO use + set correct color
-    static_cast<QDeclarativeView*>(useWidget)->rootObject()->setProperty("username", username);
+    NotifierWidget* notifierWidget = dynamic_cast<NotifierWidget*>(useWidget);
+    notifierWidget->rootObject()->setProperty("username", username);
+    notifierWidget->rootObject()->setProperty("widgetcolor", colorForUsername(username).name());
+    QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
+    // restart animation
+    QMetaObject::invokeMethod(hideAnimation, "restart");
+    // reset widget opacity + position
+    QMetaObject::invokeMethod(notifierWidget->rootObject(), "reset");
+    notifierWidget->closeTimer->start();
 
     // use KTE api to calculate position
+    // TODO handle out-of-view changes nicely, by pointing the arrow up or down
+    // TODO support scrolling while the widget is visible
     QPoint pos = useWidget->mapToParent(view->cursorToCoordinate(cursor));
     pos.setY(pos.y() + view->fontMetrics().height()*0.8 - useWidget->y());
     pos.setX(pos.x() - 15 - useWidget->x());
     QPoint pos2 = useWidget->mapToParent(pos);
-    useWidget->move(pos2.x() - useWidget->x(), pos2.y() - useWidget->y());
+    useWidget->move(qMax(10, pos2.x() - useWidget->x()), pos2.y() - useWidget->y());
     useWidget->show();
     kDebug() << "widget size:" << useWidget->size() << useWidget->isVisible() << pos << useWidget->pos();
 }

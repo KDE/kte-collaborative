@@ -23,6 +23,8 @@
 #define REMOTECHANGENOTIFIER_H
 
 #include <QObject>
+#include <QTimer>
+#include <QDeclarativeView>
 #include <KTextEditor/View>
 
 // This class is used to draw fancy widgets in the editor window when a
@@ -36,4 +38,9 @@ public:
     static QMap< QPair<KTextEditor::View*, QString>, QWidget* > existingWidgets;
 };
 
+class NotifierWidget : public QDeclarativeView {
+public:
+    NotifierWidget(const QUrl& source, QWidget* parent = 0);
+    QTimer* closeTimer;
+};
 #endif // REMOTECHANGENOTIFIER_H

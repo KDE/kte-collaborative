@@ -174,7 +174,8 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         blockLocalInsert = true;
         QString str = codec()->toUnicode( chunk.text() );
         kDocument()->insertText( startCursor, str );
-        RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), startCursor, user->name());
+        RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), offsetToCursor_remote(offset+chunk.length()),
+                                                    user->name());
     }
     else
         blockRemoteInsert = false;
@@ -193,6 +194,8 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
         blockLocalRemove = true;
         kDocument()->removeText( KTextEditor::Range(startCursor, endCursor) );
+        RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), startCursor,
+                                                    user->name());
     }
     else
         blockRemoteRemove = false;
