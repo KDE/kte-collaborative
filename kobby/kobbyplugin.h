@@ -35,33 +35,11 @@
 #include <libqinfinity/browser.h>
 #include <libqinfinity/textsession.h>
 
+#include "common/connection.h"
+#include "common/documentbuilder.h"
+#include "manageddocument.h"
+
 using namespace Kobby;
-
-class ManagedDocument : public QObject {
-Q_OBJECT
-public:
-    ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* model);
-    virtual ~ManagedDocument();
-    void subscribe();
-    void unsubscribe();
-    bool isSubscribed();
-    KTextEditor::Document* document() const {
-        return m_document;
-    };
-    KDocumentTextBuffer* m_textBuffer;
-public slots:
-    void finishSubscription(QInfinity::BrowserIter iter);
-    void subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>);
-    void userJoinCompleted(QPointer<QInfinity::User>);
-    void sessionStatusChanged();
-    void joinUser();
-private:
-    KTextEditor::Document* m_document;
-    QInfinity::BrowserModel* m_browserModel;
-    bool m_subscribed;
-    QPointer< QInfinity::SessionProxy > m_proxy;
-};
-
 
 class KobbyPluginView;
 
