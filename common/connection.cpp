@@ -95,7 +95,7 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
     connect( m_xmppConnection, SIGNAL(error( const GError* )),
         this, SLOT(slotError( const GError* )) );
 
-    emit ready();
+    emit ready( this );
 }
 
 void Connection::slotStatusChanged()
