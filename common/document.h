@@ -84,7 +84,7 @@ class KOBBYCOMMON_EXPORT Document
             InfText = 2
         };
 
-        Document( KTextEditor::Document &kDocument );
+        Document( KTextEditor::Document* kDocument );
         virtual ~Document();
 
         /**
@@ -243,9 +243,9 @@ class KOBBYCOMMON_EXPORT InfTextDocument
          *
          * Takes ownership of passed session and sessionProxy.
          */
-        InfTextDocument( QInfinity::SessionProxy &sessionProxy,
-            QInfinity::TextSession &sesion,
-            KDocumentTextBuffer &buffer,
+        InfTextDocument( QInfinity::SessionProxy* sessionProxy,
+            QInfinity::TextSession* session,
+            KDocumentTextBuffer* buffer,
             const QString &name );
         ~InfTextDocument();
 

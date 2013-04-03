@@ -45,8 +45,8 @@
 namespace Kobby
 {
 
-Document::Document( KTextEditor::Document &kDocument )
-    : m_kDocument( &kDocument )
+Document::Document( KTextEditor::Document* kDocument )
+    : m_kDocument( kDocument )
     , m_loadState( Document::Unloaded )
     , m_dirty( false )
 {
@@ -450,23 +450,23 @@ void KDocumentTextBuffer::textOpPerformed()
 /* Accepting the session and buffer as parameters, although we
    could obtain them from the session proxy, ensures some type
    safety. */
-InfTextDocument::InfTextDocument( QInfinity::SessionProxy &proxy,
-    QInfinity::TextSession &session,
-    KDocumentTextBuffer &buffer,
+InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
+    QInfinity::TextSession* session,
+    KDocumentTextBuffer* buffer,
     const QString &name )
-    : Document( *(buffer.kDocument()) )
-    , m_sessionProxy( &proxy )
-    , m_session( &session )
-    , m_buffer( &buffer )
+    : Document( buffer->kDocument() )
+    , m_sessionProxy( proxy )
+    , m_session( session )
+    , m_buffer( buffer )
     , m_name( name )
 {
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
     connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
         this, SLOT(slotViewCreated( KTextEditor::Document*, KTextEditor::View* )) );
-    connect( &buffer, SIGNAL(canUndo( bool )),
+    connect( buffer, SIGNAL(canUndo( bool )),
         this, SLOT(slotCanUndo( bool )) );
-    connect( &buffer, SIGNAL(canRedo( bool )),
+    connect( buffer, SIGNAL(canRedo( bool )),
         this, SLOT(slotCanRedo( bool )) );
     synchronize();
 }
@@ -586,6 +586,7 @@ void InfTextDocument::slotCanRedo( bool enable )
 
 void InfTextDocument::synchronize()
 {
+    qDebug() << "synchronizing document";
     if( m_session->status() == QInfinity::Session::Running )
         slotSynchronized();
     else if( m_session->status() == QInfinity::Session::Synchronizing )
