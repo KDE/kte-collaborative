@@ -91,7 +91,7 @@ KobbyPlugin::~KobbyPlugin()
 void KobbyPlugin::connectionPrepared(Connection* connection)
 {
     kDebug() << "connection prepared, establishing connection";
-    m_browserModel->addConnection(*(connection->xmppConnection()), connection->name());
+    m_browserModel->addConnection(connection->xmppConnection(), connection->name());
     foreach ( QInfinity::Browser* browser, m_browserModel->browsers() ) {
         QObject::connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
                          this, SLOT(browserConnected(const QInfinity::Browser*)), Qt::UniqueConnection);
@@ -164,10 +164,10 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
     }
     kDebug() << "initializing collaborative session for document" << document->url();
 
-    ManagedDocument* managed = new ManagedDocument(document, m_browserModel, m_textPlugin, this);
-    m_managedDocuments.append(managed);
+    Connection* connection = eventuallyAddConnection(document->url());
 
-    eventuallyAddConnection(document->url());
+    ManagedDocument* managed = new ManagedDocument(document, m_browserModel, m_textPlugin, connection, this);
+    m_managedDocuments.append(managed);
 
     connect(document, SIGNAL(textInserted(KTextEditor::Document*, KTextEditor::Range)),
             this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)), Qt::UniqueConnection);
@@ -179,7 +179,7 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
     subscribeNewDocuments();
 }
 
-void KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
+Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 {
     int port = documentUrl.port();
     port = port == -1 ? defaultPort : port;
@@ -193,10 +193,12 @@ void KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
                 this, SLOT(connectionPrepared(Connection*)));
         m_connections[connectionName] = c;
         c->prepare();
+        return c;
     }
     else {
         kDebug() << "connection" << connectionName << "requested but it exists already";
     }
+    return m_connections[connectionName];
 }
 
 void KobbyPlugin::addView(KTextEditor::View* view)

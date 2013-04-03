@@ -21,31 +21,56 @@
 #include <libqinfinity/session.h>
 #include <libqinfinity/browser.h>
 #include <libqinfinity/textsession.h>
+#include <libqinfinity/browseritemfactory.h>
+#include <libqinfinity/xmlconnection.h>
+#include <libqinfinity/xmppconnection.h>
+
+#include <common/connection.h>
 
 #include <QTimer>
 
 #include "utils.h"
 
-ManagedDocument::ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* model,
-                                 QInfinity::NotePlugin* notePlugin, QObject* parent)
+using namespace QInfinity;
+
+ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* browserModel, NotePlugin* plugin, Kobby::Connection* connection, QObject* parent)
     : QObject(parent)
     , m_document(document)
-    , m_browserModel(model)
-    , m_notePlugin(notePlugin)
+    , m_browserModel(browserModel)
+    , m_notePlugin(plugin)
     , m_subscribed(false)
     , m_textBuffer(0)
+    , m_infDocument(0)
+    , m_connection(connection)
 {
     kDebug() << "now managing document" << document << document->url();
 }
 
 ManagedDocument::~ManagedDocument()
 {
+    unsubscribe();
+}
 
+QInfinity::Browser* ManagedDocument::browser() const
+{
+    Q_ASSERT(m_connection->xmppConnection() && "requested browser for an inactive connection!");
+    for ( int i = 0; i < m_browserModel->rowCount(); i++ ) {
+        ConnectionItem* item = dynamic_cast<ConnectionItem*>(m_browserModel->item(i));
+        if ( item && item->connection() == static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()) ) {
+            return item->browser();
+        }
+    }
+    Q_ASSERT(false && "no browser found for connection");
+    return 0;
 }
 
 void ManagedDocument::unsubscribe()
 {
     kDebug() << "should unsubscribe document";
+    if ( m_infDocument ) {
+        m_infDocument->leave();
+        delete m_infDocument;
+    }
 }
 
 bool ManagedDocument::isSubscribed() const
@@ -56,14 +81,10 @@ bool ManagedDocument::isSubscribed() const
 void ManagedDocument::subscribe()
 {
     if ( m_document->url().protocol() != "inf" ) {
-        // TODO URGENT urghghh
         return;
     }
     kDebug() << "beginning subscription for" << m_document->url();
-#warning fixme urgent
-    // TODO URGENT browsers.first is wrong
-    IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash),
-                                                    m_browserModel->browsers().first());
+    IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash), browser());
     connect(helper, SIGNAL(done(QInfinity::BrowserIter)),
             this, SLOT(finishSubscription(QInfinity::BrowserIter)));
     helper->begin();

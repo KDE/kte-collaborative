@@ -48,7 +48,6 @@ public:
                         const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
-    // can add those again later in case we actually need the views
     virtual void addView(KTextEditor::View *view);
     virtual void removeView(KTextEditor::View *view);
     virtual void addDocument(KTextEditor::Document* document);
@@ -57,7 +56,11 @@ public:
     void subscribeNewDocuments();
 
 private:
-    void eventuallyAddConnection(const KUrl& documentUrl);
+    // Gets a Connection from the m_connections hashtable if it exists,
+    // or sets it up and returns it otherwise.
+    // The connection returned is not necessarily ready to be used,
+    // but never null.
+    Connection* eventuallyAddConnection(const KUrl& documentUrl);
 
     ManagedDocumentList m_managedDocuments;
     bool m_isConnected;

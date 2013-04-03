@@ -27,12 +27,13 @@
 #include <libqinfinity/sessionproxy.h>
 
 #include <common/document.h>
+#include <common/connection.h>
 
 class ManagedDocument : public QObject {
 Q_OBJECT
 public:
-    ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* model,
-                    QInfinity::NotePlugin* plugin, QObject* parent = 0);
+    ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* browserModel,
+                    QInfinity::NotePlugin* plugin, Kobby::Connection* connection, QObject* parent = 0);
     virtual ~ManagedDocument();
     void subscribe();
     void unsubscribe();
@@ -40,6 +41,8 @@ public:
     inline KTextEditor::Document* document() const {
         return m_document;
     };
+    // Returns the Browser for the document's connection
+    QInfinity::Browser* browser() const;
 
 public slots:
     void finishSubscription(QInfinity::BrowserIter iter);
@@ -51,6 +54,7 @@ private:
     KTextEditor::Document* m_document;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_notePlugin;
+    Kobby::Connection* m_connection;
     bool m_subscribed;
     QPointer< QInfinity::SessionProxy > m_proxy;
     Kobby::InfTextDocument* m_infDocument;

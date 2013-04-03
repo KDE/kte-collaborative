@@ -134,11 +134,12 @@ void InfinityProtocol::listDir(const KUrl &url)
 
     // TODO make synchronous properly
     loop.exec();
-    m_browserModel->addConnection(*static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "Test connection");
+    m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
 
     kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
 
+    // browsers.first is ok, since we only have one connection
     QInfinity::Browser* browser = m_browserModel->browsers().first();
     while ( browser->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
