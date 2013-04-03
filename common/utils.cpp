@@ -29,12 +29,15 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* brows
     if ( lookupPath.startsWith('/') ) {
         lookupPath = lookupPath.mid(1);
     }
-    m_remainingComponents << lookupPath.split('/').toVector();
+    foreach ( const QString& component, lookupPath.split('/').toVector() ) {
+        m_remainingComponents.prepend(component);
+    }
     kDebug() << "finding iter for" << m_remainingComponents;
 };
 
 void IterLookupHelper::finished_cb(InfcNodeRequest* request, void* user_data)
 {
+    kDebug() << "explore request finished";
     static_cast<IterLookupHelper*>(user_data)->directoryExplored();
 }
 
@@ -46,6 +49,9 @@ void IterLookupHelper::explore(QInfinity::BrowserIter directory)
         m_currentIter = directory;
         g_signal_connect_after(request, "finished",
                                 G_CALLBACK(IterLookupHelper::finished_cb), (void*) this);
+    }
+    else {
+        directoryExplored();
     }
 };
 

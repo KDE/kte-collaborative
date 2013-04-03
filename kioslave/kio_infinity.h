@@ -26,6 +26,20 @@
 #include <common/connection.h>
 #include <libqinfinity/browsermodel.h>
 
+struct Peer {
+    Peer(QString hostname, int port = -1)
+        : hostname(hostname)
+        , port(port == -1 ? 6523 : port) { };
+    Peer()
+        : hostname(QString())
+        , port(-1) { };
+    bool operator==(const Peer& other) const {
+        return hostname == other.hostname && port == other.port;
+    }
+    QString hostname;
+    int port;
+};
+
 class InfinityProtocol : public QObject, public KIO::SlaveBase
 {
     Q_OBJECT
@@ -40,13 +54,17 @@ public:
 
     virtual void mimetype(const KUrl& url);
     virtual void listDir(const KUrl& url);
+    virtual void put(const KUrl& url, int permissions, KIO::JobFlags flags);
+
+    void doConnect(const Peer& peer);
 
     static InfinityProtocol* self();
 
 private:
     static InfinityProtocol* _self;
-    Kobby::Connection* m_connection;
-    QInfinity::BrowserModel* m_browserModel;
+    QSharedPointer<Kobby::Connection> m_connection;
+    QSharedPointer<QInfinity::BrowserModel> m_browserModel;
+    Peer m_connectedTo;
 };
 
 

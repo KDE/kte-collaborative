@@ -77,6 +77,8 @@ InfinityProtocol* InfinityProtocol::_self = 0;
 
 InfinityProtocol::InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket)
     : QObject(), SlaveBase("inf", pool_socket, app_socket)
+    , m_connection(0)
+    , m_browserModel(0)
 {
     qDebug() << "constructing infinity kioslave";
     _self = this;
@@ -115,24 +117,20 @@ void InfinityProtocol::stat( const KUrl& url)
     finished();
 }
 
-
-void InfinityProtocol::mimetype(const KUrl & /*url*/)
+void InfinityProtocol::doConnect(const Peer& peer)
 {
-    mimeType("text/plain");
-    finished();
-}
-
-void InfinityProtocol::listDir(const KUrl &url)
-{
-    kDebug() << "LIST DIR" << url;
-    kDebug() << url.host() << url.userName() << url.password() << url.path();
+    if ( m_connectedTo == peer ) {
+        // TODO check if connection is still open
+        return;
+    }
 
     QEventLoop loop;
-    m_connection = new Kobby::Connection(url.host(), url.port() == -1 ? 6523 : url.port(), this);
-    m_browserModel = new QInfinity::BrowserModel( this );
+    m_connection = QSharedPointer<Kobby::Connection>(new Kobby::Connection(peer.hostname, peer.port, this));
+    m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel( this ));
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
-    QObject::connect(m_connection, SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
+    QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
     m_connection->prepare();
+    m_connectedTo = peer;
 
     // TODO make synchronous properly
     loop.exec();
@@ -146,11 +144,34 @@ void InfinityProtocol::listDir(const KUrl &url)
     while ( browser->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
     }
+}
+
+
+void InfinityProtocol::mimetype(const KUrl & /*url*/)
+{
+    mimeType("text/plain");
+    finished();
+}
+
+void InfinityProtocol::put(const KUrl& url, int permissions, JobFlags flags)
+{
+    doConnect(Peer(url.host(), url.port()));
+}
+
+void InfinityProtocol::listDir(const KUrl &url)
+{
+    kDebug() << "LIST DIR" << url;
+    kDebug() << url.host() << url.userName() << url.password() << url.path();
+
+    doConnect(Peer(url.host(), url.port()));
+
+    QInfinity::Browser* browser = m_browserModel->browsers().first();
 
     KUrl clean(url);
     clean.cleanPath(KUrl::SimplifyDirSeparators);
-    IterLookupHelper helper(clean.path(), browser);
-    connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
+    IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser);
+    QEventLoop loop;
+    kDebug() << "connecting signal:" << connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
     helper.begin();
     // TODO
     loop.exec();
