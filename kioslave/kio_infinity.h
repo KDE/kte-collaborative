@@ -61,7 +61,7 @@ public:
     QInfinity::BrowserIter iterForUrl(const KUrl& url);
     QInfinity::Browser* browser() const;
 
-    void doConnect(const Peer& peer);
+    bool doConnect(const Peer& peer);
 
     static InfinityProtocol* self();
 

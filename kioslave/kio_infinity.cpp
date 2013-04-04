@@ -44,6 +44,8 @@
 
 #include "common/utils.h"
 
+#define TIMEOUT_MS 10000
+
 using namespace KIO;
 
 extern "C" {
@@ -115,11 +117,11 @@ void InfinityProtocol::stat( const KUrl& url)
     finished();
 }
 
-void InfinityProtocol::doConnect(const Peer& peer)
+bool InfinityProtocol::doConnect(const Peer& peer)
 {
     if ( m_connectedTo == peer ) {
         // TODO check if connection is still open
-        return;
+        return true;
     }
 
     QEventLoop loop;
@@ -128,13 +130,22 @@ void InfinityProtocol::doConnect(const Peer& peer)
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
     QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
     m_connection->prepare();
-    m_connectedTo = peer;
 
     m_notePlugin = QSharedPointer<Kobby::NotePlugin>(new Kobby::NotePlugin( this ));
     m_browserModel->addPlugin( *m_notePlugin );
 
-    // TODO make synchronous properly
+    QTimer timeout;
+    timeout.setSingleShot(true);
+    timeout.setInterval(TIMEOUT_MS);
+    timeout.start();
+    connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     loop.exec();
+    if ( ! timeout.isActive() ) {
+        // timed out
+        kDebug() << "timed out looking up hostname";
+        error(KIO::ERR_SLAVE_DEFINED, i18n("Failed to look up hostname %1: Operation timed out.", peer.hostname));
+        return false;
+    }
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
 
@@ -144,7 +155,15 @@ void InfinityProtocol::doConnect(const Peer& peer)
     QInfinity::Browser* browser = m_browserModel->browsers().first();
     while ( browser->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
+        usleep(1000);
+        if ( ! timeout.isActive() ) {
+            kDebug() << "failed to connect";
+            error(KIO::ERR_SLAVE_DEFINED, i18n("Failed to connect to host %1, port %2: Operation timed out.", peer.hostname, peer.port));
+            return false;
+        }
     }
+    m_connectedTo = peer;
+    return true;
 }
 
 
@@ -157,7 +176,9 @@ void InfinityProtocol::mimetype(const KUrl & /*url*/)
 void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flags*/)
 {
     kDebug() << "PUT" << url;
-    doConnect(Peer(url.host(), url.port()));
+    if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        return;
+    }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     kDebug() << "adding note" << iter.path() << url.fileName();
     browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
@@ -168,7 +189,9 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
 void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
     kDebug() << "MKDIR" << url;
-    doConnect(Peer(url.host(), url.port()));
+    if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        return;
+    }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     browser()->addSubdirectory(iter, url.fileName().toAscii().data());
     // TODO error handling and waiting
@@ -195,7 +218,9 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << "LIST DIR" << url;
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
-    doConnect(Peer(url.host(), url.port()));
+    if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        return;
+    }
 
     QInfinity::BrowserIter iter = iterForUrl(url);
 
