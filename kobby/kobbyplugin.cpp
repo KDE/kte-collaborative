@@ -214,8 +214,6 @@ KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* /*
 {
     setObjectName("kobby-plugin");
     m_view = view;
-
-    connect(view, SIGNAL(selectionChanged(KTextEditor::View*)), this, SLOT(selectionChanged()));
 }
 
 KobbyPluginView::~KobbyPluginView()
