@@ -69,7 +69,7 @@ private:
     static InfinityProtocol* _self;
     QSharedPointer<Kobby::Connection> m_connection;
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
-    QSharedPointer<Kobby::NotePlugin> m_notePlugin;
+    Kobby::NotePlugin* m_notePlugin;
     Peer m_connectedTo;
 };
 

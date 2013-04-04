@@ -78,7 +78,9 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 InfinityProtocol* InfinityProtocol::_self = 0;
 
 InfinityProtocol::InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket)
-    : QObject(), SlaveBase("inf", pool_socket, app_socket)
+    : QObject()
+    , SlaveBase("inf", pool_socket, app_socket)
+    , m_notePlugin(0)
 {
     qDebug() << "constructing infinity kioslave";
     _self = this;
@@ -131,7 +133,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
     m_connection->prepare();
 
-    m_notePlugin = QSharedPointer<Kobby::NotePlugin>(new Kobby::NotePlugin( this ));
+    m_notePlugin = new Kobby::NotePlugin( this );
     m_browserModel->addPlugin( *m_notePlugin );
 
     QTimer timeout;
