@@ -61,8 +61,6 @@ Document::Document( KTextEditor::Document* kDocument )
 
 Document::~Document()
 {
-    if( m_kDocument )
-        delete m_kDocument.data();
 }
 
 KTextEditor::Document *Document::kDocument() const
