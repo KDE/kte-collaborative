@@ -27,6 +27,7 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QTimer>
+#include <kstandarddirs.h>
 
 QMap< QPair<KTextEditor::View*, QString>, QWidget* > RemoteChangeNotifier::existingWidgets;
 
@@ -52,7 +53,8 @@ QColor colorForUsername(QString username) {
 void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QString& username)
 {
     QWidget* useWidget = 0;
-    QUrl src = QUrl("/home/sven/Projekte/kde/kobby/common/ui/notifywidget.qml");
+    KStandardDirs d;
+    QUrl src = QUrl(d.locate("data", "kte-kobby/ui/notifywidget.qml"));
     bool added = false;
 
     QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, username);
@@ -83,7 +85,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     }
 
     // TODO use + set correct color
-    NotifierWidget* notifierWidget = dynamic_cast<NotifierWidget*>(useWidget);
+    NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);
     notifierWidget->rootObject()->setProperty("username", username);
     notifierWidget->rootObject()->setProperty("widgetcolor", colorForUsername(username).name());
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");

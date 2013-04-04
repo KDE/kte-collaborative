@@ -33,3 +33,4 @@ target_link_libraries( kobbycommon
 )
 
 install(TARGETS kobbycommon DESTINATION lib)
+install(FILES ui/notifywidget.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)
