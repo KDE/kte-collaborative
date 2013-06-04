@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Service
-Comment=FOOBAR WUZAH
+Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
 Name=KobbyPlugin
 GenericName=Kobby plugin
 Icon=kcoloredit
