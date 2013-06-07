@@ -241,7 +241,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 QByteArray encodedText = codec()->fromUnicode( text );
                 if( encodedText.size() == 0 )
                 {
-                    kDebug() << i18n("Got empty encoded text from non empty string "\
+                    kDebug() << i18n("Got empty encoded text from non empty string "
                         "Skipping insertion");
                     this->document()->throwFatalError( i18n("Document state compromised") );
                 }
@@ -363,7 +363,7 @@ unsigned int KDocumentTextBuffer::cursorToOffset_local( const KTextEditor::Curso
     int i, cursor_line = cursor.line();
     QList<QByteArray> lines = slice(0, length())->text().split('\n');
     for( i = 0; i < cursor_line; i++ )
-        offset += lines.at(i).length() + 1; // Add newline
+        offset += codec()->toUnicode(lines.at(i)).length() + 1; // Add newline
     offset += cursor.column();
     return offset;
 }
@@ -375,8 +375,8 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_local( unsigned int offs
         soff = offset;
     int i;
     QList<QByteArray> lines = slice(0, length())->text().split('\n');
-    for( i = 0; soff > lines.at(i).length(); i++ ) {
-        soff -= lines.at(i).length() + 1; // Subtract newline
+    for( i = 0; soff > codec()->toUnicode(lines.at(i)).length(); i++ ) {
+        soff -= codec()->toUnicode(lines.at(i)).length() + 1; // Subtract newline
         if ( i == lines.size() - 1 ) {
             kWarning() << "oops, invalid offset?";
             break;
