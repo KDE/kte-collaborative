@@ -212,8 +212,6 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         KTextEditor::Cursor offsetToCursor_remote( unsigned int offset );
         void textOpPerformed();
 
-        bool blockLocalInsert;
-        bool blockLocalRemove;
         bool blockRemoteInsert;
         bool blockRemoteRemove;
         KTextEditor::Document *m_kDocument;

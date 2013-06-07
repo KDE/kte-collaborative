@@ -124,8 +124,6 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     const QString &encoding,
     QObject *parent )
     : QInfinity::AbstractTextBuffer( encoding, parent )
-    , blockLocalInsert( false )
-    , blockLocalRemove( false )
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
     , m_kDocument( kDocument )
@@ -169,9 +167,10 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     if( !blockRemoteInsert )
     {
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
-        blockLocalInsert = true;
         QString str = codec()->toUnicode( chunk.text() );
+        kDocument()->blockSignals(true);
         kDocument()->insertText( startCursor, str );
+        kDocument()->blockSignals(false);
         RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), offsetToCursor_remote(offset+chunk.length()),
                                                     user->name());
     }
@@ -190,8 +189,9 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     {
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
-        blockLocalRemove = true;
+        kDocument()->blockSignals(true);
         kDocument()->removeText( KTextEditor::Range(startCursor, endCursor) );
+        kDocument()->blockSignals(false);
         RemoteChangeNotifier::addNotificationWidget(kDocument()->activeView(), startCursor,
                                                     user->name());
     }
@@ -225,46 +225,39 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 
     textOpPerformed();
     unsigned int offset;
-    if( !blockLocalInsert )
+    if( !m_user.isNull() )
     {
-        if( !m_user.isNull() )
+        offset = cursorToOffset_local( range.start() );
+        QInfinity::TextChunk chunk( encoding() );
+        QString text = kDocument()->text( range );
+        if( encoder() )
         {
-            offset = cursorToOffset_local( range.start() );
-            QInfinity::TextChunk chunk( encoding() );
-            QString text = kDocument()->text( range );
-//             if( text[0] == '\n' ) // FIXME hack // "hack"? you meant "breakage" :)
-//                 text = '\n';
-            if( encoder() )
+            if( text.isEmpty() )
             {
-                if( text.isEmpty() )
+                kDebug() << i18n("Skipping empty insert.");
+            }
+            else
+            {
+                QByteArray encodedText = codec()->fromUnicode( text );
+                if( encodedText.size() == 0 )
                 {
-                    kDebug() << i18n("Skipping empty insert.");
+                    kDebug() << i18n("Got empty encoded text from non empty string "\
+                        "Skipping insertion");
+                    this->document()->throwFatalError( i18n("Document state compromised") );
                 }
                 else
                 {
-                    QByteArray encodedText = codec()->fromUnicode( text );
-                    if( encodedText.size() == 0 )
-                    {
-                        kDebug() << i18n("Got empty encoded text from non empty string "\
-                            "Skipping insertion");
-                        this->document()->throwFatalError( i18n("Document state compromised") );
-                    }
-                    else
-                    {
-                        chunk.insertText( 0, encodedText, text.length(), m_user->id() );
-                        blockRemoteInsert = true;
-                        insertChunk( offset, chunk, m_user );
-                    }
+                    chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+                    blockRemoteInsert = true;
+                    insertChunk( offset, chunk, m_user );
                 }
             }
-            else
-                kDebug() << "No encoder for text codec.";
         }
         else
-            kDebug() << "Could not insert text: No local user set.";
+            kDebug() << "No encoder for text codec.";
     }
     else
-        blockLocalInsert = false;
+        kDebug() << "Could not insert text: No local user set.";
 }
 
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
@@ -278,25 +271,20 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     KTextEditor::Range chkRange;
 
     textOpPerformed();
-    if( !blockLocalRemove )
+    if( !m_user.isNull() )
     {
-        if( !m_user.isNull() )
-        {
-            offset = cursorToOffset_local( range.start() );
-            end = cursorToOffset_local( range.end() );
-            len = end - offset;
-            blockRemoteRemove = true;
-            kDebug() << "ERASING TEXT with len" << len << "offset" << offset;
-            if( len > 0 )
-                eraseText( offset, len, m_user );
-            else
-                kDebug() << "0 legth delete operation. Skipping.";
-        }
+        offset = cursorToOffset_local( range.start() );
+        end = cursorToOffset_local( range.end() );
+        len = end - offset;
+        blockRemoteRemove = true;
+        kDebug() << "ERASING TEXT with len" << len << "offset" << offset;
+        if( len > 0 )
+            eraseText( offset, len, m_user );
         else
-            kDebug() << "Could not remove text: No local user set.";
+            kDebug() << "0 legth delete operation. Skipping.";
     }
     else
-        blockLocalRemove = false;
+        kDebug() << "Could not remove text: No local user set.";
 }
 
 void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
