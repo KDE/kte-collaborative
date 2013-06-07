@@ -24,6 +24,8 @@
 #define COLLABORATIVEEDITINGTEST_H
 
 #include <QObject>
+#include <KTextEditor/Editor>
+#include <kobbyplugin.h>
 
 class CollaborativeEditingTest : public QObject
 {
@@ -36,6 +38,12 @@ private slots:
     void cleanup();
 
     void testTest();
+
+private:
+    inline KTextEditor::Editor* editor() const { return m_editor; }
+    inline KobbyPlugin* plugin() const { return m_plugin; }
+    KTextEditor::Editor* m_editor;
+    KobbyPlugin* m_plugin;
 
 };
 

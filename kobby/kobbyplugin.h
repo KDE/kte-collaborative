@@ -27,6 +27,8 @@
 #include <kjob.h>
 #include <kurl.h>
 #include <kio/job.h>
+#include <kpluginfactory.h>
+
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseriter.h>
@@ -54,6 +56,8 @@ public:
     virtual void removeDocument(KTextEditor::Document* document);
 
     void subscribeNewDocuments();
+    // access to managed documents for unit tests
+    const ManagedDocumentList& managedDocuments() const;
 
 private:
     // Gets a Connection from the m_connections hashtable if it exists,

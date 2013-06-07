@@ -50,6 +50,9 @@ public slots:
     void subscriptionDone(QInfinity::BrowserIter, QPointer<QInfinity::SessionProxy>);
     void sessionStatusChanged();
 
+signals:
+    void documentReady(KTextEditor::Document*);
+
 private:
     Kobby::KDocumentTextBuffer* m_textBuffer;
     KTextEditor::Document* m_document;

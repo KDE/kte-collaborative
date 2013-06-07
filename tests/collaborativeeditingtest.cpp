@@ -20,6 +20,7 @@
  *
  */
 #include "collaborativeeditingtest.h"
+#include <kobby/kobbyplugin.h>
 #include <ktexteditor/factory.h>
 
 #include <QtTest>
@@ -28,6 +29,7 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/Editor>
 #include <KPluginFactory>
+#include <KServiceTypeTrader>
 #include <klibloader.h>
 
 QTEST_MAIN(CollaborativeEditingTest);
@@ -35,16 +37,18 @@ QTEST_MAIN(CollaborativeEditingTest);
 void CollaborativeEditingTest::initTestCase()
 {
     qDebug() << "initializing test case";
-    QApplication::setProperty("useSimulatedInfConnection", true);
     KLibFactory* factory = KLibLoader::self()->factory("katepart");
     KTextEditor::Factory* kte_factory = qobject_cast<KTextEditor::Factory*>(factory);
 
-    if ( kte_factory ) {
-        qDebug() << "yay, got editor";
-        KTextEditor::Editor* editor = kte_factory->editor();
-    } else {
-        qFatal("failed to instantiate kate part");
-    }
+    Q_ASSERT( kte_factory && "failed to instantiate kate part" );
+
+    m_editor = kte_factory->editor();
+    Q_ASSERT(m_editor);
+
+    m_plugin = reinterpret_cast<KobbyPlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
+    m_plugin->setProperty("useSimulatedConnection", true);
+    m_plugin->setProperty("manageAllDocuments", true);
+    qDebug() << "instance:" << m_plugin;
 }
 
 void CollaborativeEditingTest::cleanupTestCase()
@@ -65,7 +69,10 @@ void CollaborativeEditingTest::cleanup()
 void CollaborativeEditingTest::testTest()
 {
     qDebug() << "running test test";
-    QVERIFY(true);
+    KTextEditor::Document* doc1 = editor()->createDocument(this);
+    KTextEditor::Document* doc2 = editor()->createDocument(this);
+    QVERIFY(plugin()->managedDocuments().length() == 2);
 }
+
 
 #include "collaborativeeditingtest.moc"

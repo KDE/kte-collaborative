@@ -75,6 +75,9 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
+    // TODO this is for unit tests. I can't figure out how to get the plugin instance
+    // from the KatePart we create there.
+    QApplication::instance()->setProperty("KobbyPluginInstance", QVariant(reinterpret_cast<unsigned long long>(this)));
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
     m_textPlugin = new Kobby::NotePlugin( this );
@@ -147,7 +150,9 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
 {
     kDebug() << "new url:" << document->url() << document;
-    if ( document->url().protocol() != "inf" ) {
+    // the property() stuff is for unit tests (and only for unit tests!)
+    bool manageAll = property("manageAllDocuments").toBool();
+    if ( document->url().protocol() != "inf" && ! manageAll ) {
         kDebug() << "not a collaborative document:" << document->url().url();
         if ( m_managedDocuments.isManaged(document) ) {
             kDebug() << "removing document" << document << "from manager";
@@ -176,6 +181,11 @@ void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
     subscribeNewDocuments();
 }
 
+const ManagedDocumentList& KobbyPlugin::managedDocuments() const
+{
+    return m_managedDocuments;
+}
+
 Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 {
     int port = documentUrl.port();
@@ -184,6 +194,7 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
     if ( ! m_connections.contains(connectionName) ) {
         kDebug() << "adding connection" << connectionName << "because it doesn't exist";
         Connection* c = new Kobby::Connection(documentUrl.host(), port, this);
+        c->setProperty("useSimulatedConnection", property("useSimulatedConnection"));
         connect(c, SIGNAL(connected(Connection*)),
                 this, SLOT(connected(Connection*)));
         connect(c, SIGNAL(ready(Connection*)),

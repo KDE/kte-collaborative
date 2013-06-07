@@ -24,8 +24,10 @@
 #include <QHostInfo>
 #include <QHostAddress>
 #include <QDebug>
+#include <QApplication>
 
 #include "connection.moc"
+#include <kobby/kobbyplugin.h>
 
 namespace Kobby
 {
@@ -88,7 +90,7 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
         m_hostname,
         QInfinity::XmppConnection::PreferTls,
         0, 0, 0,
-        this );
+        this, property("useSimulatedConnection").toBool() ); // used by tests
 
     connect( m_xmppConnection, SIGNAL(statusChanged()),
         this, SLOT(slotStatusChanged()) );
