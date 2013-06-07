@@ -190,7 +190,7 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 {
     int port = documentUrl.port();
     port = port == -1 ? defaultPort : port;
-    QString connectionName = documentUrl.host() + ":" + port;
+    QString connectionName = documentUrl.host() + ":" + QString::number(port);
     if ( ! m_connections.contains(connectionName) ) {
         kDebug() << "adding connection" << connectionName << "because it doesn't exist";
         Connection* c = new Kobby::Connection(documentUrl.host(), port, this);
