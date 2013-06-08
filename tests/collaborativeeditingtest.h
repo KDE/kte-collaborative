@@ -82,6 +82,7 @@ private:
         return 64261;
 //         return 6523;
     };
+    void wait(int msecs);
     KobbyPlugin* m_plugin_A;
     KobbyPlugin* m_plugin_B;
     KService::Ptr m_documentService;

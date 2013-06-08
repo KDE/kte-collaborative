@@ -170,21 +170,22 @@ QString CollaborativeEditingTest::makeFileName()
     return KUrl(f.fileName()).fileName();
 }
 
+void CollaborativeEditingTest::wait(int msecs)
+{
+    for ( int i = 0; i < msecs; i++ ) {
+        QTest::qWait(1);
+        QApplication::processEvents();
+    }
+}
+
 void CollaborativeEditingTest::testTest()
 {
     QString fileName = makeFileName();
     KTextEditor::Document* doc1 = newDocument_A(fileName);
     KTextEditor::Document* doc2 = loadDocument_B(fileName);
     doc1->insertText(KTextEditor::Cursor(0, 0), "Hello World!");
-    waitForDocument_A(doc1);
-    waitForDocument_B(doc2);
+    wait(50);
 
-    for ( int i = 0; i < 50; i++ ) {
-        QTest::qWait(1);
-        QApplication::processEvents();
-    }
-
-    qDebug() << doc1->text() << "|" << doc2->text();
     QVERIFY(doc1->text() == doc2->text());
 
     return;
