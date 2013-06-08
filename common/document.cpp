@@ -598,9 +598,16 @@ void InfTextDocument::joinSession()
         disconnect( this, SLOT(joinSession()) );
         
         setLoadState( Document::Joining );
+        QString userName;
+        if ( ! kDocument()->url().userName().isEmpty() ) {
+            userName = kDocument()->url().userName();
+        }
+        else {
+            userName = "UnnamedUser_" + QString::number(QTime::currentTime().second());
+        }
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
             *m_session,
-            "b00n" + QString::number(QTime::currentTime().second()),
+            userName,
             10 );
         connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
             this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
