@@ -234,21 +234,22 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
         {
             if( text.isEmpty() )
             {
-                kDebug() << i18n("Skipping empty insert.");
+                kDebug() << "Skipping empty insert.";
             }
             else
             {
                 QByteArray encodedText = codec()->fromUnicode( text );
                 if( encodedText.size() == 0 )
                 {
-                    kDebug() << i18n("Got empty encoded text from non empty string "
-                        "Skipping insertion");
+                    kDebug() << "Got empty encoded text from non empty string "
+                                "Skipping insertion";
                     this->document()->throwFatalError( i18n("Document state compromised") );
                 }
                 else
                 {
                     chunk.insertText( 0, encodedText, text.length(), m_user->id() );
                     blockRemoteInsert = true;
+                    kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer";
                     insertChunk( offset, chunk, m_user );
                 }
             }
