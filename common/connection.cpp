@@ -49,12 +49,25 @@ Connection::~Connection()
 
 void Connection::prepare()
 {
-    QHostInfo::lookupHost( m_hostname, this,
-        SLOT(slotHostnameLookedUp(const QHostInfo&)) );
+    if ( property("useSimulatedConnection").toBool() ) {
+        m_xmppConnection = new QInfinity::XmppConnection( this );
+        connect( m_xmppConnection, SIGNAL(statusChanged()),
+            this, SLOT(slotStatusChanged()) );
+        connect( m_xmppConnection, SIGNAL(error( const GError* )),
+            this, SLOT(slotError( const GError* )) );
+        emit ready( this );
+    }
+    else {
+        QHostInfo::lookupHost( m_hostname, this,
+            SLOT(slotHostnameLookedUp(const QHostInfo&)) );
+    }
 }
 
 void Connection::open()
 {
+    if ( property("useSimulatedConnection").toBool() ) {
+        return;
+    }
     Q_ASSERT(m_tcpConnection && "you must call prepare() and wait for the ready() signal to be emitted before calling open()");
     m_tcpConnection->open();
 }
@@ -90,7 +103,7 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
         m_hostname,
         QInfinity::XmppConnection::PreferTls,
         0, 0, 0,
-        this, property("useSimulatedConnection").toBool() ); // used by tests
+        this );
 
     connect( m_xmppConnection, SIGNAL(statusChanged()),
         this, SLOT(slotStatusChanged()) );
