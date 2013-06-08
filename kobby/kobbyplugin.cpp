@@ -133,6 +133,8 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
     kDebug() << "add document" << document << document->url();
     // TODO this is not good semantically
     documentUrlChanged(document);
+    connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),
+            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
 }
 
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
@@ -211,8 +213,6 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 
 void KobbyPlugin::addView(KTextEditor::View* view)
 {
-    connect(view->document(), SIGNAL(documentUrlChanged(KTextEditor::Document*)),
-            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
 }
 
 void KobbyPlugin::removeView(KTextEditor::View* view)
