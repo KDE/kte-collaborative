@@ -64,6 +64,11 @@ QInfinity::Browser* ManagedDocument::browser() const
     return 0;
 }
 
+Kobby::Connection* ManagedDocument::connection() const
+{
+    return m_connection;
+}
+
 void ManagedDocument::unsubscribe()
 {
     kDebug() << "should unsubscribe document";
@@ -99,18 +104,24 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     }
     kDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
     m_proxy = proxy;
-//     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
-//                      this, SLOT(sessionStatusChanged()));
+    QObject::connect(proxy->session(), SIGNAL(statusChanged()),
+                     this, SLOT(sessionStatusChanged()));
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy.data()->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());
     emit documentReady(document());
 }
 
+Session::Status ManagedDocument::sessionStatus() const
+{
+    return m_sessionStatus;
+}
+
 void ManagedDocument::sessionStatusChanged()
 {
 #warning TODO remove this function
-    kDebug() << "session status changed to " << m_proxy->session()->status();
+    kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
+    m_sessionStatus = m_proxy->session()->status();
     if ( m_proxy->session()->status() != QInfinity::Session::Running ) {
         kDebug() << "not running, ignoring event";
         return;

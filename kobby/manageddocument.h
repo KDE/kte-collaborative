@@ -26,6 +26,7 @@
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/browseriter.h>
+#include <libqinfinity/session.h>
 
 #include <common/document.h>
 #include <common/connection.h>
@@ -39,11 +40,17 @@ public:
     void subscribe();
     void unsubscribe();
     bool isSubscribed() const;
+    QInfinity::Session::Status sessionStatus() const;
     inline KTextEditor::Document* document() const {
         return m_document;
     };
+    inline Kobby::KDocumentTextBuffer* textBuffer() const {
+        return m_textBuffer;
+    }
     // Returns the Browser for the document's connection
     QInfinity::Browser* browser() const;
+    // Returns the Connection for this document
+    Kobby::Connection* connection() const;
 
 public slots:
     void finishSubscription(QInfinity::BrowserIter iter);
@@ -64,6 +71,8 @@ private:
     Kobby::InfTextDocument* m_infDocument;
     // id of the browser iter for this document, for checking whether signals are meant for it
     int m_iterId;
+    // status of this session (synchronizing, running etc)
+    QInfinity::Session::Status m_sessionStatus;
 };
 
 class ManagedDocumentList : public QList<ManagedDocument*> {
