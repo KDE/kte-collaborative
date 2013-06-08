@@ -51,6 +51,7 @@ void CollaborativeEditingTest::initTestCase()
     m_serverProcess->start("/usr/bin/env", QStringList() << "infinoted-0.5" << "--security-policy=no-tls"
                                            << "-r" << serverDirectory() << "-p" << QString::number(port()));
     m_serverProcess->waitForStarted(500);
+    // try binding to the server port; if this works, it has finished starting up
     while ( true ) {
         QTcpSocket s;
         s.connectToHost("localhost", port());
@@ -61,9 +62,12 @@ void CollaborativeEditingTest::initTestCase()
     }
     qDebug() << "successfully started infinioted";
 
+    // get the service factory for documents and the plugin
     m_documentService = KService::serviceByDesktopPath("katepart.desktop");
     KService::Ptr pluginService = KService::serviceByDesktopPath("ktexteditor_kobby.desktop");
 
+    // Instantiate a document. This loads an copy of the plugin, which we disable
+    // (we want to use the instances we create below)
     KTextEditor::Document* document = m_documentService->createInstance<KTextEditor::Document>(this);
     qDebug() << "got document from service:" << document;
     KobbyPlugin* p = reinterpret_cast<KobbyPlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
@@ -85,6 +89,7 @@ void CollaborativeEditingTest::cleanupTestCase()
     qDebug() << "cleaning up";
     QProcess kill;
     m_serverProcess->kill();
+    // TODO this doesn't work, must clear the temporary files first
     QDir d;
     d.rmdir(serverDirectory());
 }
@@ -106,7 +111,7 @@ KTextEditor::Document* CollaborativeEditingTest::createDocumentInstance()
 
 QString CollaborativeEditingTest::userNameForPlugin(char whichPlugin) const
 {
-    return whichPlugin == 'A' ? QString("AAAAA") : QString("BBBBB");
+    return whichPlugin == 'A' ? QString("USER_AAAAA") : QString("USER_BBBBB");
 }
 
 KUrl CollaborativeEditingTest::urlForFileName(const QString& fileName) const
@@ -170,7 +175,7 @@ void CollaborativeEditingTest::testTest()
     QString fileName = makeFileName();
     KTextEditor::Document* doc1 = newDocument_A(fileName);
     KTextEditor::Document* doc2 = loadDocument_B(fileName);
-    doc1->insertText(KTextEditor::Cursor(0, 0), "Hello World 2");
+    doc1->insertText(KTextEditor::Cursor(0, 0), "Hello World!");
     waitForDocument_A(doc1);
     waitForDocument_B(doc2);
 
@@ -182,27 +187,7 @@ void CollaborativeEditingTest::testTest()
     qDebug() << doc1->text() << "|" << doc2->text();
     QVERIFY(doc1->text() == doc2->text());
 
-
-    return; // TODO
-//     qDebug() << "running test test";
-//     KTextEditor::Document* doc1 = editor()->createDocument(this);
-//     doc1->saveAs(KUrl("inf://localhost/unittest.txt"));
-//     qDebug() << "new document url:" << doc1->url();
-//     for ( int i = 0; i < 200; i++ ) {
-//         QTest::qWait(1);
-//         QApplication::processEvents();
-//     }
-//     KTextEditor::Document* doc2 = editor()->createDocument(this);
-//     doc2->openUrl(KUrl("inf://localhost/unittest.txt"));
-//     for ( int i = 0; i < 200; i++ ) {
-//         QTest::qWait(1);
-//         QApplication::processEvents();
-//     }
-//     QVERIFY(plugin()->managedDocuments().length() == 2);
-//     doc1->insertText(KTextEditor::Cursor(0, 0), "Hello World");
-//     QApplication::processEvents();
-//     QVERIFY(doc1->text() == "Hello World");
-//     QVERIFY(doc2->text() == "Hello World");
+    return;
 }
 
 
