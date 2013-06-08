@@ -179,12 +179,16 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
 {
     kDebug() << "PUT" << url;
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        error(KIO::ERR_SLAVE_DEFINED, "Failed to connect");
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     kDebug() << "adding note" << iter.path() << url.fileName();
+    QEventLoop loop;
+    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), &loop, SLOT(quit()));
     browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
-    // TODO error handling and waiting
+    loop.exec();
+    kDebug() << "FINISHED PUT" << url;
     finished();
 }
 
@@ -192,6 +196,7 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
     kDebug() << "MKDIR" << url;
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        error(KIO::ERR_SLAVE_DEFINED, "Failed to connect");
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
@@ -221,6 +226,7 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
+        error(0, "Failed to connect");
         return;
     }
 
