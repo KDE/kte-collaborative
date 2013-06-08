@@ -26,10 +26,12 @@
 #include <QObject>
 #include <QProcess>
 #include <QDir>
-#include <qtest.h>
 #include <QApplication>
+#include <qtest_gui.h>
+
 #include <KTextEditor/Editor>
-#include <kobbyplugin.h>
+
+#include "kobbyplugin.h"
 
 #define NEED_SYNC_CYCLES 30
 
@@ -121,6 +123,8 @@ private slots:
 
     void testBasicCorrectness();
     void testBasicCorrectness_data();
+
+    void testSnippets();
 
 private:
     inline KobbyPlugin* plugin_A() {

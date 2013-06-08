@@ -22,6 +22,7 @@
 #include "collaborativeeditingtest.h"
 #include <kobby/kobbyplugin.h>
 #include <ktexteditor/factory.h>
+#include <ktexteditor/templateinterface2.h>
 #include <libqinfinity/xmppconnection.h>
 
 #include <QtTest>
@@ -285,6 +286,60 @@ void CollaborativeEditingTest::testRemovalConsistency_data()
                                                         << new DeleteOperation(Range(Cursor(0, 2), Cursor(0, 3)), 'A')
                                                         << new WaitForSyncOperation('B')
                                                         << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 1)), 'B') );
+}
+
+void CollaborativeEditingTest::testSnippets()
+{
+    QString fileName = makeFileName();
+    KTextEditor::Document* doc1 = newDocument_A(fileName);
+    KTextEditor::Document* doc2 = loadDocument_B(fileName);
+    QSharedPointer<QWidget> w(new QWidget);
+    KTextEditor::View* view = doc1->createView(w.data());
+    KTextEditor::TemplateInterface2* iface = qobject_cast<KTextEditor::TemplateInterface2*>(view);
+    Q_ASSERT(iface);
+    KTextEditor::TemplateScriptRegistrar* registrar = qobject_cast<KTextEditor::TemplateScriptRegistrar*>(doc1->editor());
+    Q_ASSERT(registrar);
+    QString script = "function foo(src) {"
+                     "  var result = \"\";"
+                     "  for ( var i = 0; i < src.length; i++ ) {"
+                     "    result += \" A \";"
+                     "  }"
+                     "  return result;"
+                     "}";
+    QString tpl = "{ source: ${ABCDEF}; result: ${ABCDEF`foo`} }";
+    QMap<QString, QString> initialValues;
+    initialValues["ABCDEF"] = "ABCDEF";
+    KTextEditor::TemplateScript* templateScript = registrar->registerTemplateScript(this, script);
+    iface->insertTemplateText(Cursor(0, 0), tpl, initialValues, templateScript);
+    QCOMPARE(doc1->text(), QString("{ source: ABCDEF; result:  A  A  A  A  A  A  }"));
+    doc1->insertText(Cursor(0, 12), "XX");
+    QCOMPARE(doc1->text(), QString("{ source: ABXXCDEF; result:  A  A  A  A  A  A  A  A  }"));
+
+    wait(NEED_SYNC_CYCLES);
+    // check if template is transferred correctly to the peer
+    QCOMPARE(doc1->text(), doc2->text());
+
+    // ... also after it has already been transferred once
+    doc1->insertText(Cursor(0, 12), "X");
+    QCOMPARE(doc1->text(), QString("{ source: ABXXXCDEF; result:  A  A  A  A  A  A  A  A  A  }"));
+    wait(NEED_SYNC_CYCLES);
+    QCOMPARE(doc1->text(), QString("{ source: ABXXXCDEF; result:  A  A  A  A  A  A  A  A  A  }"));
+    QCOMPARE(doc1->text(), doc2->text());
+
+    // and now try altering it from the other document
+    doc2->removeText(Range(Cursor(0, 12), Cursor(0, 13)));
+    QCOMPARE(doc2->text(), QString("{ source: ABXXCDEF; result:  A  A  A  A  A  A  A  A  A  }"));
+    wait(NEED_SYNC_CYCLES);
+    // snippet should not be re-evaluated now, since it was not edited by A
+    QCOMPARE(doc1->text(), QString("{ source: ABXXCDEF; result:  A  A  A  A  A  A  A  A  A  }"));
+    QCOMPARE(doc1->text(), doc2->text());
+
+    // try editing it again from A, should be evaluated again then
+    doc1->removeText(Range(Cursor(0, 12), Cursor(0, 13)));
+    QCOMPARE(doc1->text(), QString("{ source: ABXCDEF; result:  A  A  A  A  A  A  A  }"));
+    wait(NEED_SYNC_CYCLES);
+    QCOMPARE(doc2->text(), QString("{ source: ABXCDEF; result:  A  A  A  A  A  A  A  }"));
+    QCOMPARE(doc1->text(), doc2->text());
 }
 
 void CollaborativeEditingTest::testBasicCorrectness()
