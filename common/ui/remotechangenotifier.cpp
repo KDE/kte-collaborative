@@ -52,6 +52,9 @@ QColor colorForUsername(QString username) {
 
 void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QString& username)
 {
+    if ( ! view ) {
+        return;
+    }
     QWidget* useWidget = 0;
     KStandardDirs d;
     QUrl src = QUrl(d.locate("data", "kte-kobby/ui/notifywidget.qml"));
