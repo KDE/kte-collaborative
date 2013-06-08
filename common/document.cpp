@@ -161,7 +161,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
-    kDebug() << "insert text" << offset << chunk.text() << kDocument() << "(" << chunk.length() << " chars )";
+    kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument() << "(" << chunk.length() << " chars )";
     Q_UNUSED(user)
 
     if( !blockRemoteInsert )
