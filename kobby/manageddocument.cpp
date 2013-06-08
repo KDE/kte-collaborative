@@ -42,6 +42,8 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_textBuffer(0)
     , m_infDocument(0)
     , m_connection(connection)
+    , m_iterId(0)
+    , m_sessionStatus(QInfinity::Session::Closed)
 {
     kDebug() << "now managing document" << document << document->url();
 }
