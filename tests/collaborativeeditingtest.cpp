@@ -29,6 +29,8 @@
 #include <QApplication>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QMetaType>
+
 #include <KTextEditor/Document>
 #include <KTextEditor/Editor>
 #include <KPluginFactory>
@@ -37,9 +39,14 @@
 
 QTEST_MAIN(CollaborativeEditingTest);
 
+using KTextEditor::Cursor;
+
 void CollaborativeEditingTest::initTestCase()
 {
     qDebug() << "initializing test case";
+
+    // register types to use in data functions
+    qRegisterMetaType< QList<Operation> >("QList<Operation>");
 
     // start the infinoted server needed for sharing documents
     QDir d;
@@ -178,17 +185,44 @@ void CollaborativeEditingTest::wait(int msecs)
     }
 }
 
-void CollaborativeEditingTest::testTest()
+void CollaborativeEditingTest::testInsertion()
 {
     QString fileName = makeFileName();
     KTextEditor::Document* doc1 = newDocument_A(fileName);
     KTextEditor::Document* doc2 = loadDocument_B(fileName);
-    doc1->insertText(KTextEditor::Cursor(0, 0), "Hello World!");
-    wait(50);
+    KTextEditor::Document* raw = createDocumentInstance();
 
-    QVERIFY(doc1->text() == doc2->text());
+    QFETCH(QList<Operation>, operations);
+    Transaction transaction(operations);
+    transaction.replay(doc1, doc2);
+    transaction.replay(raw);
 
-    return;
+    QCOMPARE(doc1->text(), doc2->text());
+    QCOMPARE(doc1->text(), raw->text());
+
+    delete doc1, doc2, raw;
+}
+
+void CollaborativeEditingTest::testInsertion_data()
+{
+    QTest::addColumn< QList<Operation> >("operations");
+
+    QTest::newRow("base64") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "aAbBCcDdeEfF") );
+    QTest::newRow("ascii") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "% A & ? A //  []") );
+    QTest::newRow("newline") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\n") );
+    QTest::newRow("multiple_newlines") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\n\n\n") );
+    QTest::newRow("multiple_newlines_text") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\naa\nc\n ") );
+    QTest::newRow("unicode") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("\u20AC")) );
+
+    QTest::newRow("multiple_operations") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Foo"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Bar"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Baz")) );
+    QTest::newRow("multiple_operations_newlines") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Foo\n"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Bar\n\n"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("\n\nBaz")) );
+    QTest::newRow("multiple_operations_unicode") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Fo\u20AC\n"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("B\u20ACr\n\n"))
+                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("\n\nBa\u20AC\u20AC")) );
 }
 
 

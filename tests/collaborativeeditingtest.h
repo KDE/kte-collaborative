@@ -29,6 +29,65 @@
 #include <KTextEditor/Editor>
 #include <kobbyplugin.h>
 
+class Operation {
+public:
+    Operation(char forDocument) : forDocument(forDocument) { };
+    virtual ~Operation() { };
+    virtual void apply(KTextEditor::Document* document) { };
+    const char whichDocument() const {
+        return forDocument;
+    }
+protected:
+    char forDocument;
+};
+
+class InsertOperation : public Operation {
+public:
+    InsertOperation(const KTextEditor::Cursor cursor, const QString text, const char forDocument = 'A')
+        : Operation(forDocument)
+        , cursor(cursor)
+        , text(text) { };
+    virtual void apply(KTextEditor::Document* document) {
+        document->insertText(cursor, text);
+    };
+private:
+    KTextEditor::Cursor cursor;
+    const QString text;
+};
+
+class DeleteOperation : public Operation {
+public:
+    DeleteOperation(const KTextEditor::Range range, const char forDocument = 'A')
+        : Operation(forDocument)
+        , range(range) { };
+    virtual void apply(KTextEditor::Document* document) {
+        document->removeText(range);
+    }
+    KTextEditor::Range range;
+};
+
+class Transaction {
+public:
+    Transaction(const QList<Operation>& items) {
+        operations = items;
+    };
+    virtual ~Transaction() { };
+    void replay(KTextEditor::Document* document1, KTextEditor::Document* document2) const {
+        foreach ( Operation op, operations ) {
+            op.apply(op.whichDocument() == 'A' ? document1 : document2);
+        }
+    };
+    void replay(KTextEditor::Document* document) {
+        foreach ( Operation op, operations ) {
+            op.apply(document);
+        }
+    }
+private:
+    QList<Operation> operations;
+};
+
+Q_DECLARE_METATYPE(QList<Operation>);
+
 class CollaborativeEditingTest : public QObject
 {
     Q_OBJECT
@@ -39,7 +98,8 @@ private slots:
     void init();
     void cleanup();
 
-    void testTest();
+    void testInsertion();
+    void testInsertion_data();
 
 private:
     inline KobbyPlugin* plugin_A() {
