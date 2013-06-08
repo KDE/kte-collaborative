@@ -24,6 +24,8 @@
 #define COLLABORATIVEEDITINGTEST_H
 
 #include <QObject>
+#include <QProcess>
+#include <QDir>
 #include <KTextEditor/Editor>
 #include <kobbyplugin.h>
 
@@ -73,10 +75,18 @@ private:
     void waitForDocument_B(KTextEditor::Document* document) {
         return waitForDocument(document, plugin_B());
     }
+    const QString serverDirectory() const {
+        return QDir::tempPath() + "/kobby_unit_tests";
+    };
+    const int port() const {
+        return 64261;
+//         return 6523;
+    };
     KobbyPlugin* m_plugin_A;
     KobbyPlugin* m_plugin_B;
     KService::Ptr m_documentService;
     QString makeFileName();
+    QProcess* m_serverProcess;
 
 };
 
