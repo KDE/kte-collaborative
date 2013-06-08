@@ -130,7 +130,11 @@ void KobbyPlugin::subscribeNewDocuments()
 
 void KobbyPlugin::addDocument(KTextEditor::Document* document)
 {
-    kDebug() << "add document" << document << document->url();
+    if ( property("kobbyPluginDisabled").toBool() ) {
+        // unit tests
+        return;
+    }
+    kDebug() << "add document" << document << document->url() << "to plugin instance" << this;
     // TODO this is not good semantically
     documentUrlChanged(document);
     connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),

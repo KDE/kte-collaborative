@@ -40,10 +40,43 @@ private slots:
     void testTest();
 
 private:
-    inline KTextEditor::Editor* editor() const { return m_editor; }
-    inline KobbyPlugin* plugin() const { return m_plugin; }
-    KTextEditor::Editor* m_editor;
-    KobbyPlugin* m_plugin;
+    inline KobbyPlugin* plugin_A() {
+        return m_plugin_A;
+    };
+    inline KobbyPlugin* plugin_B() {
+        return m_plugin_B;
+    };
+    inline KobbyPlugin* plugin(char whichPlugin) {
+        return whichPlugin == 'A' ? plugin_A() : plugin_B();
+    };
+    KTextEditor::Document* newDocument(const QString& name, char whichPlugin);
+    KTextEditor::Document* newDocument_A(const QString& name) {
+        return newDocument(name, 'A');
+    };
+    KTextEditor::Document* newDocument_B(const QString& name) {
+        return newDocument(name, 'B');
+    };
+    KTextEditor::Document* loadDocument(const QString& name, char whichPlugin);
+    KTextEditor::Document* loadDocument_A(const QString& name) {
+        return loadDocument(name, 'A');
+    };
+    KTextEditor::Document* loadDocument_B(const QString& name) {
+        return loadDocument(name, 'B');
+    };
+    KTextEditor::Document* createDocumentInstance();
+    QString userNameForPlugin(char whichPlugin) const;
+    KUrl urlForFileName(const QString& fileName) const;
+    void waitForDocument(KTextEditor::Document* document, KobbyPlugin* onPlugin);
+    void waitForDocument_A(KTextEditor::Document* document) {
+        return waitForDocument(document, plugin_A());
+    }
+    void waitForDocument_B(KTextEditor::Document* document) {
+        return waitForDocument(document, plugin_B());
+    }
+    KobbyPlugin* m_plugin_A;
+    KobbyPlugin* m_plugin_B;
+    KService::Ptr m_documentService;
+    QString makeFileName();
 
 };
 
