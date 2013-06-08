@@ -516,6 +516,11 @@ void InfTextDocument::slotSynchronizationFailed( GError *gerror )
     throwFatalError( emsg );
 }
 
+bool KDocumentTextBuffer::hasUser() const
+{
+    return m_user != 0;
+}
+
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
     m_buffer->setUser( user );

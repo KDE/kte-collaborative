@@ -181,6 +181,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
             unsigned int length,
             QInfinity::User *user );
         void setUser( QPointer<QInfinity::User> user );
+        bool hasUser() const;
 
         void resetUndoRedo();
         void performingUndo();
