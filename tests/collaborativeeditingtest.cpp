@@ -46,7 +46,7 @@ void CollaborativeEditingTest::initTestCase()
     qDebug() << "initializing test case";
 
     // register types to use in data functions
-    qRegisterMetaType< QList<Operation> >("QList<Operation>");
+    qRegisterMetaType< QList<Operation*> >("QList<Operation*>");
 
     // start the infinoted server needed for sharing documents
     QDir d;
@@ -172,17 +172,9 @@ QString CollaborativeEditingTest::makeFileName()
 {
     // TODO replace with a proper tempraryNote object
     // optimally a simple QTempFile with the proper url
-    QTemporaryFile f;
-    f.open();
-    return KUrl(f.fileName()).fileName();
-}
-
-void CollaborativeEditingTest::wait(int msecs)
-{
-    for ( int i = 0; i < msecs; i++ ) {
-        QTest::qWait(1);
-        QApplication::processEvents();
-    }
+    QTime time = QTime::currentTime();
+    qsrand( (uint) time.msec());
+    return "kobby_test_" + QString::number(qrand());
 }
 
 void CollaborativeEditingTest::testInsertion()
@@ -192,37 +184,52 @@ void CollaborativeEditingTest::testInsertion()
     KTextEditor::Document* doc2 = loadDocument_B(fileName);
     KTextEditor::Document* raw = createDocumentInstance();
 
-    QFETCH(QList<Operation>, operations);
-    Transaction transaction(operations);
-    transaction.replay(doc1, doc2);
-    transaction.replay(raw);
+    QFETCH(QList<Operation*>, operations);
+    replayTransaction(operations, doc1, doc2);
+    replayTransaction(operations, raw);
+
+    wait(30);
+
+    qDebug() << "**************" << doc1->text() << doc2->text();
 
     QCOMPARE(doc1->text(), doc2->text());
     QCOMPARE(doc1->text(), raw->text());
 
-    delete doc1, doc2, raw;
+    delete doc1;
+    delete doc2;
+    delete raw;
+    qDeleteAll(operations);
 }
 
 void CollaborativeEditingTest::testInsertion_data()
 {
-    QTest::addColumn< QList<Operation> >("operations");
+    QTest::addColumn< QList<Operation*> >("operations");
 
-    QTest::newRow("base64") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "aAbBCcDdeEfF") );
-    QTest::newRow("ascii") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "% A & ? A //  []") );
-    QTest::newRow("newline") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\n") );
-    QTest::newRow("multiple_newlines") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\n\n\n") );
-    QTest::newRow("multiple_newlines_text") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), "\naa\nc\n ") );
-    QTest::newRow("unicode") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("\u20AC")) );
+    QTest::newRow("base64") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "aAbBCcDdeEfF") );
+    QTest::newRow("ascii") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "% A & ? A //  []") );
+    QTest::newRow("newline") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\n") );
+    QTest::newRow("multiple_newlines") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\n\n\n") );
+    QTest::newRow("multiple_newlines_text") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\naa\nc\n ") );
+    QTest::newRow("unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), QString::fromUtf8("\u20AC")) );
 
-    QTest::newRow("multiple_operations") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Foo"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Bar"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Baz")) );
-    QTest::newRow("multiple_operations_newlines") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Foo\n"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("Bar\n\n"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("\n\nBaz")) );
-    QTest::newRow("multiple_operations_unicode") << ( QList<Operation>() << InsertOperation(Cursor(0, 0), QString::fromUtf8("Fo\u20AC\n"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("B\u20ACr\n\n"))
-                                                                 << InsertOperation(Cursor(0, 0), QString::fromUtf8("\n\nBa\u20AC\u20AC")) );
+    QTest::newRow("multiple_operations") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo")
+                                                                 << new InsertOperation(Cursor(0, 0), "Bar")
+                                                                 << new InsertOperation(Cursor(0, 0), "Baz") );
+    QTest::newRow("multiple_operations_newlines") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo\n")
+                                                                 << new InsertOperation(Cursor(0, 0), "Bar\n\n")
+                                                                 << new InsertOperation(Cursor(0, 0), "\n\nBaz") );
+    QTest::newRow("multiple_operations_unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Fo\u20AC\n")
+                                                                 << new InsertOperation(Cursor(0, 0), "B\u20ACr\n\n")
+                                                                 << new InsertOperation(Cursor(0, 0), "\n\nBa\u20AC\u20AC") );
+
+    QTest::newRow("both_documents") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo", 'A')
+                                                                 << new InsertOperation(Cursor(0, 0), "Bar", 'B')
+                                                                 << new WaitForSyncOperation('B')
+                                                                 << new InsertOperation(Cursor(0, 3), "Baz", 'A') );
+
+    QTest::newRow("both_documents_newlines") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo\n", 'A')
+                                                                 << new InsertOperation(Cursor(0, 0), "Bar", 'B')
+                                                                 << new InsertOperation(Cursor(1, 0), "Baz", 'A') );
 }
 
 

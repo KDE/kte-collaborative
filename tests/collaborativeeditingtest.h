@@ -26,19 +26,40 @@
 #include <QObject>
 #include <QProcess>
 #include <QDir>
+#include <qtest.h>
+#include <QApplication>
 #include <KTextEditor/Editor>
 #include <kobbyplugin.h>
+
+void wait(int msecs)
+{
+    for ( int i = 0; i < msecs; i++ ) {
+        QTest::qWait(1);
+        QApplication::processEvents();
+    }
+};
 
 class Operation {
 public:
     Operation(char forDocument) : forDocument(forDocument) { };
     virtual ~Operation() { };
-    virtual void apply(KTextEditor::Document* document) { };
+    virtual void apply(KTextEditor::Document* document) {
+        Q_ASSERT(false && "not implemented");
+    };
     const char whichDocument() const {
         return forDocument;
     }
 protected:
     char forDocument;
+};
+
+class WaitForSyncOperation : public Operation {
+public:
+    WaitForSyncOperation(char forDocument) : Operation(forDocument) { };
+    virtual void apply(KTextEditor::Document* document) {
+        // TODO wait correctly if we know how
+        wait(30);
+    };
 };
 
 class InsertOperation : public Operation {
@@ -66,27 +87,19 @@ public:
     KTextEditor::Range range;
 };
 
-class Transaction {
-public:
-    Transaction(const QList<Operation>& items) {
-        operations = items;
-    };
-    virtual ~Transaction() { };
-    void replay(KTextEditor::Document* document1, KTextEditor::Document* document2) const {
-        foreach ( Operation op, operations ) {
-            op.apply(op.whichDocument() == 'A' ? document1 : document2);
-        }
-    };
-    void replay(KTextEditor::Document* document) {
-        foreach ( Operation op, operations ) {
-            op.apply(document);
-        }
+void replayTransaction(const QList<Operation*> transaction, KTextEditor::Document* document1, KTextEditor::Document* document2) {
+    foreach ( Operation* op, transaction ) {
+        op->apply(op->whichDocument() == 'A' ? document1 : document2);
     }
-private:
-    QList<Operation> operations;
 };
 
-Q_DECLARE_METATYPE(QList<Operation>);
+void replayTransaction(const QList<Operation*> transaction, KTextEditor::Document* document) {
+    foreach ( Operation* op, transaction ) {
+        op->apply(document);
+    }
+}
+
+Q_DECLARE_METATYPE(QList<Operation*>);
 
 class CollaborativeEditingTest : public QObject
 {
@@ -142,7 +155,6 @@ private:
         return 64261;
 //         return 6523;
     };
-    void wait(int msecs);
     KobbyPlugin* m_plugin_A;
     KobbyPlugin* m_plugin_B;
     KService::Ptr m_documentService;
