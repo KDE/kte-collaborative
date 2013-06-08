@@ -31,6 +31,8 @@
 #include <KTextEditor/Editor>
 #include <kobbyplugin.h>
 
+#define NEED_SYNC_CYCLES 30
+
 void wait(int msecs)
 {
     for ( int i = 0; i < msecs; i++ ) {
@@ -58,7 +60,7 @@ public:
     WaitForSyncOperation(char forDocument) : Operation(forDocument) { };
     virtual void apply(KTextEditor::Document* document) {
         // TODO wait correctly if we know how
-        wait(30);
+        wait(NEED_SYNC_CYCLES);
     };
 };
 
@@ -111,8 +113,14 @@ private slots:
     void init();
     void cleanup();
 
-    void testInsertion();
-    void testInsertion_data();
+    void testInsertionConsistency();
+    void testInsertionConsistency_data();
+
+    void testRemovalConsistency();
+    void testRemovalConsistency_data();
+
+    void testBasicCorrectness();
+    void testBasicCorrectness_data();
 
 private:
     inline KobbyPlugin* plugin_A() {

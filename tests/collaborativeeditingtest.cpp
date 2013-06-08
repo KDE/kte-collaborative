@@ -40,6 +40,7 @@
 QTEST_MAIN(CollaborativeEditingTest);
 
 using KTextEditor::Cursor;
+using KTextEditor::Range;
 
 void CollaborativeEditingTest::initTestCase()
 {
@@ -173,11 +174,11 @@ QString CollaborativeEditingTest::makeFileName()
     // TODO replace with a proper tempraryNote object
     // optimally a simple QTempFile with the proper url
     QTime time = QTime::currentTime();
-    qsrand( (uint) time.msec());
+    qsrand( (uint) time.msec() + (uint) time.second()*60 + (uint) time.minute()*3600 + (uint) time.hour()*216000);
     return "kobby_test_" + QString::number(qrand());
 }
 
-void CollaborativeEditingTest::testInsertion()
+void CollaborativeEditingTest::testInsertionConsistency()
 {
     QString fileName = makeFileName();
     KTextEditor::Document* doc1 = newDocument_A(fileName);
@@ -188,9 +189,7 @@ void CollaborativeEditingTest::testInsertion()
     replayTransaction(operations, doc1, doc2);
     replayTransaction(operations, raw);
 
-    wait(30);
-
-    qDebug() << "**************" << doc1->text() << doc2->text();
+    wait(NEED_SYNC_CYCLES);
 
     QCOMPARE(doc1->text(), doc2->text());
     QCOMPARE(doc1->text(), raw->text());
@@ -201,7 +200,7 @@ void CollaborativeEditingTest::testInsertion()
     qDeleteAll(operations);
 }
 
-void CollaborativeEditingTest::testInsertion_data()
+void CollaborativeEditingTest::testInsertionConsistency_data()
 {
     QTest::addColumn< QList<Operation*> >("operations");
 
@@ -218,9 +217,9 @@ void CollaborativeEditingTest::testInsertion_data()
     QTest::newRow("multiple_operations_newlines") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo\n")
                                                                  << new InsertOperation(Cursor(0, 0), "Bar\n\n")
                                                                  << new InsertOperation(Cursor(0, 0), "\n\nBaz") );
-    QTest::newRow("multiple_operations_unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Fo\u20AC\n")
-                                                                 << new InsertOperation(Cursor(0, 0), "B\u20ACr\n\n")
-                                                                 << new InsertOperation(Cursor(0, 0), "\n\nBa\u20AC\u20AC") );
+    QTest::newRow("multiple_operations_unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), QString::fromUtf8("Fo\u20AC\n"))
+                                                                 << new InsertOperation(Cursor(0, 0), QString::fromUtf8("B\u20ACr\n\n"))
+                                                                 << new InsertOperation(Cursor(0, 0), QString::fromUtf8("\n\nBa\u20AC\u20AC")) );
 
     QTest::newRow("both_documents") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo", 'A')
                                                                  << new InsertOperation(Cursor(0, 0), "Bar", 'B')
@@ -230,6 +229,98 @@ void CollaborativeEditingTest::testInsertion_data()
     QTest::newRow("both_documents_newlines") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "Foo\n", 'A')
                                                                  << new InsertOperation(Cursor(0, 0), "Bar", 'B')
                                                                  << new InsertOperation(Cursor(1, 0), "Baz", 'A') );
+}
+
+void CollaborativeEditingTest::testRemovalConsistency()
+{
+    QString fileName = makeFileName();
+    KTextEditor::Document* doc1 = newDocument_A(fileName);
+    KTextEditor::Document* doc2 = loadDocument_B(fileName);
+    KTextEditor::Document* raw = createDocumentInstance();
+
+    QFETCH(QList<Operation*>, operations);
+    replayTransaction(operations, doc1, doc2);
+    replayTransaction(operations, raw);
+
+    wait(NEED_SYNC_CYCLES);
+
+    QCOMPARE(doc1->text(), doc2->text());
+    QCOMPARE(doc1->text(), raw->text());
+
+    delete doc1;
+    delete doc2;
+    delete raw;
+    qDeleteAll(operations);
+}
+
+void CollaborativeEditingTest::testRemovalConsistency_data()
+{
+    QTest::addColumn< QList<Operation*> >("operations");
+
+    // Ctrl+A del
+    QTest::newRow("delete_all") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789")
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 10))) );
+    QTest::newRow("delete_part") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789")
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 3))) );
+    // like holding del
+    QTest::newRow("delete_multiple_begin") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789")
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 1)))
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 1)))
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 1))) );
+    // like holding backspace
+    QTest::newRow("delete_multiple_end") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789")
+                                                        << new DeleteOperation(Range(Cursor(0, 9), Cursor(0, 10)))
+                                                        << new DeleteOperation(Range(Cursor(0, 8), Cursor(0, 9)))
+                                                        << new DeleteOperation(Range(Cursor(0, 7), Cursor(0, 8))) );
+    QTest::newRow("delete_newline") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "A\n")
+                                                        << new DeleteOperation(Range(Cursor(0, 1), Cursor(0, 2))) );
+    QTest::newRow("delete_newline_chars") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "AAA\nBBB")
+                                                        << new DeleteOperation(Range(Cursor(0, 2), Cursor(1, 2))) );
+    QTest::newRow("delete_unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), QString::fromUtf8("\u20AC\u20ACA\n\u20AC\u20ACB"))
+                                                        << new DeleteOperation(Range(Cursor(0, 1), Cursor(1, 1))) );
+    QTest::newRow("delete_after_unicode") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), QString::fromUtf8("\u20ACabc"))
+                                                        << new DeleteOperation(Range(Cursor(0, 2), Cursor(0, 3))) );
+
+    QTest::newRow("delete_both_documents") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), QString::fromUtf8("0123456789"))
+                                                        << new DeleteOperation(Range(Cursor(0, 2), Cursor(0, 3)), 'A')
+                                                        << new WaitForSyncOperation('B')
+                                                        << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 1)), 'B') );
+}
+
+void CollaborativeEditingTest::testBasicCorrectness()
+{
+    QString fileName = makeFileName();
+    KTextEditor::Document* doc1 = newDocument_A(fileName);
+    KTextEditor::Document* doc2 = loadDocument_B(fileName);
+    KTextEditor::Document* raw = createDocumentInstance();
+
+    QFETCH(QList<Operation*>, operations);
+    QFETCH(QString, expectedText);
+    replayTransaction(operations, doc1, doc2);
+    replayTransaction(operations, raw);
+
+    wait(NEED_SYNC_CYCLES);
+
+    QCOMPARE(doc1->text(), doc2->text());
+    QCOMPARE(doc1->text(), raw->text());
+    QCOMPARE(doc1->text(), expectedText);
+
+    delete doc1;
+    delete doc2;
+    delete raw;
+    qDeleteAll(operations);
+}
+
+void CollaborativeEditingTest::testBasicCorrectness_data()
+{
+    QTest::addColumn< QList<Operation*> >("operations");
+    QTest::addColumn< QString >("expectedText");
+
+    QTest::newRow("basic_insert") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789") )
+                                  << "0123456789";
+    QTest::newRow("basic_delete") << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "0123456789")
+                                                           << new DeleteOperation(Range(Cursor(0, 0), Cursor(0, 3))) )
+                                  << "3456789";
 }
 
 
