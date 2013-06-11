@@ -451,6 +451,7 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
     , m_session( session )
     , m_buffer( buffer )
     , m_name( name )
+    , m_user( 0 )
 {
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
