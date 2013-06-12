@@ -81,7 +81,9 @@ void CollaborativeEditingTest::initTestCase()
     qDebug() << "got document from service:" << document;
     KobbyPlugin* p = reinterpret_cast<KobbyPlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
     qDebug() << "auto-created instance:" << p;
-    p->setProperty("kobbyPluginDisabled", true);
+    if ( p ) {
+        p->setProperty("kobbyPluginDisabled", true);
+    }
 
     // TODO why do we use reinterpret_cast<> here? qobject_cast<> returns 0 for some reason,
     // although metaObject()->className() says "KobbyPlugin" and valgrind reports no errors
