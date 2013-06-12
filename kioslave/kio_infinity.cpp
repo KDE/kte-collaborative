@@ -57,9 +57,9 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 //     QApplication app(argc, argv);
     KComponentData componentData("infinity", "kio_infinity");
 
-    qDebug() << "starting infinity kioslave";
+    kDebug() << "starting infinity kioslave";
     if (argc != 4) {
-        qDebug() << "wrong arguments count";
+        kDebug() << "wrong arguments count";
         exit(-1);
     }
 
@@ -69,7 +69,7 @@ int KDE_EXPORT kdemain( int argc, char **argv )
     slave.dispatchLoop();
 //     slave.listDir(KUrl("inf://localhost"));
 
-    qDebug() << "slave exiting";
+    kDebug() << "slave exiting";
     return app.exec();
 }
 
@@ -82,7 +82,7 @@ InfinityProtocol::InfinityProtocol(const QByteArray &pool_socket, const QByteArr
     , SlaveBase("inf", pool_socket, app_socket)
     , m_notePlugin(0)
 {
-    qDebug() << "constructing infinity kioslave";
+    kDebug() << "constructing infinity kioslave";
     _self = this;
 }
 
@@ -179,13 +179,17 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
 {
     kDebug() << "PUT" << url;
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
-        error(KIO::ERR_SLAVE_DEFINED, "Failed to connect");
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     kDebug() << "adding note" << iter.path() << url.fileName();
     QEventLoop loop;
     connect(browser(), SIGNAL(nodeAdded(BrowserIter)), &loop, SLOT(quit()));
+    QTimer timeout;
+    timeout.setSingleShot(true);
+    timeout.setInterval(TIMEOUT_MS);
+    connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
+    timeout.start();
     browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
     loop.exec();
     kDebug() << "FINISHED PUT" << url;
@@ -196,7 +200,6 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
     kDebug() << "MKDIR" << url;
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
-        error(KIO::ERR_SLAVE_DEFINED, "Failed to connect");
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
@@ -226,7 +229,6 @@ void InfinityProtocol::listDir(const KUrl &url)
     kDebug() << url.host() << url.userName() << url.password() << url.path();
 
     if ( ! doConnect(Peer(url.host(), url.port())) ) {
-        error(0, "Failed to connect");
         return;
     }
 

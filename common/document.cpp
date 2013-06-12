@@ -529,7 +529,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     m_user = dynamic_cast<QInfinity::AdoptedUser*>(user.data());
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
-    kDebug() << "Join successful.";
+    kDebug() << "Join successful, user" << user->name() << "now online";
 }
 
 void InfTextDocument::slotJoinFailed( GError *gerror )
@@ -565,7 +565,7 @@ void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
 
 void InfTextDocument::slotCanUndo( bool enable )
 {
-    kDebug() << i18n("set undo %1", enable);
+    kDebug() << "set undo:" << enable;
     QAction *act;
     foreach( act, undoActions )
     {
@@ -584,7 +584,7 @@ void InfTextDocument::slotCanRedo( bool enable )
 
 void InfTextDocument::synchronize()
 {
-    qDebug() << "synchronizing document";
+    kDebug() << "synchronizing document";
     if( m_session->status() == QInfinity::Session::Running )
         slotSynchronized();
     else if( m_session->status() == QInfinity::Session::Synchronizing )
@@ -612,6 +612,7 @@ void InfTextDocument::joinSession()
         else {
             userName = "UnnamedUser_" + QString::number(QTime::currentTime().second());
         }
+        kDebug() << "requesting join of user" << userName;
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
             *m_session,
             userName,

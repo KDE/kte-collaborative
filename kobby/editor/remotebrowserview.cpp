@@ -265,7 +265,7 @@ void RemoteBrowserProxy::resolveNameDelete( DNSSD::RemoteService::Ptr pointer )
 {
     if( pointer->resolve() )
     {
-        qDebug() << i18n("delete name %1", pointer->hostName());
+        kDebug() << "delete name %1", pointer->hostName();
         emit( deleteConnection( pointer->hostName(),
             pointer->port() ) );
     }

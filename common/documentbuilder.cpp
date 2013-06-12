@@ -121,8 +121,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     
     if( !textSession || !INF_TEXT_IS_SESSION(textSession->gobject()) )
     {
-        kDebug() << i18n("Session is not an InfText session.  This usually means " \
-            "the connection is not using the kobby plugin.");
+        kDebug() << "Session is not an InfText session.  This usually means "
+                    "the connection is not using the kobby plugin.";
         return;
     }
 
@@ -130,8 +130,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
     if( !kbuff )
     {
-        kDebug() << i18n("Could not retrieve Kobby buffer from session.  This " \
-            "usually means the connection is not using the kobby plugin.");
+        kDebug() << "Could not retrieve Kobby buffer from session.  This "
+                    "usually means the connection is not using the kobby plugin.";
         return;
     }
     QInfinity::BrowserIter titr = iter;

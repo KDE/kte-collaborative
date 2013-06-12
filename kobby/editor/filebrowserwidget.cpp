@@ -63,7 +63,7 @@ void FileBrowserWidget::createFolder( QInfinity::BrowserFolderItem &parent,
     Infinity::ClientBrowser *browser = iter.getBrowser();
     if( !browser )
     {
-        kDebug() << i18n("Parent iterator for adding folder does not reference a browser!");
+        kDebug() << "Parent iterator for adding folder does not reference a browser!";
         return;
     }
 
@@ -89,7 +89,7 @@ void FileBrowserWidget::slotItemActivated( const QModelIndex &index )
 
     if( !standardItem )
     {
-        kDebug() << i18n("Got invalid item when locating activated index!");
+        kDebug() << "Got invalid item when locating activated index!";
         return;
     }
 
@@ -159,7 +159,7 @@ void FileBrowserWidget::slotDeleteSelected()
         item = fileModel->itemFromIndex( *itr );
         if( !item )
         {
-            kDebug() << i18n("Got bad item back to delete, skipping.");
+            kDebug() << "Got bad item back to delete, skipping.";
             continue;
         }
 
