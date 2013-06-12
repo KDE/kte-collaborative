@@ -162,7 +162,6 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     QInfinity::User *user )
 {
     kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument() << "(" << chunk.length() << " chars )";
-    Q_UNUSED(user)
 
     if( !blockRemoteInsert )
     {
@@ -183,7 +182,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     QInfinity::User *user )
 {
     kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset;
-    Q_UNUSED(user)
 
     if( !blockRemoteRemove )
     {
