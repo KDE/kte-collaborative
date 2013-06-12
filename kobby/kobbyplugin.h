@@ -50,11 +50,17 @@ public:
                         const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
+    // Called when a new view is created for a document
     virtual void addView(KTextEditor::View *view);
+    // Called when a view is removed
     virtual void removeView(KTextEditor::View *view);
+    // Called when a new document is added (e.g. user opens a document in kate)
     virtual void addDocument(KTextEditor::Document* document);
+    // Called when a document is closed or otherwise removed
     virtual void removeDocument(KTextEditor::Document* document);
 
+    // Checks if connections have been established for all managed documents,
+    // and subscribes those which are not yet subscribed (if possible).
     void subscribeNewDocuments();
     // access to managed documents for unit tests
     const ManagedDocumentList& managedDocuments() const;
@@ -65,25 +71,29 @@ private:
     // The connection returned is not necessarily ready to be used,
     // but never null.
     Connection* eventuallyAddConnection(const KUrl& documentUrl);
+    // Returns a unique name for a connection to the host of the given URL
+    const QString connectionName(const KUrl& url);
+    // Returns the URLs port, or the default infinity port if none is set
+    unsigned short portForUrl(const KUrl& url);
 
     ManagedDocumentList m_managedDocuments;
-    bool m_isConnected;
-    bool m_browserReady;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
     QInfinity::CommunicationManager* m_communicationManager;
     // Maps connection names to connection instances;
-    // the connection name is host:port
+    // the connection name is host:port, get it with connectionName(url)
+    // TODO use QHash?
     QHash<QString, Kobby::Connection*> m_connections;
 
 public slots:
-    // This is called when the underlying connection is established.
-    // It does not mean that the browser is ready to be used.
-    void connected(Connection*);
     // This is called when the browser is ready.
     void browserConnected(const QInfinity::Browser*);
+    // Called when a connection is prepared (after hostname lookup etc)
     void connectionPrepared(Connection*);
-    void documentUrlChanged(KTextEditor::Document*);
+    // Should be called whenever a significant property of a document
+    // changes, or a new document is added. It will eventually
+    // add that document to the plugin.
+    void eventuallyManageDocument(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*, KTextEditor::Range);
     void textRemoved(KTextEditor::Document*, KTextEditor::Range);
 };
@@ -96,9 +106,6 @@ class KobbyPluginView : public QObject
     ~KobbyPluginView();
 
     KTextEditor::View* view() const;
-
-  public Q_SLOTS:
-    void selectionChanged();
 
   private:
     KTextEditor::View* m_view;

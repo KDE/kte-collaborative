@@ -18,6 +18,7 @@
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
 #include "kobbycommon_export.h"
+#include <libqinfinity/xmlconnection.h>
 
 #include <QObject>
 
@@ -58,6 +59,8 @@ class KOBBYCOMMON_EXPORT Connection
         // Returns the xmpp connection if called after ready()
         // was emitted, or 0 otherwise.
         QInfinity::XmppConnection *xmppConnection() const;
+        // Returns the status of the connection.
+        QInfinity::XmlConnection::Status status() const;
 
     Q_SIGNALS:
         void connecting( Connection *conn );
@@ -78,6 +81,7 @@ class KOBBYCOMMON_EXPORT Connection
     private:
         QString m_hostname;
         unsigned int m_port;
+        QInfinity::XmlConnection::Status m_connectionStatus;
         QInfinity::TcpConnection *m_tcpConnection;
         QInfinity::XmppConnection *m_xmppConnection;
 

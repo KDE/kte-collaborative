@@ -40,6 +40,7 @@ Connection::Connection( const QString &hostname,
     , m_port( port )
     , m_tcpConnection( 0 )
     , m_xmppConnection( 0 )
+    , m_connectionStatus(QInfinity::XmlConnection::Closed)
 {
 }
 
@@ -113,8 +114,14 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
     emit ready( this );
 }
 
+QInfinity::XmlConnection::Status Connection::status() const
+{
+    return m_connectionStatus;
+}
+
 void Connection::slotStatusChanged()
 {
+    m_connectionStatus = m_xmppConnection->status();
     switch( m_xmppConnection->status() )
     {
         case QInfinity::XmlConnection::Opening:

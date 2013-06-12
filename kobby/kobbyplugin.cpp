@@ -70,8 +70,6 @@ K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktextedit
 
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
-  , m_isConnected(false)
-  , m_browserReady(false)
 {
     kDebug() << "loading kobby plugin";
     QInfinity::init();
@@ -101,28 +99,21 @@ void KobbyPlugin::connectionPrepared(Connection* connection)
     connection->open();
 }
 
-void KobbyPlugin::connected(Kobby::Connection* connection)
+void KobbyPlugin::browserConnected(const QInfinity::Browser* browser)
 {
-    kDebug() << "connection established!";
-    m_isConnected = true;
-}
-
-void KobbyPlugin::browserConnected(const QInfinity::Browser* )
-{
-    kDebug() << "browser connected";
-    // TODO differentiate which connection the browser even belongs to!
-    m_browserReady = true;
+    kDebug() << "browser connected, subscribing documents";
     subscribeNewDocuments();
 }
 
 void KobbyPlugin::subscribeNewDocuments()
 {
-    kDebug() << "subscribing new documents; connected (tcp/browser):" << m_isConnected << m_browserReady;
-    if ( ! m_browserReady ) {
-        return;
-    }
+    kDebug() << "subscribing new documents";
     foreach ( ManagedDocument* document, m_managedDocuments ) {
-        if ( ! document->isSubscribed() ) {
+        QInfinity::Browser* browser = document->browser();
+        if ( ! browser ) {
+            continue;
+        }
+        if ( browser->connectionStatus() == INFC_BROWSER_CONNECTED && ! document->isSubscribed() ) {
             document->subscribe();
         }
     }
@@ -135,10 +126,9 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
         return;
     }
     kDebug() << "add document" << document << document->url() << "to plugin instance" << this;
-    // TODO this is not good semantically
-    documentUrlChanged(document);
+    eventuallyManageDocument(document);
     connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),
-            this, SLOT(documentUrlChanged(KTextEditor::Document*)));
+            this, SLOT(eventuallyManageDocument(KTextEditor::Document*)));
 }
 
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
@@ -153,7 +143,7 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
     }
 }
 
-void KobbyPlugin::documentUrlChanged(KTextEditor::Document* document)
+void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
 {
     kDebug() << "new url:" << document->url() << document;
     // the property() stuff is for unit tests (and only for unit tests!)
@@ -192,31 +182,41 @@ const ManagedDocumentList& KobbyPlugin::managedDocuments() const
     return m_managedDocuments;
 }
 
+const QString KobbyPlugin::connectionName(const KUrl& url)
+{
+    int port = url.port();
+    port = port == -1 ? defaultPort : port;
+    return url.host() + ":" + QString::number(port);
+}
+
+short unsigned int KobbyPlugin::portForUrl(const KUrl& url)
+{
+    return url.port() == -1 ? defaultPort : url.port();
+}
+
 Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 {
-    int port = documentUrl.port();
-    port = port == -1 ? defaultPort : port;
-    QString connectionName = documentUrl.host() + ":" + QString::number(port);
-    if ( ! m_connections.contains(connectionName) ) {
-        kDebug() << "adding connection" << connectionName << "because it doesn't exist";
+    int port = portForUrl(documentUrl);
+    QString name = connectionName(documentUrl);
+    if ( ! m_connections.contains(name) ) {
+        kDebug() << "adding connection" << name << "because it doesn't exist";
         Connection* c = new Kobby::Connection(documentUrl.host(), port, this);
         c->setProperty("useSimulatedConnection", property("useSimulatedConnection"));
-        connect(c, SIGNAL(connected(Connection*)),
-                this, SLOT(connected(Connection*)));
         connect(c, SIGNAL(ready(Connection*)),
                 this, SLOT(connectionPrepared(Connection*)));
-        m_connections[connectionName] = c;
+        m_connections[name] = c;
         c->prepare();
         return c;
     }
     else {
-        kDebug() << "connection" << connectionName << "requested but it exists already";
+        kDebug() << "connection" << name << "requested but it exists already";
     }
-    return m_connections[connectionName];
+    return m_connections[name];
 }
 
 void KobbyPlugin::addView(KTextEditor::View* view)
 {
+    kDebug() << "adding view" << view;
 }
 
 void KobbyPlugin::removeView(KTextEditor::View* view)
@@ -236,6 +236,7 @@ KobbyPluginView::~KobbyPluginView()
 
 }
 
+// Just for debugging purposes, the real handling happens in Kobby::InfTextDocument
 void KobbyPlugin::textInserted(KTextEditor::Document* doc, KTextEditor::Range range)
 {
     kDebug() << "text inserted:" << range << doc->textLines(range) << doc;
@@ -249,11 +250,6 @@ void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range ran
 KTextEditor::View* KobbyPluginView::view() const
 {
     return m_view;
-}
-
-void KobbyPluginView::selectionChanged()
-{
-    kDebug() << "plugin: selection changed" << "in view" << this;
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;

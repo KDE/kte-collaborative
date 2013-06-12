@@ -55,14 +55,15 @@ ManagedDocument::~ManagedDocument()
 
 QInfinity::Browser* ManagedDocument::browser() const
 {
-    Q_ASSERT(m_connection->xmppConnection() && "requested browser for an inactive connection!");
+    if ( ! m_connection->xmppConnection() ) {
+        return 0;
+    }
     for ( int i = 0; i < m_browserModel->rowCount(); i++ ) {
         ConnectionItem* item = dynamic_cast<ConnectionItem*>(m_browserModel->item(i));
         if ( item && item->connection() == static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()) ) {
             return item->browser();
         }
     }
-    Q_ASSERT(false && "no browser found for connection");
     return 0;
 }
 
