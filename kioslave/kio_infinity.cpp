@@ -104,20 +104,21 @@ void InfinityProtocol::get(const KUrl& url )
     }
 
     bool ok = false;
-    QInfinity::BrowserIter iter = iterForUrl(url, &ok);
-    Q_UNUSED(iter);
-    kDebug() << "GET:" << ok;
+    iterForUrl(url, &ok);
     if ( ! ok ) {
         error(KIO::ERR_COULD_NOT_STAT, i18n("Could not get %1: The node does not exist.", url.url()));
         return;
     }
 
     mimeType("text/plain");
+    // TODO: Maybe we can find a way to make the note's (current, stationary) content accessible to
+    // applications which don't support infinity, too? That will need replaying the operations,
+    // though, and is thus not trivial.
     data("");
     finished();
 }
 
-void InfinityProtocol::stat( const KUrl& url)
+void InfinityProtocol::stat(const KUrl& url)
 {
     kDebug() << "STAT " << url.url();
     if ( ! doConnect(Peer(url)) ) {
@@ -128,7 +129,8 @@ void InfinityProtocol::stat( const KUrl& url)
     QInfinity::BrowserIter iter = iterForUrl(url, &ok);
     Q_UNUSED(iter);
     if ( ! ok ) {
-        error(KIO::ERR_COULD_NOT_STAT, i18n("Could not stat %1: The node does not exist.", url.url()));
+        error(KIO::ERR_COULD_NOT_STAT, i18n("Could not stat %1: No such file or directory.", url.url()));
+        return;
     }
 
     UDSEntry entry;
@@ -175,15 +177,12 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     timeout.start();
     loop.exec();
     if ( ! timeout.isActive() ) {
-        // timed out
         kDebug() << "timed out looking up hostname";
         error(KIO::ERR_COULD_NOT_CONNECT, i18n("Failed to look up hostname %1: Operation timed out.", peer.hostname));
         return false;
     }
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
-
-    kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
 
     while ( browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
@@ -293,7 +292,6 @@ QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url, bool* ok)
 void InfinityProtocol::listDir(const KUrl &url)
 {
     kDebug() << "LIST DIR" << url;
-
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
