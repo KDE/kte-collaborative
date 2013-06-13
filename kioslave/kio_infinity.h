@@ -65,6 +65,7 @@ public:
     virtual void listDir(const KUrl& url);
     virtual void put(const KUrl& url, int permissions, KIO::JobFlags flags);
     virtual void mkdir(const KUrl& url, int permissions);
+    virtual void del(const KUrl& url, bool isfile);
 
 
     static InfinityProtocol* self();

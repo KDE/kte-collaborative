@@ -226,6 +226,25 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     }
 }
 
+void InfinityProtocol::del(const KUrl& url, bool isfile)
+{
+    kDebug() << "DELETE" << url;
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
+    bool itemExists = false;
+    QInfinity::BrowserIter iter = iterForUrl(url, &itemExists);
+    if ( ! itemExists ) {
+        error(KIO::ERR_CANNOT_DELETE, i18n("Cannot delete %1: No such file or directory", url.url()));
+        return;
+    }
+    connect(browser(), SIGNAL(nodeRemoved(BrowserIter)), this, SIGNAL(requestSuccessful()));
+    InfcNodeRequest* req = browser()->removeNode(iter);
+    if ( waitForRequest(INFC_REQUEST(req)) ) {
+        finished();
+    }
+}
+
 void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
     kDebug() << "MKDIR" << url;
