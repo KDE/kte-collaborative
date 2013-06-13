@@ -92,8 +92,13 @@ void IterLookupHelper::directoryExplored()
         }
     } while ( m_currentIter.next() );
 
-    if ( m_remainingComponents.isEmpty() ) {
-        // no directories remain
+    // no entries remain and the item was found
+    bool fullyFound = found && m_remainingComponents.isEmpty();
+    // just an empty entry remains and the current item is not a directory
+    bool directoryFound = m_remainingComponents.size() == 1 && m_remainingComponents.first().isEmpty()
+                          && ! m_currentIter.isDirectory();
+    if ( fullyFound || directoryFound ) {
+        m_wasSuccessful = true;
         emit done(m_currentIter);
         return;
     }
