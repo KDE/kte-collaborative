@@ -19,6 +19,7 @@
 */
 
 #include "kio_infinity.h"
+#include "malloc.h"
 
 #include <kdebug.h>
 #include <kcomponentdata.h>
@@ -26,40 +27,40 @@
 #include <kstandarddirs.h>
 #include <klocale.h>
 #include <kencodingprober.h>
+
 #include <qcoreapplication.h>
 #include <qapplication.h>
 
 #include <common/itemfactory.h>
 #include <common/noteplugin.h>
 #include <common/documentbuilder.h>
-#include <remotebrowserview.h>
+
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/init.h>
-
-#include "malloc.h"
-#include <KTextEditor/View>
+#include <libqinfinity/qgobject.h>
+#include <libqinfinity/qgsignal.h>
 
 #include "common/utils.h"
 
 #define TIMEOUT_MS 10000
 
 using namespace KIO;
+using QInfinity::QGObject;
+using QInfinity::QGSignal;
 
 extern "C" {
 
 int KDE_EXPORT kdemain( int argc, char **argv )
-// int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-//     QApplication app(argc, argv);
     KComponentData componentData("infinity", "kio_infinity");
 
     kDebug() << "starting infinity kioslave";
     if (argc != 4) {
-        kDebug() << "wrong arguments count";
+        kWarning() << "wrong arguments count";
         exit(-1);
     }
 
@@ -67,7 +68,6 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 
     InfinityProtocol slave(argv[2], argv[3]);
     slave.dispatchLoop();
-//     slave.listDir(KUrl("inf://localhost"));
 
     kDebug() << "slave exiting";
     return app.exec();
@@ -77,7 +77,7 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 
 InfinityProtocol* InfinityProtocol::_self = 0;
 
-InfinityProtocol::InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket)
+InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArray& app_socket)
     : QObject()
     , SlaveBase("inf", pool_socket, app_socket)
     , m_notePlugin(0)
@@ -99,10 +99,10 @@ InfinityProtocol::~InfinityProtocol()
 void InfinityProtocol::get(const KUrl& url )
 {
     kDebug() << "GET " << url.url();
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
 
-    QString title, section;
-
-    // tell the mimetype
     mimeType("text/plain");
     data("");
     finished();
@@ -110,7 +110,10 @@ void InfinityProtocol::get(const KUrl& url )
 
 void InfinityProtocol::stat( const KUrl& url)
 {
-    kDebug() << "ENTERING STAT " << url.url();
+    kDebug() << "STAT " << url.url();
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
 
     UDSEntry entry;
     entry.insert(KIO::UDSEntry::UDS_MIME_TYPE, QString::fromLatin1("text/plain"));
@@ -119,33 +122,46 @@ void InfinityProtocol::stat( const KUrl& url)
     finished();
 }
 
+bool InfinityProtocol::isConnectedTo(const Peer& peer)
+{
+    if ( m_connectedTo != peer ) {
+        return false;
+    }
+    if ( ! m_connection || ! m_connection->xmppConnection() ) {
+        return false;
+    }
+    if ( m_connection->xmppConnection()->status() != QInfinity::XmlConnection::Open ) {
+        return false;
+    }
+    return true;
+}
+
 bool InfinityProtocol::doConnect(const Peer& peer)
 {
-    if ( m_connectedTo == peer ) {
-        // TODO check if connection is still open
+    if ( isConnectedTo(peer) ) {
         return true;
     }
 
     QEventLoop loop;
     m_connection = QSharedPointer<Kobby::Connection>(new Kobby::Connection(peer.hostname, peer.port, this));
     m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel( this ));
-    m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
+    m_browserModel->setItemFactory(new Kobby::ItemFactory( this ));
     QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
     m_connection->prepare();
 
-    m_notePlugin = new Kobby::NotePlugin( this );
-    m_browserModel->addPlugin( *m_notePlugin );
+    m_notePlugin = new Kobby::NotePlugin(this);
+    m_browserModel->addPlugin(*m_notePlugin);
 
     QTimer timeout;
     timeout.setSingleShot(true);
     timeout.setInterval(TIMEOUT_MS);
-    timeout.start();
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
+    timeout.start();
     loop.exec();
     if ( ! timeout.isActive() ) {
         // timed out
         kDebug() << "timed out looking up hostname";
-        error(KIO::ERR_SLAVE_DEFINED, i18n("Failed to look up hostname %1: Operation timed out.", peer.hostname));
+        error(KIO::ERR_COULD_NOT_CONNECT, i18n("Failed to look up hostname %1: Operation timed out.", peer.hostname));
         return false;
     }
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
@@ -153,14 +169,12 @@ bool InfinityProtocol::doConnect(const Peer& peer)
 
     kDebug() << "connection status:" << m_connection->xmppConnection()->status() << QInfinity::XmlConnection::Open;
 
-    // browsers.first is ok, since we only have one connection
-    QInfinity::Browser* browser = m_browserModel->browsers().first();
-    while ( browser->connectionStatus() != INFC_BROWSER_CONNECTED ) {
+    while ( browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
         usleep(1000);
         if ( ! timeout.isActive() ) {
             kDebug() << "failed to connect";
-            error(KIO::ERR_SLAVE_DEFINED, i18n("Failed to connect to host %1, port %2: Operation timed out.", peer.hostname, peer.port));
+            error(KIO::ERR_COULD_NOT_CONNECT, i18n("Failed to connect to host %1, port %2: Operation timed out.", peer.hostname, peer.port));
             return false;
         }
     }
@@ -169,8 +183,12 @@ bool InfinityProtocol::doConnect(const Peer& peer)
 }
 
 
-void InfinityProtocol::mimetype(const KUrl & /*url*/)
+void InfinityProtocol::mimetype(const KUrl & url)
 {
+    kDebug() << "MIMETYPE" << url;
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
     mimeType("text/plain");
     finished();
 }
@@ -178,28 +196,58 @@ void InfinityProtocol::mimetype(const KUrl & /*url*/)
 void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flags*/)
 {
     kDebug() << "PUT" << url;
-    if ( ! doConnect(Peer(url.host(), url.port())) ) {
+    if ( ! doConnect(Peer(url)) ) {
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
-    kDebug() << "adding note" << iter.path() << url.fileName();
+    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), this, SIGNAL(requestSuccessful()));
+    InfcNodeRequest* infReq = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    if ( waitForRequest(INFC_REQUEST(infReq)) ) {
+        finished();
+    }
+}
+
+bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
+{
     QEventLoop loop;
-    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), &loop, SLOT(quit()));
+
+    // Set up the timeout connection
     QTimer timeout;
     timeout.setSingleShot(true);
     timeout.setInterval(TIMEOUT_MS);
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
-    browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+
+    // Set up the connections for handling an error
+    QGObject request;
+    request.setGobject(G_OBJECT(infcRequest));
+    QGSignal connection(&request, "failed", G_CALLBACK(InfinityProtocol::requestError_cb), (void*) this);
+    connect(this, SIGNAL(requestError()), &loop, SLOT(quit()));
+
+    // Set up the connection for successfully completing the operation
+    connect(this, SIGNAL(requestSuccessful()), &loop, SLOT(quit()));
+
+    // Start waiting.
     loop.exec();
-    kDebug() << "FINISHED PUT" << url;
-    finished();
+
+    // Disconnect the "requestSuccessful" connection, since it differs for each request
+    // and is meant to be used only once
+    disconnect(this, SIGNAL(requestSuccessful()));
+
+    if ( ! m_lastError.isEmpty() ) {
+        // TODO is there a way to give the proper error types for e.g. "node already exists"?
+        error(ERR_SLAVE_DEFINED, m_lastError);
+        m_lastError.clear();
+        return false;
+    }
+    return true;
+    // Exiting from the function will destroy the QGSignal instance and disconnect the signal.
 }
 
 void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
     kDebug() << "MKDIR" << url;
-    if ( ! doConnect(Peer(url.host(), url.port())) ) {
+    if ( ! doConnect(Peer(url)) ) {
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
@@ -208,13 +256,25 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
     finished();
 }
 
+void InfinityProtocol::requestError_cb(InfcRequest* /*request*/, GError* error, void* user_data)
+{
+    kDebug() << "request error:" << error->message;
+    reinterpret_cast<InfinityProtocol*>(user_data)->signalError(QString(error->message));
+}
+
+void InfinityProtocol::signalError(const QString message)
+{
+    m_lastError = message;
+    emit requestError();
+}
+
 QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url)
 {
     KUrl clean(url);
     clean.cleanPath(KUrl::SimplifyDirSeparators);
     IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser());
     QEventLoop loop;
-    kDebug() << "connecting signal:" << connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
+    connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
     helper.beginLater();
     // Using an event loop is okay in this case, because the kio slave doesn't get
     // any signals from outside.
