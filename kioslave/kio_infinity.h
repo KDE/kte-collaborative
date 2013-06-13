@@ -98,7 +98,11 @@ private:
 
     // Finds a QInfinity::BrowserIter for the given URL. This operation requires
     // communication with the server and is very expensive.
-    QInfinity::BrowserIter iterForUrl(const KUrl& url);
+    // You can provide an "ok" boolean to check if the request succeeded,
+    // in case you are not sure it does. If ok is false, the returned
+    // iter is invalid.
+    // isDirectory must be true if you're looking for a directory.
+    QInfinity::BrowserIter iterForUrl(const KUrl& url, bool* ok = 0);
 
     // Get the browser for the currently established connection.
     // Only call this if connected.

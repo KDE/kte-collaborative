@@ -54,6 +54,7 @@ public:
         QTimer::singleShot(0, this, SLOT(begin()));
     };
     QInfinity::BrowserIter result() const;
+    bool success() const;
 
 signals:
     void done(QInfinity::BrowserIter found);
@@ -72,6 +73,7 @@ protected:
     QStack<QString> m_remainingComponents;
     QInfinity::Browser* m_browser;
     QInfinity::BrowserIter m_currentIter;
+    bool m_wasSuccessful;
 };
 
 #endif

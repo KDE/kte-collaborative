@@ -103,6 +103,15 @@ void InfinityProtocol::get(const KUrl& url )
         return;
     }
 
+    bool ok = false;
+    QInfinity::BrowserIter iter = iterForUrl(url, &ok);
+    Q_UNUSED(iter);
+    kDebug() << "GET:" << ok;
+    if ( ! ok ) {
+        error(KIO::ERR_COULD_NOT_STAT, i18n("Could not get %1: The node does not exist.", url.url()));
+        return;
+    }
+
     mimeType("text/plain");
     data("");
     finished();
@@ -113,6 +122,13 @@ void InfinityProtocol::stat( const KUrl& url)
     kDebug() << "STAT " << url.url();
     if ( ! doConnect(Peer(url)) ) {
         return;
+    }
+
+    bool ok = false;
+    QInfinity::BrowserIter iter = iterForUrl(url, &ok);
+    Q_UNUSED(iter);
+    if ( ! ok ) {
+        error(KIO::ERR_COULD_NOT_STAT, i18n("Could not stat %1: The node does not exist.", url.url()));
     }
 
     UDSEntry entry;
@@ -200,11 +216,92 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
+    // TODO: this is technically wrong; we need to wait for a nodeAdded() signal
+    // where the BrowserIter matches the iter found above.
+    // (This actually causing problems is very unlikely though)
     connect(browser(), SIGNAL(nodeAdded(BrowserIter)), this, SIGNAL(requestSuccessful()));
-    InfcNodeRequest* infReq = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
-    if ( waitForRequest(INFC_REQUEST(infReq)) ) {
+    InfcNodeRequest* req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    if ( waitForRequest(INFC_REQUEST(req)) ) {
         finished();
     }
+}
+
+void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
+{
+    kDebug() << "MKDIR" << url;
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
+    QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
+    // TODO: see put()
+    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), this, SIGNAL(requestSuccessful()));
+    InfcNodeRequest* req = browser()->addSubdirectory(iter, url.fileName().toAscii().data());
+    if ( waitForRequest(INFC_REQUEST(req)) ) {
+        finished();
+    }
+}
+
+void InfinityProtocol::requestError_cb(InfcRequest* /*request*/, GError* error, void* user_data)
+{
+    kDebug() << "request error:" << error->message;
+    reinterpret_cast<InfinityProtocol*>(user_data)->signalError(QString(error->message));
+}
+
+void InfinityProtocol::signalError(const QString message)
+{
+    m_lastError = message;
+    emit requestError();
+}
+
+QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url, bool* ok)
+{
+    KUrl clean(url);
+    clean.cleanPath(KUrl::SimplifyDirSeparators);
+    IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser());
+    QEventLoop loop;
+    connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
+    connect(&helper, SIGNAL(failed()), &loop, SLOT(quit()));
+    helper.beginLater();
+    // Using an event loop is okay in this case, because the kio slave doesn't get
+    // any signals from outside.
+    loop.exec();
+    if ( ok ) {
+        *ok = helper.success();
+    }
+    return helper.result();
+}
+
+void InfinityProtocol::listDir(const KUrl &url)
+{
+    kDebug() << "LIST DIR" << url;
+
+    if ( ! doConnect(Peer(url)) ) {
+        return;
+    }
+
+    QInfinity::BrowserIter iter = iterForUrl(url);
+
+    if ( ! iter.isExplored() ) {
+        InfcExploreRequest* request = iter.explore();
+        while ( INFC_IS_EXPLORE_REQUEST(request) && ! infc_explore_request_get_finished(INFC_EXPLORE_REQUEST(request)) ) {
+            QCoreApplication::processEvents();
+        }
+    }
+    bool hasChildren = iter.child();
+
+    // If not, the directory is just empty.
+    if ( hasChildren ) {
+        do {
+            UDSEntry entry;
+            entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.name() );
+            entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
+            entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
+            listEntry(entry, false);
+        } while ( iter.next() );
+    }
+
+    listEntry(UDSEntry(), true);
+    finished();
 }
 
 bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
@@ -242,82 +339,6 @@ bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
     }
     return true;
     // Exiting from the function will destroy the QGSignal instance and disconnect the signal.
-}
-
-void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
-{
-    kDebug() << "MKDIR" << url;
-    if ( ! doConnect(Peer(url)) ) {
-        return;
-    }
-    QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
-    browser()->addSubdirectory(iter, url.fileName().toAscii().data());
-    // TODO error handling and waiting
-    finished();
-}
-
-void InfinityProtocol::requestError_cb(InfcRequest* /*request*/, GError* error, void* user_data)
-{
-    kDebug() << "request error:" << error->message;
-    reinterpret_cast<InfinityProtocol*>(user_data)->signalError(QString(error->message));
-}
-
-void InfinityProtocol::signalError(const QString message)
-{
-    m_lastError = message;
-    emit requestError();
-}
-
-QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url)
-{
-    KUrl clean(url);
-    clean.cleanPath(KUrl::SimplifyDirSeparators);
-    IterLookupHelper helper(clean.path(KUrl::AddTrailingSlash), browser());
-    QEventLoop loop;
-    connect(&helper, SIGNAL(done(QInfinity::BrowserIter)), &loop, SLOT(quit()));
-    helper.beginLater();
-    // Using an event loop is okay in this case, because the kio slave doesn't get
-    // any signals from outside.
-    loop.exec();
-    kDebug() << "ok, found iter";
-    return helper.result();
-}
-
-void InfinityProtocol::listDir(const KUrl &url)
-{
-    kDebug() << "LIST DIR" << url;
-    kDebug() << url.host() << url.userName() << url.password() << url.path();
-
-    if ( ! doConnect(Peer(url.host(), url.port())) ) {
-        return;
-    }
-
-    QInfinity::BrowserIter iter = iterForUrl(url);
-
-    if ( ! iter.isExplored() ) {
-        kDebug() << "exploring iter";
-        InfcExploreRequest* request = iter.explore();
-        while ( INFC_IS_EXPLORE_REQUEST(request) && ! infc_explore_request_get_finished(INFC_EXPLORE_REQUEST(request)) ) {
-            kDebug() << "waiting for exploration";
-            QCoreApplication::processEvents();
-        }
-    }
-    bool hasChildren = iter.child();
-
-    // If not, the directory is just empty.
-    if ( hasChildren ) {
-        do {
-            UDSEntry entry;
-            entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.name() );
-            entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
-            entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
-            kDebug() << "listing" << iter.path();
-            listEntry(entry, false);
-        } while ( iter.next() );
-    }
-
-    listEntry(UDSEntry(), true);
-    finished();
 }
 
 QInfinity::Browser* InfinityProtocol::browser() const

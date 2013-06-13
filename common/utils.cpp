@@ -24,6 +24,7 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* brows
         : QObject()
         , m_browser(browser)
         , m_currentIter(*m_browser)
+        , m_wasSuccessful(false)
 {
     // remove starting and trailing slash
     if ( lookupPath.startsWith('/') ) {
@@ -34,6 +35,11 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* brows
     }
     kDebug() << "finding iter for" << m_remainingComponents;
 };
+
+bool IterLookupHelper::success() const
+{
+    return m_wasSuccessful;
+}
 
 void IterLookupHelper::finished_cb(InfcNodeRequest* request, void* user_data)
 {
@@ -67,6 +73,7 @@ void IterLookupHelper::directoryExplored()
     kDebug() << "finding:" << findEntry << " -- remaining:" << m_remainingComponents;
     if ( findEntry.isEmpty() ) {
         // the path is a directory; return the directory iter instead of a child
+        m_wasSuccessful = true;
         emit done(m_currentIter);
         return;
     }
