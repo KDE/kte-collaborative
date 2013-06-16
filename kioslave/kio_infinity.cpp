@@ -42,6 +42,7 @@
 #include <libqinfinity/init.h>
 #include <libqinfinity/qgobject.h>
 #include <libqinfinity/qgsignal.h>
+#include <libqinfinity/noderequest.h>
 
 #include "common/utils.h"
 
@@ -85,7 +86,7 @@ InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArr
 {
     kDebug() << "constructing infinity kioslave";
     _self = this;
-    connect(this, SIGNAL(requestError(NodeRequest*,QString)), this, SLOT(slotRequestError(NodeRequest*,QString)));
+    connect(this, SIGNAL(requestError(GError*)), this, SLOT(slotRequestError(GError*)));
 }
 
 InfinityProtocol* InfinityProtocol::self()
@@ -219,7 +220,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     QInfinity::NodeRequest* req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
     connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
-    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
     if ( waitForCompletion() ) {
         finished();
     }
@@ -239,7 +240,7 @@ void InfinityProtocol::del(const KUrl& url, bool isfile)
     }
     QInfinity::NodeRequest* req = browser()->removeNode(iter);
     connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
-    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
     if ( waitForCompletion() ) {
         finished();
     }
@@ -253,15 +254,15 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     QInfinity::NodeRequest* req = browser()->addSubdirectory(iter, url.fileName().toAscii().data());
-    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
     if ( waitForCompletion() ) {
         finished();
     }
 }
 
-void InfinityProtocol::slotRequestError(NodeRequest* /*req*/, QString message)
+void InfinityProtocol::slotRequestError(GError* error)
 {
-    m_lastError = message;
+    m_lastError = QString(error->message);
 }
 
 QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url, bool* ok)
@@ -326,7 +327,7 @@ bool InfinityProtocol::waitForCompletion()
     timeout.start();
 
     // Set up the connection for handling an error
-    connect(this, SIGNAL(requestError(NodeRequest*,QString)), &loop, SLOT(quit()));
+    connect(this, SIGNAL(requestError(GError*)), &loop, SLOT(quit()));
 
     // Set up the connection for successfully completing the operation
     connect(this, SIGNAL(requestSuccessful(NodeRequest*)), &loop, SLOT(quit()));

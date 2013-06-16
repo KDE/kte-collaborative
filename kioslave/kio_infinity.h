@@ -79,13 +79,13 @@ signals:
     // message provides a human-readable description of why the request failed.
     // TODO translate messages? How? I guess they need to be translated
     // in infinoted.
-    void requestError(NodeRequest* req, QString message);
+    void requestError(GError* error);
 
     // This signal is be emitted if an operation was successful.
     void requestSuccessful(NodeRequest* req);
 
 public slots:
-    void slotRequestError(NodeRequest* req, QString message);
+    void slotRequestError(GError* error);
 
 private:
 
