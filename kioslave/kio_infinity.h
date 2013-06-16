@@ -86,10 +86,6 @@ public slots:
     void slotRequestError(GError* error);
 
 private:
-
-    // wrapper for emitting error signal if a request fails
-    void signalError(const QString);
-
     // Checks if a connection to the given peer is open already.
     bool isConnectedTo(const Peer& peer);
 
