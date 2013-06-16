@@ -43,6 +43,7 @@
 #include <libqinfinity/qgobject.h>
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/noderequest.h>
+#include <libqinfinity/explorerequest.h>
 
 #include "common/utils.h"
 
@@ -52,6 +53,7 @@ using namespace KIO;
 using QInfinity::QGObject;
 using QInfinity::QGSignal;
 using QInfinity::NodeRequest;
+using QInfinity::ExploreRequest;
 
 extern "C" {
 
@@ -293,9 +295,11 @@ void InfinityProtocol::listDir(const KUrl &url)
     QInfinity::BrowserIter iter = iterForUrl(url);
 
     if ( ! iter.isExplored() ) {
-        InfcExploreRequest* request = iter.explore();
-        while ( INFC_IS_EXPLORE_REQUEST(request) && ! infc_explore_request_get_finished(INFC_EXPLORE_REQUEST(request)) ) {
-            QCoreApplication::processEvents();
+        ExploreRequest* req = iter.explore();
+        connect(req, SIGNAL(finished(ExploreRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
+        connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
+        if ( ! waitForCompletion() ) {
+            return;
         }
     }
     bool hasChildren = iter.child();

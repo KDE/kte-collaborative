@@ -71,7 +71,7 @@ K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktextedit
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
 {
-    kDebug() << "loading kobby plugin";
+    kDebug() << "loading kobby plugin" << this;
     QInfinity::init();
     // TODO this is for unit tests. I can't figure out how to get the plugin instance
     // from the KatePart we create there.

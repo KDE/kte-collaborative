@@ -48,7 +48,6 @@ class KOBBYCOMMON_EXPORT IterLookupHelper : public QObject {
 Q_OBJECT
 public:
     IterLookupHelper(QString lookupPath, QInfinity::Browser* browser);
-    static void finished_cb( InfcNodeRequest* request, void* user_data );
 
     inline void beginLater() {
         QTimer::singleShot(0, this, SLOT(begin()));
@@ -65,9 +64,9 @@ public slots:
         kDebug() << "beginning explore";
         explore(m_currentIter);
     };
+    void directoryExplored();
 
 protected:
-    void directoryExplored();
     void explore(QInfinity::BrowserIter directory);
 
     QStack<QString> m_remainingComponents;

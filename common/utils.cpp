@@ -17,8 +17,11 @@
  */
 
 #include "common/utils.h"
+#include <libqinfinity/explorerequest.h>
 
 #include <QStringList>
+
+using QInfinity::ExploreRequest;
 
 IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
         : QObject()
@@ -41,20 +44,13 @@ bool IterLookupHelper::success() const
     return m_wasSuccessful;
 }
 
-void IterLookupHelper::finished_cb(InfcNodeRequest* request, void* user_data)
-{
-    kDebug() << "explore request finished";
-    static_cast<IterLookupHelper*>(user_data)->directoryExplored();
-}
-
 void IterLookupHelper::explore(QInfinity::BrowserIter directory)
 {
     if ( ! directory.isExplored() ) {
         kDebug() << "exploring iter";
-        InfcExploreRequest* request = directory.explore();
+        ExploreRequest* request = directory.explore();
         m_currentIter = directory;
-        g_signal_connect_after(request, "finished",
-                                G_CALLBACK(IterLookupHelper::finished_cb), (void*) this);
+        connect(request, SIGNAL(finished(ExploreRequest*)), this, SLOT(directoryExplored()));
     }
     else {
         directoryExplored();
