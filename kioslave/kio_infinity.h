@@ -61,7 +61,7 @@ Q_OBJECT
 
 public:
     InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket);
-    virtual ~InfinityProtocol();
+    virtual ~InfinityProtocol() { };
 
     virtual void get(const KUrl& url);
     virtual void stat(const KUrl& url);
@@ -71,8 +71,6 @@ public:
     virtual void put(const KUrl& url, int permissions, KIO::JobFlags flags);
     virtual void mkdir(const KUrl& url, int permissions);
     virtual void del(const KUrl& url, bool isfile);
-
-    static InfinityProtocol* self();
 
 signals:
     // This signal is emitted if a request fails.
@@ -124,7 +122,6 @@ private:
     Kobby::NotePlugin* m_notePlugin;
     Peer m_connectedTo;
     QString m_lastError;
-    static InfinityProtocol* _self;
 };
 
 

@@ -79,26 +79,13 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 
 }
 
-InfinityProtocol* InfinityProtocol::_self = 0;
-
 InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArray& app_socket)
     : QObject()
     , SlaveBase("inf", pool_socket, app_socket)
     , m_notePlugin(0)
 {
     kDebug() << "constructing infinity kioslave";
-    _self = this;
     connect(this, SIGNAL(requestError(GError*)), this, SLOT(slotRequestError(GError*)));
-}
-
-InfinityProtocol* InfinityProtocol::self()
-{
-    return _self;
-}
-
-InfinityProtocol::~InfinityProtocol()
-{
-    _self = 0;
 }
 
 void InfinityProtocol::get(const KUrl& url )
