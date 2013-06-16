@@ -29,6 +29,12 @@
 
 #include <libinfinity/client/infc-request.h>
 
+namespace QInfinity {
+    class NodeRequest;
+}
+
+using QInfinity::NodeRequest;
+
 struct Peer {
     Peer(QString hostname, int port = -1)
         : hostname(hostname)
@@ -51,10 +57,9 @@ struct Peer {
 
 class InfinityProtocol : public QObject, public KIO::SlaveBase
 {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-
     InfinityProtocol(const QByteArray &pool_socket, const QByteArray &app_socket);
     virtual ~InfinityProtocol();
 
@@ -67,23 +72,23 @@ public:
     virtual void mkdir(const KUrl& url, int permissions);
     virtual void del(const KUrl& url, bool isfile);
 
-
     static InfinityProtocol* self();
 
-    // Callback function for the infinity request
-    static void requestError_cb(InfcRequest* request, GError* error, void* user_data);
-
 signals:
-    // This signal is emitted if a request fails. Since it is connected to a local
-    // event loop's quit() slot usually, the error message is available through
-    // the m_lastError member. You have to reset that member if you handeled the error.
-    void requestError();
+    // This signal is emitted if a request fails.
+    // message provides a human-readable description of why the request failed.
+    // TODO translate messages? How? I guess they need to be translated
+    // in infinoted.
+    void requestError(NodeRequest* req, QString message);
 
-    // This signal should be emitted if an operation was successful, and the
-    // waitForRequest() function should exit.
-    void requestSuccessful();
+    // This signal is be emitted if an operation was successful.
+    void requestSuccessful(NodeRequest* req);
+
+public slots:
+    void slotRequestError(NodeRequest* req, QString message);
 
 private:
+
     // wrapper for emitting error signal if a request fails
     void signalError(const QString);
 
@@ -109,17 +114,17 @@ private:
     // Only call this if connected.
     QInfinity::Browser* browser() const;
 
-    // Waits for the given InfcRequest to finish, and reacts to errors accordingly.
+    // Waits for a request finish (as signaled by requestSuccessful() / requestError()),
+    // and reacts to errors accordingly.
     // A slave function (such as put()) should just abort (return) if this returns false.
-    bool waitForRequest(const InfcRequest* request);
+    bool waitForCompletion();
 
-    static InfinityProtocol* _self;
     QSharedPointer<Kobby::Connection> m_connection;
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
     Kobby::NotePlugin* m_notePlugin;
     Peer m_connectedTo;
     QString m_lastError;
-
+    static InfinityProtocol* _self;
 };
 
 

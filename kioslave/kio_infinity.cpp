@@ -50,6 +50,7 @@
 using namespace KIO;
 using QInfinity::QGObject;
 using QInfinity::QGSignal;
+using QInfinity::NodeRequest;
 
 extern "C" {
 
@@ -84,6 +85,7 @@ InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArr
 {
     kDebug() << "constructing infinity kioslave";
     _self = this;
+    connect(this, SIGNAL(requestError(NodeRequest*,QString)), this, SLOT(slotRequestError(NodeRequest*,QString)));
 }
 
 InfinityProtocol* InfinityProtocol::self()
@@ -215,12 +217,10 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
-    // TODO: this is technically wrong; we need to wait for a nodeAdded() signal
-    // where the BrowserIter matches the iter found above.
-    // (This actually causing problems is very unlikely though)
-    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), this, SIGNAL(requestSuccessful()));
-    InfcNodeRequest* req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
-    if ( waitForRequest(INFC_REQUEST(req)) ) {
+    QInfinity::NodeRequest* req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
+    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    if ( waitForCompletion() ) {
         finished();
     }
 }
@@ -237,9 +237,10 @@ void InfinityProtocol::del(const KUrl& url, bool isfile)
         error(KIO::ERR_CANNOT_DELETE, i18n("Cannot delete %1: No such file or directory", url.url()));
         return;
     }
-    connect(browser(), SIGNAL(nodeRemoved(BrowserIter)), this, SIGNAL(requestSuccessful()));
-    InfcNodeRequest* req = browser()->removeNode(iter);
-    if ( waitForRequest(INFC_REQUEST(req)) ) {
+    QInfinity::NodeRequest* req = browser()->removeNode(iter);
+    connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
+    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    if ( waitForCompletion() ) {
         finished();
     }
 }
@@ -251,24 +252,16 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
-    // TODO: see put()
-    connect(browser(), SIGNAL(nodeAdded(BrowserIter)), this, SIGNAL(requestSuccessful()));
-    InfcNodeRequest* req = browser()->addSubdirectory(iter, url.fileName().toAscii().data());
-    if ( waitForRequest(INFC_REQUEST(req)) ) {
+    QInfinity::NodeRequest* req = browser()->addSubdirectory(iter, url.fileName().toAscii().data());
+    connect(req, SIGNAL(error(NodeRequest*,QString)), this, SIGNAL(requestError(NodeRequest*, QString)));
+    if ( waitForCompletion() ) {
         finished();
     }
 }
 
-void InfinityProtocol::requestError_cb(InfcRequest* /*request*/, GError* error, void* user_data)
-{
-    kDebug() << "request error:" << error->message;
-    reinterpret_cast<InfinityProtocol*>(user_data)->signalError(QString(error->message));
-}
-
-void InfinityProtocol::signalError(const QString message)
+void InfinityProtocol::slotRequestError(NodeRequest* /*req*/, QString message)
 {
     m_lastError = message;
-    emit requestError();
 }
 
 QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url, bool* ok)
@@ -321,7 +314,7 @@ void InfinityProtocol::listDir(const KUrl &url)
     finished();
 }
 
-bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
+bool InfinityProtocol::waitForCompletion()
 {
     QEventLoop loop;
 
@@ -332,21 +325,14 @@ bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
 
-    // Set up the connections for handling an error
-    QGObject request;
-    request.setGobject(G_OBJECT(infcRequest));
-    QGSignal connection(&request, "failed", G_CALLBACK(InfinityProtocol::requestError_cb), (void*) this);
-    connect(this, SIGNAL(requestError()), &loop, SLOT(quit()));
+    // Set up the connection for handling an error
+    connect(this, SIGNAL(requestError(NodeRequest*,QString)), &loop, SLOT(quit()));
 
     // Set up the connection for successfully completing the operation
-    connect(this, SIGNAL(requestSuccessful()), &loop, SLOT(quit()));
+    connect(this, SIGNAL(requestSuccessful(NodeRequest*)), &loop, SLOT(quit()));
 
     // Start waiting.
     loop.exec();
-
-    // Disconnect the "requestSuccessful" connection, since it differs for each request
-    // and is meant to be used only once
-    disconnect(this, SIGNAL(requestSuccessful()));
 
     if ( ! m_lastError.isEmpty() ) {
         // TODO is there a way to give the proper error types for e.g. "node already exists"?
@@ -355,7 +341,6 @@ bool InfinityProtocol::waitForRequest(const InfcRequest* infcRequest)
         return false;
     }
     return true;
-    // Exiting from the function will destroy the QGSignal instance and disconnect the signal.
 }
 
 QInfinity::Browser* InfinityProtocol::browser() const
