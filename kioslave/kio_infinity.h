@@ -26,6 +26,7 @@
 #include <common/connection.h>
 #include <common/noteplugin.h>
 #include <libqinfinity/browsermodel.h>
+#include <libqinfinity/browseriter.h>
 
 #include <libinfinity/client/infc-request.h>
 
@@ -34,6 +35,7 @@ namespace QInfinity {
 }
 
 using QInfinity::NodeRequest;
+using QInfinity::BrowserIter;
 
 struct Peer {
     Peer(QString hostname, int port = -1)
@@ -84,6 +86,7 @@ signals:
 
 public slots:
     void slotRequestError(GError* error);
+    void directoryChanged(const BrowserIter iter);
 
 private:
     // Checks if a connection to the given peer is open already.
