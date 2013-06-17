@@ -48,8 +48,6 @@
 
 #include "common/utils.h"
 
-#define TIMEOUT_MS 10000
-
 using namespace KIO;
 using QInfinity::QGObject;
 using QInfinity::QGSignal;
@@ -178,7 +176,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
 
     QTimer timeout;
     timeout.setSingleShot(true);
-    timeout.setInterval(TIMEOUT_MS);
+    timeout.setInterval(connectTimeout() * 1000);
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
     loop.exec();
@@ -190,6 +188,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
 
+    // TODO use the connectionEstablished() signal!
     while ( browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
         QCoreApplication::processEvents();
         usleep(1000);
@@ -333,7 +332,7 @@ bool InfinityProtocol::waitForCompletion()
     // Set up the timeout connection
     QTimer timeout;
     timeout.setSingleShot(true);
-    timeout.setInterval(TIMEOUT_MS);
+    timeout.setInterval(connectTimeout() * 1000);
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
 
