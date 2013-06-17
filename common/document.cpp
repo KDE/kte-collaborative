@@ -161,7 +161,8 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
-    kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument() << "(" << chunk.length() << " chars )";
+    kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
+             << "(" << chunk.length() << " chars )" << "[blocked:" << blockRemoteInsert << "]";
 
     if( !blockRemoteInsert )
     {
@@ -218,7 +219,7 @@ void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
-    kDebug() << "local text inserted" << kDocument() << "(range" << range << ")";
+    kDebug() << "local text inserted" << kDocument() << "(range" << range << ")" << m_user;
     Q_UNUSED(document)
 
     textOpPerformed();
@@ -364,6 +365,7 @@ unsigned int KDocumentTextBuffer::cursorToOffset_local( const KTextEditor::Curso
     for( i = 0; i < cursor_line; i++ )
         offset += codec()->toUnicode(lines.at(i)).length() + 1; // Add newline
     offset += cursor.column();
+    kDebug() << "cursor:" << cursor << "-> offset:" << offset;
     return offset;
 }
 
@@ -451,6 +453,7 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
     , m_name( name )
     , m_user( 0 )
 {
+    kDebug() << "new infTextDocument for url" << kDocument()->url();
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
     connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
@@ -518,6 +521,9 @@ void InfTextDocument::slotSynchronizationFailed( GError *gerror )
 
 bool KDocumentTextBuffer::hasUser() const
 {
+    if ( m_user) {
+        kDebug() << "user" << m_user->name() << "status:" << m_user->status();
+    }
     return m_user != 0;
 }
 
