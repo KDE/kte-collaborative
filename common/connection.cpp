@@ -122,6 +122,7 @@ QInfinity::XmlConnection::Status Connection::status() const
 void Connection::slotStatusChanged()
 {
     m_connectionStatus = m_xmppConnection->status();
+    emit statusChanged(this, m_connectionStatus);
     switch( m_xmppConnection->status() )
     {
         case QInfinity::XmlConnection::Opening:

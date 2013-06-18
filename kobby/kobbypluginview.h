@@ -23,7 +23,18 @@
 #define KOBBYPLUGINVIEW_H
 
 #include <QObject>
+#include <QLabel>
 #include <KTextEditor/View>
+
+#include <libqinfinity/xmlconnection.h>
+
+#include "common/document.h"
+
+namespace Kobby {
+    class Connection;
+}
+using Kobby::Connection;
+using Kobby::Document;
 
 class ManagedDocument;
 
@@ -31,11 +42,29 @@ namespace QInfinity {
     class User;
 }
 
+class KobbyPluginView;
+
+class KobbyStatusBar : public QWidget {
+Q_OBJECT
+public:
+    explicit KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f = 0);
+
+public slots:
+    void connectionStatusChanged(Connection*, QInfinity::XmlConnection::Status status);
+    void sessionFullyReady();
+
+private:
+    QLabel* m_connectionStatusLabel;
+    KobbyPluginView* m_view;
+};
+
 class KobbyPluginView : public QObject
 {
 Q_OBJECT
 public:
-    KobbyPluginView(KTextEditor::View* kteView);
+    KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document);
+    virtual ~KobbyPluginView();
+    KobbyStatusBar* statusBar() const;
 
 public slots:
     void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user);
@@ -43,6 +72,10 @@ public slots:
 
 private:
     KTextEditor::View* m_view;
+    KobbyStatusBar* m_statusBar;
+    ManagedDocument* m_document;
+
+    friend class KobbyStatusBar;
 };
 
 #endif // KOBBYPLUGINVIEW_H

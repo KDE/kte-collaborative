@@ -231,9 +231,7 @@ void KobbyPlugin::addView(KTextEditor::View* view)
     ManagedDocument* doc = managedDocuments().findDocument(view->document());
     if ( doc ) {
         kDebug() << "adding view" << view;
-        KobbyPluginView* kobbyView = new KobbyPluginView(view);
-        connect(doc, SIGNAL(documentReady(ManagedDocument*)),
-                kobbyView, SLOT(documentReady(ManagedDocument*)));
+        KobbyPluginView* kobbyView = new KobbyPluginView(view, doc);
     }
 }
 

@@ -67,6 +67,8 @@ class KOBBYCOMMON_EXPORT Connection
         void connected( Connection *conn );
         void disconnecting( Connection *conn );
         void disconnected( Connection *conn );
+        // Emitted additionally to the above four signals, for convenience.
+        void statusChanged( Connection *conn, QInfinity::XmlConnection::Status status );
         void error( Connection *conn, QString message );
         // This signal is emitted when the connection is ready to be opened,
         // i.e. when the host name was looked up and everything is set up.

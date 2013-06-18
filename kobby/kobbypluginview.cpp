@@ -23,10 +23,67 @@
 #include "manageddocument.h"
 #include <common/ui/remotechangenotifier.h>
 #include <libqinfinity/user.h>
+#include <QLayout>
+#include <QLabel>
+#include <KLocalizedString>
 
-KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView)
+KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
+    : QWidget(parent->m_view, f)
+    , m_connectionStatusLabel(new QLabel(this))
+    , m_view(parent)
+{
+    setLayout(new QHBoxLayout());
+    layout()->setAlignment(Qt::AlignRight);
+    layout()->addWidget(m_connectionStatusLabel);
+}
+
+void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
+{
+    QString text;
+    if ( status == QInfinity::XmlConnection::Closed ) {
+        // Since the connection will start opening immediately,
+        // this will not display in the beginning, just on disconnect
+        text = i18n("Disconnected from collaboration server.");
+    }
+    else if ( status == QInfinity::XmlConnection::Opening ) {
+        text = i18n("Connecting...");
+    }
+    else if ( status == QInfinity::XmlConnection::Open ) {
+        text = i18n("Synchronizing document...");
+    }
+    else if ( status == QInfinity::XmlConnection::Closing ) {
+        text = i18n("Disconnecting...");
+    }
+    m_connectionStatusLabel->setText(text);
+}
+
+void KobbyStatusBar::sessionFullyReady()
+{
+    m_connectionStatusLabel->setText(  "<b><span style=\"color:#009D0A\">"
+                                     + i18n("Connected to collaboration server.")
+                                     + "</span></b>" );
+}
+
+KobbyStatusBar* KobbyPluginView::statusBar() const
+{
+    return m_statusBar;
+}
+
+KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document)
     : QObject(kteView)
     , m_view(kteView)
+    , m_statusBar(new KobbyStatusBar(this))
+    , m_document(document)
+{
+    connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
+            statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
+    statusBar()->connectionStatusChanged(m_document->connection(), m_document->connection()->status());
+    connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
+            this, SLOT(documentReady(ManagedDocument*)));
+    m_view->layout()->addWidget(m_statusBar);
+}
+
+KobbyPluginView::~KobbyPluginView()
 {
 }
 
@@ -39,6 +96,7 @@ void KobbyPluginView::documentReady(ManagedDocument* doc)
 {
      connect(doc->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*)),
              this, SLOT(remoteTextChanged(KTextEditor::Range,QInfinity::User*)));
+     statusBar()->sessionFullyReady();
 }
 
 #include "kobbypluginview.moc"
