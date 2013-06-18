@@ -78,6 +78,7 @@ void ManagedDocument::unsubscribe()
     if ( m_infDocument ) {
         m_infDocument->leave();
         delete m_infDocument;
+        m_infDocument = 0;
     }
 }
 

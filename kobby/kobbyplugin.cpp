@@ -128,19 +128,25 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
     }
     kDebug() << "add document" << document << document->url() << "to plugin instance" << this;
     eventuallyManageDocument(document);
+    connect(document, SIGNAL(aboutToClose(KTextEditor::Document*)),
+            this, SLOT(removeDocument(KTextEditor::Document*)));
+    connect(document, SIGNAL(aboutToReload(KTextEditor::Document*)),
+            this, SLOT(removeDocument(KTextEditor::Document*)));
     connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),
             this, SLOT(eventuallyManageDocument(KTextEditor::Document*)));
 }
 
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 {
+    kDebug() << "remove document:" << document->url().path();
     ManagedDocument* doc = m_managedDocuments.findDocument(document);
     if ( doc ) {
+        doc->unsubscribe();
         m_managedDocuments.remove(document);
         delete doc;
     }
     else {
-        kWarning() << "tried to remove document" << document << "which is not being managed";
+        kDebug() << "tried to remove document" << document << "which is not being managed";
     }
 }
 

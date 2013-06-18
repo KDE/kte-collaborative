@@ -56,8 +56,6 @@ public:
     virtual void removeView(KTextEditor::View *view);
     // Called when a new document is added (e.g. user opens a document in kate)
     virtual void addDocument(KTextEditor::Document* document);
-    // Called when a document is closed or otherwise removed
-    virtual void removeDocument(KTextEditor::Document* document);
 
     // Checks if connections have been established for all managed documents,
     // and subscribes those which are not yet subscribed (if possible).
@@ -96,6 +94,11 @@ public slots:
     void eventuallyManageDocument(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*, KTextEditor::Range);
     void textRemoved(KTextEditor::Document*, KTextEditor::Range);
+    // Called when a document is closed or otherwise removed
+    // This is a slot because it needs to disconnect from the collaborative
+    // server before KTE clears the document's text (which would cause the
+    // text to be erased for other users, too)
+    virtual void removeDocument(KTextEditor::Document* document);
 };
 
 #endif // _KOBBY_PLUGIN_H_
