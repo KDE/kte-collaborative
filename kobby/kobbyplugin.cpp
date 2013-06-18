@@ -136,7 +136,7 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 {
     ManagedDocument* doc = m_managedDocuments.findDocument(document);
     if ( doc ) {
-        m_managedDocuments.removeAll(doc);
+        m_managedDocuments.remove(document);
         delete doc;
     }
     else {
@@ -154,7 +154,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
         if ( m_managedDocuments.isManaged(document) ) {
             kDebug() << "removing document" << document << "from manager";
             ManagedDocument* doc = m_managedDocuments.findDocument(document);
-            m_managedDocuments.removeAll(doc);
+            m_managedDocuments.remove(doc->document());
             delete doc;
         }
         return;
@@ -168,7 +168,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
     Connection* connection = eventuallyAddConnection(document->url());
 
     ManagedDocument* managed = new ManagedDocument(document, m_browserModel, m_textPlugin, connection, this);
-    m_managedDocuments.append(managed);
+    m_managedDocuments[document] = managed;
 
     connect(document, SIGNAL(textInserted(KTextEditor::Document*, KTextEditor::Range)),
             this, SLOT(textInserted(KTextEditor::Document*, KTextEditor::Range)), Qt::UniqueConnection);

@@ -146,16 +146,15 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 
 ManagedDocument* ManagedDocumentList::findDocument(KTextEditor::Document* document) const
 {
-    ManagedDocument* found = 0;
-    foreach ( ManagedDocument* doc, *this ) {
-        if ( doc->document() == document ) {
-            found = doc;
-        }
+    if ( contains(document) ) {
+        return operator[](document);
     }
-    return found;
+    else {
+        return 0;
+    }
 }
 
 bool ManagedDocumentList::isManaged(KTextEditor::Document* document) const
 {
-    return findDocument(document) != 0;
+    return contains(document);
 }
