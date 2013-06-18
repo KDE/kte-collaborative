@@ -193,6 +193,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void canUndo( bool enable );
         void canRedo( bool enable );
         void fatalError( const QString &message );
+        void remoteChangedText( const KTextEditor::Range& range, QInfinity::User* user );
 
     public Q_SLOTS:
         void joinFailed( GError *error );

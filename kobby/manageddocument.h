@@ -58,7 +58,7 @@ public slots:
     void sessionStatusChanged();
 
 signals:
-    void documentReady(KTextEditor::Document*);
+    void documentReady(ManagedDocument* document);
 
 private:
     Kobby::KDocumentTextBuffer* m_textBuffer;

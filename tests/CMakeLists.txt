@@ -4,6 +4,7 @@ kde4_add_unit_test(
     collaborativeeditingtest.cpp
     ../kobby/manageddocument.cpp
     ../kobby/kobbyplugin.cpp
+    ../kobby/kobbypluginview.cpp
 )
 
 include_directories(

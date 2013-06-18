@@ -1,4 +1,4 @@
-/* This file is part of the KDE libraries
+/* This file is part of the Kobby
    Copyright (C) 2013 Sven Brauch <svenbrauch@gmail.com>
 
    This library is free software; you can redistribute it and/or
@@ -45,6 +45,7 @@
 #include "common/documentmodel.h"
 #include <createitemdialog.h>
 #include <createconnectiondialog.h>
+#include "kobbypluginview.h"
 
 #include <libqinfinity/communicationjoinedgroup.h>
 #include <libqinfinity/init.h>
@@ -174,6 +175,11 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
     connect(document, SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
             this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)), Qt::UniqueConnection);
 
+    // add the existing views for this document
+    foreach ( KTextEditor::View* view, document->views() ) {
+        addView(view);
+    }
+
     subscribeNewDocuments();
 }
 
@@ -216,24 +222,18 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 
 void KobbyPlugin::addView(KTextEditor::View* view)
 {
-    kDebug() << "adding view" << view;
+    ManagedDocument* doc = managedDocuments().findDocument(view->document());
+    if ( doc ) {
+        kDebug() << "adding view" << view;
+        KobbyPluginView* kobbyView = new KobbyPluginView(view);
+        connect(doc, SIGNAL(documentReady(ManagedDocument*)),
+                kobbyView, SLOT(documentReady(ManagedDocument*)));
+    }
 }
 
 void KobbyPlugin::removeView(KTextEditor::View* view)
 {
     kDebug() << "removing view" << view;
-}
-
-KobbyPluginView::KobbyPluginView( KTextEditor::View *view, Kobby::Connection* /*connection*/)
-  : QObject( view )
-{
-    setObjectName("kobby-plugin");
-    m_view = view;
-}
-
-KobbyPluginView::~KobbyPluginView()
-{
-
 }
 
 // Just for debugging purposes, the real handling happens in Kobby::InfTextDocument
@@ -245,11 +245,6 @@ void KobbyPlugin::textInserted(KTextEditor::Document* doc, KTextEditor::Range ra
 void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range range)
 {
     kDebug() << "text removed:" << range << doc->textLines(range) << doc;
-}
-
-KTextEditor::View* KobbyPluginView::view() const
-{
-    return m_view;
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;

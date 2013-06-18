@@ -112,7 +112,7 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy.data()->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());
-    emit documentReady(document());
+    emit documentReady(this);
 }
 
 Session::Status ManagedDocument::sessionStatus() const

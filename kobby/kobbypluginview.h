@@ -1,5 +1,5 @@
-/*
- * Copyright 2013 Sven Brauch <svenbrauch@gmail.com>
+/* This file is part of the Kobby
+ * Copyright (C) 2013 Sven Brauch <svenbrauch@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -19,30 +19,30 @@
  *
  */
 
-#ifndef REMOTECHANGENOTIFIER_H
-#define REMOTECHANGENOTIFIER_H
-
-#include "../kobbycommon_export.h"
+#ifndef KOBBYPLUGINVIEW_H
+#define KOBBYPLUGINVIEW_H
 
 #include <QObject>
-#include <QTimer>
-#include <QDeclarativeView>
 #include <KTextEditor/View>
 
-// This class is used to draw fancy widgets in the editor window when a
-// remote user changes text
-class KOBBYCOMMON_EXPORT RemoteChangeNotifier : public QObject
+class ManagedDocument;
+
+namespace QInfinity {
+    class User;
+}
+
+class KobbyPluginView : public QObject
 {
+Q_OBJECT
 public:
-    static void addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QString& username);
-    // TODO do those use enough memory to be worth freeing temporarily? Each one might eventually be re-used
-    // if the user writes more text, so it's not really a leak.
-    static QMap< QPair<KTextEditor::View*, QString>, QWidget* > existingWidgets;
+    KobbyPluginView(KTextEditor::View* kteView);
+
+public slots:
+    void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user);
+    void documentReady(ManagedDocument*);
+
+private:
+    KTextEditor::View* m_view;
 };
 
-class NotifierWidget : public QDeclarativeView {
-public:
-    NotifierWidget(const QUrl& source, QWidget* parent = 0);
-    QTimer* closeTimer;
-};
-#endif // REMOTECHANGENOTIFIER_H
+#endif // KOBBYPLUGINVIEW_H

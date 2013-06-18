@@ -1,4 +1,4 @@
-/* This file is part of the KDE libraries
+/* This file is part of the Kobby
    Copyright (C) 2013 Sven Brauch <svenbrauch@gmail.com>
 
    This library is free software; you can redistribute it and/or
@@ -96,19 +96,6 @@ public slots:
     void eventuallyManageDocument(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*, KTextEditor::Range);
     void textRemoved(KTextEditor::Document*, KTextEditor::Range);
-};
-
-class KobbyPluginView : public QObject
-{
-  Q_OBJECT
-  public:
-    explicit KobbyPluginView(KTextEditor::View *view, Kobby::Connection* connection);
-    ~KobbyPluginView();
-
-    KTextEditor::View* view() const;
-
-  private:
-    KTextEditor::View* m_view;
 };
 
 #endif // _KOBBY_PLUGIN_H_
