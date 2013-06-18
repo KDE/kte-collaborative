@@ -85,9 +85,9 @@ void InfinityProtocol::directoryChanged(const QInfinity::BrowserIter iter)
         kDebug() << "directory is being explored:" << iter.path() << "-- not emitting changed signal";
         return;
     }
-    KUrl url("inf://" + m_connectedTo.hostname + ":" + QString::number(m_connectedTo.port) + iter.path());
+    KUrl url("inf://" + m_connectedTo.hostname + ":" + QString::number(m_connectedTo.port) + copy.path());
     QString dir = url.upUrl().url();
-    kDebug() << "directory changed::" << dir << iter.path();
+    kDebug() << "directory changed::" << dir << copy.path();
     OrgKdeKDirNotifyInterface::emitFilesAdded(dir);
 }
 
