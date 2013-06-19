@@ -54,6 +54,8 @@ public:
     QInfinity::Browser* browser() const;
     // Returns the Connection for this document
     Kobby::Connection* connection() const;
+    // Returns the user table for this document
+    QInfinity::UserTable* userTable() const;
 
 public slots:
     void finishSubscription(QInfinity::BrowserIter iter);

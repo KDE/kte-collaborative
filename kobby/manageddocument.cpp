@@ -24,6 +24,7 @@
 #include <libqinfinity/browseritemfactory.h>
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/xmppconnection.h>
+#include <libqinfinity/usertable.h>
 
 #include <common/connection.h>
 
@@ -138,6 +139,11 @@ void ManagedDocument::disconnected(Kobby::Connection* )
     document()->setReadWrite(false);
 }
 
+UserTable* ManagedDocument::userTable() const
+{
+    return m_proxy->session()->userTable().data();
+}
+
 Session::Status ManagedDocument::sessionStatus() const
 {
     return m_sessionStatus;
@@ -163,6 +169,7 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
                      this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)), Qt::UniqueConnection);
     m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8");
+    kDebug() << "created text buffer";
     m_iterId = iter.id();
     browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
 }

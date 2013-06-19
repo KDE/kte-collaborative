@@ -21,20 +21,26 @@
 
 #include "kobbypluginview.h"
 #include "manageddocument.h"
-#include <common/ui/remotechangenotifier.h>
+#include "common/ui/remotechangenotifier.h"
+
 #include <libqinfinity/user.h>
+#include <libqinfinity/usertable.h>
+
 #include <QLayout>
 #include <QLabel>
+
 #include <KLocalizedString>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
     , m_connectionStatusLabel(new QLabel(this))
     , m_view(parent)
+    , m_usersLabel(new QLabel(this))
 {
     setLayout(new QHBoxLayout());
     layout()->setAlignment(Qt::AlignRight);
     layout()->addWidget(m_connectionStatusLabel);
+    layout()->addWidget(m_usersLabel);
 }
 
 void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
@@ -64,6 +70,16 @@ void KobbyStatusBar::sessionFullyReady()
     m_connectionStatusLabel->setText(  "<b><span style=\"color:#009D0A\">"
                                      + i18n("Connected to collaboration server.")
                                      + "</span></b>" );
+}
+
+void KobbyStatusBar::usersChanged()
+{
+    QList< QPointer< QInfinity::User > > users = m_view->m_document->userTable()->users();
+    foreach ( const QPointer<QInfinity::User>& user, users ) {
+        connect(user.data(), SIGNAL(statusChanged()), this, SLOT(usersChanged()), Qt::UniqueConnection);
+    }
+    QList< QPointer< QInfinity::User > > activeUsers = m_view->m_document->userTable()->activeUsers();
+    m_usersLabel->setText(i18np("%1 active user in session", "%1 active users in session", activeUsers.size()));
 }
 
 KobbyStatusBar* KobbyPluginView::statusBar() const
@@ -96,9 +112,14 @@ void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinit
 
 void KobbyPluginView::documentReady(ManagedDocument* doc)
 {
-     connect(doc->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*)),
-             this, SLOT(remoteTextChanged(KTextEditor::Range,QInfinity::User*)));
-     statusBar()->sessionFullyReady();
+    connect(doc->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*)),
+            this, SLOT(remoteTextChanged(KTextEditor::Range,QInfinity::User*)));
+    connect(m_document->userTable(), SIGNAL(userAdded(User*)),
+            statusBar(), SLOT(usersChanged()));
+    connect(m_document->userTable(), SIGNAL(userRemoved(User*)),
+            statusBar(), SLOT(usersChanged()));
+    m_statusBar->usersChanged();
+    statusBar()->sessionFullyReady();
 }
 
 #include "kobbypluginview.moc"

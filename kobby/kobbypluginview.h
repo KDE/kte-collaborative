@@ -52,9 +52,11 @@ public:
 public slots:
     void connectionStatusChanged(Connection*, QInfinity::XmlConnection::Status status);
     void sessionFullyReady();
+    void usersChanged();
 
 private:
     QLabel* m_connectionStatusLabel;
+    QLabel* m_usersLabel;
     KobbyPluginView* m_view;
 };
 
