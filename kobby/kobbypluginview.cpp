@@ -43,7 +43,9 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
     if ( status == QInfinity::XmlConnection::Closed ) {
         // Since the connection will start opening immediately,
         // this will not display in the beginning, just on disconnect
-        text = i18n("Disconnected from collaboration server.");
+        text =   "<b><span style=\"color:#C30000\">"
+               + i18n("Disconnected from collaboration server.")
+               + "</span></b>";
     }
     else if ( status == QInfinity::XmlConnection::Opening ) {
         text = i18n("Connecting...");
