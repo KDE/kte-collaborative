@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Service
+Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
+Name=KobbyPlugin
+GenericName=Kobby plugin
+Icon=kcoloredit
+ServiceTypes=KTextEditor/Plugin
+X-KDE-ServiceTypes=KTextEditor/Plugin
+X-KDE-Library=ktexteditor_kobby
+X-KDE-PluginInfo-Name=ktexteditor_kobby
+X-KDE-PluginInfo-Author=Sven Brauch
+X-KDE-PluginInfo-Email=svenbrauch@gmail.com
+X-KDE-PluginInfo-Website=kate.org
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-License=LGPL_V3
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-Category=Editor
+X-KDE-ParentApp=kate
+X-KDE-Version=4.0

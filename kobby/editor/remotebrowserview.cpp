@@ -171,7 +171,7 @@ void RemoteBrowserView::slotNewDocument()
         delete dialog;
     }
     else
-        qDebug() << i18n("Create document handler called but we have invalid selection.");
+        kDebug() << "Create document handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotNewFolder()
@@ -187,7 +187,7 @@ void RemoteBrowserView::slotNewFolder()
         delete dialog;
     }
     else
-        qDebug() << i18n("Create folder handler called but we have invalid selection.");
+        kDebug() << "Create folder handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotOpen()
@@ -196,11 +196,13 @@ void RemoteBrowserView::slotOpen()
     QList<QModelIndex>::ConstIterator itr;
     if( canOpenItem( indexes ) )
     {
-        for( itr = indexes.begin(); itr != indexes.end(); itr++ )
+        for( itr = indexes.begin(); itr != indexes.end(); itr++ ) {
+            kDebug() << itr->row() << itr->column();
             slotOpen( *itr );
+        }
     }
     else
-        qDebug() << i18n("Open handler called but we have invalid selection.");
+        kDebug() << "Open handler called but we have invalid selection.";
 }
 
 void RemoteBrowserView::slotOpen( const QModelIndex &index )
@@ -263,7 +265,7 @@ void RemoteBrowserProxy::resolveNameDelete( DNSSD::RemoteService::Ptr pointer )
 {
     if( pointer->resolve() )
     {
-        qDebug() << i18n("delete name %1", pointer->hostName());
+        kDebug() << "delete name %1", pointer->hostName();
         emit( deleteConnection( pointer->hostName(),
             pointer->port() ) );
     }

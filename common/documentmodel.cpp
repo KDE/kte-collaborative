@@ -201,7 +201,7 @@ QList<Document*> DocumentModel::dirtyDocs()
         docItem = dynamic_cast<DocumentItem*>(stdItem);
         if( !docItem )
         {
-            kDebug() << i18n( "Non DocumentItem in DocumentModel." );
+            kDebug() <<  "Non DocumentItem in DocumentModel.";
             continue;
         }
         doc = &docItem->document();
@@ -225,7 +225,7 @@ QList<Document*> DocumentModel::collabDocs()
         docItem = dynamic_cast<DocumentItem*>(stdItem);
         if( !docItem )
         {
-            kDebug() << i18n( "Non DocumentItem in DocumentModel." );
+            kDebug() << "Non DocumentItem in DocumentModel.";
             continue;
         }
         doc = &docItem->document();
@@ -277,7 +277,7 @@ void DocumentModel::slotRowsAboutToBeRemoved( const QModelIndex &parent,
         }
         else
         {
-            kDebug() << i18n("Row removed from document model not of DocumentItem type!");
+            kDebug() << "Row removed from document model not of DocumentItem type!";
         }
         start++;
     }

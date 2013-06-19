@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_DOCUMENTMANAGER_H
 #define KOBBY_DOCUMENTMANAGER_H
+#include "kobbycommon_export.h"
 
 #include <QObject>
 #include <QPointer>
@@ -56,15 +57,13 @@ class KDocumentTextBuffer;
  * also creates and stores wrapper objects for the created
  * doucuments if needed.
  */
-class DocumentBuilder
+class KOBBYCOMMON_EXPORT DocumentBuilder
     : public QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
-        DocumentBuilder( KTextEditor::Editor &editor,
-            QInfinity::BrowserModel &browserModel,
-            QObject *parent = 0 );
+        DocumentBuilder( QInfinity::BrowserModel& browserModel, QObject* parent = 0 );
         ~DocumentBuilder();
 
         /**
@@ -106,7 +105,6 @@ class DocumentBuilder
     private:
         void sessionSynchronized( QInfinity::Session *session );
 
-        KTextEditor::Editor *editor;
         QInfinity::BrowserModel *m_browserModel;
         QHash<QInfinity::Session*, QInfinity::SessionProxy*> sessionToProxy;
 

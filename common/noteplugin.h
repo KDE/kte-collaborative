@@ -17,9 +17,12 @@
 
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
+#include "kobbycommon_export.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>
+#include "document.h"
+#include <KTextEditor/Editor>
 
 namespace Kobby
 {
@@ -29,21 +32,18 @@ class DocumentBuilder;
 /**
  * @brief Instantiates InfText sessions.
  */
-class NotePlugin
+class KOBBYCOMMON_EXPORT NotePlugin
     : public QInfinity::NotePlugin
 {
 
     public:
-        NotePlugin( DocumentBuilder &builder,
-            QObject *parent = 0 );
+        NotePlugin( QObject *parent = 0 );
 
-        QInfinity::Session *createSession( QInfinity::CommunicationManager *commMgr,
+        QInfinity::Session *createSession(QInfinity::CommunicationManager *commMgr,
             QInfinity::Session::Status sess_status,
             QInfinity::CommunicationJoinedGroup *syncGroup,
-            QInfinity::XmlConnection *syncConnection );
-
-    private:
-        DocumentBuilder *m_builder;
+            QInfinity::XmlConnection *syncConnection,
+            void* userData );
 
 };
 

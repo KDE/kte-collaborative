@@ -17,6 +17,8 @@
 
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
+#include "kobbycommon_export.h"
+#include <libqinfinity/xmlconnection.h>
 
 #include <QObject>
 
@@ -36,7 +38,7 @@ namespace Kobby
 /**
  * @brief Ties connection/creation monitoring to simple interface.
  */
-class Connection
+class KOBBYCOMMON_EXPORT Connection
     : public QObject
 {
     Q_OBJECT
@@ -44,19 +46,35 @@ class Connection
     public:
         Connection( const QString &hostname,
             unsigned int port,
-            QObject *parent = 0 );
+            const QString& name_,
+            QObject *parent = 0);
         ~Connection();
 
+        // Prepares the connection by looking up the host name and populating
+        // the internals as soon as it is looked up.
+        void prepare();
+        // Opens a prepared connection. You must call prepare() and wait for the ready()
+        // signal before calling this.
         void open();
         QString name() const;
+        // Returns the xmpp connection if called after ready()
+        // was emitted, or 0 otherwise.
         QInfinity::XmppConnection *xmppConnection() const;
+        // Returns the status of the connection.
+        QInfinity::XmlConnection::Status status() const;
 
     Q_SIGNALS:
         void connecting( Connection *conn );
         void connected( Connection *conn );
         void disconnecting( Connection *conn );
         void disconnected( Connection *conn );
+        // Emitted additionally to the above four signals, for convenience.
+        void statusChanged( Connection *conn, QInfinity::XmlConnection::Status status );
         void error( Connection *conn, QString message );
+        // This signal is emitted when the connection is ready to be opened,
+        // i.e. when the host name was looked up and everything is set up.
+        // When this signal is emitted, xmppConnection() becomes valid.
+        void ready( Connection* conn );
 
     private Q_SLOTS:
         void slotHostnameLookedUp( const QHostInfo &hostInfo );
@@ -66,6 +84,9 @@ class Connection
     private:
         QString m_hostname;
         unsigned int m_port;
+        // A unique identifier for a particular host/port combination, usually host:port.
+        const QString m_name;
+        QInfinity::XmlConnection::Status m_connectionStatus;
         QInfinity::TcpConnection *m_tcpConnection;
         QInfinity::XmppConnection *m_xmppConnection;
 

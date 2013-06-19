@@ -46,11 +46,8 @@
 namespace Kobby
 {
 
-DocumentBuilder::DocumentBuilder( KTextEditor::Editor &editor,
-    QInfinity::BrowserModel &browserModel,
-    QObject *parent )
+DocumentBuilder::DocumentBuilder( QInfinity::BrowserModel &browserModel, QObject *parent )
     : QObject( parent )
-    , editor( &editor )
     , m_browserModel( &browserModel )
 {
     QInfinity::Browser *itr;
@@ -69,7 +66,7 @@ DocumentBuilder::~DocumentBuilder()
 KDocumentTextBuffer *DocumentBuilder::createKDocumentTextBuffer(
     const QString &encoding )
 {
-    KDocumentTextBuffer *doc = new KDocumentTextBuffer( *editor->createDocument( this ),
+    KDocumentTextBuffer *doc = new KDocumentTextBuffer( editor->createDocument( this ),
         encoding, this );
     return doc;
 }
@@ -84,12 +81,14 @@ void DocumentBuilder::openInfDocmuent( const QModelIndex &index )
 {
     QStandardItem *stdItem = m_browserModel->itemFromIndex( index );
     QInfinity::NodeItem *nodeItem;
+    kDebug() << index.parent().isValid() << index.parent().row() << index.parent().column();
 
     if( stdItem->type() != QInfinity::BrowserItemFactory::NodeItem )
     {
-        kDebug() << i18n("Cannot open non-node item.");
+        kDebug() << "Cannot open non-node item" << index.row() << index.column() << stdItem->type() << index.isValid();
         return;
     }
+    kDebug() << "item ok";
     nodeItem = dynamic_cast<QInfinity::NodeItem*>(stdItem);
     if(nodeItem->isDirectory())
         return;
@@ -122,8 +121,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     
     if( !textSession || !INF_TEXT_IS_SESSION(textSession->gobject()) )
     {
-        kDebug() << i18n("Session is not an InfText session.  This usually means " \
-            "the connection is not using the kobby plugin.");
+        kDebug() << "Session is not an InfText session.  This usually means "
+                    "the connection is not using the kobby plugin.";
         return;
     }
 
@@ -131,8 +130,8 @@ void DocumentBuilder::sessionSubscribed( const QInfinity::BrowserIter &iter,
     KDocumentTextBuffer *kbuff = dynamic_cast<KDocumentTextBuffer*>(infBuff);
     if( !kbuff )
     {
-        kDebug() << i18n("Could not retrieve Kobby buffer from session.  This " \
-            "usually means the connection is not using the kobby plugin.");
+        kDebug() << "Could not retrieve Kobby buffer from session.  This "
+                    "usually means the connection is not using the kobby plugin.";
         return;
     }
     QInfinity::BrowserIter titr = iter;

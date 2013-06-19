@@ -16,7 +16,6 @@
  */
 
 #include "connection.h"
-#include "kobbysettings.h"
 
 #include <libqinfinity/ipaddress.h>
 #include <libqinfinity/tcpconnection.h>
@@ -25,20 +24,25 @@
 #include <QHostInfo>
 #include <QHostAddress>
 #include <QDebug>
+#include <QApplication>
 
 #include "connection.moc"
+#include <kobby/kobbyplugin.h>
 
 namespace Kobby
 {
 
 Connection::Connection( const QString &hostname,
     unsigned int port,
-    QObject *parent )
+    const QString& name_,
+    QObject *parent)
     : QObject( parent )
     , m_hostname( hostname )
     , m_port( port )
     , m_tcpConnection( 0 )
     , m_xmppConnection( 0 )
+    , m_connectionStatus(QInfinity::XmlConnection::Closed)
+    , m_name( name_ )
 {
 }
 
@@ -46,16 +50,34 @@ Connection::~Connection()
 {
 }
 
+void Connection::prepare()
+{
+    if ( property("useSimulatedConnection").toBool() ) {
+        m_xmppConnection = new QInfinity::XmppConnection( this );
+        connect( m_xmppConnection, SIGNAL(statusChanged()),
+            this, SLOT(slotStatusChanged()) );
+        connect( m_xmppConnection, SIGNAL(error( const GError* )),
+            this, SLOT(slotError( const GError* )) );
+        emit ready( this );
+    }
+    else {
+        QHostInfo::lookupHost( m_hostname, this,
+            SLOT(slotHostnameLookedUp(const QHostInfo&)) );
+    }
+}
+
 void Connection::open()
 {
-    QHostInfo::lookupHost( m_hostname, this,
-        SLOT(slotHostnameLookedUp(const QHostInfo&)) );
+    if ( property("useSimulatedConnection").toBool() ) {
+        return;
+    }
+    Q_ASSERT(m_tcpConnection && "you must call prepare() and wait for the ready() signal to be emitted before calling open()");
+    m_tcpConnection->open();
 }
 
 QString Connection::name() const
 {
-    QString str = m_hostname + ":" + QString::number( m_port );
-    return str;
+    return m_name;
 }
 
 QInfinity::XmppConnection *Connection::xmppConnection() const
@@ -78,7 +100,8 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
 
     m_xmppConnection = new QInfinity::XmppConnection( *m_tcpConnection,
         QInfinity::XmppConnection::Client,
-        KobbySettings::hostName(),
+#warning fixme
+        "localhost",
         m_hostname,
         QInfinity::XmppConnection::PreferTls,
         0, 0, 0,
@@ -89,11 +112,18 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
     connect( m_xmppConnection, SIGNAL(error( const GError* )),
         this, SLOT(slotError( const GError* )) );
 
-    m_tcpConnection->open();
+    emit ready( this );
+}
+
+QInfinity::XmlConnection::Status Connection::status() const
+{
+    return m_connectionStatus;
 }
 
 void Connection::slotStatusChanged()
 {
+    m_connectionStatus = m_xmppConnection->status();
+    emit statusChanged(this, m_connectionStatus);
     switch( m_xmppConnection->status() )
     {
         case QInfinity::XmlConnection::Opening:

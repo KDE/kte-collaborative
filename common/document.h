@@ -17,6 +17,7 @@
 
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
+#include "kobbycommon_export.h"
 
 #include <libqinfinity/abstracttextbuffer.h>
 
@@ -61,7 +62,7 @@ namespace Kobby
  * If using this class, you must monitor for fatalError, which
  * will notify of deletion of the Document.
  */
-class Document
+class KOBBYCOMMON_EXPORT Document
     : public QObject
 {
     Q_OBJECT
@@ -83,7 +84,7 @@ class Document
             InfText = 2
         };
 
-        Document( KTextEditor::Document &kDocument );
+        Document( KTextEditor::Document* kDocument );
         virtual ~Document();
 
         /**
@@ -160,13 +161,13 @@ class Document
  * and removal operations.  It is also responsible for maintaining
  * undo/redo stats (insertionCount and undoCount).
  */
-class KDocumentTextBuffer
+class KOBBYCOMMON_EXPORT KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
-        KDocumentTextBuffer( KTextEditor::Document &kDocument,
+        KDocumentTextBuffer( KTextEditor::Document* kDocument,
             const QString &encoding,
             QObject *parent = 0 );
         ~KDocumentTextBuffer();
@@ -180,6 +181,7 @@ class KDocumentTextBuffer
             unsigned int length,
             QInfinity::User *user );
         void setUser( QPointer<QInfinity::User> user );
+        bool hasUser() const;
 
         void resetUndoRedo();
         void performingUndo();
@@ -191,6 +193,7 @@ class KDocumentTextBuffer
         void canUndo( bool enable );
         void canRedo( bool enable );
         void fatalError( const QString &message );
+        void remoteChangedText( const KTextEditor::Range& range, QInfinity::User* user );
 
     public Q_SLOTS:
         void joinFailed( GError *error );
@@ -205,12 +208,12 @@ class KDocumentTextBuffer
             const KTextEditor::Range &range );
 
     private:
-        unsigned int cursorToOffset( const KTextEditor::Cursor &cursor );
-        KTextEditor::Cursor offsetToCursor( unsigned int offset );
+        unsigned int cursorToOffset_local( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_local( unsigned int offset );
+        unsigned int cursorToOffset_remote( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_remote( unsigned int offset );
         void textOpPerformed();
 
-        bool blockLocalInsert;
-        bool blockLocalRemove;
         bool blockRemoteInsert;
         bool blockRemoteRemove;
         KTextEditor::Document *m_kDocument;
@@ -229,7 +232,7 @@ class KDocumentTextBuffer
  *
  * Ties local operations/acitons into QInfinity::Session operations.
  */
-class InfTextDocument
+class KOBBYCOMMON_EXPORT InfTextDocument
     : public Document
 {
     Q_OBJECT
@@ -240,9 +243,9 @@ class InfTextDocument
          *
          * Takes ownership of passed session and sessionProxy.
          */
-        InfTextDocument( QInfinity::SessionProxy &sessionProxy,
-            QInfinity::TextSession &sesion,
-            KDocumentTextBuffer &buffer,
+        InfTextDocument( QInfinity::SessionProxy* sessionProxy,
+            QInfinity::TextSession* session,
+            KDocumentTextBuffer* buffer,
             const QString &name );
         ~InfTextDocument();
 
