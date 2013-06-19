@@ -87,6 +87,7 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
 
 KobbyPlugin::~KobbyPlugin()
 {
+    qDeleteAll(m_managedDocuments);
 }
 
 void KobbyPlugin::connectionPrepared(Connection* connection)
