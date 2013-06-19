@@ -46,6 +46,11 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_sessionStatus(QInfinity::Session::Closed)
 {
     kDebug() << "now managing document" << document << document->url();
+    // A document must not be edited before it is connected, since changes done will
+    // not be synchronized with the server; this causes inconsistency.
+    document->setReadWrite(false);
+    connect(m_connection, SIGNAL(disconnected(Connection*)),
+            this, SLOT(disconnected(Connection*)));
 }
 
 ManagedDocument::~ManagedDocument()
@@ -113,7 +118,24 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy.data()->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());
+    connect(m_infDocument, SIGNAL(loadingComplete(Document*)),
+            this, SLOT(synchronizationComplete(Document*)));
+}
+
+void ManagedDocument::synchronizationComplete(Kobby::Document* d)
+{
+    // Only after the connection has been established and synchronization is finished,
+    // the user is allowed to edit the document.
+    document()->setReadWrite(true);
     emit documentReady(this);
+}
+
+void ManagedDocument::disconnected(Kobby::Connection* )
+{
+    // If a connection for a document gets disconnected, it should be
+    // set to read-only, to prevent a user from further editing the document
+    // without saving it somewhere.
+    document()->setReadWrite(false);
 }
 
 Session::Status ManagedDocument::sessionStatus() const

@@ -31,6 +31,9 @@
 #include <common/document.h>
 #include <common/connection.h>
 
+using Kobby::Connection;
+using Kobby::Document;
+
 class ManagedDocument : public QObject {
 Q_OBJECT
 public:
@@ -56,6 +59,8 @@ public slots:
     void finishSubscription(QInfinity::BrowserIter iter);
     void subscriptionDone(QInfinity::BrowserIter, QPointer<QInfinity::SessionProxy>);
     void sessionStatusChanged();
+    void synchronizationComplete(Document*);
+    void disconnected(Connection*);
 
 signals:
     void documentReady(ManagedDocument* document);
