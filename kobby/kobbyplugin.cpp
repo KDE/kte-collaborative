@@ -212,10 +212,12 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
     QString name = connectionName(documentUrl);
     if ( ! m_connections.contains(name) ) {
         kDebug() << "adding connection" << name << "because it doesn't exist";
-        Connection* c = new Kobby::Connection(documentUrl.host(), port, this);
+        Connection* c = new Kobby::Connection(documentUrl.host(), port, name, this);
         c->setProperty("useSimulatedConnection", property("useSimulatedConnection"));
         connect(c, SIGNAL(ready(Connection*)),
                 this, SLOT(connectionPrepared(Connection*)));
+        connect(c, SIGNAL(disconnected(Connection*)),
+                this, SLOT(connectionDisconnected(Connection*)));
         m_connections[name] = c;
         c->prepare();
         return c;
@@ -224,6 +226,12 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
         kDebug() << "connection" << name << "requested but it exists already";
     }
     return m_connections[name];
+}
+
+void KobbyPlugin::connectionDisconnected(Connection* connection)
+{
+    kDebug() << "disconnected:" << connection;
+    m_connections.remove(connection->name());
 }
 
 void KobbyPlugin::addView(KTextEditor::View* view)

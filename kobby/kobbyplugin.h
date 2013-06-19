@@ -80,7 +80,6 @@ private:
     QInfinity::CommunicationManager* m_communicationManager;
     // Maps connection names to connection instances;
     // the connection name is host:port, get it with connectionName(url)
-    // TODO use QHash?
     QHash<QString, Kobby::Connection*> m_connections;
 
 public slots:
@@ -99,6 +98,7 @@ public slots:
     // server before KTE clears the document's text (which would cause the
     // text to be erased for other users, too)
     virtual void removeDocument(KTextEditor::Document* document);
+    void connectionDisconnected(Connection*);
 };
 
 #endif // _KOBBY_PLUGIN_H_

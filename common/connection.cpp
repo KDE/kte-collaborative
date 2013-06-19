@@ -34,13 +34,15 @@ namespace Kobby
 
 Connection::Connection( const QString &hostname,
     unsigned int port,
-    QObject *parent )
+    const QString& name_,
+    QObject *parent)
     : QObject( parent )
     , m_hostname( hostname )
     , m_port( port )
     , m_tcpConnection( 0 )
     , m_xmppConnection( 0 )
     , m_connectionStatus(QInfinity::XmlConnection::Closed)
+    , m_name( name_ )
 {
 }
 
@@ -75,8 +77,7 @@ void Connection::open()
 
 QString Connection::name() const
 {
-    QString str = m_hostname + ":" + QString::number( m_port );
-    return str;
+    return m_name;
 }
 
 QInfinity::XmppConnection *Connection::xmppConnection() const

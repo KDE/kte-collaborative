@@ -46,7 +46,8 @@ class KOBBYCOMMON_EXPORT Connection
     public:
         Connection( const QString &hostname,
             unsigned int port,
-            QObject *parent = 0 );
+            const QString& name_,
+            QObject *parent = 0);
         ~Connection();
 
         // Prepares the connection by looking up the host name and populating
@@ -83,6 +84,8 @@ class KOBBYCOMMON_EXPORT Connection
     private:
         QString m_hostname;
         unsigned int m_port;
+        // A unique identifier for a particular host/port combination, usually host:port.
+        const QString m_name;
         QInfinity::XmlConnection::Status m_connectionStatus;
         QInfinity::TcpConnection *m_tcpConnection;
         QInfinity::XmppConnection *m_xmppConnection;

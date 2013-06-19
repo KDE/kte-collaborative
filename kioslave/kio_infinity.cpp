@@ -165,7 +165,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     }
 
     QEventLoop loop;
-    m_connection = QSharedPointer<Kobby::Connection>(new Kobby::Connection(peer.hostname, peer.port, this));
+    m_connection = QSharedPointer<Kobby::Connection>(new Kobby::Connection(peer.hostname, peer.port, QString(), this));
     m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel( this ));
     m_browserModel->setItemFactory(new Kobby::ItemFactory( this ));
     QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
