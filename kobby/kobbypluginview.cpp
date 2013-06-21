@@ -21,6 +21,7 @@
 
 #include "kobbypluginview.h"
 #include "manageddocument.h"
+#include "kobbyplugin.h"
 #include "common/ui/remotechangenotifier.h"
 
 #include <libqinfinity/user.h>
@@ -28,8 +29,12 @@
 
 #include <QLayout>
 #include <QLabel>
+#include <QAction>
 
 #include <KLocalizedString>
+#include <KActionCollection>
+#include <KIcon>
+#include <KAction>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -89,9 +94,29 @@ KobbyStatusBar* KobbyPluginView::statusBar() const
 
 KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document)
     : QObject(kteView)
+    , KXMLGUIClient(kteView)
     , m_view(kteView)
     , m_statusBar(new KobbyStatusBar(this))
     , m_document(document)
+{
+    if ( m_document ) {
+        documentBecameManaged(document);
+    }
+
+    setComponentData(KobbyPluginFactory::componentData());
+    setXMLFile("ktexteditor_kobbyui.rc");
+    KAction* a = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
+    a->setIcon(KIcon("kcoloredit"));
+    a->setText(i18n("Disconnect"));
+}
+
+void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
+{
+    m_document = document;
+    setupSignals();
+}
+
+void KobbyPluginView::setupSignals()
 {
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
             statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
@@ -99,6 +124,11 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
             this, SLOT(documentReady(ManagedDocument*)));
     m_view->layout()->addWidget(m_statusBar);
+}
+
+void KobbyPluginView::disconnectActionClicked()
+{
+    kDebug();
 }
 
 KobbyPluginView::~KobbyPluginView()

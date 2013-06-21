@@ -65,8 +65,8 @@
 // This is the default port for infinoted.
 static int defaultPort = 6523;
 
-K_PLUGIN_FACTORY( KobbyPluginFactory, registerPlugin<KobbyPlugin>(); )
-K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_plugins",
+K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory, registerPlugin<KobbyPlugin>("ktexteditor_kobby"); )
+K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_kobby",
                                           ki18n( "Collaborative Editing" ), "1.0", ki18n("Collaborative Editing"), KAboutData::License_LGPL_V2 ) ) )
 
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
@@ -182,11 +182,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
     connect(document, SIGNAL(textRemoved(KTextEditor::Document*,KTextEditor::Range)),
             this, SLOT(textRemoved(KTextEditor::Document*,KTextEditor::Range)), Qt::UniqueConnection);
 
-    // add the existing views for this document
-    foreach ( KTextEditor::View* view, document->views() ) {
-        addView(view);
-    }
-
+    emit newManagedDocument(managed);
     subscribeNewDocuments();
 }
 
@@ -238,15 +234,25 @@ void KobbyPlugin::connectionDisconnected(Connection* connection)
 void KobbyPlugin::addView(KTextEditor::View* view)
 {
     ManagedDocument* doc = managedDocuments().findDocument(view->document());
-    if ( doc ) {
-        kDebug() << "adding view" << view;
-        KobbyPluginView* kobbyView = new KobbyPluginView(view, doc);
+    kDebug() << "adding view" << view;
+    // Although the document might not be managed, a new view must be added,
+    // otherwise KXMLGuiClient will not register our actions correctly;
+    // it must be present when kate displays the view.
+    // A signal is used to actually display the GUI when a document becomes managed.
+    KobbyPluginView* kobbyView = new KobbyPluginView(view, doc);
+    m_views[view] = kobbyView;
+    if ( ! doc ) {
+        connect(this, SIGNAL(newManagedDocument(ManagedDocument*)),
+                kobbyView, SLOT(documentBecameManaged(ManagedDocument*)));
     }
 }
 
 void KobbyPlugin::removeView(KTextEditor::View* view)
 {
     kDebug() << "removing view" << view;
+    if ( m_views.contains(view) ) {
+        delete m_views.take(view);
+    }
 }
 
 // Just for debugging purposes, the real handling happens in Kobby::InfTextDocument

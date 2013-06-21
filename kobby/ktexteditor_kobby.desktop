@@ -7,6 +7,7 @@ Icon=kcoloredit
 ServiceTypes=KTextEditor/Plugin
 X-KDE-ServiceTypes=KTextEditor/Plugin
 X-KDE-Library=ktexteditor_kobby
+X-KDE-PluginKeyword=ktexteditor_kobby
 X-KDE-PluginInfo-Name=ktexteditor_kobby
 X-KDE-PluginInfo-Author=Sven Brauch
 X-KDE-PluginInfo-Email=svenbrauch@gmail.com

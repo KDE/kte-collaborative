@@ -81,6 +81,8 @@ private:
     // Maps connection names to connection instances;
     // the connection name is host:port, get it with connectionName(url)
     QHash<QString, Kobby::Connection*> m_connections;
+    // Maps KTextEditor::View instances to KobbyPluginView instances.
+    QMap<KTextEditor::View*, KobbyPluginView*> m_views;
 
 public slots:
     // This is called when the browser is ready.
@@ -97,9 +99,15 @@ public slots:
     // This is a slot because it needs to disconnect from the collaborative
     // server before KTE clears the document's text (which would cause the
     // text to be erased for other users, too)
-    virtual void removeDocument(KTextEditor::Document* document);
+    virtual void removeDocument(KTextEditor::Document*);
     void connectionDisconnected(Connection*);
+
+signals:
+    // Emitted when a document becomes managed.
+    void newManagedDocument(ManagedDocument*);
 };
+
+K_PLUGIN_FACTORY_DECLARATION(KobbyPluginFactory)
 
 #endif // _KOBBY_PLUGIN_H_
 

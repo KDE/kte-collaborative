@@ -60,7 +60,9 @@ private:
     KobbyPluginView* m_view;
 };
 
-class KobbyPluginView : public QObject
+class KobbyPluginView
+    : public QObject
+    , public KXMLGUIClient
 {
 Q_OBJECT
 public:
@@ -70,12 +72,16 @@ public:
 
 public slots:
     void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user);
+    void documentBecameManaged(ManagedDocument*);
     void documentReady(ManagedDocument*);
+    void disconnectActionClicked();
 
 private:
     KTextEditor::View* m_view;
     KobbyStatusBar* m_statusBar;
     ManagedDocument* m_document;
+
+    void setupSignals();
 
     friend class KobbyStatusBar;
 };
