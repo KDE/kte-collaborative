@@ -71,7 +71,7 @@ public:
     KobbyStatusBar* statusBar() const;
 
 public slots:
-    void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user);
+    void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal);
     void documentBecameManaged(ManagedDocument*);
     void documentReady(ManagedDocument*);
     void disconnectActionClicked();

@@ -171,7 +171,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         kDocument()->blockSignals(true);
         kDocument()->insertText( startCursor, str );
         kDocument()->blockSignals(false);
-        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_remote(offset+chunk.length())), user);
+        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_remote(offset+chunk.length())), user, false);
     }
     else
         blockRemoteInsert = false;
@@ -191,7 +191,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         kDocument()->blockSignals(true);
         kDocument()->removeText( range );
         kDocument()->blockSignals(false);
-        emit remoteChangedText(range, user);
+        emit remoteChangedText(range, user, true);
     }
     else
         blockRemoteRemove = false;

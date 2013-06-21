@@ -135,15 +135,15 @@ KobbyPluginView::~KobbyPluginView()
 {
 }
 
-void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user)
+void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal)
 {
     RemoteChangeNotifier::addNotificationWidget(m_view, range.start(), user->name());
 }
 
 void KobbyPluginView::documentReady(ManagedDocument* doc)
 {
-    connect(doc->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*)),
-            this, SLOT(remoteTextChanged(KTextEditor::Range,QInfinity::User*)));
+    connect(doc->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*,bool)),
+            this, SLOT(remoteTextChanged(KTextEditor::Range,QInfinity::User*,bool)));
     connect(m_document->userTable(), SIGNAL(userAdded(User*)),
             statusBar(), SLOT(usersChanged()));
     connect(m_document->userTable(), SIGNAL(userRemoved(User*)),
