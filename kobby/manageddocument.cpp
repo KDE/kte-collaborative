@@ -151,9 +151,8 @@ Session::Status ManagedDocument::sessionStatus() const
 
 void ManagedDocument::sessionStatusChanged()
 {
-#warning TODO remove this function
-    kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
     m_sessionStatus = m_proxy->session()->status();
+    kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
     if ( m_proxy->session()->status() != QInfinity::Session::Running ) {
         kDebug() << "not running, ignoring event";
         return;

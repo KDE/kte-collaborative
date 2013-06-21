@@ -43,8 +43,6 @@
 #include "editor/remotebrowserview.h"
 #include "common/noteplugin.h"
 #include "common/documentmodel.h"
-#include <createitemdialog.h>
-#include <createconnectiondialog.h>
 #include "kobbypluginview.h"
 
 #include <libqinfinity/communicationjoinedgroup.h>
@@ -153,20 +151,16 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 
 void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
 {
-    kDebug() << "new url:" << document->url() << document;
-    // the property() stuff is for unit tests (and only for unit tests!)
-    bool manageAll = property("manageAllDocuments").toBool();
-    if ( document->url().protocol() != "inf" && ! manageAll ) {
+    bool isManaged = m_managedDocuments.isManaged(document);
+    if ( document->url().protocol() != "inf" ) {
         kDebug() << "not a collaborative document:" << document->url().url();
-        if ( m_managedDocuments.isManaged(document) ) {
+        if ( isManaged ) {
             kDebug() << "removing document" << document << "from manager";
-            ManagedDocument* doc = m_managedDocuments.findDocument(document);
-            m_managedDocuments.remove(doc->document());
-            delete doc;
+            delete m_managedDocuments.take(document);
         }
         return;
     }
-    if ( m_managedDocuments.isManaged(document) ) {
+    if ( isManaged ) {
         kDebug() << document->url() << "is already being managed.";
         return;
     }
