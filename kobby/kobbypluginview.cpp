@@ -182,7 +182,9 @@ void KobbyPluginView::disableUi()
 
 void KobbyPluginView::disconnectActionClicked()
 {
-    kDebug();
+    m_document->unsubscribe();
+    // TODO
+    m_document->document()->saveAs(KUrl("/tmp/" + m_document->document()->url().encodedPath()));
 }
 
 void KobbyPluginView::changeUserActionClicked()
