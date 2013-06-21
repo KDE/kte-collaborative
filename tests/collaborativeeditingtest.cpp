@@ -196,6 +196,8 @@ void CollaborativeEditingTest::testInsertionConsistency()
 
     QCOMPARE(doc1->text(), doc2->text());
     QCOMPARE(doc1->text(), raw->text());
+    QCOMPARE(doc1->lines(), raw->lines());
+    QCOMPARE(doc1->lines(), doc2->lines());
 
     delete doc1;
     delete doc2;
@@ -249,6 +251,8 @@ void CollaborativeEditingTest::testRemovalConsistency()
 
     QCOMPARE(doc1->text(), doc2->text());
     QCOMPARE(doc1->text(), raw->text());
+    QCOMPARE(doc1->lines(), raw->lines());
+    QCOMPARE(doc1->lines(), doc2->lines());
 
     delete doc1;
     delete doc2;
