@@ -47,9 +47,12 @@ public:
     inline KTextEditor::Document* document() const {
         return m_document;
     };
+    inline Kobby::InfTextDocument* infTextDocument() const {
+        return m_infDocument;
+    };
     inline Kobby::KDocumentTextBuffer* textBuffer() const {
         return m_textBuffer;
-    }
+    };
     // Returns the Browser for the document's connection
     QInfinity::Browser* browser() const;
     // Returns the Connection for this document

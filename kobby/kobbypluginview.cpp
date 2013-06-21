@@ -38,6 +38,7 @@
 #include <KAction>
 #include <KDialog>
 #include <KMessageBox>
+#include <KColorScheme>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -47,19 +48,21 @@ KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
 {
     setLayout(new QHBoxLayout());
     layout()->setAlignment(Qt::AlignRight);
-    layout()->addWidget(m_connectionStatusLabel);
     layout()->addWidget(m_usersLabel);
+    layout()->addWidget(m_connectionStatusLabel);
 }
 
 void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
 {
     QString text;
+    // TODO colors don't work. Find out why.
+    KColorScheme::ForegroundRole role = KColorScheme::NormalText;
     if ( status == QInfinity::XmlConnection::Closed ) {
         // Since the connection will start opening immediately,
         // this will not display in the beginning, just on disconnect
-        text =   "<b><span style=\"color:#C30000\">"
-               + i18n("Disconnected from collaboration server.")
-               + "</span></b>";
+        text = "<b>" + i18n("Disconnected from collaboration server.") + "</b>";
+        role = KColorScheme::NegativeText;
+        m_usersLabel->setText(QString());
     }
     else if ( status == QInfinity::XmlConnection::Opening ) {
         text = i18n("Connecting...");
@@ -70,14 +73,18 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
     else if ( status == QInfinity::XmlConnection::Closing ) {
         text = i18n("Disconnecting...");
     }
+    QPalette p = m_connectionStatusLabel->palette();
+    KColorScheme::adjustForeground(p, role);
+    m_connectionStatusLabel->setPalette(p);
     m_connectionStatusLabel->setText(text);
 }
 
 void KobbyStatusBar::sessionFullyReady()
 {
-    m_connectionStatusLabel->setText(  "<b><span style=\"color:#009D0A\">"
-                                     + i18n("Connected to collaboration server.")
-                                     + "</span></b>" );
+    QPalette p = m_connectionStatusLabel->palette();
+    KColorScheme::adjustForeground(p, KColorScheme::PositiveText);
+    m_connectionStatusLabel->setPalette(p);
+    m_connectionStatusLabel->setText( "<b>" + i18n("Connected to collaboration server.") + "</b>" );
 }
 
 void KobbyStatusBar::usersChanged()
@@ -87,7 +94,26 @@ void KobbyStatusBar::usersChanged()
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(usersChanged()), Qt::UniqueConnection);
     }
     QList< QPointer< QInfinity::User > > activeUsers = m_view->m_document->userTable()->activeUsers();
-    m_usersLabel->setText(i18np("%1 active user in session", "%1 active users in session", activeUsers.size()));
+    if ( activeUsers.length() > 3 ) {
+        m_usersLabel->setText(i18n("Users: You and %i others", activeUsers.size()));
+    }
+    else {
+        QStringList usersList;
+        foreach ( const QPointer<QInfinity::User>& user, activeUsers ) {
+            if ( user->name() != m_view->m_document->textBuffer()->user()->name() ) {
+                usersList.append(user->name());
+            }
+        }
+        if ( usersList.length() == 1 ) {
+            m_usersLabel->setText(i18n("Users: You and %1", usersList.first()));
+        }
+        else if ( usersList.length() > 1 ) {
+            m_usersLabel->setText(i18n("Users: You, %1", usersList.join(", ")));
+        }
+        else {
+            m_usersLabel->setText(i18n("Users: only you"));
+        }
+    }
 }
 
 KobbyStatusBar* KobbyPluginView::statusBar() const

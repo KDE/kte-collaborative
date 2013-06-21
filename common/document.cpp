@@ -454,6 +454,11 @@ InfTextDocument::~InfTextDocument()
     m_session->close();
 }
 
+QInfinity::User* KDocumentTextBuffer::user() const
+{
+    return m_user;
+}
+
 QString InfTextDocument::name() const
 {
     return m_name;
