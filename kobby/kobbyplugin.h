@@ -105,6 +105,8 @@ public slots:
 signals:
     // Emitted when a document becomes managed.
     void newManagedDocument(ManagedDocument*);
+    // Emitted when a document stops being managed.
+    void removedManagedDocument(ManagedDocument*);
 };
 
 K_PLUGIN_FACTORY_DECLARATION(KobbyPluginFactory)

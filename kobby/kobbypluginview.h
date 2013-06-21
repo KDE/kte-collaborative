@@ -33,15 +33,16 @@
 namespace Kobby {
     class Connection;
 }
-using Kobby::Connection;
-using Kobby::Document;
-
-class ManagedDocument;
 
 namespace QInfinity {
     class User;
 }
 
+using Kobby::Connection;
+using Kobby::Document;
+
+class KAction;
+class ManagedDocument;
 class KobbyPluginView;
 
 class KobbyStatusBar : public QWidget {
@@ -73,15 +74,34 @@ public:
 public slots:
     void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal);
     void documentBecameManaged(ManagedDocument*);
+    void documentBecameUnmanaged(ManagedDocument*);
     void documentReady(ManagedDocument*);
+
     void disconnectActionClicked();
+    void openActionClicked();
+    void saveCopyActionClicked();
+    void shareActionClicked();
+    void changeUserActionClicked();
+    void createServerActionClicked();
+
+    void changeUserName();
 
 private:
     KTextEditor::View* m_view;
     KobbyStatusBar* m_statusBar;
     ManagedDocument* m_document;
 
-    void setupSignals();
+    // actions from the "Collaborative" menu
+    KAction* m_openCollabDocumentAction;
+    KAction* m_saveCopyAction;
+    KAction* m_shareWithContactAction;
+    KAction* m_changeUserNameAction;
+    KAction* m_disconnectAction;
+    KAction* m_createServerAction;
+
+    // Enables or disables the UI (status bar, tracking widget, ...)
+    void enableUi();
+    void disableUi();
 
     friend class KobbyStatusBar;
 };

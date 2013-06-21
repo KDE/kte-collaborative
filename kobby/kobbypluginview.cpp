@@ -30,11 +30,14 @@
 #include <QLayout>
 #include <QLabel>
 #include <QAction>
+#include <QLineEdit>
 
 #include <KLocalizedString>
 #include <KActionCollection>
 #include <KIcon>
 #include <KAction>
+#include <KDialog>
+#include <KMessageBox>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -96,39 +99,118 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     : QObject(kteView)
     , KXMLGUIClient(kteView)
     , m_view(kteView)
-    , m_statusBar(new KobbyStatusBar(this))
+    , m_statusBar(0)
     , m_document(document)
 {
     if ( m_document ) {
+        // See KobbyPlugin::addView
         documentBecameManaged(document);
     }
 
     setComponentData(KobbyPluginFactory::componentData());
     setXMLFile("ktexteditor_kobbyui.rc");
-    KAction* a = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
-    a->setIcon(KIcon("kcoloredit"));
-    a->setText(i18n("Disconnect"));
+
+    // Set up the actions for the "Collaborative" menu
+    m_openCollabDocumentAction = actionCollection()->addAction("kobby_open", this, SLOT(openActionClicked()));
+    m_openCollabDocumentAction->setText(i18n("Open collaborative document..."));
+    m_openCollabDocumentAction->setToolTip(i18n("Open a collaborative document from a manually specified server"));
+
+    m_saveCopyAction = actionCollection()->addAction("kobby_save_copy", this, SLOT(saveCopyActionClicked()));
+    m_saveCopyAction->setText(i18n("Save a local copy..."));
+    m_saveCopyAction->setHelpText(i18n("Save a local copy of the current document, but continue "
+                                      "synchronizing changes"));
+
+    m_shareWithContactAction = actionCollection()->addAction("kobby_share_with_contact", this, SLOT(shareActionClicked()));
+    m_shareWithContactAction->setText(i18n("Share document..."));
+    m_shareWithContactAction->setHelpText(i18n("Collaboratively edit the current document with an "
+                                              "instant messenger contact"));
+
+    m_changeUserNameAction = actionCollection()->addAction("kobby_change_user_name", this, SLOT(changeUserActionClicked()));
+    m_changeUserNameAction->setText(i18n("Change user name..."));
+    m_changeUserNameAction->setHelpText(i18n("Change your user name for the current document"));
+
+    m_disconnectAction = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
+    m_disconnectAction->setText(i18n("Disconnect"));
+    m_disconnectAction->setHelpText(i18n("Disconnect from the collaborative server, and stop"
+                                        "synchronizing changes to the document"));
+    m_disconnectAction->setEnabled(false);
+
+    m_createServerAction = actionCollection()->addAction("kobby_create_server", this, SLOT(createServerActionClicked()));
+    m_createServerAction->setText(i18n("Start collaborative server..."));
+    m_createServerAction->setHelpText(i18n("Host a collaboration session. Other persons can join the session "
+                                          "by using the \"Open collaborative document\" action."));
+    m_createServerAction->setEnabled(false);
 }
 
 void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
 {
+    if ( document->document() != m_view->document() ) {
+        return;
+    }
     m_document = document;
-    setupSignals();
+    enableUi();
 }
 
-void KobbyPluginView::setupSignals()
+void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
 {
+    if ( document != m_document || m_document == 0 ) {
+        return;
+    }
+    Q_ASSERT(document->document() == m_document->document());
+    m_document = 0;
+    disableUi();
+}
+
+void KobbyPluginView::enableUi()
+{
+    m_statusBar = new KobbyStatusBar(this);
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
-            statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
+            statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)), Qt::UniqueConnection);
     statusBar()->connectionStatusChanged(m_document->connection(), m_document->connection()->status());
     connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
-            this, SLOT(documentReady(ManagedDocument*)));
+            this, SLOT(documentReady(ManagedDocument*)), Qt::UniqueConnection);
     m_view->layout()->addWidget(m_statusBar);
+}
+
+void KobbyPluginView::disableUi()
+{
+    m_view->layout()->removeWidget(m_statusBar);
+    delete m_statusBar;
+    m_statusBar = 0;
+    // Connections are disconnected automatically since m_document will be deleted
 }
 
 void KobbyPluginView::disconnectActionClicked()
 {
     kDebug();
+}
+
+void KobbyPluginView::changeUserActionClicked()
+{
+}
+
+void KobbyPluginView::changeUserName()
+{
+}
+
+void KobbyPluginView::createServerActionClicked()
+{
+
+}
+
+void KobbyPluginView::openActionClicked()
+{
+
+}
+
+void KobbyPluginView::saveCopyActionClicked()
+{
+
+}
+
+void KobbyPluginView::shareActionClicked()
+{
+
 }
 
 KobbyPluginView::~KobbyPluginView()
@@ -150,6 +232,7 @@ void KobbyPluginView::documentReady(ManagedDocument* doc)
             statusBar(), SLOT(usersChanged()));
     m_statusBar->usersChanged();
     statusBar()->sessionFullyReady();
+    m_disconnectAction->setEnabled(true);
 }
 
 #include "kobbypluginview.moc"

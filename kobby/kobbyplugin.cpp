@@ -157,6 +157,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
         if ( isManaged ) {
             kDebug() << "removing document" << document << "from manager";
             delete m_managedDocuments.take(document);
+            emit removedManagedDocument(m_managedDocuments.findDocument(document));
         }
         return;
     }
@@ -238,6 +239,8 @@ void KobbyPlugin::addView(KTextEditor::View* view)
     if ( ! doc ) {
         connect(this, SIGNAL(newManagedDocument(ManagedDocument*)),
                 kobbyView, SLOT(documentBecameManaged(ManagedDocument*)));
+        connect(this, SIGNAL(removedManagedDocument(ManagedDocument*)),
+                kobbyView, SLOT(documentBecameUnmanaged(ManagedDocument*)));
     }
 }
 
