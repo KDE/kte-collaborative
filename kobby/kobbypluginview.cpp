@@ -31,6 +31,7 @@
 #include <QLabel>
 #include <QAction>
 #include <QLineEdit>
+#include <QFormLayout>
 
 #include <KLocalizedString>
 #include <KActionCollection>
@@ -39,6 +40,7 @@
 #include <KDialog>
 #include <KMessageBox>
 #include <KColorScheme>
+#include <KTextEditor/Editor>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -242,6 +244,7 @@ void KobbyPluginView::changeUserName()
     url.setUser(newUserName);
     m_document->document()->setModified(false);
     m_document->document()->openUrl(url);
+    delete QObject::sender();
 }
 
 void KobbyPluginView::createServerActionClicked()
@@ -251,7 +254,40 @@ void KobbyPluginView::createServerActionClicked()
 
 void KobbyPluginView::openActionClicked()
 {
+    KDialog* dialog = new KDialog(m_view);
+    QWidget* widget = new QWidget(dialog);
+    QFormLayout* layout = new QFormLayout();
+    widget->setLayout(layout);
 
+    QLineEdit* host = new QLineEdit();
+    layout->addRow(new QLabel(i18n("Remote host address:")), host);
+
+    QLineEdit* port = new QLineEdit("6523");
+    layout->addRow(new QLabel(i18n("Port:")), port);
+
+    QLineEdit* userName = new QLineEdit("UnnamedUser");
+    layout->addRow(new QLabel(i18n("User name:")), userName);
+
+    QLineEdit* documentPath = new QLineEdit();
+    layout->addRow(new QLabel(i18n("Document path and name (e.g. /test.txt):")), documentPath);
+
+    QLineEdit* password = new QLineEdit();
+    layout->addRow(new QLabel(i18n("Password (optional):")), password);
+
+    dialog->setMainWidget(widget);
+
+    if ( dialog->exec() == KDialog::Accepted ) {
+        KUrl url;
+        QString path = documentPath->text().startsWith('/') ? documentPath->text() : "/" + documentPath->text();
+        url.setHost(host->text());
+        url.setPort(port->text().toInt());
+        url.setPath(path);
+        url.setUser(userName->text());
+        url.setPassword(password->text());
+        url.setProtocol("inf");
+        m_view->document()->openUrl(url);
+    }
+    delete dialog;
 }
 
 void KobbyPluginView::saveCopyActionClicked()
