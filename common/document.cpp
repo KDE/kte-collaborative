@@ -133,10 +133,6 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , redo_lock( false )
 {
     kDebug() << "new text buffer for document" << kDocument;
-    connect( kDocument, SIGNAL(textChanged(KTextEditor::Document*,
-            const KTextEditor::Range&, const KTextEditor::Range&)),
-        this, SLOT(localTextChanged(KTextEditor::Document*,
-            const KTextEditor::Range&, const KTextEditor::Range&)) );
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
     connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
@@ -202,17 +198,6 @@ void KDocumentTextBuffer::joinFailed( GError *error )
     QString errorString = i18n("Joining failed: ");
     errorString.append( error->message );
     KMessageBox::error( 0, errorString, i18n("Joining Failed") );
-}
-
-// TODO handle this
-void KDocumentTextBuffer::localTextChanged( KTextEditor::Document *document,
-    const KTextEditor::Range &oldRange,
-    const KTextEditor::Range &newRange )
-{
-    kWarning() << "localTextChanged -- not implemented!";
-    Q_UNUSED(document);
-    Q_UNUSED(oldRange);
-    Q_UNUSED(newRange);
 }
 
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
