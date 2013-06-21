@@ -85,6 +85,8 @@ void ManagedDocument::unsubscribe()
         m_infDocument->leave();
         delete m_infDocument;
         m_infDocument = 0;
+        delete m_textBuffer;
+        m_textBuffer = 0;
     }
 }
 
@@ -153,10 +155,6 @@ void ManagedDocument::sessionStatusChanged()
 {
     m_sessionStatus = m_proxy->session()->status();
     kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
-    if ( m_proxy->session()->status() != QInfinity::Session::Running ) {
-        kDebug() << "not running, ignoring event";
-        return;
-    }
 }
 
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)

@@ -140,9 +140,8 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
     kDebug() << "remove document:" << document->url().path();
     ManagedDocument* doc = m_managedDocuments.findDocument(document);
     if ( doc ) {
-        doc->unsubscribe();
-        m_managedDocuments.remove(document);
-        delete doc;
+        emit removedManagedDocument(doc);
+        delete m_managedDocuments.take(document);
     }
     else {
         kDebug() << "tried to remove document" << document << "which is not being managed";
@@ -155,9 +154,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
     if ( document->url().protocol() != "inf" ) {
         kDebug() << "not a collaborative document:" << document->url().url();
         if ( isManaged ) {
-            kDebug() << "removing document" << document << "from manager";
-            delete m_managedDocuments.take(document);
-            emit removedManagedDocument(m_managedDocuments.findDocument(document));
+            removeDocument(document);
         }
         return;
     }
@@ -239,9 +236,9 @@ void KobbyPlugin::addView(KTextEditor::View* view)
     if ( ! doc ) {
         connect(this, SIGNAL(newManagedDocument(ManagedDocument*)),
                 kobbyView, SLOT(documentBecameManaged(ManagedDocument*)));
-        connect(this, SIGNAL(removedManagedDocument(ManagedDocument*)),
-                kobbyView, SLOT(documentBecameUnmanaged(ManagedDocument*)));
     }
+    connect(this, SIGNAL(removedManagedDocument(ManagedDocument*)),
+            kobbyView, SLOT(documentBecameUnmanaged(ManagedDocument*)));
 }
 
 void KobbyPlugin::removeView(KTextEditor::View* view)
