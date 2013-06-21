@@ -18,7 +18,8 @@
 
 #include "document.h"
 #include "documentmodel.h"
-#include <common/ui/remotechangenotifier.h>
+#include "common/ui/remotechangenotifier.h"
+
 
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>
@@ -42,6 +43,10 @@
 #include <QTextEncoder>
 #include <QTime>
 #include <QAction>
+
+#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
+#include <ktexteditor/bufferinterface.h>
+#endif
 
 namespace Kobby
 {
@@ -126,6 +131,9 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     : QInfinity::AbstractTextBuffer( encoding, parent )
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
+#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
+    , m_bufferInterface( qobject_cast<KTextEditor::BufferInterface*>(kDocument) )
+#endif
     , m_kDocument( kDocument )
     , m_insertCount( 0 )
     , m_undoCount( 0 )
@@ -165,7 +173,19 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         QString str = codec()->toUnicode( chunk.text() );
         kDocument()->blockSignals(true);
-        kDocument()->insertText( startCursor, str );
+#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
+        // The compile-time check just verifies that the interface is present.
+        // This does not guarantee that it is supported by the KTE implementation used here.
+        if ( m_bufferInterface ) {
+            m_bufferInterface->insertTextRaw(startCursor.line(), startCursor.column(), str);
+        }
+#else
+        if ( false ) { }
+#endif
+        else {
+            kWarning() << "Text editor does not support the Buffer interface!";
+            kDocument()->insertText( startCursor, str );
+        }
         kDocument()->blockSignals(false);
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_remote(offset+chunk.length())), user, false);
     }
@@ -185,7 +205,19 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
         kDocument()->blockSignals(true);
-        kDocument()->removeText( range );
+#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
+        // see onInsertText
+        if ( m_bufferInterface ) {
+            m_bufferInterface->removeTextRaw(startCursor.line(), startCursor.column(),
+                                             endCursor.line(), endCursor.column());
+        }
+#else
+        if ( false ) { }
+#endif
+        else {
+            kWarning() << "Text editor does not support the Buffer interface!";
+            kDocument()->removeText( range );
+        }
         kDocument()->blockSignals(false);
         emit remoteChangedText(range, user, true);
     }

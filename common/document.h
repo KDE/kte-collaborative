@@ -35,6 +35,7 @@ namespace KTextEditor
     class Range;
     class Cursor;
     class View;
+    class BufferInterface;
 }
 
 namespace QInfinity
