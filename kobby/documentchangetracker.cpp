@@ -31,7 +31,7 @@ DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
     , m_iface(qobject_cast<KTextEditor::MovingInterface*>(document->document()))
 {
     kDebug() << "change tracker created for" << document->document()->url() << "moving interface:" << m_iface;
-    connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
+    connect(m_document, SIGNAL(synchronizationBegins(ManagedDocument*)),
             this, SLOT(setupSignals()));
 }
 

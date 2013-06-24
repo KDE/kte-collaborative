@@ -69,6 +69,7 @@ public slots:
 
 signals:
     void documentReady(ManagedDocument* document);
+    void synchronizationBegins(ManagedDocument* document);
 
 private:
     Kobby::KDocumentTextBuffer* m_textBuffer;

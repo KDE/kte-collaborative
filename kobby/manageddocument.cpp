@@ -125,6 +125,7 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
                                                m_textBuffer, document()->documentName());
     connect(m_infDocument, SIGNAL(loadingComplete(Document*)),
             this, SLOT(synchronizationComplete(Document*)));
+    emit synchronizationBegins(this);
 }
 
 void ManagedDocument::synchronizationComplete(Kobby::Document* d)
