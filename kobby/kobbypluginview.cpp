@@ -97,7 +97,7 @@ void KobbyStatusBar::usersChanged()
     }
     QList< QPointer< QInfinity::User > > activeUsers = m_view->m_document->userTable()->activeUsers();
     if ( activeUsers.length() > 3 ) {
-        m_usersLabel->setText(i18n("Users: You and %i others", activeUsers.size()));
+        m_usersLabel->setText(i18n("Users: You and %1 others", activeUsers.size()));
     }
     else {
         QStringList usersList;
