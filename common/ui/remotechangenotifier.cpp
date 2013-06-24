@@ -20,6 +20,7 @@
  */
 
 #include "remotechangenotifier.h"
+#include <libqinfinity/user.h>
 #include <QLabel>
 #include <QPaintEvent>
 
@@ -40,17 +41,7 @@ NotifierWidget::NotifierWidget(const QUrl& source, QWidget* parent)
     connect(closeTimer, SIGNAL(timeout()), this, SLOT(hide()));
 }
 
-// TODO use user's color instead -- or maybe not?
-// After all, this whole "select your color" stuff is of questionable use, and this works nicely.
-QColor colorForUsername(QString username) {
-    unsigned int hash = 0;
-    for ( int i = 0; i < username.size(); i++ ) {
-        hash += (17*i%31+1)*username.at(i).toAscii();
-    }
-    return QColor::fromHsv(hash % 359, 255, 255);
-};
-
-void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QString& username)
+void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QInfinity::User* user)
 {
     if ( ! view ) {
         return;
@@ -60,7 +51,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     QUrl src = QUrl(d.locate("data", "kte-kobby/ui/notifywidget.qml"));
     bool added = false;
 
-    QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, username);
+    QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, user->name());
     if ( existingWidgets.contains(key) ) {
         // move an existing widget
         useWidget = existingWidgets[key];
@@ -87,10 +78,9 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
         added = true;
     }
 
-    // TODO use + set correct color
     NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);
-    notifierWidget->rootObject()->setProperty("username", username);
-    notifierWidget->rootObject()->setProperty("widgetcolor", colorForUsername(username).name());
+    notifierWidget->rootObject()->setProperty("username", user->name());
+    notifierWidget->rootObject()->setProperty("widgetcolor", user->color().name());
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
     // restart animation
     QMetaObject::invokeMethod(hideAnimation, "restart");
