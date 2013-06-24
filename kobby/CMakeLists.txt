@@ -9,6 +9,7 @@ find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
 
 set( kobby_PART_SRCS
+    documentchangetracker.cpp
     kobbypluginview.cpp
     kobbyplugin.cpp
     manageddocument.cpp

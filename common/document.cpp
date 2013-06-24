@@ -236,6 +236,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     kDebug() << "local text inserted" << kDocument() << "(range" << range << ")" << m_user;
+    emit localChangedText(range, user(), false);
     Q_UNUSED(document)
 
     textOpPerformed();
@@ -280,6 +281,8 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
     kDebug() << "local text removed:" << kDocument() << range;
+    emit localChangedText(range, user(), true);
+
     Q_UNUSED(document)
     unsigned int offset;
     unsigned int end;

@@ -17,6 +17,7 @@
  */
 
 #include "manageddocument.h"
+#include "documentchangetracker.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/browser.h>
@@ -52,6 +53,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     document->setReadWrite(false);
     connect(m_connection, SIGNAL(disconnected(Connection*)),
             this, SLOT(disconnected(Connection*)));
+    new DocumentChangeTracker(this);
 }
 
 ManagedDocument::~ManagedDocument()

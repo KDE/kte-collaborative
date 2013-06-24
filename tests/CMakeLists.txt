@@ -5,6 +5,7 @@ kde4_add_unit_test(
     ../kobby/manageddocument.cpp
     ../kobby/kobbyplugin.cpp
     ../kobby/kobbypluginview.cpp
+    ../kobby/documentchangetracker.cpp
 )
 
 include_directories(
