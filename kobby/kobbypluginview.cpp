@@ -107,10 +107,10 @@ void KobbyStatusBar::usersChanged()
             }
         }
         if ( usersList.length() == 1 ) {
-            m_usersLabel->setText(i18n("Users: You and %1", usersList.first()));
+            m_usersLabel->setText(i18nc("As in Users: You and Fred", "Users: You and %1", usersList.first()));
         }
         else if ( usersList.length() > 1 ) {
-            m_usersLabel->setText(i18n("Users: You, %1", usersList.join(", ")));
+            m_usersLabel->setText(i18nc("As in Users: You, Fred, George", "Users: You, %1", usersList.join(", ")));
         }
         else {
             m_usersLabel->setText(i18n("Users: only you"));
