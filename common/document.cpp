@@ -17,7 +17,6 @@
  */
 
 #include "document.h"
-#include "documentmodel.h"
 
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>
@@ -154,11 +153,6 @@ KTextEditor::Document *KDocumentTextBuffer::kDocument() const
     return m_kDocument;
 }
 
-Document *KDocumentTextBuffer::document()
-{
-    return DocumentModel::instance()->documentFromKDoc(*kDocument());
-}
-
 void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
@@ -257,7 +251,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 {
                     kDebug() << "Got empty encoded text from non empty string "
                                 "Skipping insertion";
-                    this->document()->throwFatalError( i18n("Document state compromised") );
+                    Q_ASSERT(false);
                 }
                 else
                 {

@@ -30,7 +30,6 @@
 #include "common/document.h"
 #include "common/itemfactory.h"
 #include "common/noteplugin.h"
-#include "common/documentmodel.h"
 #include "kobbypluginview.h"
 
 #include <libqinfinity/communicationjoinedgroup.h>

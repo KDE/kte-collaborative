@@ -22,7 +22,6 @@ set(
     KOBBY_COMMON_SRCS
     connection.cpp
     document.cpp
-    documentmodel.cpp
     itemfactory.cpp
     noteplugin.cpp
     utils.cpp
