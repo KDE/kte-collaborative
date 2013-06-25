@@ -5,6 +5,8 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
+cmake_minimum_required(VERSION 2.8)
+
 find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
 
@@ -15,7 +17,10 @@ set( kobby_PART_SRCS
     manageddocument.cpp
 )
 
-kde4_add_plugin(ktexteditor_kobby ${kobby_PART_SRCS})
+add_definitions(-fPIC)
+automoc4(ktexteditor_kobby_objects kobby_PART_SRCS)
+add_library(ktexteditor_kobby_objects OBJECT ${kobby_PART_SRCS})
+kde4_add_plugin(ktexteditor_kobby $<TARGET_OBJECTS:ktexteditor_kobby_objects>)
 
 include_directories(
     ${KDE4_INCLUDES}

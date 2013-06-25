@@ -2,10 +2,7 @@ automoc4(collaborativeeditingtest collaborativeeditingtest.cpp)
 kde4_add_unit_test(
     collaborativeeditingtest
     collaborativeeditingtest.cpp
-    ../kobby/manageddocument.cpp
-    ../kobby/kobbyplugin.cpp
-    ../kobby/kobbypluginview.cpp
-    ../kobby/documentchangetracker.cpp
+    $<TARGET_OBJECTS:ktexteditor_kobby_objects>
 )
 
 include_directories(
