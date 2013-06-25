@@ -1,8 +1,9 @@
 This document may not be entirely up to date.  For recent information visit
 http://kobby.greghaynes.net/
 
-To install kobby, enter the kobby source directory, and run:
-cmake . -DCMAKE_INSTALL_PREFIX={prefix}
+To install kobby, enter the kobby source directory, create directory called build/, and run:
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX={prefix}
 make
 sudo make install
 
