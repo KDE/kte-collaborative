@@ -22,7 +22,7 @@
 #include "kobbypluginview.h"
 #include "manageddocument.h"
 #include "kobbyplugin.h"
-#include "common/ui/remotechangenotifier.h"
+#include "ui/remotechangenotifier.h"
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>

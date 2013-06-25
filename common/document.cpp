@@ -18,8 +18,6 @@
 
 #include "document.h"
 #include "documentmodel.h"
-#include "common/ui/remotechangenotifier.h"
-
 
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>

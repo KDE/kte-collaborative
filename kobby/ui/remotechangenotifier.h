@@ -22,8 +22,6 @@
 #ifndef REMOTECHANGENOTIFIER_H
 #define REMOTECHANGENOTIFIER_H
 
-#include "../kobbycommon_export.h"
-
 #include <QObject>
 #include <QTimer>
 #include <QDeclarativeView>
@@ -35,7 +33,7 @@ namespace QInfinity {
 
 // This class is used to draw fancy widgets in the editor window when a
 // remote user changes text
-class KOBBYCOMMON_EXPORT RemoteChangeNotifier : public QObject
+class RemoteChangeNotifier : public QObject
 {
 public:
     static void addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QInfinity::User* user);

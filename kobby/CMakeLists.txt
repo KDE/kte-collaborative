@@ -15,6 +15,7 @@ set( kobby_PART_SRCS
     kobbypluginview.cpp
     kobbyplugin.cpp
     manageddocument.cpp
+    ui/remotechangenotifier.cpp
 )
 
 add_definitions(-fPIC)
@@ -41,9 +42,10 @@ target_link_libraries( ktexteditor_kobby
     ${KDE4_KDECORE_LIBS}
     ${KDE4_KDNSSD_LIBS}
     ${LIBQINFINITY_LIBRARIES}
+    ${QT_QTDECLARATIVE_LIBRARIES}
 )
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR} )
 install(FILES ktexteditor_kobby.desktop  DESTINATION  ${SERVICES_INSTALL_DIR})
 install(FILES ktexteditor_kobbyui.rc  DESTINATION  ${DATA_INSTALL_DIR}/ktexteditor_kobby)
-
+install(FILES ui/notifywidget.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)
