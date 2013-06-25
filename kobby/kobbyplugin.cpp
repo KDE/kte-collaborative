@@ -19,16 +19,7 @@
 #include "kobbyplugin.h"
 
 #include <ktexteditor/document.h>
-#include <ktexteditor/attribute.h>
-#include <ktexteditor/searchinterface.h>
-#include <ktexteditor/movinginterface.h>
-#include <ktexteditor/movingrange.h>
-#include <ktexteditor/configinterface.h>
 
-#include <assert.h>
-#include <kaction.h>
-#include <kactioncollection.h>
-#include <kfiledialog.h>
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
 #include <klocale.h>
@@ -56,7 +47,6 @@
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/userrequest.h>
 
-#include <kparts/part.h>
 #include <QApplication>
 #include <QTimer>
 
