@@ -34,7 +34,6 @@
 
 #include <common/itemfactory.h>
 #include <common/noteplugin.h>
-#include <common/documentbuilder.h>
 
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>

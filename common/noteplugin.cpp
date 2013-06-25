@@ -17,7 +17,6 @@
 
 #include "noteplugin.h"
 #include "document.h"
-#include "documentbuilder.h"
 
 #include <KTextEditor/Document>
 #include <KTextEditor/Editor>

@@ -29,7 +29,6 @@
 #include "common/connection.h"
 #include "common/document.h"
 #include "common/itemfactory.h"
-#include "common/documentbuilder.h"
 #include "common/noteplugin.h"
 #include "common/documentmodel.h"
 #include "kobbypluginview.h"

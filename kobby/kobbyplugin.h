@@ -36,7 +36,6 @@
 #include <libqinfinity/textsession.h>
 
 #include "common/connection.h"
-#include "common/documentbuilder.h"
 #include "manageddocument.h"
 
 using namespace Kobby;
