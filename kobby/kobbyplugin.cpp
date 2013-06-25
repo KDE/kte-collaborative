@@ -126,13 +126,13 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
         return;
     }
     kDebug() << "add document" << document << document->url() << "to plugin instance" << this;
-    eventuallyManageDocument(document);
+    checkManageDocument(document);
     connect(document, SIGNAL(aboutToClose(KTextEditor::Document*)),
             this, SLOT(removeDocument(KTextEditor::Document*)));
     connect(document, SIGNAL(aboutToReload(KTextEditor::Document*)),
             this, SLOT(removeDocument(KTextEditor::Document*)));
     connect(document, SIGNAL(documentUrlChanged(KTextEditor::Document*)),
-            this, SLOT(eventuallyManageDocument(KTextEditor::Document*)));
+            this, SLOT(checkManageDocument(KTextEditor::Document*)));
 }
 
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
@@ -148,7 +148,7 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
     }
 }
 
-void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
+void KobbyPlugin::checkManageDocument(KTextEditor::Document* document)
 {
     bool isManaged = m_managedDocuments.isManaged(document);
     if ( document->url().protocol() != "inf" ) {
@@ -164,7 +164,7 @@ void KobbyPlugin::eventuallyManageDocument(KTextEditor::Document* document)
     }
     kDebug() << "initializing collaborative session for document" << document->url();
 
-    Connection* connection = eventuallyAddConnection(document->url());
+    Connection* connection = ensureConnection(document->url());
 
     ManagedDocument* managed = new ManagedDocument(document, m_browserModel, m_textPlugin, connection, this);
     m_managedDocuments[document] = managed;
@@ -195,7 +195,7 @@ short unsigned int KobbyPlugin::portForUrl(const KUrl& url)
     return url.port() == -1 ? defaultPort : url.port();
 }
 
-Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
+Connection* KobbyPlugin::ensureConnection(const KUrl& documentUrl)
 {
     int port = portForUrl(documentUrl);
     QString name = connectionName(documentUrl);
@@ -220,7 +220,7 @@ Connection* KobbyPlugin::eventuallyAddConnection(const KUrl& documentUrl)
 void KobbyPlugin::connectionDisconnected(Connection* connection)
 {
     kDebug() << "disconnected:" << connection;
-    m_connections.remove(connection->name());
+    delete m_connections.take(connection->name());
 }
 
 void KobbyPlugin::addView(KTextEditor::View* view)
@@ -261,3 +261,4 @@ void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range ran
 }
 
 // kate: space-indent on; indent-width 4; replace-tabs on;
+

@@ -68,7 +68,7 @@ private:
     // or sets it up and returns it otherwise.
     // The connection returned is not necessarily ready to be used,
     // but never null.
-    Connection* eventuallyAddConnection(const KUrl& documentUrl);
+    Connection* ensureConnection(const KUrl& documentUrl);
     // Returns a unique name for a connection to the host of the given URL
     const QString connectionName(const KUrl& url);
     // Returns the URLs port, or the default infinity port if none is set
@@ -92,7 +92,7 @@ public slots:
     // Should be called whenever a significant property of a document
     // changes, or a new document is added. It will eventually
     // add that document to the plugin.
-    void eventuallyManageDocument(KTextEditor::Document*);
+    void checkManageDocument(KTextEditor::Document*);
     void textInserted(KTextEditor::Document*, KTextEditor::Range);
     void textRemoved(KTextEditor::Document*, KTextEditor::Range);
     // Called when a document is closed or otherwise removed
