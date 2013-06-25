@@ -43,37 +43,152 @@ using namespace Kobby;
 
 class KobbyPluginView;
 
+/**
+ * @brief The main class of the project, a plugin to KTextEditor.
+ *
+ * This class is responsible for deciding what documents should be managed,
+ * and what views the plugin UI should be added to. All other things
+ * should be managed in the appropriate other classes.
+ */
 class KobbyPlugin : public KTextEditor::Plugin {
 Q_OBJECT
 public:
+    /**
+     * @brief Constructor, only to be used internally.
+     */
     explicit KobbyPlugin( QObject *parent = 0,
-                        const QVariantList &args = QVariantList() );
+                          const QVariantList &args = QVariantList() );
     virtual ~KobbyPlugin();
 
-    // Called when a new view is created for a document
+    /**
+     * @brief Called when a new view is created for a document
+     *
+     * @param view passed by KTE, the view which was created.
+     */
     virtual void addView(KTextEditor::View *view);
-    // Called when a view is removed
+
+    /**
+     * @brief Called when a view is removed
+     *
+     * @param view passed by KTE, the view which was removed.
+     */
     virtual void removeView(KTextEditor::View *view);
-    // Called when a new document is added (e.g. user opens a document in kate)
+
+    /**
+     * @brief Called when a new document is added (e.g. user opens a document in kate)
+     *
+     * @param document The document which was added. URL is probably not set yet.
+     */
     virtual void addDocument(KTextEditor::Document* document);
 
-    // Checks if connections have been established for all managed documents,
-    // and subscribes those which are not yet subscribed (if possible).
+    /**
+     * @brief Checks if connections have been established for all managed documents,
+     *        and subscribes those which are not yet subscribed (if possible).
+     */
     void subscribeNewDocuments();
-    // access to managed documents for unit tests
+
+    /**
+     * @brief Get a list of all documents currently being managed by the plugin.
+     * Documents are removed from this list if they are disconnected (actively
+     * by the user, or for any other reason). All the documents in this list
+     * are being synchronized, or are currently being connected.
+     * @return const ManagedDocumentList& List of managed documents
+     */
     const ManagedDocumentList& managedDocuments() const;
 
 private:
-    // Gets a Connection from the m_connections hashtable if it exists,
-    // or sets it up and returns it otherwise.
-    // The connection returned is not necessarily ready to be used,
-    // but never null.
+    /**
+     * @brief Ensures that a connection for the given URL exists.
+     * Gets a Connection from the m_connections hashtable if it exists,
+     * or sets it up and returns it otherwise.
+     * The connection returned is not necessarily ready to be used,
+     * but never null.
+     * @param documentUrl The URL to get a connection for. Hostname and port are read from it.
+     * @return Kobby::Connection* The connection. Not necessarily established, but never null.
+     */
     Connection* ensureConnection(const KUrl& documentUrl);
-    // Returns a unique name for a connection to the host of the given URL
+
+    /**
+     * @brief Returns a unique name for a connection to the host of the given URL
+     */
     const QString connectionName(const KUrl& url);
-    // Returns the URLs port, or the default infinity port if none is set
+
+    /**
+     * @brief Returns the URLs port, or the default infinity port (6523) if none is set
+     */
     unsigned short portForUrl(const KUrl& url);
 
+public slots:
+    /**
+     * @brief Slot which should be invoked when a browser becomes ready
+     *
+     * @param browser The browser which became ready
+     */
+    void browserConnected(const QInfinity::Browser*);
+
+    /**
+     * @brief Should be invoked when a connection is prepared (after hostname lookup etc)
+     * It will proceed to establish the connection.
+     * @param connection The connection which is ready to be established
+     */
+    void connectionPrepared(Connection*);
+
+    /**
+     * @brief Should be invoked when a document will need to be added or removed from the managed list.
+     * Depending on the document's URL (inf:// protocol or not), it will add it
+     * to or remove it from the m_managedDocuments list of managed documents.
+     * @see manageddocuments()
+     * @param document The document to check
+     */
+    void checkManageDocument(KTextEditor::Document*);
+
+    /**
+     * @brief Called when text is inserted into a document. For debugging purposes only.
+     */
+    void textInserted(KTextEditor::Document*, KTextEditor::Range);
+
+    /**
+     * @brief Called when text is removed from a document. For debugging purposes only.
+     */
+    void textRemoved(KTextEditor::Document*, KTextEditor::Range);
+
+    /**
+     * @brief Should be called when a document is about to be closed
+     * Called when a document is closed or otherwise removed
+     * This is a slot because it needs to disconnect from the collaborative
+     * server before KTE clears the document's text (which would cause the
+     * text to be erased for other users, too)
+     * @param document the document which was removed from the editor
+     */
+    virtual void removeDocument(KTextEditor::Document*);
+
+    /**
+     * @brief Should be invoked when a connection was disconnected.
+     * It will delete the connection and remove it from the connection map,
+     * such that for new documents a new connetion will be established.
+     * @param connection The connection which was disconnected.
+     */
+    void connectionDisconnected(Connection*);
+
+signals:
+    //
+    /**
+     * @brief Emitted when a document becomes managed.
+     * The document is probably not yet connected or synchronized.
+     * @param document The document which became managed
+     */
+    void newManagedDocument(ManagedDocument*);
+
+    /**
+     * @brief Emitted when a document stops being managed.
+     * The document instance is still valid when this is emitted, but will
+     * become invalid immediately after that.
+     * @param document The document which became unmanaged
+     */
+    void removedManagedDocument(ManagedDocument*);
+
+private:
+    // List of managed douments
     ManagedDocumentList m_managedDocuments;
     QInfinity::BrowserModel* m_browserModel;
     QInfinity::NotePlugin* m_textPlugin;
@@ -83,30 +198,6 @@ private:
     QHash<QString, Kobby::Connection*> m_connections;
     // Maps KTextEditor::View instances to KobbyPluginView instances.
     QMap<KTextEditor::View*, KobbyPluginView*> m_views;
-
-public slots:
-    // This is called when the browser is ready.
-    void browserConnected(const QInfinity::Browser*);
-    // Called when a connection is prepared (after hostname lookup etc)
-    void connectionPrepared(Connection*);
-    // Should be called whenever a significant property of a document
-    // changes, or a new document is added. It will eventually
-    // add that document to the plugin.
-    void checkManageDocument(KTextEditor::Document*);
-    void textInserted(KTextEditor::Document*, KTextEditor::Range);
-    void textRemoved(KTextEditor::Document*, KTextEditor::Range);
-    // Called when a document is closed or otherwise removed
-    // This is a slot because it needs to disconnect from the collaborative
-    // server before KTE clears the document's text (which would cause the
-    // text to be erased for other users, too)
-    virtual void removeDocument(KTextEditor::Document*);
-    void connectionDisconnected(Connection*);
-
-signals:
-    // Emitted when a document becomes managed.
-    void newManagedDocument(ManagedDocument*);
-    // Emitted when a document stops being managed.
-    void removedManagedDocument(ManagedDocument*);
 };
 
 K_PLUGIN_FACTORY_DECLARATION(KobbyPluginFactory)

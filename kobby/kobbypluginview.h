@@ -45,6 +45,10 @@ class KAction;
 class ManagedDocument;
 class KobbyPluginView;
 
+/**
+ * @brief This class manages the status bar below a collaborative document.
+ * It is responsible for updating the text in the status bar itself.
+ */
 class KobbyStatusBar : public QWidget {
 Q_OBJECT
 public:
@@ -53,6 +57,11 @@ public:
 public slots:
     void connectionStatusChanged(Connection*, QInfinity::XmlConnection::Status status);
     void sessionFullyReady();
+
+    /**
+     * @brief Should be invoked when something about the users for a document changed.
+     * This includes both user count and any user's properties (name, status, ...)
+     */
     void usersChanged();
 
 private:
@@ -61,17 +70,37 @@ private:
     KobbyPluginView* m_view;
 };
 
+/**
+ * @brief This class manages the UI for a collaborative document.
+ */
 class KobbyPluginView
     : public QObject
     , public KXMLGUIClient
 {
 Q_OBJECT
 public:
+    /**
+     * @brief Adds the plugin's user interface to a KTextEditor::View, and keeps it up-to-date.
+     *
+     * @param kteView The KTextEditor::View instance to add the UI to. Usually you get this from the plugin's addView() function.
+     * @param document The ManagedDocument instance used for this view, needed for setting up connections.
+     */
     KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document);
     virtual ~KobbyPluginView();
+
+    /**
+     * @brief Get the status bar instance used for this view
+     */
     KobbyStatusBar* statusBar() const;
 
 public slots:
+    /**
+     * @brief Should be invoked when a remote (only remote) user changed text.
+     * It will add a small popup widget indicating the user name which typed some text to the view.
+     * @param range The range of the text which changed
+     * @param user The remote user which changed the text
+     * @param removal true if the text was removed, false if it was inserted
+     */
     void remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal);
     void documentBecameManaged(ManagedDocument*);
     void documentBecameUnmanaged(ManagedDocument*);
@@ -84,6 +113,9 @@ public slots:
     void changeUserActionClicked();
     void createServerActionClicked();
 
+    /**
+     * @brief Display UI to change the user name.
+     */
     void changeUserName();
 
 private:

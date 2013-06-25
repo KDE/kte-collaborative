@@ -38,6 +38,10 @@ namespace QInfinity {
 
 class ManagedDocument;
 
+/**
+ * @brief Class for tracking changes to a collaborative document.
+ * Its current purpose is to take care of the colorful background highlighting.
+ */
 class DocumentChangeTracker : public QObject {
 Q_OBJECT
 public:

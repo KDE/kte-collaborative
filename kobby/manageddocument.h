@@ -34,16 +34,52 @@
 using Kobby::Connection;
 using Kobby::Document;
 
+/**
+ * @brief Describes an instance of a document managed by the plugin.
+ * This class ties together a KTextEditor::Document instance to all the
+ * collaborative editing backend classes.
+ */
 class ManagedDocument : public QObject {
 Q_OBJECT
 public:
+    /**
+     * @brief Create a new managed document instance.
+     * Doing so will initiate the synchronization process for the given KTE::Document.
+     * @param document The document from KTE to be synchronized, usually retrieved from the addDocument() method of the plugin
+     * @param browserModel The browser model; the plugin instance knows about it
+     * @param plugin The note plugin; the plugin instance knows about it
+     * @param connection The connection; the plugin instance knows about it
+     * @param parent parent object for lifetime management purposes
+     */
     ManagedDocument(KTextEditor::Document* document, QInfinity::BrowserModel* browserModel,
                     QInfinity::NotePlugin* plugin, Kobby::Connection* connection, QObject* parent = 0);
+
     virtual ~ManagedDocument();
+
+    /**
+     * @brief Subscribe to this document, to get notified of changes and also upload own changes.
+     * This operation is asynchroneous.
+     */
     void subscribe();
+
+    /**
+     * @brief Unsubscribe this document, to stop receiving and sending updates.
+     */
     void unsubscribe();
+
+    /**
+     * @brief Tells whether this document is currently being synchronized or not.
+     * @return true of synchronizing, false otherwise.
+     */
     bool isSubscribed() const;
+
+    /**
+     * @brief Get the session status of this document's session.
+     * This is "Running" if the document is currently receiving and uploading changes.
+     * "Synchronizing" just occurs on start-up (initial synchronization).
+     */
     QInfinity::Session::Status sessionStatus() const;
+
     inline KTextEditor::Document* document() const {
         return m_document;
     };
@@ -53,22 +89,60 @@ public:
     inline Kobby::KDocumentTextBuffer* textBuffer() const {
         return m_textBuffer;
     };
-    // Returns the Browser for the document's connection
+
+    /**
+     * @brief Returns the Browser for the document's connection
+     */
     QInfinity::Browser* browser() const;
-    // Returns the Connection for this document
+
+    /**
+     * @brief Returns the Connection for this document
+     */
     Kobby::Connection* connection() const;
-    // Returns the user table for this document
+
+    /**
+     * @brief Returns the user table for this document
+     */
     QInfinity::UserTable* userTable() const;
 
 public slots:
+    /**
+     * @brief Invoked when a subscription is ready to be finished (i.e. the iter is known)
+     * @param iter The browser iter (like an "internal URI") for the document
+     */
     void finishSubscription(QInfinity::BrowserIter iter);
+
+    /**
+     * @brief Invoked when a subscription was done; will initiate synchronizing the document.
+     */
     void subscriptionDone(QInfinity::BrowserIter, QPointer<QInfinity::SessionProxy>);
+
+    /**
+     * @brief Invoked when the session status changes (e.g. Synchronizing -> Running, or Running -> Disconnected).
+     */
     void sessionStatusChanged();
+
+    /**
+     * @brief Invoked when the document is completely synchronized; it's now fully ready to be used.
+     */
     void synchronizationComplete(Document*);
+
+    /**
+     * @brief Invoked when a connection breaks.
+     */
     void disconnected(Connection*);
 
 signals:
+    /**
+     * @brief Emitted when a document is completely synchronized and ready to be used (user can start typing etc).
+     * @param document The document which became ready.
+     */
     void documentReady(ManagedDocument* document);
+
+    /**
+     * @brief Emitted when synchronization of a document begins.
+     * @param document The document for which synchronization has begun
+     */
     void synchronizationBegins(ManagedDocument* document);
 
 private:
