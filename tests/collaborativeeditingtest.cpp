@@ -20,7 +20,6 @@
  *
  */
 #include "collaborativeeditingtest.h"
-#include <kobby/kobbyplugin.h>
 #include <ktexteditor/factory.h>
 #include <ktexteditor/templateinterface2.h>
 #include <libqinfinity/xmppconnection.h>
@@ -37,6 +36,8 @@
 #include <KPluginFactory>
 #include <KServiceTypeTrader>
 #include <klibloader.h>
+
+#include "kobbyplugin.h"
 
 QTEST_MAIN(CollaborativeEditingTest);
 

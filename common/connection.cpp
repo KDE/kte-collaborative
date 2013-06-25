@@ -27,7 +27,6 @@
 #include <QApplication>
 
 #include "connection.moc"
-#include <kobby/kobbyplugin.h>
 
 namespace Kobby
 {

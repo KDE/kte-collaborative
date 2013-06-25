@@ -8,10 +8,8 @@ kde4_add_unit_test(
 include_directories(
     ${KDE4_INCLUDES}
     ../common
-    ../kobby
+    ../kte-plugin
     ../
-    ../kobby/dialogs
-    ../kobby/data
     ${LIBQINFINITY_INCLUDES}
 )
 

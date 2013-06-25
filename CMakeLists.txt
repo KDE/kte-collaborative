@@ -15,7 +15,7 @@ include(KDE4Defaults)
 # find_package(Gettext REQUIRED)
 # add_subdirectory( po )
 
-add_subdirectory(kobby)
+add_subdirectory(kte-plugin)
 add_subdirectory(kioslave)
 add_subdirectory(common)
 add_subdirectory(tests)
