@@ -37,6 +37,9 @@ namespace QInfinity {
 using QInfinity::NodeRequest;
 using QInfinity::BrowserIter;
 
+/**
+ * @brief Represents a host/port pair.
+ */
 struct Peer {
     Peer(QString hostname, int port = -1)
         : hostname(hostname)
@@ -57,6 +60,9 @@ struct Peer {
     int port;
 };
 
+/**
+ * @brief Main class for the KIO slave
+ */
 class InfinityProtocol : public QObject, public KIO::SlaveBase
 {
 Q_OBJECT
