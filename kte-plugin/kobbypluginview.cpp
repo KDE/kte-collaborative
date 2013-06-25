@@ -1,4 +1,4 @@
-/* This file is part of the Kobby
+/* This file is part of the Kobby plugin
  * Copyright (C) 2013 Sven Brauch <svenbrauch@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -45,8 +45,8 @@
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
     , m_connectionStatusLabel(new QLabel(this))
-    , m_view(parent)
     , m_usersLabel(new QLabel(this))
+    , m_view(parent)
 {
     setLayout(new QHBoxLayout());
     layout()->setAlignment(Qt::AlignRight);
@@ -304,7 +304,7 @@ KobbyPluginView::~KobbyPluginView()
 {
 }
 
-void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal)
+void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool /*removal*/)
 {
     RemoteChangeNotifier::addNotificationWidget(m_view, range.start(), user);
 }

@@ -38,10 +38,10 @@ Connection::Connection( const QString &hostname,
     : QObject( parent )
     , m_hostname( hostname )
     , m_port( port )
+    , m_name( name_ )
+    , m_connectionStatus(QInfinity::XmlConnection::Closed)
     , m_tcpConnection( 0 )
     , m_xmppConnection( 0 )
-    , m_connectionStatus(QInfinity::XmlConnection::Closed)
-    , m_name( name_ )
 {
 }
 
@@ -99,7 +99,6 @@ void Connection::slotHostnameLookedUp( const QHostInfo &hostInfo )
 
     m_xmppConnection = new QInfinity::XmppConnection( *m_tcpConnection,
         QInfinity::XmppConnection::Client,
-#warning fixme
         "localhost",
         m_hostname,
         QInfinity::XmppConnection::PreferTls,

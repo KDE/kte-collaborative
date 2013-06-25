@@ -106,13 +106,13 @@ void Document::setLoadState( Document::LoadState state )
     }
 }
 
-void Document::textChanged( KTextEditor::Document *doc )
+void Document::textChanged( KTextEditor::Document */*doc*/ )
 {
     m_dirty = true;
 }
 
-void Document::documentSaved( KTextEditor::Document *doc,
-    bool saveAs )
+void Document::documentSaved( KTextEditor::Document */*doc*/,
+    bool /*saveAs*/ )
 {
     m_dirty = false;
 }
@@ -128,10 +128,10 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     : QInfinity::AbstractTextBuffer( encoding, parent )
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
+    , m_kDocument( kDocument )
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
     , m_bufferInterface( qobject_cast<KTextEditor::BufferInterface*>(kDocument) )
 #endif
-    , m_kDocument( kDocument )
     , m_insertCount( 0 )
     , m_undoCount( 0 )
     , undo_lock( false )
@@ -400,8 +400,7 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_local( unsigned int offs
 unsigned int KDocumentTextBuffer::cursorToOffset_remote( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
-    int i, cursor_line = cursor.line();
-    for( i = 0; i < kDocument()->lineLength(i); i++ )
+    for( int i = 0; i < kDocument()->lineLength(i); i++ )
         offset += kDocument()->lineLength(i) + 1; // Add newline
     offset += cursor.column();
     return offset;
@@ -461,8 +460,8 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
     , m_sessionProxy( proxy )
     , m_session( session )
     , m_buffer( buffer )
-    , m_name( name )
     , m_user( 0 )
+    , m_name( name )
 {
     kDebug() << "new infTextDocument for url" << kDocument()->url();
     m_session->setParent( this );

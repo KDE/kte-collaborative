@@ -49,7 +49,6 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     QWidget* useWidget = 0;
     KStandardDirs d;
     QUrl src = QUrl(d.locate("data", "kte-kobby/ui/notifywidget.qml"));
-    bool added = false;
 
     QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, user->name());
     if ( existingWidgets.contains(key) ) {
@@ -75,7 +74,6 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
         useWidget = widget;
         existingWidgets[key] = widget;
-        added = true;
     }
 
     NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);

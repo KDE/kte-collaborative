@@ -233,7 +233,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     }
 }
 
-void InfinityProtocol::del(const KUrl& url, bool isfile)
+void InfinityProtocol::del(const KUrl& url, bool /*isfile*/)
 {
     kDebug() << "DELETE" << url;
     if ( ! doConnect(Peer(url)) ) {

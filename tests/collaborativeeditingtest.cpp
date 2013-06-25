@@ -166,7 +166,6 @@ KTextEditor::Document* CollaborativeEditingTest::newDocument(const QString& name
     // intelligent caching stuff (it saves to a local document first, and later
     // uploads that to the server). I'm not sure what exactly causes it, but
     // using saveAs() instead of KIO::put causes the test to randomly fail.
-    KobbyPlugin* p = plugin(whichPlugin);
     KUrl url = urlForFileName(name);
     url.setUser(userNameForPlugin(whichPlugin));
     KIO::put(url, 0);

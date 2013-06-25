@@ -155,7 +155,7 @@ private:
     QPointer< QInfinity::SessionProxy > m_proxy;
     Kobby::InfTextDocument* m_infDocument;
     // id of the browser iter for this document, for checking whether signals are meant for it
-    int m_iterId;
+    unsigned int m_iterId;
     // status of this session (synchronizing, running etc)
     QInfinity::Session::Status m_sessionStatus;
 };

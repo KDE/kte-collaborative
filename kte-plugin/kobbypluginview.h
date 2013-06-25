@@ -1,4 +1,4 @@
-/* This file is part of the Kobby
+/* This file is part of the Kobby plugin
  * Copyright (C) 2013 Sven Brauch <svenbrauch@gmail.com>
  *
  * This program is free software; you can redistribute it and/or

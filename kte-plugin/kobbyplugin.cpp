@@ -87,7 +87,7 @@ void KobbyPlugin::connectionPrepared(Connection* connection)
     connection->open();
 }
 
-void KobbyPlugin::browserConnected(const QInfinity::Browser* browser)
+void KobbyPlugin::browserConnected(const QInfinity::Browser* /*browser*/)
 {
     kDebug() << "browser connected, subscribing documents";
     subscribeNewDocuments();

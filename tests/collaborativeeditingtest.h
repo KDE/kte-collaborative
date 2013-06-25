@@ -47,10 +47,10 @@ class Operation {
 public:
     Operation(char forDocument) : forDocument(forDocument) { };
     virtual ~Operation() { };
-    virtual void apply(KTextEditor::Document* document) {
+    virtual void apply(KTextEditor::Document* /*document*/) {
         Q_ASSERT(false && "not implemented");
     };
-    const char whichDocument() const {
+    char whichDocument() const {
         return forDocument;
     }
 protected:
@@ -60,7 +60,7 @@ protected:
 class WaitForSyncOperation : public Operation {
 public:
     WaitForSyncOperation(char forDocument) : Operation(forDocument) { };
-    virtual void apply(KTextEditor::Document* document) {
+    virtual void apply(KTextEditor::Document* /*document*/) {
         // TODO wait correctly if we know how
         wait(NEED_SYNC_CYCLES);
     };
@@ -163,7 +163,7 @@ private:
     const QString serverDirectory() const {
         return QDir::tempPath() + "/kobby_unit_tests";
     };
-    const int port() const {
+    int port() const {
         return 64261;
 //         return 6523;
     };

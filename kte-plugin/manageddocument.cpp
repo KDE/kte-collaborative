@@ -37,13 +37,13 @@ using namespace QInfinity;
 
 ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* browserModel, NotePlugin* plugin, Kobby::Connection* connection, QObject* parent)
     : QObject(parent)
+    , m_textBuffer(0)
     , m_document(document)
     , m_browserModel(browserModel)
     , m_notePlugin(plugin)
-    , m_subscribed(false)
-    , m_textBuffer(0)
-    , m_infDocument(0)
     , m_connection(connection)
+    , m_subscribed(false)
+    , m_infDocument(0)
     , m_iterId(0)
     , m_sessionStatus(QInfinity::Session::Closed)
 {
@@ -128,7 +128,7 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     emit synchronizationBegins(this);
 }
 
-void ManagedDocument::synchronizationComplete(Kobby::Document* d)
+void ManagedDocument::synchronizationComplete(Kobby::Document* /*document*/)
 {
     // Only after the connection has been established and synchronization is finished,
     // the user is allowed to edit the document.
