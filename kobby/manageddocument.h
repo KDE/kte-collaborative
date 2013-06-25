@@ -86,12 +86,6 @@ private:
     QInfinity::Session::Status m_sessionStatus;
 };
 
-// TODO this map sort of lost its purpose when it turned from a list into a map...
-// maybe we should just replace it with a typedef?
-class ManagedDocumentList : public QMap<KTextEditor::Document*, ManagedDocument*> {
-public:
-    bool isManaged(KTextEditor::Document* document) const;
-    ManagedDocument* findDocument(KTextEditor::Document* document) const;
-};
+typedef QMap<KTextEditor::Document*, ManagedDocument*> ManagedDocumentList;
 
 #endif

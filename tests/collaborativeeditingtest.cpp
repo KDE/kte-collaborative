@@ -135,11 +135,11 @@ void CollaborativeEditingTest::waitForDocument(KTextEditor::Document* document, 
     const ManagedDocumentList& docs = onPlugin->managedDocuments();
     bool ready = false;
     while ( ! ready ) {
-        kDebug() << "waiting for document to become ready" << docs.isManaged(document) << document->url();
+        kDebug() << "waiting for document to become ready" << docs.contains(document) << document->url();
         QTest::qWait(1);
         QApplication::processEvents();
-        if ( docs.isManaged(document) ) {
-            ManagedDocument* managed = docs.findDocument(document);
+        if ( docs.contains(document) ) {
+            ManagedDocument* managed = docs[document];
             ready = managed->sessionStatus() == QInfinity::Session::Running;
             kDebug() << managed->sessionStatus() << managed->textBuffer();
             ready = ready && managed->textBuffer()->hasUser();

@@ -174,17 +174,3 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
 }
 
-ManagedDocument* ManagedDocumentList::findDocument(KTextEditor::Document* document) const
-{
-    if ( contains(document) ) {
-        return operator[](document);
-    }
-    else {
-        return 0;
-    }
-}
-
-bool ManagedDocumentList::isManaged(KTextEditor::Document* document) const
-{
-    return contains(document);
-}

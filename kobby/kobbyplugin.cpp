@@ -138,9 +138,8 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
 void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 {
     kDebug() << "remove document:" << document->url().path();
-    ManagedDocument* doc = m_managedDocuments.findDocument(document);
-    if ( doc ) {
-        emit removedManagedDocument(doc);
+    if ( m_managedDocuments.contains(document) ) {
+        emit removedManagedDocument(m_managedDocuments[document]);
         delete m_managedDocuments.take(document);
     }
     else {
@@ -150,7 +149,7 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
 
 void KobbyPlugin::checkManageDocument(KTextEditor::Document* document)
 {
-    bool isManaged = m_managedDocuments.isManaged(document);
+    bool isManaged = m_managedDocuments.contains(document);
     if ( document->url().protocol() != "inf" ) {
         kDebug() << "not a collaborative document:" << document->url().url();
         if ( isManaged ) {
@@ -225,7 +224,10 @@ void KobbyPlugin::connectionDisconnected(Connection* connection)
 
 void KobbyPlugin::addView(KTextEditor::View* view)
 {
-    ManagedDocument* doc = managedDocuments().findDocument(view->document());
+    ManagedDocument* doc = 0;
+    if ( managedDocuments().contains(view->document()) ) {
+        doc = managedDocuments()[view->document()];
+    }
     kDebug() << "adding view" << view;
     // Although the document might not be managed, a new view must be added,
     // otherwise KXMLGuiClient will not register our actions correctly;
