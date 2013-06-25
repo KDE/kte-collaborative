@@ -1,3 +1,0 @@
-install( FILES kobbyui.rc DESTINATION ${DATA_INSTALL_DIR}/kobby )
-install( FILES kobby.desktop  DESTINATION  ${XDG_APPS_INSTALL_DIR} )
-install( FILES kobbysettings.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} )

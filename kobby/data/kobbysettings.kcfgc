@@ -1,5 +1,0 @@
-File=kobbysettings.kcfg
-ClassName=KobbySettings
-NameSpace=Kobby
-Singleton=true
-Mutators=true
