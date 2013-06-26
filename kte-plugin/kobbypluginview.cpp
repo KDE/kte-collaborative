@@ -41,6 +41,7 @@
 #include <KMessageBox>
 #include <KColorScheme>
 #include <KTextEditor/Editor>
+#include <KFileDialog>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -270,9 +271,6 @@ void KobbyPluginView::openActionClicked()
     QLineEdit* userName = new QLineEdit("UnnamedUser");
     layout->addRow(new QLabel(i18n("User name:")), userName);
 
-    QLineEdit* documentPath = new QLineEdit();
-    layout->addRow(new QLabel(i18n("Document path and name (e.g. /test.txt):")), documentPath);
-
     QLineEdit* password = new QLineEdit();
     layout->addRow(new QLabel(i18n("Password (optional):")), password);
 
@@ -280,14 +278,16 @@ void KobbyPluginView::openActionClicked()
 
     if ( dialog->exec() == KDialog::Accepted ) {
         KUrl url;
-        QString path = documentPath->text().startsWith('/') ? documentPath->text() : "/" + documentPath->text();
         url.setHost(host->text());
         url.setPort(port->text().toInt());
-        url.setPath(path);
+        url.setPath(QLatin1String("/"));
         url.setUser(userName->text());
         url.setPassword(password->text());
         url.setProtocol("inf");
-        m_view->document()->openUrl(url);
+        KUrl result = KFileDialog::getOpenUrl(url);
+        if ( result.isValid() ) {
+            m_view->document()->openUrl(KUrl(result));
+        }
     }
     delete dialog;
 }
