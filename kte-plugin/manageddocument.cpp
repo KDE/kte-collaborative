@@ -33,6 +33,7 @@
 #include <common/connection.h>
 
 #include <QTimer>
+#include <QFile>
 
 #include "common/utils.h"
 
@@ -49,6 +50,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_infDocument(0)
     , m_iterId(0)
     , m_sessionStatus(QInfinity::Session::Closed)
+    , m_localSavePath()
 {
     kDebug() << "now managing document" << document << document->url();
     // A document must not be edited before it is connected, since changes done will
@@ -62,6 +64,27 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
 ManagedDocument::~ManagedDocument()
 {
     unsubscribe();
+}
+
+bool ManagedDocument::saveCopy() const
+{
+    if ( localSavePath().isEmpty() ) {
+        kDebug() << "invalid save url";
+        return false;
+    }
+    QFile f(localSavePath());
+    // TODO can we do this less manually?
+    QByteArray contents = m_document->text().toUtf8();
+    if ( ! f.open(QIODevice::WriteOnly) ) {
+        kDebug() << "failed to open" << localSavePath() << "for writing";
+        return false;
+    }
+    if ( f.write(contents) != contents.size() ) {
+        kDebug() << "failed to write" << contents.size() << "bytes to" << localSavePath();
+        return false;
+    }
+    m_document->setModified(false);
+    return true;
 }
 
 QInfinity::Browser* ManagedDocument::browser() const

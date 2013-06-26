@@ -294,7 +294,21 @@ void KobbyPluginView::openActionClicked()
 
 void KobbyPluginView::saveCopyActionClicked()
 {
-
+    if ( ! m_document ) {
+        return;
+    }
+    if ( m_document->localSavePath().isEmpty() ) {
+        const QString saveUrl = KFileDialog::getSaveFileName();
+        kDebug() << "saving to url" << saveUrl;
+        if ( saveUrl.isEmpty() ) {
+            return;
+        }
+        m_document->setLocalSavePath(saveUrl);
+    }
+    if ( ! m_document->saveCopy() ) {
+        KMessageBox::error(m_view, i18n("Failed to save file to %1", m_document->localSavePath()));
+        m_document->setLocalSavePath(QString());
+    }
 }
 
 void KobbyPluginView::shareActionClicked()

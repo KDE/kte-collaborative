@@ -92,6 +92,12 @@ public:
     inline Kobby::KDocumentTextBuffer* textBuffer() const {
         return m_textBuffer;
     };
+    inline void setLocalSavePath(const QString& url) {
+        m_localSavePath = url;
+    };
+    inline const QString& localSavePath() const {
+        return m_localSavePath;
+    };
 
     /**
      * @brief Returns the Browser for the document's connection
@@ -107,6 +113,13 @@ public:
      * @brief Returns the user table for this document
      */
     QInfinity::UserTable* userTable() const;
+
+    /**
+     * @brief Save a copy of this document to the URL set by setLocalSaveUrl().
+     * If this method succeeds, it'll set the part status to "not modified".
+     * @return true if saved successfully, else false.
+     */
+    bool saveCopy() const;
 
 public slots:
     /**
@@ -161,6 +174,8 @@ private:
     unsigned int m_iterId;
     // status of this session (synchronizing, running etc)
     QInfinity::Session::Status m_sessionStatus;
+    // local URL to copy the document to if requested
+    QString m_localSavePath;
 };
 
 typedef QMap<KTextEditor::Document*, ManagedDocument*> ManagedDocumentList;
