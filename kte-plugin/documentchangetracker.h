@@ -30,6 +30,7 @@
 namespace KTextEditor {
     class Document;
     class MovingInterface;
+class MovingRange;
 }
 
 namespace QInfinity {
@@ -52,10 +53,24 @@ public slots:
     void setupSignals();
 
 private:
+    /**
+     * @brief Finds empty ranges in m_ranges and deletes them.
+     */
+    void cleanupRanges();
+
+    /**
+     * @brief Adds a range to the highlighted ranges.
+     *
+     * @param range The raw range to start tracking
+     * @param color The color to use for highlighting
+     */
+    void addHighlightedRange(const KTextEditor::Range& range, const QColor& color);
+
     ManagedDocument* const m_document;
     KTextEditor::Document* kDocument() const;
     KTextEditor::MovingInterface* m_iface;
     inline KTextEditor::MovingInterface* iface() const { return m_iface; };
+    QList<KTextEditor::MovingRange*> m_ranges;
 };
 
 #endif // DOCUMENTCHANGETRACKER_H

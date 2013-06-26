@@ -48,19 +48,80 @@ KTextEditor::Document* DocumentChangeTracker::kDocument() const
     return m_document->document();
 }
 
+void DocumentChangeTracker::cleanupRanges()
+{
+    // TODO: Could join ranges in some cases. Worth it?
+    for ( int i = 0; i < m_ranges.size(); i++ ) {
+        KTextEditor::MovingRange* r = m_ranges.at(i);
+        if ( r->isEmpty() ) {
+            m_ranges.removeAt(i);
+            delete r;
+            i -= 1;
+        }
+    }
+}
+
+void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range, const QColor& color)
+{
+    // We allow empty ranges here, and invalidate them ourselves on the next insertion.
+    KTextEditor::MovingRange* r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand,
+                                        KTextEditor::MovingRange::AllowEmpty);
+    KTextEditor::Attribute::Ptr attrib(new KTextEditor::Attribute);
+    attrib->setBackground(color);
+    r->setAttribute(attrib);
+    m_ranges << r;
+}
+
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
 {
-    kDebug() << "user changed text:" << user->name() << range << removal;
+    kDebug() << "user changed text:" << user->name() << range << removal << "moving range count:" << m_ranges.size();
     if ( ! iface() ) {
         return;
     }
-    if ( ! removal ) {
-        KTextEditor::MovingRange* r;
-        r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand, KTextEditor::MovingRange::InvalidateIfEmpty);
-        KTextEditor::Attribute::Ptr attrib(new KTextEditor::Attribute);
-        attrib->setBackground(user->color());
-        r->setAttribute(attrib);
+    cleanupRanges();
+    if ( removal ) {
+        // Nothing to do for removals, ranges will shrink automatically
+        return;
     }
+    foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
+        if ( existing->start() > range.end() || existing->end() < range.start() ) {
+            continue;
+        }
+
+        bool colorMatches = existing->attribute()->background().color().rgb() == user->color().rgb();
+        if ( colorMatches ) {
+            if ( existing->contains(range) ) {
+                kDebug() << "nothing to do";
+                // The existing range has the same color and contains the insertion.
+                // It will auto-expand, and nothing needs to be done at all.
+                return;
+            }
+            // Expand this range if it matches start or end of the new text
+            if ( existing->start() == range.end() ) {
+                kDebug() << "adjusting range start";
+                existing->setRange(range.start(), existing->end());
+                return;
+            }
+            else if ( existing->end() == range.start() ) {
+                kDebug() << "adjusting range end";
+                existing->setRange(existing->start(), range.end());
+                return;
+            }
+            // Should not reach here, if I have understood the interface correctly :)
+            Q_ASSERT(false);
+        }
+        else if ( existing->contains(range) ) {
+            kDebug() << "splitting" << *existing;
+            // split this range; the old range turns into the second part...
+            KTextEditor::Cursor oldStart = existing->start();
+            existing->setRange(range.end(), existing->end());
+            // and a new one is created for the first part
+            KTextEditor::Range firstPartRaw(oldStart, range.start());
+            addHighlightedRange(firstPartRaw, existing->attribute()->background().color());
+            // the range for the new text will be added below, after the loop.
+        }
+    }
+    addHighlightedRange(range, user->color());
 }
 
 #include "documentchangetracker.moc"
