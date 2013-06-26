@@ -113,10 +113,6 @@ public slots:
     void changeUserActionClicked();
     void createServerActionClicked();
 
-    /**
-     * @brief Display UI to change the user name.
-     */
-    void changeUserName();
 
 private:
     KTextEditor::View* m_view;
@@ -134,6 +130,11 @@ private:
     // Enables or disables the UI (status bar, tracking widget, ...)
     void enableUi();
     void disableUi();
+
+    /**
+     * @brief Changes the document's user name to the given name.
+     */
+    void changeUserName(const QString& newUserName);
 
     friend class KobbyStatusBar;
 };

@@ -220,31 +220,33 @@ void KobbyPluginView::changeUserActionClicked()
         KMessageBox::error(m_view, i18n("You cannot change your user name for a document you are not subscribed to."));
         return;
     }
-    KDialog* dialog = new KDialog(m_view);
-    dialog->setCaption(i18n("Change user name"));
-    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
-    QWidget* widget = new QWidget(dialog);
+    KDialog dialog(m_view);
+    dialog.setCaption(i18n("Change user name"));
+    dialog.setButtons(KDialog::Ok | KDialog::Cancel);
+    dialog.setDefaultButton(KDialog::Ok);
+    QWidget* widget = new QWidget(&dialog);
     widget->setLayout(new QVBoxLayout);
     widget->layout()->addWidget(new QLabel(i18n("Enter your new user name:")));
     QLineEdit* lineEdit = new QLineEdit();
     lineEdit->setText(m_document->textBuffer()->user()->name());
     widget->layout()->addWidget(lineEdit);
-    lineEdit->setObjectName(QString::fromLatin1("username"));
-    dialog->setMainWidget(widget);
-    connect(dialog, SIGNAL(okClicked()), this, SLOT(changeUserName()));
-    dialog->show();
+    dialog.setMainWidget(widget);
+    lineEdit->setFocus();
+    lineEdit->selectAll();
+    if ( dialog.exec() == KDialog::Accepted ) {
+        changeUserName(lineEdit->text());
+    }
 }
 
-void KobbyPluginView::changeUserName()
+void KobbyPluginView::changeUserName(const QString& newUserName)
 {
-    QLineEdit* lineEdit = qobject_cast<QWidget*>(QObject::sender())->findChild<QLineEdit*>(QString::fromLatin1("username"));
-    const QString& newUserName = lineEdit->text();
     kDebug() << "new user name" << newUserName;
     KUrl url = m_document->document()->url();
     url.setUser(newUserName);
-    m_document->document()->setModified(false);
-    m_document->document()->openUrl(url);
-    delete QObject::sender();
+    KTextEditor::Document* document = m_document->document();
+    document->setModified(false);
+    document->closeUrl();
+    document->openUrl(url);
 }
 
 void KobbyPluginView::createServerActionClicked()
