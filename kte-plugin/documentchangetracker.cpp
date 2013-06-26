@@ -83,6 +83,40 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         // Nothing to do for removals, ranges will shrink automatically
         return;
     }
+    const int startLine = range.start().line();
+    const int endLine = range.end().line();
+    if ( m_document->document()->text(range, false) == QLatin1String("\n") ) {
+        // Special case optimization: just a newline was inserted; nothing needs to be done.
+        return;
+    }
+    else if ( startLine != endLine ) {
+        // If the range spans multiple lines, add multiple moving ranges to avoid
+        // highlighting the newlines.
+        // TODO maybe we want this behaviour to be configurable?
+        for ( int line = startLine; line <= endLine; line++ ) {
+            const int lineSize = m_document->document()->lineLength(line);
+            if ( lineSize == 0 ) {
+                // do not create empty highlight ranges
+                continue;
+            }
+            const KTextEditor::Cursor lineEnd(line, lineSize);
+            KTextEditor::Range lineRange;
+            if ( line == startLine ) {
+                lineRange.setRange(range.start(), lineEnd);
+            }
+            else if ( line == endLine ) {
+                lineRange.setRange(KTextEditor::Cursor(line, 0), range.end());
+            }
+            else {
+                lineRange.setRange(KTextEditor::Cursor(line, 0), lineEnd);
+            }
+            // Off-load the actual work of highlighting the line to another call
+            Q_ASSERT(lineRange.start().line() == lineRange.end().line());
+            userChangedText(lineRange, user, removal);
+        }
+        return;
+    }
+
     foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
         if ( existing->start() > range.end() || existing->end() < range.start() ) {
             continue;
