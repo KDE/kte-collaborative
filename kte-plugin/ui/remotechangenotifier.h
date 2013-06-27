@@ -43,9 +43,20 @@ public:
 };
 
 class NotifierWidget : public QDeclarativeView {
+Q_OBJECT
 public:
     NotifierWidget(const QUrl& source, QWidget* parent = 0);
-    QTimer* closeTimer;
+    void startCloseTimer();
     virtual bool event(QEvent* event);
+    inline void setCursorPosition(KTextEditor::Cursor& cursor) {
+        m_position = cursor;
+    };
+
+public slots:
+    void moveWidget(KTextEditor::View* view, KTextEditor::Cursor cursor = KTextEditor::Cursor::invalid());
+
+private:
+    QTimer* m_closeTimer;
+    KTextEditor::Cursor m_position;
 };
 #endif // REMOTECHANGENOTIFIER_H

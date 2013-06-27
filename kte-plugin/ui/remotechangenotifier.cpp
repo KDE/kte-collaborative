@@ -35,11 +35,11 @@ QMap< QPair<KTextEditor::View*, QString>, QWidget* > RemoteChangeNotifier::exist
 
 NotifierWidget::NotifierWidget(const QUrl& source, QWidget* parent)
     : QDeclarativeView(source, parent)
-    , closeTimer(new QTimer(parent))
+    , m_closeTimer(new QTimer(parent))
 {
-    closeTimer->setSingleShot(true);
-    closeTimer->setInterval(3000);
-    connect(closeTimer, SIGNAL(timeout()), this, SLOT(hide()));
+    m_closeTimer->setSingleShot(true);
+    m_closeTimer->setInterval(3000);
+    connect(m_closeTimer, SIGNAL(timeout()), this, SLOT(hide()));
 }
 
 bool NotifierWidget::event(QEvent* event)
@@ -80,6 +80,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
         // check if loading the QML file was successful, otherwise abort
         if ( ! widget->rootContext() ) {
+            kWarning() << "Errors occured while loading" << src;
             return;
         }
 
@@ -95,16 +96,32 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     QMetaObject::invokeMethod(hideAnimation, "restart");
     // reset widget opacity + position
     QMetaObject::invokeMethod(notifierWidget->rootObject(), "reset");
-    notifierWidget->closeTimer->start();
+    notifierWidget->startCloseTimer();
 
+    // update the position now, and when the user scrolls
+    QObject::connect(view, SIGNAL(verticalScrollPositionChanged(KTextEditor::View*,KTextEditor::Cursor)),
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)));
+    QObject::connect(view, SIGNAL(horizontalScrollPositionChanged(KTextEditor::View*)),
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)));
+    notifierWidget->setCursorPosition(cursor);
+    notifierWidget->moveWidget(view);
+}
+
+void NotifierWidget::startCloseTimer()
+{
+    m_closeTimer->start();
+}
+
+void NotifierWidget::moveWidget(KTextEditor::View* view, KTextEditor::Cursor /*cursor*/)
+{
+    // The cursor we get as an argument is not the cursor we want to move to!
+    // It's set by the view to where the user scrolled to.
     // use KTE api to calculate position
     // TODO handle out-of-view changes nicely, by pointing the arrow up or down
-    // TODO support scrolling while the widget is visible
-    QPoint pos = useWidget->mapToParent(view->cursorToCoordinate(cursor));
-    pos.setY(pos.y() + view->fontMetrics().height()*0.8 - useWidget->y());
-    pos.setX(pos.x() - 15 - useWidget->x());
-    QPoint pos2 = useWidget->mapToParent(pos);
-    useWidget->move(qMax(10, pos2.x() - useWidget->x()), pos2.y() - useWidget->y());
-    useWidget->show();
-    kDebug() << "widget size:" << useWidget->size() << useWidget->isVisible() << pos << useWidget->pos();
+    QPoint pos = mapToParent(view->cursorToCoordinate(m_position));
+    pos.setY(pos.y() + view->fontMetrics().height()*0.8 - y());
+    pos.setX(pos.x() - 15 - x());
+    QPoint pos2 = mapToParent(pos);
+    move(qMax(10, pos2.x() - x()), pos2.y() - y());
+    show();
 }
