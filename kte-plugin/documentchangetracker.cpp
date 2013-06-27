@@ -65,7 +65,7 @@ void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range,
 {
     // We allow empty ranges here, and invalidate them ourselves on the next insertion.
     KTextEditor::MovingRange* r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand,
-                                        KTextEditor::MovingRange::AllowEmpty);
+                                                          KTextEditor::MovingRange::AllowEmpty);
     KTextEditor::Attribute::Ptr attrib(new KTextEditor::Attribute);
     attrib->setBackground(color);
     r->setAttribute(attrib);
@@ -74,15 +74,14 @@ void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range,
 
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
 {
-    kDebug() << "user changed text:" << user->name() << range << removal << "moving range count:" << m_ranges.size();
     if ( ! iface() ) {
         return;
     }
-    cleanupRanges();
     if ( removal ) {
         // Nothing to do for removals, ranges will shrink automatically
         return;
     }
+    cleanupRanges();
     const int startLine = range.start().line();
     const int endLine = range.end().line();
     if ( m_document->document()->text(range, false) == QLatin1String("\n") ) {
@@ -125,19 +124,16 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         bool colorMatches = existing->attribute()->background().color().rgb() == user->color().rgb();
         if ( colorMatches ) {
             if ( existing->contains(range) ) {
-                kDebug() << "nothing to do";
                 // The existing range has the same color and contains the insertion.
                 // It will auto-expand, and nothing needs to be done at all.
                 return;
             }
             // Expand this range if it matches start or end of the new text
             if ( existing->start() == range.end() ) {
-                kDebug() << "adjusting range start";
                 existing->setRange(range.start(), existing->end());
                 return;
             }
             else if ( existing->end() == range.start() ) {
-                kDebug() << "adjusting range end";
                 existing->setRange(existing->start(), range.end());
                 return;
             }
@@ -145,7 +141,6 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             Q_ASSERT(false);
         }
         else if ( existing->contains(range) ) {
-            kDebug() << "splitting" << *existing;
             // split this range; the old range turns into the second part...
             KTextEditor::Cursor oldStart = existing->start();
             existing->setRange(range.end(), existing->end());

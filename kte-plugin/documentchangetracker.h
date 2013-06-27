@@ -49,7 +49,18 @@ public:
     DocumentChangeTracker(ManagedDocument* const document);
 
 public slots:
+    /**
+     * @brief Should be invoked when anyone (you or a remote user) changes the document's text.
+     *
+     * @param range The range of the text which was changed
+     * @param user The user who changed the text
+     * @param removal true if the text was removed, else false
+     */
     void userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal);
+
+    /**
+     * @brief Sets up the signals notifying this class about changes to the text after synchronization begins.
+     */
     void setupSignals();
 
 private:
