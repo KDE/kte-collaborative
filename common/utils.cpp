@@ -116,7 +116,7 @@ QColor ColorHelper::colorForUsername(const QString& username, const unsigned cha
     const uint hue = ((hash % 19) * 4129) % 360;
     const uint val = qMin<int>(brightness + ((hash % 3741) * 17) % 35, 255);
     QColor color = QColor::fromHsv(hue, sat, val);
-    while ( y(color) < qMin<int>(brightness + ((hash % 3011) * 13) % 50 - 25, 225) ) {
+    while ( y(color) < qMin<int>(brightness + ((hash % 3011) * 13) % 20 - 10, 225) ) {
         color = color.lighter(115);
     }
     return color;
@@ -128,19 +128,22 @@ QColor ColorHelper::colorForUsername(const QString& username, const KTextEditor:
     short backgroundBrightness = 195;
     KTextEditor::ConfigInterface* iface = qobject_cast<KTextEditor::ConfigInterface*>(view);
     if ( iface ) {
-        backgroundBrightness = qMin(y(iface->configValue("background-color").value<QColor>()) + 15, 255);
+        backgroundBrightness = qMin(y(iface->configValue("background-color").value<QColor>()), 255);
         if ( backgroundBrightness < 60 ) {
             // don't make it too dark, it's hard to see otherwise
             backgroundBrightness += 10;
         }
+        else if ( backgroundBrightness > 225 ) {
+            backgroundBrightness -= 20;
+        }
         else if ( backgroundBrightness > 200 ) {
-            backgroundBrightness -= 15;
+            backgroundBrightness -= 10;
         }
     }
     // Read the user-configured saturation
     KConfig config(QLatin1String("ktecollaborative"));
     KConfigGroup group = config.group("colors");
-    int saturation = group.readEntry("saturation", 195);
+    int saturation = group.readEntry("saturation", 185);
     return colorForUsername(username, saturation, backgroundBrightness);
 }
 
