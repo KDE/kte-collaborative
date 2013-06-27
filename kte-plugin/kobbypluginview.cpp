@@ -185,7 +185,9 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
 
 void KobbyPluginView::clearHighlightActionClicked()
 {
-    m_document->changeTracker()->clearHighlight();
+    if ( m_document && m_document->changeTracker() ) {
+        m_document->changeTracker()->clearHighlight();
+    }
 }
 
 void KobbyPluginView::documentBecameManaged(ManagedDocument* document)

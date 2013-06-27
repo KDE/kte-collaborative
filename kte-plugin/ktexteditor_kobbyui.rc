@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<gui name="ktexteditor_kobbyui" library="ktexteditor_kobby" version="4">
+<gui name="ktexteditor_kobbyui" library="ktexteditor_kobby" version="5">
 
 <MenuBar>
   <Menu name="collaborative"><text>&amp;Collaborative</text>
