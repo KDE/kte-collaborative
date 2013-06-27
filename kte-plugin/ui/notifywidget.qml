@@ -16,8 +16,8 @@ Rectangle {
     }
 //     property string arrowAlignment: "top"
     Rectangle {
-        x: 10
-        y: 10
+        x: 8
+        y: 11
         id: content
         border.color: "black"
         border.width: 1
@@ -45,7 +45,7 @@ Rectangle {
         }
         Rectangle {
             anchors.horizontalCenter: parent.left
-            anchors.horizontalCenterOffset: +15 + root.arrowOffset
+            anchors.horizontalCenterOffset: +12 + root.arrowOffset
             anchors.top: parent.top
             color: "#00000000"
             Rectangle {
