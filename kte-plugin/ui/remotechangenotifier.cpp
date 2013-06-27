@@ -100,11 +100,12 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
     // update the position now, and when the user scrolls
     QObject::connect(view, SIGNAL(verticalScrollPositionChanged(KTextEditor::View*,KTextEditor::Cursor)),
-                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)));
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)), Qt::UniqueConnection);
     QObject::connect(view, SIGNAL(horizontalScrollPositionChanged(KTextEditor::View*)),
-                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)));
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)), Qt::UniqueConnection);
     notifierWidget->setCursorPosition(cursor);
     notifierWidget->moveWidget(view);
+    notifierWidget->show();
 }
 
 void NotifierWidget::startCloseTimer()
@@ -114,6 +115,9 @@ void NotifierWidget::startCloseTimer()
 
 void NotifierWidget::moveWidget(KTextEditor::View* view, KTextEditor::Cursor /*cursor*/)
 {
+    if ( ! isVisible() ) {
+        return;
+    }
     // The cursor we get as an argument is not the cursor we want to move to!
     // It's set by the view to where the user scrolled to.
     // use KTE api to calculate position
