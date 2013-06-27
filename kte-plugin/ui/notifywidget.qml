@@ -6,7 +6,7 @@ Rectangle {
     property string widgetcolor: "#FF9900";
     property string wasVisibleBefore: "false"
     property bool outsideView: false
-    property double defaultOpacity: 0.8
+    property double defaultOpacity: root.outsideView ? 0.5 : 0.8
     color: "#00000000"
     // changed by the content animation on startup
     opacity: root.defaultOpacity
