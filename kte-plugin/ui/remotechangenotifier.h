@@ -51,12 +51,16 @@ public:
     inline void setCursorPosition(KTextEditor::Cursor& cursor) {
         m_position = cursor;
     };
+    inline void forceUpdate() {
+        m_forceUpdate = true;
+    };
 
 public slots:
-    void moveWidget(KTextEditor::View* view, KTextEditor::Cursor cursor = KTextEditor::Cursor::invalid());
+    void moveWidget(KTextEditor::View* view);
 
 private:
     QTimer* m_closeTimer;
+    bool m_forceUpdate;
     KTextEditor::Cursor m_position;
 };
 #endif // REMOTECHANGENOTIFIER_H

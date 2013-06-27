@@ -5,14 +5,16 @@ Rectangle {
     property string username: "not set"
     property string widgetcolor: "#FF9900";
     property string wasVisibleBefore: "false"
+    property bool outsideView: false
+    property double defaultOpacity: 0.8
     color: "#00000000"
     // changed by the content animation on startup
-    opacity: 0.8
+    opacity: root.defaultOpacity
     property int arrowOffset: 0
     // TODO use states?
     function reset() {
-        root.opacity = 0.8
-        content.x = 10
+        root.opacity = root.defaultOpacity
+        content.x = 10;
     }
 //     property string arrowAlignment: "top"
     Rectangle {
@@ -25,6 +27,7 @@ Rectangle {
             id: user_text
             text: root.username
             anchors.centerIn: parent
+            font.pointSize: root.outsideView ? 6 : 8
         }
         anchors.margins: 5
         width: user_text.width + 12
@@ -43,7 +46,9 @@ Rectangle {
             running: true
             loops: 1
         }
+        // The little arrow
         Rectangle {
+            visible: ! root.outsideView
             anchors.horizontalCenter: parent.left
             anchors.horizontalCenterOffset: +12 + root.arrowOffset
             anchors.top: parent.top

@@ -20,8 +20,10 @@
  */
 
 #include "remotechangenotifier.h"
+#include <kobbypluginview.h>
 #include <common/utils.h>
 #include <libqinfinity/user.h>
+#include <ktexteditor/document.h>
 #include <QLabel>
 #include <QPaintEvent>
 
@@ -36,6 +38,7 @@ QMap< QPair<KTextEditor::View*, QString>, QWidget* > RemoteChangeNotifier::exist
 NotifierWidget::NotifierWidget(const QUrl& source, QWidget* parent)
     : QDeclarativeView(source, parent)
     , m_closeTimer(new QTimer(parent))
+    , m_forceUpdate(false)
 {
     m_closeTimer->setSingleShot(true);
     m_closeTimer->setInterval(3000);
@@ -94,17 +97,18 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
     // restart animation
     QMetaObject::invokeMethod(hideAnimation, "restart");
-    // reset widget opacity + position
-    QMetaObject::invokeMethod(notifierWidget->rootObject(), "reset");
     notifierWidget->startCloseTimer();
 
     // update the position now, and when the user scrolls
     QObject::connect(view, SIGNAL(verticalScrollPositionChanged(KTextEditor::View*,KTextEditor::Cursor)),
-                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)), Qt::UniqueConnection);
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*)), Qt::UniqueConnection);
     QObject::connect(view, SIGNAL(horizontalScrollPositionChanged(KTextEditor::View*)),
-                     notifierWidget, SLOT(moveWidget(KTextEditor::View*,KTextEditor::Cursor)), Qt::UniqueConnection);
+                     notifierWidget, SLOT(moveWidget(KTextEditor::View*)), Qt::UniqueConnection);
     notifierWidget->setCursorPosition(cursor);
+    notifierWidget->forceUpdate();
     notifierWidget->moveWidget(view);
+    // reset widget opacity + position
+    QMetaObject::invokeMethod(notifierWidget->rootObject(), "reset");
     notifierWidget->show();
 }
 
@@ -113,19 +117,43 @@ void NotifierWidget::startCloseTimer()
     m_closeTimer->start();
 }
 
-void NotifierWidget::moveWidget(KTextEditor::View* view, KTextEditor::Cursor /*cursor*/)
+void NotifierWidget::moveWidget(KTextEditor::View* view)
 {
-    if ( ! isVisible() ) {
+    if ( ! m_forceUpdate && ! isVisible() ) {
         return;
     }
-    // The cursor we get as an argument is not the cursor we want to move to!
-    // It's set by the view to where the user scrolled to.
     // use KTE api to calculate position
-    // TODO handle out-of-view changes nicely, by pointing the arrow up or down
-    QPoint pos = mapToParent(view->cursorToCoordinate(m_position));
-    pos.setY(pos.y() + view->fontMetrics().height()*0.8 - y());
-    pos.setX(pos.x() - 15 - x());
-    QPoint pos2 = mapToParent(pos);
-    move(qMax(10, pos2.x() - x()), pos2.y() - y());
-    show();
+    const QPoint rawPos = view->cursorToCoordinate(m_position);
+    if ( rawPos == QPoint(-1, -1) ) {
+        // position is above or below the view
+        rootObject()->setProperty("outsideView", true);
+        if ( KTextEditor::CoordinatesToCursorInterface* iface = qobject_cast<KTextEditor::CoordinatesToCursorInterface*>(view)) {
+            const KTextEditor::Cursor topLeft = iface->coordinatesToCursor(QPoint(0, 0));
+            if ( topLeft.line() < m_position.line() ) {
+                // position is below the view
+                int bottom = view->height() - height();
+                if ( QWidget* statusBar = view->findChild<KobbyStatusBar*>() ) {
+                    bottom -= statusBar->height();
+                }
+                move(0, bottom);
+            }
+            else {
+                // position is above the view
+                move(0, 0);
+            }
+        }
+        else {
+            // interface is not supported; just hide the widget
+            hide();
+            return;
+        }
+    }
+    else {
+        rootObject()->setProperty("outsideView", false);
+        QPoint pos = mapToParent(rawPos);
+        pos.setY(pos.y() + view->fontMetrics().height()*0.8 - y());
+        pos.setX(pos.x() - 15 - x());
+        QPoint pos2 = mapToParent(pos);
+        move(qMax(10, pos2.x() - x()), pos2.y() - y());
+    }
 }
