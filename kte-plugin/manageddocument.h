@@ -152,6 +152,12 @@ public slots:
      */
     void disconnected(Connection*);
 
+    /**
+     * @brief Invoked when an error which cannot be recovered happens.
+     * The document will  be closed after the error has been displayed.
+     */
+    void unrecoverableError(Document*,QString);
+
 signals:
     /**
      * @brief Emitted when a document is completely synchronized and ready to be used (user can start typing etc).

@@ -34,6 +34,8 @@
 
 #include <QTimer>
 #include <QFile>
+#include <KMessageBox>
+#include <KLocalizedString>
 
 #include "common/utils.h"
 
@@ -149,9 +151,21 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy.data()->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());
+    connect(m_infDocument, SIGNAL(fatalError(Document*,QString)),
+            this, SLOT(unrecoverableError(Document*,QString)));
     connect(m_infDocument, SIGNAL(loadingComplete(Document*)),
             this, SLOT(synchronizationComplete(Document*)));
     emit synchronizationBegins(this);
+}
+
+void ManagedDocument::unrecoverableError(Document* document, QString error)
+{
+    Q_ASSERT(document == m_infDocument);
+    if ( document->kDocument() ) {
+        KMessageBox::error(document->kDocument()->widget(), i18n("Error opening document: %1", error));
+        document->kDocument()->setModified(false);
+        document->kDocument()->closeUrl();
+    }
 }
 
 void ManagedDocument::synchronizationComplete(Kobby::Document* /*document*/)
