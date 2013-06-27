@@ -18,8 +18,12 @@
 
 #include "common/utils.h"
 #include <libqinfinity/explorerequest.h>
+#include <ktexteditor/configinterface.h>
 
 #include <QStringList>
+#include <KTextEditor/View>
+#include <KConfigGroup>
+#include <kconfig.h>
 
 using QInfinity::ExploreRequest;
 
@@ -105,16 +109,39 @@ void IterLookupHelper::directoryExplored()
     emit failed();
 };
 
-QColor ColorHelper::colorForUsername(const QString& username, const int sat, const int brightness)
+QColor ColorHelper::colorForUsername(const QString& username, const unsigned char sat,
+                                     const unsigned char brightness)
 {
     const uint hash = qHash(username);
     const uint hue = ((hash % 19) * 4129) % 360;
-    const uint val = 180 + ((hash % 3741) * 17) % 75;
+    const uint val = qMin<int>(brightness + ((hash % 3741) * 17) % 35, 255);
     QColor color = QColor::fromHsv(hue, sat, val);
-    while ( ColorHelper::y(color) < brightness ) {
-        color = color.lighter(120);
+    while ( y(color) < qMin<int>(brightness + ((hash % 3011) * 13) % 50 - 25, 225) ) {
+        color = color.lighter(115);
     }
     return color;
+}
+
+QColor ColorHelper::colorForUsername(const QString& username, const KTextEditor::View* view)
+{
+    // Try to find a brightness which has good contrast to the text
+    short backgroundBrightness = 195;
+    KTextEditor::ConfigInterface* iface = qobject_cast<KTextEditor::ConfigInterface*>(view);
+    if ( iface ) {
+        backgroundBrightness = qMin(y(iface->configValue("background-color").value<QColor>()) + 15, 255);
+        if ( backgroundBrightness < 60 ) {
+            // don't make it too dark, it's hard to see otherwise
+            backgroundBrightness += 10;
+        }
+        else if ( backgroundBrightness > 200 ) {
+            backgroundBrightness -= 15;
+        }
+    }
+    // Read the user-configured saturation
+    KConfig config(QLatin1String("ktecollaborative"));
+    KConfigGroup group = config.group("colors");
+    int saturation = group.readEntry("saturation", 195);
+    return colorForUsername(username, saturation, backgroundBrightness);
 }
 
 int ColorHelper::y(const QColor& color)

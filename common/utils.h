@@ -31,6 +31,10 @@
 #include <libqinfinity/browser.h>
 #include <libqinfinity/browseriter.h>
 
+namespace KTextEditor {
+class View;
+}
+
 // Helper class for finding the BrowserIter for a directory.
 // libinfinity works with documents (or directories) only as "iters",
 // which are basically iterators of a tree model which represents
@@ -92,8 +96,17 @@ public:
      * @param brightness Hint on how bright the color should be; 255 = white, 0 = black
      * @return QColor The resulting color.
      */
-    static QColor colorForUsername(const QString& username, const int saturation = 180,
-                                   const int brightness = 180);
+    static QColor colorForUsername(const QString& username, const unsigned char saturation = 180,
+                                   const unsigned char brightness = 180);
+
+    /**
+     * @brief Like colorForUsername(QString, uchar, uchar), but determines params automatically
+     * It will read the saturation from KConfig (user configurable), and the brightness from the view.
+     * @param username The username to generate a color for
+     * @param view The view in which the color should be used as a background. May be zero, then brightness will be guessed.
+     * @return QColor The resulting color.
+     */
+    static QColor colorForUsername(const QString& username, const KTextEditor::View* view);
 };
 
 #endif

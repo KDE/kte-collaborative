@@ -117,7 +117,7 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         return;
     }
 
-    const QColor& userColor = ColorHelper::colorForUsername(user->name());
+    const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView());
     foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
         if ( existing->start() > range.end() || existing->end() < range.start() ) {
             continue;
