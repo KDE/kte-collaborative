@@ -34,6 +34,7 @@
 
 #include <QTimer>
 #include <QFile>
+#include <QTemporaryFile>
 #include <KMessageBox>
 #include <KLocalizedString>
 
@@ -163,8 +164,11 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
     Q_ASSERT(document == m_infDocument);
     if ( document->kDocument() ) {
         KMessageBox::error(document->kDocument()->widget(), i18n("Error opening document: %1", error));
-        document->kDocument()->setModified(false);
-        document->kDocument()->closeUrl();
+        QTemporaryFile file;
+        file.setAutoRemove(false);
+        file.open();
+        file.close();
+        document->kDocument()->saveAs(KUrl(file.fileName()));
     }
 }
 
