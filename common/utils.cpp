@@ -104,3 +104,20 @@ void IterLookupHelper::directoryExplored()
     kWarning() << "explore failed!";
     emit failed();
 };
+
+QColor ColorHelper::colorForUsername(const QString& username, const int sat, const int brightness)
+{
+    const uint hash = qHash(username);
+    const uint hue = ((hash % 19) * 4129) % 360;
+    const uint val = 180 + ((hash % 3741) * 17) % 75;
+    QColor color = QColor::fromHsv(hue, sat, val);
+    while ( ColorHelper::y(color) < brightness ) {
+        color = color.lighter(120);
+    }
+    return color;
+}
+
+int ColorHelper::y(const QColor& color)
+{
+    return 0.299*color.red() + 0.587*color.green() + 0.114*color.blue();
+}

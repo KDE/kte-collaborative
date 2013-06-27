@@ -22,6 +22,7 @@
 
 #include "documentchangetracker.h"
 #include "manageddocument.h"
+#include <common/utils.h>
 
 #include <ktexteditor/movinginterface.h>
 
@@ -116,12 +117,13 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         return;
     }
 
+    const QColor& userColor = ColorHelper::colorForUsername(user->name());
     foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
         if ( existing->start() > range.end() || existing->end() < range.start() ) {
             continue;
         }
 
-        bool colorMatches = existing->attribute()->background().color().rgb() == user->color().rgb();
+        bool colorMatches = existing->attribute()->background().color() == userColor;
         if ( colorMatches ) {
             if ( existing->contains(range) ) {
                 // The existing range has the same color and contains the insertion.
@@ -150,7 +152,7 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             // the range for the new text will be added below, after the loop.
         }
     }
-    addHighlightedRange(range, user->color());
+    addHighlightedRange(range, userColor);
 }
 
 #include "documentchangetracker.moc"

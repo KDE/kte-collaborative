@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QStack>
 #include <QTimer>
+#include <QColor>
 #include <KDebug>
 
 #include <glib.h>
@@ -73,6 +74,26 @@ protected:
     QInfinity::Browser* m_browser;
     QInfinity::BrowserIter m_currentIter;
     bool m_wasSuccessful;
+};
+
+// Helper class for dealing with colors.
+class KOBBYCOMMON_EXPORT ColorHelper {
+public:
+    /**
+     * @brief YUV "Y" value of the given color, between 255 (very light) and 0 (very dark).
+     */
+    static int y(const QColor& color);
+
+    /**
+     * @brief Generate a color depending on a given username.
+     * This is used for example for the background colors, and the popup widgets.
+     * @param username The username. The same username will always yield the same color.
+     * @param saturation Hint on how saturated the color should be; 255 = very colorful, 0 = black+white
+     * @param brightness Hint on how bright the color should be; 255 = white, 0 = black
+     * @return QColor The resulting color.
+     */
+    static QColor colorForUsername(const QString& username, const int saturation = 180,
+                                   const int brightness = 180);
 };
 
 #endif

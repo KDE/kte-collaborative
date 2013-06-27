@@ -20,6 +20,7 @@
  */
 
 #include "remotechangenotifier.h"
+#include <common/utils.h>
 #include <libqinfinity/user.h>
 #include <QLabel>
 #include <QPaintEvent>
@@ -78,7 +79,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
     NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);
     notifierWidget->rootObject()->setProperty("username", user->name());
-    notifierWidget->rootObject()->setProperty("widgetcolor", user->color().name());
+    notifierWidget->rootObject()->setProperty("widgetcolor", ColorHelper::colorForUsername(user->name()).name());
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
     // restart animation
     QMetaObject::invokeMethod(hideAnimation, "restart");
