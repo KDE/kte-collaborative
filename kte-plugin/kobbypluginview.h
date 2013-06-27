@@ -112,7 +112,7 @@ public slots:
     void shareActionClicked();
     void changeUserActionClicked();
     void createServerActionClicked();
-
+    void clearHighlightActionClicked();
 
 private:
     KTextEditor::View* m_view;
@@ -126,6 +126,9 @@ private:
     KAction* m_changeUserNameAction;
     KAction* m_disconnectAction;
     KAction* m_createServerAction;
+
+    // actions from the popup menu
+    KAction* m_clearHighlightAction;
 
     // Enables or disables the UI (status bar, tracking widget, ...)
     void enableUi();

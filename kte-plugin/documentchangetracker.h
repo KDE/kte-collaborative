@@ -63,6 +63,11 @@ public slots:
      */
     void setupSignals();
 
+    /**
+     * @brief Clears all existing highlights.
+     */
+    void clearHighlight();
+
 private:
     /**
      * @brief Finds empty ranges in m_ranges and deletes them.

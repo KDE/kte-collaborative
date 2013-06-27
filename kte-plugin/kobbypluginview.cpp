@@ -23,6 +23,7 @@
 #include "manageddocument.h"
 #include "kobbyplugin.h"
 #include "ui/remotechangenotifier.h"
+#include "documentchangetracker.h"
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
@@ -175,6 +176,16 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
                                           "by using the \"Open collaborative document\" action."));
     m_createServerAction->setEnabled(false);
     m_createServerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+N")), KAction::DefaultShortcut);
+
+    // TODO: disable this for non-collab documents
+    m_clearHighlightAction = actionCollection()->addAction("kobby_clear_highlight", this, SLOT(clearHighlightActionClicked()));
+    m_clearHighlightAction->setText("Clear user highlights");
+    m_clearHighlightAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+C")), KAction::DefaultShortcut);
+}
+
+void KobbyPluginView::clearHighlightActionClicked()
+{
+    m_document->changeTracker()->clearHighlight();
 }
 
 void KobbyPluginView::documentBecameManaged(ManagedDocument* document)

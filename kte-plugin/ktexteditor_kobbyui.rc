@@ -12,4 +12,8 @@
   </Menu>
 </MenuBar>
 
+<Menu name="ktexteditor_popup">
+  <Action name="kobby_clear_highlight" group="popup_operations"/>
+</Menu>
+
 </gui>

@@ -51,6 +51,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_iterId(0)
     , m_sessionStatus(QInfinity::Session::Closed)
     , m_localSavePath()
+    , m_changeTracker(new DocumentChangeTracker(this))
 {
     kDebug() << "now managing document" << document << document->url();
     // A document must not be edited before it is connected, since changes done will
@@ -58,7 +59,6 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     document->setReadWrite(false);
     connect(m_connection, SIGNAL(disconnected(Connection*)),
             this, SLOT(disconnected(Connection*)));
-    new DocumentChangeTracker(this);
 }
 
 ManagedDocument::~ManagedDocument()

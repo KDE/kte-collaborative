@@ -34,6 +34,7 @@
 #include <common/document.h>
 #include <common/connection.h>
 
+class DocumentChangeTracker;
 using Kobby::Connection;
 using Kobby::Document;
 
@@ -97,6 +98,9 @@ public:
     };
     inline const QString& localSavePath() const {
         return m_localSavePath;
+    };
+    inline DocumentChangeTracker* changeTracker() const {
+        return m_changeTracker;
     };
 
     /**
@@ -176,6 +180,7 @@ private:
     QInfinity::Session::Status m_sessionStatus;
     // local URL to copy the document to if requested
     QString m_localSavePath;
+    DocumentChangeTracker* m_changeTracker;
 };
 
 typedef QMap<KTextEditor::Document*, ManagedDocument*> ManagedDocumentList;

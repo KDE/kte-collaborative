@@ -49,6 +49,12 @@ KTextEditor::Document* DocumentChangeTracker::kDocument() const
     return m_document->document();
 }
 
+void DocumentChangeTracker::clearHighlight()
+{
+    qDeleteAll(m_ranges);
+    m_ranges.clear();
+}
+
 void DocumentChangeTracker::cleanupRanges()
 {
     // TODO: Could join ranges in some cases. Worth it?
