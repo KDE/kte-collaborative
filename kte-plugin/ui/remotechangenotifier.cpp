@@ -42,6 +42,16 @@ NotifierWidget::NotifierWidget(const QUrl& source, QWidget* parent)
     connect(closeTimer, SIGNAL(timeout()), this, SLOT(hide()));
 }
 
+bool NotifierWidget::event(QEvent* event)
+{
+    if ( event->type() == QEvent::MouseButtonPress ) {
+        hide();
+        event->ignore();
+        return false;
+    }
+    return QGraphicsView::event(event);
+}
+
 void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QInfinity::User* user)
 {
     if ( ! view ) {

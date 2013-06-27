@@ -46,5 +46,6 @@ class NotifierWidget : public QDeclarativeView {
 public:
     NotifierWidget(const QUrl& source, QWidget* parent = 0);
     QTimer* closeTimer;
+    virtual bool event(QEvent* event);
 };
 #endif // REMOTECHANGENOTIFIER_H
