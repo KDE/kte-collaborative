@@ -63,6 +63,8 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     layout()->addWidget(new QLabel(i18n("Some changes might only be applied for newly opened documents.")));
     layout()->addWidget(notificationsGroupBox);
     layout()->addWidget(colorsGroupBox);
+    // Add a spacer to top-align the widgets
+    layout()->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     // Set up connections for changed signals
     connect(m_saturationSilder, SIGNAL(sliderMoved(int)), SLOT(changed()));
