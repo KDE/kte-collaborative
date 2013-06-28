@@ -24,11 +24,33 @@
 
 #include <KCModule>
 #include <KComponentData>
+#include <KConfigGroup>
 
+class QCheckBox;
+class QSlider;
+
+/**
+ * @brief This class is the configuration module for the plugin, accessible usually through the plugins list (wrench icon)
+ */
 class KCMKTECollaborative : public KCModule
 {
 public:
     explicit KCMKTECollaborative(QWidget* parent, const QVariantList& args);
+    virtual ~KCMKTECollaborative();
+    virtual void load();
+    virtual void save();
+
+private:
+    // Group containing configuration related to colors.
+    KConfigGroup m_colorsGroup;
+    // Group containing configuration related to enabled notifier features,
+    // especially background coloring + popup widgets
+    KConfigGroup m_notifyGroup;
+    // colors
+    QSlider* m_saturationSilder;
+    // features
+    QCheckBox* m_highlightBackground;
+    QCheckBox* m_displayWidgets;
 };
 
 #endif // KCM_KTE_COLLABORATIVE_H

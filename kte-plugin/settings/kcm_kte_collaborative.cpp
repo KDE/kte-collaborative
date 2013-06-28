@@ -23,10 +23,68 @@
 #include <kobbyplugin.h>
 
 #include <KDebug>
+#include <QHBoxLayout>
+#include <QLayout>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QCheckBox>
+#include <QSlider>
+#include <QLabel>
 
 KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& args)
     : KCModule(KobbyPluginFactory::componentData(), parent, args)
 {
     kDebug() << "creating kte_collaborative kcmodule";
+    // Set up config groups
+    KConfig* config = new KConfig("ktecollaborative");
+    m_colorsGroup = config->group("colors");
+    m_notifyGroup = config->group("notifications");
+
+    // Create config group boxes
+    QGroupBox* notificationsGroupBox = new QGroupBox();
+    notificationsGroupBox->setTitle(i18n("Highlights and Notifications"));
+    QFormLayout* notificationsLayout = new QFormLayout();
+    notificationsGroupBox->setLayout(notificationsLayout);
+    m_highlightBackground = new QCheckBox();
+    m_displayWidgets = new QCheckBox();
+    notificationsLayout->addRow(i18n("Display popup widgets"), m_displayWidgets);
+    notificationsLayout->addRow(i18n("Colorize text background"), m_highlightBackground);
+
+    QGroupBox* colorsGroupBox = new QGroupBox();
+    colorsGroupBox->setTitle(i18n("Colours"));
+    QFormLayout* colorsLayout = new QFormLayout();
+    colorsGroupBox->setLayout(colorsLayout);
+    m_saturationSilder = new QSlider(Qt::Horizontal);
+    m_saturationSilder->setRange(30, 255);
+    colorsLayout->addRow(i18n("Highlight saturation"), m_saturationSilder);
+
+    // Assemble the UI
+    setLayout(new QVBoxLayout());
+    layout()->addWidget(new QLabel(i18n("Some changes might only be applied for newly opened documents.")));
+    layout()->addWidget(notificationsGroupBox);
+    layout()->addWidget(colorsGroupBox);
+
+    // Set up connections for changed signals
+    connect(m_saturationSilder, SIGNAL(sliderMoved(int)), SLOT(changed()));
+    connect(m_highlightBackground, SIGNAL(toggled(bool)), SLOT(changed()));
+    connect(m_displayWidgets, SIGNAL(toggled(bool)), SLOT(changed()));
 }
 
+KCMKTECollaborative::~KCMKTECollaborative()
+{
+    delete m_colorsGroup.config();
+}
+
+void KCMKTECollaborative::load()
+{
+    m_saturationSilder->setValue(m_colorsGroup.readEntry("saturation", 185));
+    m_highlightBackground->setChecked(m_notifyGroup.readEntry("highlightBackground", true));
+    m_displayWidgets->setChecked(m_notifyGroup.readEntry("displayWidgets", true));
+}
+
+void KCMKTECollaborative::save()
+{
+    m_colorsGroup.writeEntry("saturation", m_saturationSilder->value());
+    m_notifyGroup.writeEntry("highlightBackground", m_highlightBackground->isChecked());
+    m_notifyGroup.writeEntry("displayWidgets", m_displayWidgets->isChecked());
+}
