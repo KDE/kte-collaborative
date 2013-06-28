@@ -7,6 +7,8 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+add_subdirectory(settings)
+
 find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
 
@@ -16,6 +18,7 @@ set( kobby_PART_SRCS
     kobbyplugin.cpp
     manageddocument.cpp
     ui/remotechangenotifier.cpp
+    settings/kcm_kte_collaborative.cpp
 )
 
 add_definitions(-fPIC)
@@ -46,6 +49,6 @@ target_link_libraries( ktexteditor_kobby
 )
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR} )
-install(FILES ktexteditor_kobby.desktop  DESTINATION  ${SERVICES_INSTALL_DIR})
+install(FILES ktexteditor_kobby.desktop settings/ktexteditor_kobby_config.desktop DESTINATION  ${SERVICES_INSTALL_DIR})
 install(FILES ktexteditor_kobbyui.rc  DESTINATION  ${DATA_INSTALL_DIR}/ktexteditor_kobby)
 install(FILES ui/notifywidget.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)

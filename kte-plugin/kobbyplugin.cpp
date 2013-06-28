@@ -34,6 +34,7 @@
 #include "common/itemfactory.h"
 #include "common/noteplugin.h"
 #include "kobbypluginview.h"
+#include "settings/kcm_kte_collaborative.h"
 
 #include <libqinfinity/communicationjoinedgroup.h>
 #include <libqinfinity/init.h>
@@ -52,7 +53,10 @@
 // This is the default port for infinoted.
 static int defaultPort = 6523;
 
-K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory, registerPlugin<KobbyPlugin>("ktexteditor_kobby"); )
+K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory,
+                             registerPlugin<KobbyPlugin>("ktexteditor_kobby");
+                             registerPlugin<KCMKTECollaborative>("ktexteditor_kobby_config");
+)
 K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_kobby",
                                           ki18n( "Collaborative Editing" ), "1.0", ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
 
