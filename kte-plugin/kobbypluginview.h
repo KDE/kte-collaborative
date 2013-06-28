@@ -113,6 +113,7 @@ public slots:
     void changeUserActionClicked();
     void createServerActionClicked();
     void clearHighlightActionClicked();
+    void configureActionClicked();
 
 private:
     KTextEditor::View* m_view;
@@ -126,6 +127,7 @@ private:
     KAction* m_changeUserNameAction;
     KAction* m_disconnectAction;
     KAction* m_createServerAction;
+    KAction* m_configureAction;
 
     // actions from the popup menu
     KAction* m_clearHighlightAction;

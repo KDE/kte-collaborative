@@ -38,6 +38,7 @@ include_directories(
 
 target_link_libraries( ktexteditor_kobby
     kobbycommon
+    ${KDE4_KCMUTILS_LIBS}
     ${KDE4_KDEUI_LIBS}
     ${KDE4_KIO_LIBS}
     ${KDE4_KFILE_LIBS}

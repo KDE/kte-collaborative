@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<gui name="ktexteditor_kobbyui" library="ktexteditor_kobby" version="5">
+<gui name="ktexteditor_kobbyui" library="ktexteditor_kobby" version="6">
 
 <MenuBar>
   <Menu name="collaborative"><text>&amp;Collaborative</text>
@@ -9,6 +9,7 @@
     <Action name="kobby_change_user_name"/>
     <Action name="kobby_disconnect"/>
     <Action name="kobby_create_server"/>
+    <Action name="kobby_configure"/>
   </Menu>
 </MenuBar>
 

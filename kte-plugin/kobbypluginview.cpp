@@ -24,6 +24,7 @@
 #include "kobbyplugin.h"
 #include "ui/remotechangenotifier.h"
 #include "documentchangetracker.h"
+#include "settings/kcm_kte_collaborative.h"
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
@@ -43,6 +44,7 @@
 #include <KColorScheme>
 #include <KTextEditor/Editor>
 #include <KFileDialog>
+#include <kcmultidialog.h>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -181,6 +183,16 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_clearHighlightAction = actionCollection()->addAction("kobby_clear_highlight", this, SLOT(clearHighlightActionClicked()));
     m_clearHighlightAction->setText("Clear user highlights");
     m_clearHighlightAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+C")), KAction::DefaultShortcut);
+
+    m_configureAction = actionCollection()->addAction("kobby_configure", this, SLOT(configureActionClicked()));
+    m_configureAction->setText(i18n("Configure..."));
+}
+
+void KobbyPluginView::configureActionClicked()
+{
+    KCMultiDialog proxy;
+    proxy.addModule("ktexteditor_kobby_config");
+    proxy.exec();
 }
 
 void KobbyPluginView::clearHighlightActionClicked()

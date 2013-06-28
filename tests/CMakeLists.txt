@@ -16,6 +16,7 @@ include_directories(
 target_link_libraries( collaborativeeditingtest
     ${KDE4_KFILE_LIBS}
     ${KDE4_KTEXTEDITOR_LIBS}
+    ${KDE4_KCMUTILS_LIBS}
     ${KDE4_KDECORE_LIBS}
     ${KDE4_KDNSSD_LIBS}
     ${LIBQINFINITY_LIBRARIES}
