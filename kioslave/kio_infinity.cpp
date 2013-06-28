@@ -138,6 +138,10 @@ void InfinityProtocol::stat(const KUrl& url)
 
     UDSEntry entry;
     entry.insert(KIO::UDSEntry::UDS_MIME_TYPE, QString::fromLatin1("text/plain"));
+    entry.insert(KIO::UDSEntry::UDS_NAME, iter.name());
+    entry.insert(KIO::UDSEntry::UDS_SIZE, 0);
+    entry.insert(KIO::UDSEntry::UDS_DISPLAY_NAME, iter.name());
+    entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG);
     statEntry(entry);
 
     finished();
@@ -313,7 +317,6 @@ void InfinityProtocol::listDir(const KUrl &url)
     if ( hasChildren ) {
         do {
             UDSEntry entry;
-            entry.insert( KIO::UDSEntry::UDS_URL, url.url(KUrl::AddTrailingSlash) + iter.name() );
             entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
             entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
             listEntry(entry, false);
