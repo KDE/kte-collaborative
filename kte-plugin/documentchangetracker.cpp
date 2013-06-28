@@ -22,9 +22,11 @@
 
 #include "documentchangetracker.h"
 #include "manageddocument.h"
-#include <common/utils.h>
+#include "common/utils.h"
 
 #include <ktexteditor/movinginterface.h>
+#include <KConfigGroup>
+#include <KConfig>
 
 DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
     : QObject(document)
@@ -38,10 +40,13 @@ DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
 
 void DocumentChangeTracker::setupSignals()
 {
-    connect(m_document->textBuffer(), SIGNAL(localChangedText(KTextEditor::Range,QInfinity::User*,bool)),
-            this, SLOT(userChangedText(KTextEditor::Range,QInfinity::User*,bool)));
-    connect(m_document->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*,bool)),
-            this, SLOT(userChangedText(KTextEditor::Range,QInfinity::User*,bool)));
+    KConfig config("ktecollaborative");
+    if ( config.group("notifications").readEntry("highlightBackground", true) ) {
+        connect(m_document->textBuffer(), SIGNAL(localChangedText(KTextEditor::Range,QInfinity::User*,bool)),
+                this, SLOT(userChangedText(KTextEditor::Range,QInfinity::User*,bool)));
+        connect(m_document->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*,bool)),
+                this, SLOT(userChangedText(KTextEditor::Range,QInfinity::User*,bool)));
+    }
 }
 
 KTextEditor::Document* DocumentChangeTracker::kDocument() const

@@ -341,7 +341,10 @@ KobbyPluginView::~KobbyPluginView()
 
 void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal)
 {
-    RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(), user);
+    KConfig config("ktecollaborative");
+    if ( config.group("notifications").readEntry("displayWidgets", true) ) {
+        RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(), user);
+    }
 }
 
 void KobbyPluginView::documentReady(ManagedDocument* doc)
