@@ -181,7 +181,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
 
     // TODO: disable this for non-collab documents
     m_clearHighlightAction = actionCollection()->addAction("kobby_clear_highlight", this, SLOT(clearHighlightActionClicked()));
-    m_clearHighlightAction->setText("Clear user highlights");
+    m_clearHighlightAction->setText(i18n("Clear user highlights"));
     m_clearHighlightAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+C")), KAction::DefaultShortcut);
 
     m_configureAction = actionCollection()->addAction("kobby_configure", this, SLOT(configureActionClicked()));
