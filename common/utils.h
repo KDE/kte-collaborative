@@ -91,13 +91,14 @@ public:
     /**
      * @brief Generate a color depending on a given username.
      * This is used for example for the background colors, and the popup widgets.
+     * TODO: Cache this.
      * @param username The username. The same username will always yield the same color.
      * @param saturation Hint on how saturated the color should be; 255 = very colorful, 0 = black+white
      * @param brightness Hint on how bright the color should be; 255 = white, 0 = black
      * @return QColor The resulting color.
      */
-    static QColor colorForUsername(const QString& username, const unsigned char saturation = 180,
-                                   const unsigned char brightness = 180);
+    static QColor colorForUsername(const QString& username, unsigned char sat = 180, unsigned char brightness = 180,
+                                   const QSet< QColor >& avoidColors = QSet<QColor>());
 
     /**
      * @brief Like colorForUsername(QString, uchar, uchar), but determines params automatically
@@ -106,7 +107,8 @@ public:
      * @param view The view in which the color should be used as a background. May be zero, then brightness will be guessed.
      * @return QColor The resulting color.
      */
-    static QColor colorForUsername(const QString& username, const KTextEditor::View* view);
+    static QColor colorForUsername(const QString& username, const KTextEditor::View* view,
+                                   const QSet<QColor>& avoidColors = QSet<QColor>());
 };
 
 #endif

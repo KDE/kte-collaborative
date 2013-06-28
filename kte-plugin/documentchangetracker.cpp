@@ -73,7 +73,7 @@ void DocumentChangeTracker::cleanupRanges()
     }
 }
 
-void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range, const QColor& color)
+void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range, const QColor& color, bool isSelf)
 {
     // We allow empty ranges here, and invalidate them ourselves on the next insertion.
     KTextEditor::MovingRange* r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand,
@@ -82,18 +82,19 @@ void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range,
     attrib->setBackground(color);
     r->setAttribute(attrib);
     m_ranges << r;
+    if ( ! isSelf ) {
+        m_existingColors.insert(color);
+    }
 }
 
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
 {
-    if ( ! iface() ) {
-        return;
-    }
-    if ( removal ) {
-        // Nothing to do for removals, ranges will shrink automatically
+    // Nothing to do for removals, ranges will shrink automatically
+    if ( ! iface() || ! user || removal ) {
         return;
     }
     cleanupRanges();
+    const bool isSelf = user == m_document->textBuffer()->user();
     const int startLine = range.start().line();
     const int endLine = range.end().line();
     if ( m_document->document()->text(range, false) == QLatin1String("\n") ) {
@@ -128,7 +129,8 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         return;
     }
 
-    const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView());
+    const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView(),
+                                                            m_existingColors);
     foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
         if ( existing->start() > range.end() || existing->end() < range.start() ) {
             continue;
@@ -159,11 +161,16 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             existing->setRange(range.end(), existing->end());
             // and a new one is created for the first part
             KTextEditor::Range firstPartRaw(oldStart, range.start());
-            addHighlightedRange(firstPartRaw, existing->attribute()->background().color());
+            addHighlightedRange(firstPartRaw, existing->attribute()->background().color(), isSelf);
             // the range for the new text will be added below, after the loop.
         }
     }
-    addHighlightedRange(range, userColor);
+    addHighlightedRange(range, userColor, isSelf);
+}
+
+unsigned int qHash(const QColor& color)
+{
+    return color.rgb();
 }
 
 #include "documentchangetracker.moc"

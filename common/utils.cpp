@@ -109,20 +109,43 @@ void IterLookupHelper::directoryExplored()
     emit failed();
 };
 
-QColor ColorHelper::colorForUsername(const QString& username, const unsigned char sat,
-                                     const unsigned char brightness)
+QColor ColorHelper::colorForUsername(const QString& username, unsigned char sat,
+                                     unsigned char brightness, const QSet<QColor>& avoidColors)
 {
     const uint hash = qHash(username);
-    const uint hue = ((hash % 19) * 4129) % 360;
-    const uint val = qMin<int>(brightness + ((hash % 3741) * 17) % 35, 255);
+    uint hue = ((hash % 19) * 4129) % 360;
+    const int minDistance = 15;
+    // Find the color which is closest to the choosen color, and retry if it's too close.
+    uint closesDistance;
+    for ( int i = 0; i < 360 / minDistance; i++ ) {
+        closesDistance = 360;
+        foreach ( const QColor& color, avoidColors ) {
+            const uint distance = abs(color.hsvHue() - hue);
+            closesDistance = qMin(distance, closesDistance);
+        }
+        if ( closesDistance <= minDistance ) {
+            hue += minDistance;
+            hue = hue % 360;
+        }
+        else {
+            break;
+        }
+    }
+    if ( closesDistance < minDistance ) {
+        // Still no luck -- most colors are used apparently.
+        // Try changing brightness and hope that works.
+        brightness = brightness > 128 ? brightness - 40 : brightness + 40;
+    }
+    const uint val = qMin<int>(brightness + ((hash % 3741) * 17) % 20, 255);
     QColor color = QColor::fromHsv(hue, sat, val);
-    while ( y(color) < qMin<int>(brightness + ((hash % 3011) * 13) % 20 - 10, 225) ) {
+    while ( y(color) < qMin<int>(brightness + ((hash % 3011) * 13) % 20 - 10, 215) ) {
         color = color.lighter(115);
     }
     return color;
 }
 
-QColor ColorHelper::colorForUsername(const QString& username, const KTextEditor::View* view)
+QColor ColorHelper::colorForUsername(const QString& username, const KTextEditor::View* view,
+                                     const QSet<QColor>& avoidColors)
 {
     // Try to find a brightness which has good contrast to the text
     short backgroundBrightness = 195;
@@ -144,7 +167,7 @@ QColor ColorHelper::colorForUsername(const QString& username, const KTextEditor:
     KConfig config(QLatin1String("ktecollaborative"));
     KConfigGroup group = config.group("colors");
     int saturation = group.readEntry("saturation", 185);
-    return colorForUsername(username, saturation, backgroundBrightness);
+    return colorForUsername(username, saturation, backgroundBrightness, avoidColors);
 }
 
 int ColorHelper::y(const QColor& color)

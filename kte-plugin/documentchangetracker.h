@@ -79,14 +79,19 @@ private:
      *
      * @param range The raw range to start tracking
      * @param color The color to use for highlighting
+     * @param bySelf should be true if text was inserted by the local user
      */
-    void addHighlightedRange(const KTextEditor::Range& range, const QColor& color);
+    void addHighlightedRange(const KTextEditor::Range& range, const QColor& color, bool bySelf = false);
 
     ManagedDocument* const m_document;
     KTextEditor::Document* kDocument() const;
     KTextEditor::MovingInterface* m_iface;
     inline KTextEditor::MovingInterface* iface() const { return m_iface; };
     QList<KTextEditor::MovingRange*> m_ranges;
+    QSet<QColor> m_existingColors;
 };
+
+// For QSet<QColor>
+unsigned int qHash(const QColor& color);
 
 #endif // DOCUMENTCHANGETRACKER_H
