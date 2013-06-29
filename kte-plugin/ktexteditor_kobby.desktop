@@ -1,8 +1,23 @@
 [Desktop Entry]
 Type=Service
 Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
+Comment[nl]=Gezamenlijk bewerken plug-in voor KTextEditor, gebaseerd op het infinity protocol protocol
+Comment[pt]='Plugin' de edição colaborativa para o KTextEditor, baseado no protocolo 'infinity'
+Comment[pt_BR]=Plugin de edição colaborativa para o KTextEditor baseado no protocolo infinity
+Comment[sv]=Insticksprogram till Ktexteditor för samredigering, baserad på protokollet Infinity
+Comment[x-test]=xxCollaborative editing plugin for KTextEditor, based on the infinity protocolxx
 Name=KobbyPlugin
+Name[nl]=KobbyPlugin
+Name[pt]=KobbyPlugin
+Name[pt_BR]=KobbyPlugin
+Name[sv]=Kobby-insticksprogram
+Name[x-test]=xxKobbyPluginxx
 GenericName=Kobby plugin
+GenericName[nl]=Kobby-plug-in
+GenericName[pt]='Plugin' do Kobby
+GenericName[pt_BR]=Plugin do Kobby
+GenericName[sv]=Kobby insticksprogram
+GenericName[x-test]=xxKobby pluginxx
 Icon=kcoloredit
 ServiceTypes=KTextEditor/Plugin
 X-KDE-ServiceTypes=KTextEditor/Plugin
