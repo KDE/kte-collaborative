@@ -57,7 +57,7 @@ K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory,
                              registerPlugin<KobbyPlugin>("ktexteditor_kobby");
                              registerPlugin<KCMKTECollaborative>("ktexteditor_kobby_config");
 )
-K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "ktexteditor_kobby",
+K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "kte-collaborative",
                                           ki18n( "Collaborative Editing" ), "1.0", ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
 
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
