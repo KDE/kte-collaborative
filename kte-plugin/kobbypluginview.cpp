@@ -134,11 +134,6 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     , m_statusBar(0)
     , m_document(document)
 {
-    if ( m_document ) {
-        // See KobbyPlugin::addView
-        documentBecameManaged(document);
-    }
-
     setComponentData(KobbyPluginFactory::componentData());
     setXMLFile("ktexteditor_kobbyui.rc");
 
@@ -151,13 +146,13 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_saveCopyAction = actionCollection()->addAction("kobby_save_copy", this, SLOT(saveCopyActionClicked()));
     m_saveCopyAction->setText(i18n("Save a local copy..."));
     m_saveCopyAction->setHelpText(i18n("Save a local copy of the current document, but continue "
-                                      "synchronizing changes"));
+                                       "synchronizing changes"));
     m_saveCopyAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+S")), KAction::DefaultShortcut);
 
     m_shareWithContactAction = actionCollection()->addAction("kobby_share_with_contact", this, SLOT(shareActionClicked()));
     m_shareWithContactAction->setText(i18n("Share document..."));
     m_shareWithContactAction->setHelpText(i18n("Collaboratively edit the current document with an "
-                                              "instant messenger contact"));
+                                               "instant messenger contact"));
     m_shareWithContactAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+E")), KAction::DefaultShortcut);
 
     m_changeUserNameAction = actionCollection()->addAction("kobby_change_user_name", this, SLOT(changeUserActionClicked()));
@@ -168,15 +163,13 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_disconnectAction = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
     m_disconnectAction->setText(i18n("Disconnect"));
     m_disconnectAction->setHelpText(i18n("Disconnect from the collaborative server, and stop"
-                                        "synchronizing changes to the document"));
-    m_disconnectAction->setEnabled(false);
+                                         "synchronizing changes to the document"));
     m_disconnectAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+W")), KAction::DefaultShortcut);
 
     m_createServerAction = actionCollection()->addAction("kobby_create_server", this, SLOT(createServerActionClicked()));
     m_createServerAction->setText(i18n("Start collaborative server..."));
     m_createServerAction->setHelpText(i18n("Host a collaboration session. Other persons can join the session "
-                                          "by using the \"Open collaborative document\" action."));
-    m_createServerAction->setEnabled(false);
+                                           "by using the \"Open collaborative document\" action."));
     m_createServerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+N")), KAction::DefaultShortcut);
 
     // TODO: disable this for non-collab documents
@@ -186,6 +179,15 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
 
     m_configureAction = actionCollection()->addAction("kobby_configure", this, SLOT(configureActionClicked()));
     m_configureAction->setText(i18n("Configure..."));
+
+    m_actionsRequiringConnection << m_saveCopyAction << m_changeUserNameAction
+                                 << m_disconnectAction << m_clearHighlightAction;
+
+    disableActions();
+    if ( m_document ) {
+        // See KobbyPlugin::addView
+        documentBecameManaged(document);
+    }
 }
 
 void KobbyPluginView::configureActionClicked()
@@ -199,6 +201,20 @@ void KobbyPluginView::clearHighlightActionClicked()
 {
     if ( m_document && m_document->changeTracker() ) {
         m_document->changeTracker()->clearHighlight();
+    }
+}
+
+void KobbyPluginView::disableActions()
+{
+    foreach ( KAction* action, m_actionsRequiringConnection ) {
+        action->setEnabled(false);
+    }
+}
+
+void KobbyPluginView::enableActions()
+{
+    foreach ( KAction* action, m_actionsRequiringConnection ) {
+        action->setEnabled(true);
     }
 }
 
@@ -219,6 +235,7 @@ void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
     Q_ASSERT(document->document() == m_document->document());
     m_document = 0;
     disableUi();
+    disableActions();
 }
 
 void KobbyPluginView::enableUi()
@@ -370,7 +387,8 @@ void KobbyPluginView::documentReady(ManagedDocument* doc)
             statusBar(), SLOT(usersChanged()));
     m_statusBar->usersChanged();
     statusBar()->sessionFullyReady();
-    m_disconnectAction->setEnabled(true);
+
+    enableActions();
 }
 
 #include "kobbypluginview.moc"

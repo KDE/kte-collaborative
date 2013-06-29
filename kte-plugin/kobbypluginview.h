@@ -132,6 +132,14 @@ private:
     // actions from the popup menu
     KAction* m_clearHighlightAction;
 
+    // list of actions which should only be enabled when a document
+    // is a connected collaborative document
+    QList<KAction*> m_actionsRequiringConnection;
+
+    // Enables or disables the actions in m_actionsRequiringConnection
+    void enableActions();
+    void disableActions();
+
     // Enables or disables the UI (status bar, tracking widget, ...)
     void enableUi();
     void disableUi();
