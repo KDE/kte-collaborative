@@ -44,7 +44,7 @@
 #include <KColorScheme>
 #include <KTextEditor/Editor>
 #include <KFileDialog>
-#include <kcmultidialog.h>
+#include <KCMultiDialog>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)

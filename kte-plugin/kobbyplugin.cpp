@@ -21,20 +21,20 @@
 
 #include "kobbyplugin.h"
 
-#include <ktexteditor/document.h>
-
-#include <kpluginfactory.h>
-#include <kpluginloader.h>
-#include <klocale.h>
-#include <kaboutdata.h>
-#include <KTextEditor/Editor>
-
 #include "common/connection.h"
 #include "common/document.h"
 #include "common/itemfactory.h"
 #include "common/noteplugin.h"
 #include "kobbypluginview.h"
 #include "settings/kcm_kte_collaborative.h"
+
+#include <KPluginFactory>
+#include <KPluginLoader>
+#include <KLocale>
+#include <KAboutData>
+
+#include <KTextEditor/Document>
+#include <KTextEditor/Editor>
 
 #include <libqinfinity/communicationjoinedgroup.h>
 #include <libqinfinity/init.h>

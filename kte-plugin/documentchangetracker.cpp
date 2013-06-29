@@ -24,7 +24,7 @@
 #include "manageddocument.h"
 #include "common/utils.h"
 
-#include <ktexteditor/movinginterface.h>
+#include <KTextEditor/MovingInterface>
 #include <KConfigGroup>
 #include <KConfig>
 

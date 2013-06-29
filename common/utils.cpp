@@ -17,13 +17,14 @@
  */
 
 #include "common/utils.h"
+
 #include <libqinfinity/explorerequest.h>
 #include <ktexteditor/configinterface.h>
 
 #include <QStringList>
 #include <KTextEditor/View>
 #include <KConfigGroup>
-#include <kconfig.h>
+#include <KConfig>
 
 using QInfinity::ExploreRequest;
 

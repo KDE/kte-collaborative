@@ -20,7 +20,10 @@
  */
 
 #include "manageddocument.h"
+
 #include "documentchangetracker.h"
+#include "common/connection.h"
+#include "common/utils.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/browser.h>
@@ -30,15 +33,12 @@
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/usertable.h>
 
-#include <common/connection.h>
+#include <KMessageBox>
+#include <KLocalizedString>
 
 #include <QTimer>
 #include <QFile>
 #include <QTemporaryFile>
-#include <KMessageBox>
-#include <KLocalizedString>
-
-#include "common/utils.h"
 
 using namespace QInfinity;
 

@@ -18,8 +18,9 @@
 #ifndef KOBBY_ITEMFACTORY_H
 #define KOBBY_ITEMFACTORY_H
 
-#include <libqinfinity/browseritemfactory.h>
 #include "kobbycommon_export.h"
+
+#include <libqinfinity/browseritemfactory.h>
 
 class KIcon;
 class QObject;

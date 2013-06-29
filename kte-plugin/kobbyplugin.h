@@ -22,15 +22,16 @@
 #ifndef _KOBBY_PLUGIN_H_
 #define _KOBBY_PLUGIN_H_
 
-#include <ktexteditor/plugin.h>
-#include <ktexteditor/view.h>
+#include "common/connection.h"
+#include "manageddocument.h"
 
-#include <QtCore/QObject>
-#include <QStack>
-#include <kjob.h>
-#include <kurl.h>
-#include <kio/job.h>
-#include <kpluginfactory.h>
+#include <KTextEditor/Plugin>
+#include <KTextEditor/View>
+
+#include <KJob>
+#include <KUrl>
+#include <KIO/Job>
+#include <KPluginFactory>
 
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/browsermodel.h>
@@ -38,8 +39,8 @@
 #include <libqinfinity/browser.h>
 #include <libqinfinity/textsession.h>
 
-#include "common/connection.h"
-#include "manageddocument.h"
+#include <QtCore/QObject>
+#include <QStack>
 
 using namespace Kobby;
 

@@ -31,8 +31,8 @@
 #include <libqinfinity/browseriter.h>
 #include <libqinfinity/session.h>
 
-#include <common/document.h>
-#include <common/connection.h>
+#include "common/document.h"
+#include "common/connection.h"
 
 class DocumentChangeTracker;
 using Kobby::Connection;

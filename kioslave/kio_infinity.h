@@ -22,11 +22,12 @@
 #ifndef __kio_infinity_h__
 #define __kio_infinity_h__
 
+#include "common/connection.h"
+#include "common/noteplugin.h"
+
 #include <kio/global.h>
 #include <kio/slavebase.h>
 
-#include <common/connection.h>
-#include <common/noteplugin.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browseriter.h>
 

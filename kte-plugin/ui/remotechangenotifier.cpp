@@ -20,18 +20,21 @@
  */
 
 #include "remotechangenotifier.h"
-#include <kobbypluginview.h>
-#include <common/utils.h>
+
+#include "kobbypluginview.h"
+#include "common/utils.h"
+
 #include <libqinfinity/user.h>
-#include <ktexteditor/document.h>
-#include <QLabel>
-#include <QPaintEvent>
+
+#include <KTextEditor/Document>
+#include <KStandardDirs>
 
 #include <QGraphicsItem>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
+#include <QPaintEvent>
+#include <QLabel>
 #include <QTimer>
-#include <kstandarddirs.h>
 
 QMap< QPair<KTextEditor::View*, QString>, QWidget* > RemoteChangeNotifier::existingWidgets;
 

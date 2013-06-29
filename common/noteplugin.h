@@ -21,8 +21,9 @@
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>
-#include "document.h"
 #include <KTextEditor/Editor>
+
+#include "document.h"
 
 namespace Kobby
 {

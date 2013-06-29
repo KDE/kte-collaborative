@@ -26,14 +26,9 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
-#include <kencodingprober.h>
 
 #include <qcoreapplication.h>
-#include <qapplication.h>
 #include <kdirnotify.h>
-
-#include <common/itemfactory.h>
-#include <common/noteplugin.h>
 
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
@@ -45,6 +40,8 @@
 #include <libqinfinity/noderequest.h>
 #include <libqinfinity/explorerequest.h>
 
+#include "common/itemfactory.h"
+#include "common/noteplugin.h"
 #include "common/utils.h"
 
 using namespace KIO;

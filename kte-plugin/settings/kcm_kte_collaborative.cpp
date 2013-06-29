@@ -20,7 +20,7 @@
  */
 
 #include "kcm_kte_collaborative.h"
-#include <kobbyplugin.h>
+#include "kobbyplugin.h"
 
 #include <KDebug>
 #include <QHBoxLayout>
