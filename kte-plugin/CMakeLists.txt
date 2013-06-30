@@ -8,6 +8,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory(settings)
+add_subdirectory(ktpintegration)
 
 find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
