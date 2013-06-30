@@ -51,7 +51,7 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     notificationsLayout->addRow(i18n("Colorize text background"), m_highlightBackground);
 
     QGroupBox* colorsGroupBox = new QGroupBox();
-    colorsGroupBox->setTitle(i18n("Colours"));
+    colorsGroupBox->setTitle(i18n("Colors"));
     QFormLayout* colorsLayout = new QFormLayout();
     colorsGroupBox->setLayout(colorsLayout);
     m_saturationSilder = new QSlider(Qt::Horizontal);
