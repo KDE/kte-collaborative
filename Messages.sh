@@ -1,5 +1,5 @@
 #!/bin/sh
-files=`find . -name \*.rc -o -name \*.ui
+files=`find . -name \*.rc -o -name \*.ui`
 if [ "x$files" != "x" ]; then
     $EXTRACTRC $files >> rc.cpp
 fi
