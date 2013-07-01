@@ -28,4 +28,5 @@ target_link_libraries( collaborativeeditingtest
     ${KTP_MODELS_LIBRARIES}
     ${KTP_WIDGETS_LIBRARIES}
     kobbycommon
+    inftube
 )

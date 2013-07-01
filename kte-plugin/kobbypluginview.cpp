@@ -25,6 +25,7 @@
 #include "ui/remotechangenotifier.h"
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
+#include "ktpintegration/inftube.h"
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
@@ -373,7 +374,8 @@ void KobbyPluginView::shareActionClicked()
     Tp::registerTypes();
     KTp::ContactGridDialog dialog(m_view);
     if ( dialog.exec() ) {
-        qDebug() << "FOO";
+        InfTubeServer* serverTube = new InfTubeServer(this);
+        serverTube->offer(dialog.account(), dialog.contact(), m_view->document()->url());
     }
 }
 

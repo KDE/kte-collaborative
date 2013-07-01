@@ -92,17 +92,17 @@ InfTubeServer::InfTubeServer(QObject* parent)
     m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity-collaborative");
 }
 
-bool InfTubeServer::offer(Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document)
+bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document)
 {
     return offer(account, ContactList() << contact, DocumentList() << document);
 }
 
-bool InfTubeServer::offer(Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments)
+bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
 {
     qDebug() << "starting infinoted";
     startInfinoted();
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port);
-    foreach ( const KUrl& document, initialDocuments ) {
+    foreach ( const KUrl& document, documents ) {
         KUrl x = localUrl();
         x.setFileName(document.fileName());
         KIO::TransferJob* job = KIO::put(x, -1);
@@ -119,9 +119,9 @@ bool InfTubeServer::offer(Tp::Account& account, const ContactList& contacts, con
     // TODO !!!
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
                     contacts.first()->handle().at(0));
-    account.ensureChannel(request,
-                          QDateTime::currentDateTime(),
-                          "org.freedesktop.Telepathy.Client.KTp.infinity-collaborative");
+    account->ensureChannel(request,
+                           QDateTime::currentDateTime(),
+                           "org.freedesktop.Telepathy.Client.KTp.infinity-collaborative");
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));

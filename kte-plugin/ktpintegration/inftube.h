@@ -27,9 +27,12 @@
 #include <telepathy-qt4/TelepathyQt/StreamTubeClient>
 #include <telepathy-qt4/TelepathyQt/StreamTubeServer>
 #include <telepathy-qt4/TelepathyQt/AccountManager>
+#include <telepathy-qt4/TelepathyQt/Account>
 
 #include <KJob>
 #include <KUrl>
+
+#include "inftube_export.h"
 
 namespace Tp {
     class StreamTubeClient;
@@ -42,7 +45,7 @@ typedef QList<KUrl> DocumentList;
  * This class defines the API for routing infinity traffic through a TP tube
  * which is common to both the receiving an the offering side.
  */
-class InfTubeBase : public QObject {
+class INFTUBE_EXPORT InfTubeBase : public QObject {
 Q_OBJECT
 public:
     virtual ~InfTubeBase() { };
@@ -91,7 +94,7 @@ protected:
 /**
  * @brief This class implements InfTubeBase and is used on the receiving end.
  */
-class InfTubeClient : public InfTubeBase {
+class INFTUBE_EXPORT InfTubeClient : public InfTubeBase {
 Q_OBJECT
 public:
     InfTubeClient(QObject* parent = 0);
@@ -111,7 +114,7 @@ public slots:
 /**
  * @brief This class implements InfTubeBase and can be used to offer some documents to a contact.
  */
-class InfTubeServer : public InfTubeBase {
+class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
 Q_OBJECT
 public:
     InfTubeServer(QObject* parent = 0);
@@ -124,12 +127,12 @@ public:
      * @param initialDocuments The documents all contacts should have opened initially
      * @return bool true if the request was successful
      */
-    bool offer(Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments);
+    bool offer(Tp::AccountPtr account, const ContactList& contact, const DocumentList& documents);
 
     /**
      * @brief Convenience overload, for offering a single document to a single contact.
      */
-    bool offer(Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document);
+    bool offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document);
 
 private:
     Tp::StreamTubeServerPtr m_tubeServer;
