@@ -81,17 +81,15 @@ private:
      * @param color The color to use for highlighting
      * @param bySelf should be true if text was inserted by the local user
      */
-    void addHighlightedRange(const KTextEditor::Range& range, const QColor& color, bool bySelf = false);
+    void addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color);
 
     ManagedDocument* const m_document;
     KTextEditor::Document* kDocument() const;
     KTextEditor::MovingInterface* m_iface;
     inline KTextEditor::MovingInterface* iface() const { return m_iface; };
     QList<KTextEditor::MovingRange*> m_ranges;
-    QSet<QColor> m_existingColors;
+    // Maps user names to colors
+    QMap<QString, QColor> m_existingColors;
 };
-
-// For QSet<QColor>
-unsigned int qHash(const QColor& color);
 
 #endif // DOCUMENTCHANGETRACKER_H

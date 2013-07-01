@@ -162,7 +162,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
 
     m_disconnectAction = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
     m_disconnectAction->setText(i18n("Disconnect"));
-    m_disconnectAction->setHelpText(i18n("Disconnect from the collaborative server, and stop"
+    m_disconnectAction->setHelpText(i18n("Disconnect from the collaborative server, and stop "
                                          "synchronizing changes to the document"));
     m_disconnectAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+W")), KAction::DefaultShortcut);
 

@@ -73,7 +73,7 @@ void DocumentChangeTracker::cleanupRanges()
     }
 }
 
-void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range, const QColor& color, bool isSelf)
+void DocumentChangeTracker::addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color)
 {
     // We allow empty ranges here, and invalidate them ourselves on the next insertion.
     KTextEditor::MovingRange* r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand,
@@ -82,9 +82,7 @@ void DocumentChangeTracker::addHighlightedRange(const KTextEditor::Range& range,
     attrib->setBackground(color);
     r->setAttribute(attrib);
     m_ranges << r;
-    if ( ! isSelf ) {
-        m_existingColors.insert(color);
-    }
+    m_existingColors[name] = color;
 }
 
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
@@ -94,7 +92,6 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         return;
     }
     cleanupRanges();
-    const bool isSelf = user == m_document->textBuffer()->user();
     const int startLine = range.start().line();
     const int endLine = range.end().line();
     if ( m_document->document()->text(range, false) == QLatin1String("\n") ) {
@@ -161,16 +158,11 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             existing->setRange(range.end(), existing->end());
             // and a new one is created for the first part
             KTextEditor::Range firstPartRaw(oldStart, range.start());
-            addHighlightedRange(firstPartRaw, existing->attribute()->background().color(), isSelf);
+            addHighlightedRange(user->name(), firstPartRaw, existing->attribute()->background().color());
             // the range for the new text will be added below, after the loop.
         }
     }
-    addHighlightedRange(range, userColor, isSelf);
-}
-
-unsigned int qHash(const QColor& color)
-{
-    return color.rgb();
+    addHighlightedRange(user->name(), range, userColor);
 }
 
 #include "documentchangetracker.moc"
