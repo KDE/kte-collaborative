@@ -35,8 +35,8 @@ namespace Tp {
     class StreamTubeClient;
 }
 
-typedef QList<const Tp::ContactPtr> ContactList;
-typedef QList<const KUrl> DocumentList;
+typedef QList<Tp::ContactPtr> ContactList;
+typedef QList<KUrl> DocumentList;
 
 /**
  * This class defines the API for routing infinity traffic through a TP tube
@@ -45,8 +45,7 @@ typedef QList<const KUrl> DocumentList;
 class InfTubeBase : public QObject {
 Q_OBJECT
 public:
-    InfTubeBase(QObject* parent = 0) = 0;
-    virtual ~InfTubeBase() = 0;
+    virtual ~InfTubeBase() { };
 
     enum ConnectionStatus {
         StatusConnected,
@@ -93,6 +92,7 @@ protected:
  * @brief This class implements InfTubeBase and is used on the receiving end.
  */
 class InfTubeClient : public InfTubeBase {
+Q_OBJECT
 public:
     InfTubeClient(QObject* parent = 0);
     virtual ~InfTubeClient();
@@ -112,6 +112,7 @@ public slots:
  * @brief This class implements InfTubeBase and can be used to offer some documents to a contact.
  */
 class InfTubeServer : public InfTubeBase {
+Q_OBJECT
 public:
     InfTubeServer(QObject* parent = 0);
     virtual ~InfTubeServer();
@@ -123,12 +124,12 @@ public:
      * @param initialDocuments The documents all contacts should have opened initially
      * @return bool true if the request was successful
      */
-    bool offer(const Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments);
+    bool offer(Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments);
 
     /**
      * @brief Convenience overload, for offering a single document to a single contact.
      */
-    bool offer(const Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document);
+    bool offer(Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document);
 
 private:
     Tp::StreamTubeServerPtr m_tubeServer;

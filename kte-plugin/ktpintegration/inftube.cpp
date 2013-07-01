@@ -92,12 +92,12 @@ InfTubeServer::InfTubeServer(QObject* parent)
     m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity-collaborative");
 }
 
-bool InfTubeServer::offer(const Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document)
+bool InfTubeServer::offer(Tp::Account& account, const Tp::ContactPtr& contact, const KUrl& document)
 {
-    offer(ContactList() << contact, DocumentList() << document);
+    return offer(account, ContactList() << contact, DocumentList() << document);
 }
 
-bool InfTubeServer::offer(const Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments)
+bool InfTubeServer::offer(Tp::Account& account, const ContactList& contacts, const DocumentList& initialDocuments)
 {
     qDebug() << "starting infinoted";
     startInfinoted();
@@ -125,6 +125,8 @@ bool InfTubeServer::offer(const Tp::Account& account, const ContactList& contact
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
+    // TODO
+    return true;
 }
 
 void InfTubeServer::startInfinoted()
@@ -152,6 +154,16 @@ const QString InfTubeServer::serverDirectory() const
     return QLatin1String("/tmp");
 }
 
+InfTubeServer::~InfTubeServer()
+{
+
+}
+
+InfTubeClient::InfTubeClient(QObject* parent)
+{
+
+}
+
 void InfTubeClient::listen()
 {
     m_tubeClient = Tp::StreamTubeClient::create(m_accountManager, QStringList() << "tubetest", QStringList(), QString(), true, true);
@@ -163,6 +175,11 @@ void InfTubeClient::listen()
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress , quint16 , QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr )
 {
     kDebug() << "Tube accepted as Tcp";
+}
+
+InfTubeClient::~InfTubeClient()
+{
+
 }
 
 #include "inftube.moc"

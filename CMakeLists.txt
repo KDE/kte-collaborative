@@ -9,6 +9,11 @@ SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules )
 find_package(KDE4 REQUIRED)
 find_package(Libqinfinity REQUIRED)
 
+# TODO: make optional?
+set(IS_KTP_INTERNAL_MODULE TRUE) # aw yeah
+find_package(TelepathyQt4 0.8.9 REQUIRED)
+find_package(KTp REQUIRED)
+
 include(KDE4Defaults)
 
 # find_package(Msgfmt REQUIRED)

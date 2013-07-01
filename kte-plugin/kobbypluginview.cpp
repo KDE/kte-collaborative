@@ -28,6 +28,7 @@
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
+#include <KTp/Widgets/contact-grid-dialog.h>
 
 #include <QLayout>
 #include <QLabel>
@@ -369,7 +370,11 @@ void KobbyPluginView::saveCopyActionClicked()
 
 void KobbyPluginView::shareActionClicked()
 {
-
+    Tp::registerTypes();
+    KTp::ContactGridDialog dialog(m_view);
+    if ( dialog.exec() ) {
+        qDebug() << "FOO";
+    }
 }
 
 KobbyPluginView::~KobbyPluginView()

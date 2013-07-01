@@ -28,6 +28,8 @@ add_library(ktexteditor_kobby_objects OBJECT ${kobby_PART_SRCS})
 kde4_add_plugin(ktexteditor_kobby $<TARGET_OBJECTS:ktexteditor_kobby_objects>)
 
 include_directories(
+    ${TELEPATHY_QT4_INCLUDE_DIR}
+    ${KTP_INCLUDE_DIR}
     ${KDE4_INCLUDES}
     ${LIBQINFINITY_INCLUDES}
     ${CMAKE_SOURCE_DIR}
@@ -48,6 +50,12 @@ target_link_libraries( ktexteditor_kobby
     ${KDE4_KDNSSD_LIBS}
     ${LIBQINFINITY_LIBRARIES}
     ${QT_QTDECLARATIVE_LIBRARIES}
+    ${KDE4_KDEUI_LIBS}
+    ${TELEPATHY_QT4_LIBRARIES}
+    ${KTP_LIBRARIES}
+    ${KDE4_KIO_LIBS}
+    ${KTP_MODELS_LIBRARIES}
+    ${KTP_WIDGETS_LIBRARIES}
 )
 
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR} )
