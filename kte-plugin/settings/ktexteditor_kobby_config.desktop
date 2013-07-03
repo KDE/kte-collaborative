@@ -5,6 +5,7 @@ X-KDE-Library=ktexteditor_kobby
 X-KDE-PluginKeyword=ktexteditor_kobby_config
 X-KDE-ParentComponents=ktexteditor_kobby
 Name=Configure collaborative editing
+Name[nl]=Gezamenlijk bewerken instellen
 Name[pt]=Configurar a edição colaborativa
 Name[pt_BR]=Configurar a edição colaborativa
 Name[sk]=Nastaviť spoločné editovanie
