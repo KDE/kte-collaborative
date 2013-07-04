@@ -17,6 +17,7 @@ Name[sv]=Kobby-insticksprogram
 Name[uk]=KobbyPlugin
 Name[x-test]=xxKobbyPluginxx
 GenericName=Kobby plugin
+GenericName[cs]=Modul Kobby
 GenericName[nl]=Kobby-plug-in
 GenericName[pt]='Plugin' do Kobby
 GenericName[pt_BR]=Plugin do Kobby
