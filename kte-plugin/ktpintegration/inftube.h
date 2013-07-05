@@ -78,6 +78,11 @@ public:
      */
     ConnectionStatus status() const;
 
+    /**
+     * @brief Return a nickname with all "bad" characters properly escaped.
+     */
+    QString compatibleNickname(const Tp::AccountPtr& account);
+
 protected:
     ConnectionStatus m_status;
     unsigned int m_port;

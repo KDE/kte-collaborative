@@ -220,7 +220,7 @@ void InfTubeClient::listen()
     kDebug() << m_tubeClient->tubes();
 }
 
-void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr tube)
+void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
     kDebug() << "Tube accepted as Tcp, port:" << port;
     kDebug() << "parameters:" << tube->parameters();
@@ -229,8 +229,10 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
     m_port = port;
     bool ok = false;
     const int initialSize = tube->parameters().contains("initialDocumentsSize") ? tube->parameters()["initialDocumentsSize"].toInt(&ok) : 0;
+    KUrl url = localUrl();
+    url.setUser(compatibleNickname(account));
     if ( ! ok || initialSize == 0 ) {
-        KRun::run("dolphin " + localUrl().url(), KUrl::List(), 0);
+        KRun::run("dolphin " + url.url(), KUrl::List(), 0);
     }
     else {
         for ( int i = 0; i < initialSize; i++ ) {
@@ -240,7 +242,6 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
                 kWarning() << "invalid path at index" << i;
                 continue;
             }
-            KUrl url = localUrl();
             url.setPath(path);
             KRun::run("kwrite " + url.url(), KUrl::List(), 0);
         }
@@ -251,6 +252,11 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
 InfTubeClient::~InfTubeClient()
 {
 
+}
+
+QString InfTubeBase::compatibleNickname(const Tp::AccountPtr& account)
+{
+    return QUrl::toPercentEncoding(account->nickname().replace('@', '-'));
 }
 
 ConnectionManager* ConnectionManager::instance()

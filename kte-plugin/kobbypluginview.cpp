@@ -382,7 +382,9 @@ void KobbyPluginView::shareActionClicked()
         InfTubeServer* serverTube = new InfTubeServer(this);
         if ( serverTube->offer(dialog.account(), dialog.contact(), url) ) {
             m_view->document()->closeUrl();
-            m_view->document()->openUrl(serverTube->localUrl().url(KUrl::AddTrailingSlash) + url.fileName());
+            KUrl local = serverTube->localUrl();
+            local.setUser(serverTube->compatibleNickname(dialog.account()));
+            m_view->document()->openUrl(local.url(KUrl::AddTrailingSlash) + url.fileName());
         }
     }
 }
