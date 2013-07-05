@@ -167,6 +167,11 @@ bool InfTubeServer::startInfinoted()
         m_port = s.serverPort();
         s.close();
     }
+    // Ensure the server directory actually exists
+    QDir d(serverDirectory());
+    if ( ! d.exists() ) {
+        d.mkpath(d.path());
+    }
     m_serverProcess = new QProcess;
     m_serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
     m_serverProcess->setStandardOutputFile(serverDirectory() + "/infinoted.log");
@@ -193,7 +198,7 @@ bool InfTubeServer::startInfinoted()
 
 const QString InfTubeServer::serverDirectory() const
 {
-    return QLatin1String("/tmp/inftest");
+    return QDir::tempPath() + "/infinoted-" + QString::number(QApplication::instance()->applicationPid());
 }
 
 InfTubeServer::~InfTubeServer()
