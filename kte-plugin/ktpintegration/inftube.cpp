@@ -100,6 +100,7 @@ const QString InfTubeServer::serviceName() const
 InfTubeServer::InfTubeServer(QObject* parent)
 {
     initialize();
+    ServerPool::instance()->add(this);
     m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity",
                                                 QStringList(), serviceName());
 }
@@ -203,7 +204,7 @@ const QString InfTubeServer::serverDirectory() const
 
 InfTubeServer::~InfTubeServer()
 {
-
+    m_serverProcess->terminate();
 }
 
 void InfTubeClient::listen()
@@ -249,6 +250,28 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
 InfTubeClient::~InfTubeClient()
 {
 
+}
+
+ServerPool* ServerPool::instance()
+{
+    static ServerPool* m_self = new ServerPool();
+    return m_self;
+}
+
+void ServerPool::ensureCleanupOnApplicationExit(const QApplication* app)
+{
+    connect(app, SIGNAL(aboutToQuit()), this, SLOT(killServers()));
+}
+
+void ServerPool::add(InfTubeServer* server)
+{
+    m_serverProcesses.append(server);
+}
+
+void ServerPool::killServers()
+{
+    qDeleteAll(m_serverProcesses);
+    m_serverProcesses.clear();
 }
 
 #include "inftube.moc"

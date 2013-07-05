@@ -167,4 +167,23 @@ private:
     const QString serviceName() const;
 };
 
+class ServerPool : public QObject {
+Q_OBJECT
+public:
+    static ServerPool* instance();
+
+    /**
+     * @brief Makes sure to kill any remaining server instances when the given application exits.
+     */
+    void ensureCleanupOnApplicationExit(const QApplication* app);
+
+    void add(InfTubeServer* server);
+
+private:
+    QList<InfTubeServer*> m_serverProcesses;
+
+private slots:
+    void killServers();
+};
+
 #endif
