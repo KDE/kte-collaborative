@@ -41,36 +41,38 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-void InfTubeBase::initialize()
+ConnectionManager::ConnectionManager(QObject* parent): QObject(parent)
 {
     Tp::registerTypes();
     KTp::Debug::installCallback(true);
 
-    Tp::AccountFactoryPtr accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
+    accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
                                                                        Tp::Features() << Tp::Account::FeatureCore
                                                                        << Tp::Account::FeatureAvatar
                                                                        << Tp::Account::FeatureProtocolInfo
                                                                        << Tp::Account::FeatureProfile);
 
-    Tp::ConnectionFactoryPtr connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
+    connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
                                                                                Tp::Features() << Tp::Connection::FeatureCore
                                                                                << Tp::Connection::FeatureRosterGroups
                                                                                << Tp::Connection::FeatureRoster
                                                                                << Tp::Connection::FeatureSelfContact);
 
-    Tp::ContactFactoryPtr contactFactory = KTp::ContactFactory::create(Tp::Features()  << Tp::Contact::FeatureAlias
+    contactFactory = KTp::ContactFactory::create(Tp::Features()  << Tp::Contact::FeatureAlias
                                                                       << Tp::Contact::FeatureAvatarData
                                                                       << Tp::Contact::FeatureSimplePresence
                                                                       << Tp::Contact::FeatureCapabilities);
 
-    Tp::ChannelFactoryPtr channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
+    channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
 
-    m_accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
+    accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
                                                   accountFactory,
                                                   connectionFactory,
                                                   channelFactory,
                                                   contactFactory);
 
+    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
+    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(deleteLater()));
 }
 
 unsigned int InfTubeBase::localPort() const
@@ -99,9 +101,8 @@ const QString InfTubeServer::serviceName() const
 
 InfTubeServer::InfTubeServer(QObject* parent)
 {
-    initialize();
-    ServerPool::instance()->add(this);
-    m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity",
+    ConnectionManager::instance()->add(this);
+    m_tubeServer = Tp::StreamTubeServer::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
                                                 QStringList(), serviceName());
 }
 
@@ -210,7 +211,7 @@ InfTubeServer::~InfTubeServer()
 void InfTubeClient::listen()
 {
     kDebug() << "listen called";
-    m_tubeClient = Tp::StreamTubeClient::create(m_accountManager, QStringList() << "infinity",
+    m_tubeClient = Tp::StreamTubeClient::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
                                                 QStringList(), QLatin1String("KTp.infinity"), true, true);
     kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
@@ -252,23 +253,18 @@ InfTubeClient::~InfTubeClient()
 
 }
 
-ServerPool* ServerPool::instance()
+ConnectionManager* ConnectionManager::instance()
 {
-    static ServerPool* m_self = new ServerPool();
+    static ConnectionManager* m_self = new ConnectionManager();
     return m_self;
 }
 
-void ServerPool::ensureCleanupOnApplicationExit(const QApplication* app)
-{
-    connect(app, SIGNAL(aboutToQuit()), this, SLOT(killServers()));
-}
-
-void ServerPool::add(InfTubeServer* server)
+void ConnectionManager::add(InfTubeServer* server)
 {
     m_serverProcesses.append(server);
 }
 
-void ServerPool::killServers()
+void ConnectionManager::shutdown()
 {
     qDeleteAll(m_serverProcesses);
     m_serverProcesses.clear();

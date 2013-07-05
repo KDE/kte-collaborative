@@ -79,14 +79,8 @@ public:
     ConnectionStatus status() const;
 
 protected:
-    Tp::AccountManagerPtr m_accountManager;
     ConnectionStatus m_status;
     unsigned int m_port;
-
-    /**
-     * @brief Performs some initialization tasks. Call before everything else.
-     */
-    void initialize();
 };
 
 
@@ -101,10 +95,6 @@ inline Tp::ChannelClassSpecList channelClassList()
 class INFTUBE_EXPORT InfTubeClient : public InfTubeBase {
 Q_OBJECT
 public:
-    explicit InfTubeClient() {
-        // TODO move to cpp
-        initialize();
-    };
     virtual ~InfTubeClient();
 
     /**
@@ -167,23 +157,26 @@ private:
     const QString serviceName() const;
 };
 
-class ServerPool : public QObject {
+class ConnectionManager : public QObject {
 Q_OBJECT
 public:
-    static ServerPool* instance();
-
-    /**
-     * @brief Makes sure to kill any remaining server instances when the given application exits.
-     */
-    void ensureCleanupOnApplicationExit(const QApplication* app);
+    explicit ConnectionManager(QObject* parent = 0);
+    static ConnectionManager* instance();
 
     void add(InfTubeServer* server);
 
+    Tp::AccountFactoryPtr accountFactory;
+    Tp::ConnectionFactoryPtr connectionFactory;
+    Tp::ContactFactoryPtr contactFactory;
+    Tp::ChannelFactoryPtr channelFactory;
+    Tp::AccountManagerPtr accountManager;
+
 private:
     QList<InfTubeServer*> m_serverProcesses;
+    void initialize();
 
 private slots:
-    void killServers();
+    void shutdown();
 };
 
 #endif
