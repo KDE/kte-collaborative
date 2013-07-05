@@ -47,6 +47,11 @@ namespace Tp {
 typedef QList<Tp::ContactPtr> ContactList;
 typedef QList<KUrl> DocumentList;
 
+inline Tp::ChannelClassSpecList channelClassList()
+{
+    return Tp::ChannelClassSpecList() << Tp::ChannelClassSpec::incomingStreamTube("infinity");
+}
+
 /**
  * This class defines the API for routing infinity traffic through a TP tube
  * which is common to both the receiving an the offering side.
@@ -74,25 +79,13 @@ public:
     KUrl localUrl() const;
 
     /**
-     * @brief Get the status of the connection.
-     */
-    ConnectionStatus status() const;
-
-    /**
      * @brief Return a nickname with all "bad" characters properly escaped.
      */
     QString compatibleNickname(const Tp::AccountPtr& account);
 
 protected:
-    ConnectionStatus m_status;
     unsigned int m_port;
 };
-
-
-inline Tp::ChannelClassSpecList channelClassList()
-{
-    return Tp::ChannelClassSpecList() << Tp::ChannelClassSpec::incomingStreamTube("infinity");
-}
 
 /**
  * @brief This class implements InfTubeBase and is used on the receiving end.
@@ -118,6 +111,9 @@ private:
     QTcpSocket* m_socket;
 
 public slots:
+    /**
+     * @brief Called when a tube gets accepted.
+     */
     void tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr);
 };
 
@@ -151,17 +147,36 @@ signals:
     void connected(InfTubeBase* self);
 
 private slots:
+    /**
+     * @brief Invoked when creation of a tube finishes.
+     */
     void onCreateTubeFinished(Tp::PendingOperation*);
 
 private:
     Tp::StreamTubeServerPtr m_tubeServer;
     QProcess* m_serverProcess;
 
+    /**
+     * @brief Starts infinoted on a free port (avilable through port())
+     *
+     * @return bool true if successful, else false.
+     */
     bool startInfinoted();
+
+    /**
+     * @brief Gets the directory to be used as the root directory of infinoted
+     */
     const QString serverDirectory() const;
+
+    /**
+     * @brief Service name for the tube server to use on dbus.
+     */
     const QString serviceName() const;
 };
 
+/**
+ * @brief Container for all tubes offered over time and for the Tp objects which are only needed once
+ */
 class ConnectionManager : public QObject {
 Q_OBJECT
 public:

@@ -89,11 +89,6 @@ KUrl InfTubeBase::localUrl() const
     return url;
 }
 
-InfTubeBase::ConnectionStatus InfTubeBase::status() const
-{
-    return m_status;
-}
-
 const QString InfTubeServer::serviceName() const
 {
     return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
