@@ -170,6 +170,7 @@ private:
 
     void startInfinoted();
     const QString serverDirectory() const;
+    const QString serviceName() const;
 };
 
 #endif

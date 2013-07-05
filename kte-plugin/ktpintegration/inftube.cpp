@@ -98,13 +98,18 @@ InfTubeBase::ConnectionStatus InfTubeBase::status() const
 
 //  + QString::number(QApplication::instance()->applicationPid())
 
+const QString InfTubeServer::serviceName() const
+{
+    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
+}
+
 InfTubeServer::InfTubeServer(QObject* parent)
 {
     m_port = 12345;
     initialize();
     qDebug() << "CREATING STREAM TUBE SERVER";
-    m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity", QStringList(),
-                                                "KTp.infserver" + QString::number(QApplication::instance()->applicationPid()));
+    m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity",
+                                                QStringList(), serviceName());
 }
 
 bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document)
@@ -117,15 +122,20 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
     qDebug() << "starting infinoted";
     // start infinoted
     startInfinoted();
+    // construct a map of documents to open initially
+    QVariantMap hints;
+    hints.insert("initialDocumentsSize", documents.size());
+    for ( int i = 0; i < documents.size(); i++ ) {
+        hints.insert("initialDocument" + QString::number(i), documents.at(i).fileName());
+    }
     // set infinoted's socket as the local endpoint of the tube
-    m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port);
+    m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port, hints);
     // add the initial documents
     foreach ( const KUrl& document, documents ) {
         KUrl x = localUrl();
         x.setFileName(document.fileName());
         KIO::TransferJob* job = KIO::put(x, -1);
     }
-    Tp::PendingChannelRequest* channelRequest = 0;
     QVariantMap request;
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
                    TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
@@ -136,9 +146,10 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
     // TODO !!!
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
                    contacts.first()->handle().at(0));
+    Tp::PendingChannelRequest* channelRequest;
     channelRequest = account->ensureChannel(request,
                                             QDateTime::currentDateTime(),
-                                            "org.freedesktop.Telepathy.Client.KTp.infserver" + QString::number(QApplication::instance()->applicationPid()));
+                                            "org.freedesktop.Telepathy.Client." + serviceName());
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
@@ -193,13 +204,32 @@ void InfTubeClient::listen()
     kDebug() << m_tubeClient->tubes();
 }
 
-void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr )
+void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr tube)
 {
     kDebug() << "Tube accepted as Tcp, port:" << port;
+    kDebug() << "parameters:" << tube->parameters();
     // TODO error handling
+    // TODO proper selection of application(s) to run
     m_port = port;
+    bool ok = false;
+    const int initialSize = tube->parameters().contains("initialDocumentsSize") ? tube->parameters()["initialDocumentsSize"].toInt(&ok) : 0;
+    if ( ! ok || initialSize == 0 ) {
+        KRun::run("dolphin " + localUrl().url(), KUrl::List(), 0);
+    }
+    else {
+        for ( int i = 0; i < initialSize; i++ ) {
+            const QString key = "initialDocument" + QString::number(i);
+            const QString path = tube->parameters().contains(key) ? tube->parameters()[key].toString() : QString();
+            if ( path.isEmpty() ) {
+                kWarning() << "invalid path at index" << i;
+                continue;
+            }
+            KUrl url = localUrl();
+            url.setPath(path);
+            KRun::run("kwrite " + url.url(), KUrl::List(), 0);
+        }
+    }
     emit connected();
-    KRun::run("dolphin " + localUrl().url(), KUrl::List(), 0);
 }
 
 InfTubeClient::~InfTubeClient()
