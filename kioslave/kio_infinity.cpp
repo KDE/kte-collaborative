@@ -259,8 +259,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         InfCommunicationManager* communication_manager =
                 infc_browser_get_communication_manager(INFC_BROWSER(browser()->gobject()));
 
-        InfIo* io;
-        g_object_get(browser()->gobject(), "io", &io, NULL);
+        InfIo* io = INF_IO(QInfinity::QtIo::instance()->gobject());
 
         InfTextSession* session = inf_text_session_new_with_user_table(
                 communication_manager, INF_TEXT_BUFFER(textBuffer), io,
