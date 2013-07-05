@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) %{CURRENT_YEAR} by %{AUTHOR} <%{EMAIL}>                 *
+ *   Copyright (C) 2013 by Sven Brauch <svenbrauch@gmail.com>              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,10 +28,13 @@
 #include <telepathy-qt4/TelepathyQt/StreamTubeServer>
 #include <telepathy-qt4/TelepathyQt/PendingChannelRequest>
 #include <TelepathyQt/ReferencedHandles>
+#include <TelepathyQt/ClientRegistrar>
+#include <TelepathyQt/ChannelClassSpecList>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <unistd.h>
 #include <KIO/Job>
+#include <KRun>
 #include <KDebug>
 #include <krun.h>
 
@@ -65,7 +68,14 @@ void InfTubeBase::initialize()
                                                   channelFactory,
                                                   contactFactory);
 
+//     m_registrar = Tp::ClientRegistrar::create(QDBusConnection::sessionBus(), accountFactory,
+//                                                                 connectionFactory, channelFactory, contactFactory);
 }
+
+// Tp::ClientRegistrarPtr InfTubeBase::clientRegistrar() const
+// {
+//     return m_registrar;
+// }
 
 unsigned int InfTubeBase::localPort() const
 {
@@ -76,7 +86,7 @@ KUrl InfTubeBase::localUrl() const
 {
     KUrl url;
     url.setProtocol(QLatin1String("inf"));
-    url.setHost(QLatin1String("localhost"));
+    url.setHost(QLatin1String("127.0.0.1"));
     url.setPort(m_port);
     return url;
 }
@@ -86,10 +96,15 @@ InfTubeBase::ConnectionStatus InfTubeBase::status() const
     return m_status;
 }
 
+//  + QString::number(QApplication::instance()->applicationPid())
+
 InfTubeServer::InfTubeServer(QObject* parent)
 {
+    m_port = 12345;
     initialize();
-    m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity-collaborative");
+    qDebug() << "CREATING STREAM TUBE SERVER";
+    m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity", QStringList(),
+                                                "KTp.infserver" + QString::number(QApplication::instance()->applicationPid()));
 }
 
 bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document)
@@ -100,33 +115,41 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, 
 bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
 {
     qDebug() << "starting infinoted";
+    // start infinoted
     startInfinoted();
+    // set infinoted's socket as the local endpoint of the tube
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port);
+    // add the initial documents
     foreach ( const KUrl& document, documents ) {
         KUrl x = localUrl();
         x.setFileName(document.fileName());
         KIO::TransferJob* job = KIO::put(x, -1);
-        connect(job, SIGNAL(finished(KJob*)), this, SLOT(testFileCreated(KJob*)));
     }
     Tp::PendingChannelRequest* channelRequest = 0;
     QVariantMap request;
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
-                    TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
+                   TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
-                    (uint) Tp::HandleTypeContact);
+                   (uint) Tp::HandleTypeContact);
     request.insert(TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE + QLatin1String(".Service"),
-                    QLatin1String("tubetest"));
+                   QLatin1String("infinity"));
     // TODO !!!
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
-                    contacts.first()->handle().at(0));
-    account->ensureChannel(request,
-                           QDateTime::currentDateTime(),
-                           "org.freedesktop.Telepathy.Client.KTp.infinity-collaborative");
+                   contacts.first()->handle().at(0));
+    channelRequest = account->ensureChannel(request,
+                                            QDateTime::currentDateTime(),
+                                            "org.freedesktop.Telepathy.Client.KTp.infserver" + QString::number(QApplication::instance()->applicationPid()));
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
     // TODO
     return true;
+}
+
+void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
+{
+    kDebug() << "create tube finished; is error:" << operation->isError();
+    kDebug() << "error message:" << operation->errorMessage();
 }
 
 void InfTubeServer::startInfinoted()
@@ -138,8 +161,7 @@ void InfTubeServer::startInfinoted()
     m_serverProcess->start("/usr/bin/env", QStringList() << "infinoted-0.5" << "--security-policy=no-tls"
                                            << "-r" << serverDirectory() << "-p" << QString::number(m_port));
     m_serverProcess->waitForStarted(500);
-    while ( true ) {
-        sleep(1);
+    while ( m_serverProcess->state() == QProcess::Running ) {
         QTcpSocket s;
         s.connectToHost("localhost", m_port);
         if ( s.waitForConnected(100) ) {
@@ -151,7 +173,7 @@ void InfTubeServer::startInfinoted()
 
 const QString InfTubeServer::serverDirectory() const
 {
-    return QLatin1String("/tmp");
+    return QLatin1String("/tmp/inftest");
 }
 
 InfTubeServer::~InfTubeServer()
@@ -159,22 +181,25 @@ InfTubeServer::~InfTubeServer()
 
 }
 
-InfTubeClient::InfTubeClient(QObject* parent)
-{
-
-}
-
 void InfTubeClient::listen()
 {
-    m_tubeClient = Tp::StreamTubeClient::create(m_accountManager, QStringList() << "tubetest", QStringList(), QString(), true, true);
+    kDebug() << "listen called";
+    m_tubeClient = Tp::StreamTubeClient::create(m_accountManager, QStringList() << "infinity",
+                                                QStringList(), QLatin1String("KTp.infinity"), true, true);
+    kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),
             this, SLOT(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)));
+    kDebug() << m_tubeClient->tubes();
 }
 
-void InfTubeClient::tubeAcceptedAsTcp(QHostAddress , quint16 , QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr )
+void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr )
 {
-    kDebug() << "Tube accepted as Tcp";
+    kDebug() << "Tube accepted as Tcp, port:" << port;
+    // TODO error handling
+    m_port = port;
+    emit connected();
+    KRun::run("dolphin " + localUrl().url(), KUrl::List(), 0);
 }
 
 InfTubeClient::~InfTubeClient()

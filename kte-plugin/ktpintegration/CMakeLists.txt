@@ -24,3 +24,15 @@ target_link_libraries(inftube
 )
 
 install(TARGETS inftube ${INSTALL_TARGETS_DEFAULT_ARGS})
+
+# the tube handler
+kde4_add_executable(tubehandler tubehandler.cpp)
+target_link_libraries(tubehandler
+                      inftube
+                      ${KTP_LIBRARIES}
+                      ${KDE4_KIO_LIBS}
+                      ${KDE4_KDEUI_LIBS}
+                      ${TELEPATHY_QT4_LIBRARIES}
+)
+
+install(TARGETS tubehandler DESTINATION ${BIN_INSTALL_DIR})

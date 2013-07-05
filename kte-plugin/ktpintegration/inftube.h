@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) %{CURRENT_YEAR} by %{AUTHOR} <%{EMAIL}>                 *
+ *   Copyright (C) 2013 by Sven Brauch <svenbrauch@gmail.com>              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,9 +28,15 @@
 #include <telepathy-qt4/TelepathyQt/StreamTubeServer>
 #include <telepathy-qt4/TelepathyQt/AccountManager>
 #include <telepathy-qt4/TelepathyQt/Account>
+#include <telepathy-qt4/TelepathyQt/ClientRegistrar>
+#include <TelepathyQt/AbstractClientObserver>
+#include <TelepathyQt/ChannelClassSpecList>
+#include <KTp/telepathy-handler-application.h>
 
 #include <KJob>
 #include <KUrl>
+#include <KDebug>
+#include <QTcpSocket>
 
 #include "inftube_export.h"
 
@@ -45,8 +51,7 @@ typedef QList<KUrl> DocumentList;
  * This class defines the API for routing infinity traffic through a TP tube
  * which is common to both the receiving an the offering side.
  */
-class INFTUBE_EXPORT InfTubeBase : public QObject {
-Q_OBJECT
+class INFTUBE_EXPORT InfTubeBase {
 public:
     virtual ~InfTubeBase() { };
 
@@ -73,17 +78,16 @@ public:
      */
     ConnectionStatus status() const;
 
-signals:
-    /**
-     * @brief Emitted when the connection has been established
-     */
-    void connected(InfTubeBase* self);
-
+//     /**
+//      * @brief Get the client registrar instance.
+//      */
+//     Tp::ClientRegistrarPtr clientRegistrar() const;
 
 protected:
     Tp::AccountManagerPtr m_accountManager;
     ConnectionStatus m_status;
     unsigned int m_port;
+//     Tp::ClientRegistrarPtr m_registrar;
 
     /**
      * @brief Performs some initialization tasks. Call before everything else.
@@ -91,13 +95,22 @@ protected:
     void initialize();
 };
 
+
+inline Tp::ChannelClassSpecList channelClassList()
+{
+    return Tp::ChannelClassSpecList() << Tp::ChannelClassSpec::incomingStreamTube("infinity");
+}
+
 /**
  * @brief This class implements InfTubeBase and is used on the receiving end.
  */
-class INFTUBE_EXPORT InfTubeClient : public InfTubeBase {
+class INFTUBE_EXPORT InfTubeClient : public QObject, public InfTubeBase {
 Q_OBJECT
 public:
-    InfTubeClient(QObject* parent = 0);
+    explicit InfTubeClient() {
+        // TODO move to cpp
+        initialize();
+    };
     virtual ~InfTubeClient();
 
     /**
@@ -105,8 +118,16 @@ public:
      */
     void listen();
 
+signals:
+    /**
+     * @brief Emitted as soon as the tube is connected.
+     */
+    void connected();
+
 private:
     Tp::StreamTubeClientPtr m_tubeClient;
+    QTcpSocket* m_socket;
+
 public slots:
     void tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr);
 };
@@ -114,7 +135,7 @@ public slots:
 /**
  * @brief This class implements InfTubeBase and can be used to offer some documents to a contact.
  */
-class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
+class INFTUBE_EXPORT InfTubeServer : public QObject, public InfTubeBase {
 Q_OBJECT
 public:
     InfTubeServer(QObject* parent = 0);
@@ -133,6 +154,15 @@ public:
      * @brief Convenience overload, for offering a single document to a single contact.
      */
     bool offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document);
+
+signals:
+    /**
+     * @brief Emitted when the connection has been established
+     */
+    void connected(InfTubeBase* self);
+
+private slots:
+    void onCreateTubeFinished(Tp::PendingOperation*);
 
 private:
     Tp::StreamTubeServerPtr m_tubeServer;
