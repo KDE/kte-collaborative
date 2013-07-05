@@ -36,10 +36,5 @@ int main(int argc, char** argv) {
     KApplication app;
     InfTubeClient* client = new InfTubeClient();
     client->listen();
-//     Tp::SharedPtr<InfTubeClient> app = Tp::SharedPtr<InfTubeClient>(new InfTubeClient());
-//     Tp::AbstractClientPtr handler = Tp::AbstractClientPtr(app);
-//     app->listen();
-//     app->clientRegistrar()->registerClient(handler, QLatin1String("KTp.infinity"));
-//     QObject::connect(client, SIGNAL(connected()), client, SLOT(launch()));
     app.exec();
 }

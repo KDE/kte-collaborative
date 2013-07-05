@@ -71,14 +71,7 @@ void InfTubeBase::initialize()
                                                   channelFactory,
                                                   contactFactory);
 
-//     m_registrar = Tp::ClientRegistrar::create(QDBusConnection::sessionBus(), accountFactory,
-//                                                                 connectionFactory, channelFactory, contactFactory);
 }
-
-// Tp::ClientRegistrarPtr InfTubeBase::clientRegistrar() const
-// {
-//     return m_registrar;
-// }
 
 unsigned int InfTubeBase::localPort() const
 {
@@ -99,8 +92,6 @@ InfTubeBase::ConnectionStatus InfTubeBase::status() const
     return m_status;
 }
 
-//  + QString::number(QApplication::instance()->applicationPid())
-
 const QString InfTubeServer::serviceName() const
 {
     return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
@@ -109,7 +100,6 @@ const QString InfTubeServer::serviceName() const
 InfTubeServer::InfTubeServer(QObject* parent)
 {
     initialize();
-    qDebug() << "CREATING STREAM TUBE SERVER";
     m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity",
                                                 QStringList(), serviceName());
 }
