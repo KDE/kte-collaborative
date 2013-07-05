@@ -26,8 +26,8 @@ target_link_libraries(inftube
 install(TARGETS inftube ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 # the tube handler
-kde4_add_executable(tubehandler tubehandler.cpp)
-target_link_libraries(tubehandler
+kde4_add_executable(infinotetubehandler tubehandler.cpp)
+target_link_libraries(infinotetubehandler
                       inftube
                       ${KTP_LIBRARIES}
                       ${KDE4_KIO_LIBS}
@@ -35,7 +35,9 @@ target_link_libraries(tubehandler
                       ${TELEPATHY_QT4_LIBRARIES}
 )
 
-install(TARGETS tubehandler DESTINATION ${BIN_INSTALL_DIR})
-install(FILES org.freedesktop.Telepathy.Client.KTp.infinity.service
+install(TARGETS infinotetubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
+configure_file(org.freedesktop.Telepathy.Client.KTp.infinity.service.in
+               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service
         DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
 install(FILES KTp.infinity.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
