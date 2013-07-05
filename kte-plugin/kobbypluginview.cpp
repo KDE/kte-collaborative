@@ -372,7 +372,7 @@ void KobbyPluginView::saveCopyActionClicked()
 void KobbyPluginView::shareActionClicked()
 {
     if ( ! m_view->document()->url().isValid() ) {
-        KMessageBox::error(m_view, i18n("Please save the document locally before sharing it."));
+        KMessageBox::sorry(m_view, i18n("Please save the document locally before sharing it."));
         return;
     }
     Tp::registerTypes();
