@@ -29,6 +29,8 @@
 
 #include <qcoreapplication.h>
 #include <kdirnotify.h>
+#include <libinftext/inf-text-session.h>
+#include <libinftext/inf-text-default-buffer.h>
 
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/browser.h>
@@ -39,6 +41,7 @@
 #include <libqinfinity/qgsignal.h>
 #include <libqinfinity/noderequest.h>
 #include <libqinfinity/explorerequest.h>
+#include <libqinfinity/qtio.h>
 
 #include "common/itemfactory.h"
 #include "common/noteplugin.h"
@@ -225,8 +228,58 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
+    dataReq();
+    QByteArray initialContents;
+    int result = readData(initialContents);
+    kDebug() << "data:" << result;
+    if ( result < 0 ) {
+        error(KIO::ERR_INTERNAL, "Failed to read data");
+        return;
+    }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
-    QInfinity::NodeRequest* req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    QInfinity::NodeRequest* req = 0;
+    kDebug() << "adding note with content:" << result << "bytes";
+    if ( result > 0 ) {
+        // There is actually data to add to the node
+        InfUser* user = INF_USER(g_object_new(
+                INF_TEXT_TYPE_USER,
+                "id", 1,
+                "flags", INF_USER_LOCAL,
+                "name", "Initial document contents",
+                "status", INF_USER_INACTIVE,
+                "caret-position", 0,
+                static_cast<void*>(NULL)));
+
+        InfUserTable* user_table = inf_user_table_new();
+        inf_user_table_add_user(user_table, user);
+        g_object_unref(user);
+
+        InfTextDefaultBuffer* textBuffer = inf_text_default_buffer_new("utf8");
+
+        InfCommunicationManager* communication_manager =
+                infc_browser_get_communication_manager(INFC_BROWSER(browser()->gobject()));
+
+        InfIo* io;
+        g_object_get(browser()->gobject(), "io", &io, NULL);
+
+        InfTextSession* session = inf_text_session_new_with_user_table(
+                communication_manager, INF_TEXT_BUFFER(textBuffer), io,
+                user_table, INF_SESSION_RUNNING, NULL, NULL);
+        inf_text_buffer_insert_text(INF_TEXT_BUFFER(textBuffer), 0, initialContents.data(),
+                                    initialContents.size(), initialContents.size(), user);
+
+        g_object_unref(io);
+
+        req = NodeRequest::wrap(infc_browser_add_note_with_content(
+                INFC_BROWSER(browser()->gobject()), iter.infBrowserIter(),
+                url.fileName().toAscii().data(), m_notePlugin->infPlugin(), INF_SESSION(session), true));
+        g_object_unref(session);
+        g_object_unref(user_table);
+    }
+    else {
+        // There is no data to add, just create a new empty node
+        req = browser()->addNote(iter, url.fileName().toAscii().data(), *m_notePlugin, false);
+    }
     connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
     connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
     if ( waitForCompletion() ) {
