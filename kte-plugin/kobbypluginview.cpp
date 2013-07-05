@@ -374,8 +374,12 @@ void KobbyPluginView::shareActionClicked()
     Tp::registerTypes();
     KTp::ContactGridDialog dialog(m_view);
     if ( dialog.exec() ) {
+        KUrl url = m_view->document()->url();
         InfTubeServer* serverTube = new InfTubeServer(this);
-        serverTube->offer(dialog.account(), dialog.contact(), m_view->document()->url());
+        if ( serverTube->offer(dialog.account(), dialog.contact(), url) ) {
+            m_view->document()->closeUrl();
+            m_view->document()->openUrl(serverTube->localUrl().url(KUrl::AddTrailingSlash) + url.fileName());
+        }
     }
 }
 
