@@ -344,6 +344,12 @@ bool InfinityProtocol::waitForCompletion()
     // Start waiting.
     loop.exec();
 
+    if ( ! timeout.isActive() ) {
+        // If the timer timed out (i.e. is not running any more), connecting failed.
+        error(ERR_SERVER_TIMEOUT, i18n("Connection timed out."));
+        return false;
+    }
+
     if ( ! m_lastError.isEmpty() ) {
         // TODO is there a way to give the proper error types for e.g. "node already exists"?
         error(ERR_SLAVE_DEFINED, m_lastError);

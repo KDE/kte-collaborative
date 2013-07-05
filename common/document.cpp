@@ -153,17 +153,38 @@ KTextEditor::Document *KDocumentTextBuffer::kDocument() const
     return m_kDocument;
 }
 
+/**
+ * @brief Makes a KPart read-write while it exists and restores the previous state on destruction.
+ */
+class ReadWriteTransaction {
+public:
+    ReadWriteTransaction(KTextEditor::Document* document) {
+        m_document = document;
+        m_wasReadWrite = document->isReadWrite();
+        document->setReadWrite(true);
+    };
+
+    ~ReadWriteTransaction() {
+        m_document->setReadWrite(m_wasReadWrite);
+    };
+
+private:
+    KTextEditor::Document* m_document;
+    bool m_wasReadWrite;
+};
+
 void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
     kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
-             << "(" << chunk.length() << " chars )" << "[blocked:" << blockRemoteInsert << "]";
+             << "(" << chunk.length() << " chars )" << "[blocked:" << blockRemoteInsert << "]" << "rw:" << kDocument()->isReadWrite();
 
     if( !blockRemoteInsert )
     {
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         QString str = codec()->toUnicode( chunk.text() );
+        ReadWriteTransaction transaction(kDocument());
         kDocument()->blockSignals(true);
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // The compile-time check just verifies that the interface is present.
@@ -196,6 +217,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
+        ReadWriteTransaction transaction(kDocument());
         kDocument()->blockSignals(true);
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
@@ -415,7 +437,7 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_remote( unsigned int off
     for( i = 0; soff > kDocument()->lineLength(i); i++ ) {
         soff -= kDocument()->lineLength(i) + 1; // Subtract newline
         if ( kDocument()->lineLength(i) == -1 ) {
-            kWarning() << "oops, invalid offset?";
+            kWarning() << "oops, invalid offset?" << i << offset;
             break;
         }
     }

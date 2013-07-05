@@ -270,7 +270,7 @@ void KobbyPluginView::disableUi()
 void KobbyPluginView::disconnectActionClicked()
 {
     // TODO
-    m_document->document()->saveAs(KUrl("/tmp/" + m_document->document()->url().encodedPath()));
+    m_document->document()->saveAs(KUrl(QDir::tempPath() + m_document->document()->url().encodedPath()));
 }
 
 void KobbyPluginView::changeUserActionClicked()
