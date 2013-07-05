@@ -51,7 +51,7 @@ typedef QList<KUrl> DocumentList;
  * This class defines the API for routing infinity traffic through a TP tube
  * which is common to both the receiving an the offering side.
  */
-class INFTUBE_EXPORT InfTubeBase {
+class INFTUBE_EXPORT InfTubeBase : public QObject {
 public:
     virtual ~InfTubeBase() { };
 
@@ -78,16 +78,10 @@ public:
      */
     ConnectionStatus status() const;
 
-//     /**
-//      * @brief Get the client registrar instance.
-//      */
-//     Tp::ClientRegistrarPtr clientRegistrar() const;
-
 protected:
     Tp::AccountManagerPtr m_accountManager;
     ConnectionStatus m_status;
     unsigned int m_port;
-//     Tp::ClientRegistrarPtr m_registrar;
 
     /**
      * @brief Performs some initialization tasks. Call before everything else.
@@ -104,7 +98,7 @@ inline Tp::ChannelClassSpecList channelClassList()
 /**
  * @brief This class implements InfTubeBase and is used on the receiving end.
  */
-class INFTUBE_EXPORT InfTubeClient : public QObject, public InfTubeBase {
+class INFTUBE_EXPORT InfTubeClient : public InfTubeBase {
 Q_OBJECT
 public:
     explicit InfTubeClient() {
@@ -135,7 +129,7 @@ public slots:
 /**
  * @brief This class implements InfTubeBase and can be used to offer some documents to a contact.
  */
-class INFTUBE_EXPORT InfTubeServer : public QObject, public InfTubeBase {
+class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
 Q_OBJECT
 public:
     InfTubeServer(QObject* parent = 0);
