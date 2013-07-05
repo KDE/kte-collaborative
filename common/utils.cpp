@@ -118,7 +118,7 @@ QColor ColorHelper::colorForUsername(const QString& username, unsigned char sat,
     }
     const uint hash = qHash(username);
     uint hue = ((hash % 19) * 4129) % 360;
-    const int minDistance = 18;
+    const int minDistance = 30;
     // Find the color which is closest to the choosen color, and retry if it's too close.
     uint closestDistance;
     for ( int i = 0; i < 360 / minDistance; i++ ) {
