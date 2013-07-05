@@ -40,3 +40,4 @@ X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-Category=Editor
 X-KDE-ParentApp=kate
 X-KDE-Version=4.0
+X-KDE-PluginInfo-EnabledByDefault=true
