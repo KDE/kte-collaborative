@@ -314,6 +314,7 @@ void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     QInfinity::NodeRequest* req = browser()->addSubdirectory(iter, url.fileName().toAscii().data());
+    connect(req, SIGNAL(finished(NodeRequest*)), this, SIGNAL(requestSuccessful(NodeRequest*)));
     connect(req, SIGNAL(failed(GError*)), this, SIGNAL(requestError(GError*)));
     if ( waitForCompletion() ) {
         finished();
