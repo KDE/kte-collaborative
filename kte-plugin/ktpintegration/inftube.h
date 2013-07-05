@@ -168,7 +168,7 @@ private:
     Tp::StreamTubeServerPtr m_tubeServer;
     QProcess* m_serverProcess;
 
-    void startInfinoted();
+    bool startInfinoted();
     const QString serverDirectory() const;
     const QString serviceName() const;
 };

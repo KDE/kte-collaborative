@@ -30,13 +30,16 @@
 #include <TelepathyQt/ReferencedHandles>
 #include <TelepathyQt/ClientRegistrar>
 #include <TelepathyQt/ChannelClassSpecList>
-#include <QTcpServer>
-#include <QTcpSocket>
 #include <unistd.h>
 #include <KIO/Job>
 #include <KRun>
 #include <KDebug>
+#include <KMessageBox>
+#include <KLocalizedString>
 #include <krun.h>
+
+#include <QTcpServer>
+#include <QTcpSocket>
 
 void InfTubeBase::initialize()
 {
@@ -105,7 +108,6 @@ const QString InfTubeServer::serviceName() const
 
 InfTubeServer::InfTubeServer(QObject* parent)
 {
-    m_port = 12345;
     initialize();
     qDebug() << "CREATING STREAM TUBE SERVER";
     m_tubeServer = Tp::StreamTubeServer::create(m_accountManager, QStringList() << "infinity",
@@ -119,9 +121,12 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, 
 
 bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
 {
-    qDebug() << "starting infinoted";
-    // start infinoted
-    startInfinoted();
+    kDebug() << "starting infinoted";
+    if ( ! startInfinoted() ) {
+        // TODO user-visible error handling
+        kWarning() << "Failed to start infinoted. Check settings and installation.";
+        return false;
+    }
     // construct a map of documents to open initially
     QVariantMap hints;
     hints.insert("initialDocumentsSize", documents.size());
@@ -153,7 +158,6 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
-    // TODO
     return true;
 }
 
@@ -163,23 +167,38 @@ void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
     kDebug() << "error message:" << operation->errorMessage();
 }
 
-void InfTubeServer::startInfinoted()
+bool InfTubeServer::startInfinoted()
 {
+    // Find a free port by letting the system choose one for a QTcpServer, then closing that
+    // server and using the port it was assigned. Arguably not optimal but close enough.
+    {
+        QTcpServer s;
+        s.listen(QHostAddress::LocalHost, 0);
+        m_port = s.serverPort();
+        s.close();
+    }
     m_serverProcess = new QProcess;
     m_serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
     m_serverProcess->setStandardOutputFile(serverDirectory() + "/infinoted.log");
     m_serverProcess->setStandardErrorFile(serverDirectory() + "/infinoted.errors");
+    // TODO windows?
     m_serverProcess->start("/usr/bin/env", QStringList() << "infinoted-0.5" << "--security-policy=no-tls"
                                            << "-r" << serverDirectory() << "-p" << QString::number(m_port));
     m_serverProcess->waitForStarted(500);
-    while ( m_serverProcess->state() == QProcess::Running ) {
+    int timeout = 30; // 30 retries at 100 ms -> 3s
+    for ( int i = 0; i < timeout; i ++ ) {
+        if ( m_serverProcess->state() != QProcess::Running ) {
+            kWarning() << "server did not start";
+            return false;
+        }
         QTcpSocket s;
         s.connectToHost("localhost", m_port);
         if ( s.waitForConnected(100) ) {
             break;
         }
     }
-    qDebug() << "successfully started infinioted on port" << m_port << "( root dir" << serverDirectory() << ")";
+    kDebug() << "successfully started infinioted on port" << m_port << "( root dir" << serverDirectory() << ")";
+    return true;
 }
 
 const QString InfTubeServer::serverDirectory() const
