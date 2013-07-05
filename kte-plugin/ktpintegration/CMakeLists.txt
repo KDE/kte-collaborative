@@ -36,3 +36,6 @@ target_link_libraries(tubehandler
 )
 
 install(TARGETS tubehandler DESTINATION ${BIN_INSTALL_DIR})
+install(FILES org.freedesktop.Telepathy.Client.KTp.infinity.service
+        DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
+install(FILES KTp.infinity.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
