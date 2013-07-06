@@ -375,6 +375,9 @@ void KobbyPluginView::shareActionClicked()
         KMessageBox::sorry(m_view, i18n("Please save the document locally before sharing it."));
         return;
     }
+    if ( m_view->document()->url().protocol() == "inf" ) {
+        KMessageBox::sorry(m_view, i18n("The document is already being shared."));
+    }
     Tp::registerTypes();
     KTp::ContactGridDialog dialog(m_view);
     if ( dialog.exec() ) {
@@ -382,11 +385,15 @@ void KobbyPluginView::shareActionClicked()
         InfTubeServer* serverTube = new InfTubeServer(this);
         if ( serverTube->offer(dialog.account(), dialog.contact(), url) ) {
             m_view->document()->closeUrl();
-            KUrl local = serverTube->localUrl();
-            local.setUser(serverTube->compatibleNickname(dialog.account()));
-            m_view->document()->openUrl(local.url(KUrl::AddTrailingSlash) + url.fileName());
+            serverTube->setNicknameFromAccount(dialog.account());
+            connect(serverTube, SIGNAL(fileCopiedToServer(const KUrl&)), this, SLOT(openFile(KUrl)));
         }
     }
+}
+
+void KobbyPluginView::openFile(KUrl url)
+{
+    m_view->document()->openUrl(url.url());
 }
 
 KobbyPluginView::~KobbyPluginView()

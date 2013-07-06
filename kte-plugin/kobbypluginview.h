@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QLabel>
 #include <KTextEditor/View>
+#include <KUrl>
 
 #include <libqinfinity/xmlconnection.h>
 
@@ -114,6 +115,8 @@ public slots:
     void createServerActionClicked();
     void clearHighlightActionClicked();
     void configureActionClicked();
+
+    void openFile(KUrl);
 
 private:
     KTextEditor::View* m_view;

@@ -101,6 +101,25 @@ InfTubeServer::InfTubeServer(QObject* parent)
                                                 QStringList(), serviceName());
 }
 
+void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
+{
+    m_nickname = QUrl::toPercentEncoding(account->nickname().replace('@', '-'));
+}
+
+const QString& InfTubeBase::nickname() const
+{
+    return m_nickname;
+}
+
+void InfTubeServer::jobFinished(KJob* job)
+{
+    KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
+    Q_ASSERT(j);
+    KUrl url = j->destUrl();
+    url.setUser(nickname());
+    emit fileCopiedToServer(url);
+}
+
 bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document)
 {
     return offer(account, ContactList() << contact, DocumentList() << document);
@@ -126,7 +145,8 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
     foreach ( const KUrl& document, documents ) {
         KUrl x = localUrl();
         x.setFileName(document.fileName());
-        KIO::TransferJob* job = KIO::put(x, -1);
+        KIO::FileCopyJob* job = KIO::file_copy(document, x, -1, KIO::HideProgressInfo);
+        connect(job, SIGNAL(finished(KJob*)), this, SLOT(jobFinished(KJob*)));
     }
     QVariantMap request;
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
@@ -229,7 +249,8 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
     bool ok = false;
     const int initialSize = tube->parameters().contains("initialDocumentsSize") ? tube->parameters()["initialDocumentsSize"].toInt(&ok) : 0;
     KUrl url = localUrl();
-    url.setUser(compatibleNickname(account));
+    setNicknameFromAccount(account);
+    url.setUser(nickname());
     if ( ! ok || initialSize == 0 ) {
         KRun::run("dolphin " + url.url(), KUrl::List(), 0);
     }
@@ -251,11 +272,6 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
 InfTubeClient::~InfTubeClient()
 {
 
-}
-
-QString InfTubeBase::compatibleNickname(const Tp::AccountPtr& account)
-{
-    return QUrl::toPercentEncoding(account->nickname().replace('@', '-'));
 }
 
 ConnectionManager* ConnectionManager::instance()

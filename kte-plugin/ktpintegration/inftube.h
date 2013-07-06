@@ -79,12 +79,18 @@ public:
     KUrl localUrl() const;
 
     /**
-     * @brief Return a nickname with all "bad" characters properly escaped.
+     * @brief Set a nickname with all "bad" characters properly escaped.
      */
-    QString compatibleNickname(const Tp::AccountPtr& account);
+    void setNicknameFromAccount(const Tp::AccountPtr& account);
+
+    /**
+     * @brief Get the nickname used in documents for this tube by default
+     */
+    const QString& nickname() const;
 
 protected:
     unsigned int m_port;
+    QString m_nickname;
 };
 
 /**
@@ -146,11 +152,23 @@ signals:
      */
     void connected(InfTubeBase* self);
 
+    /**
+     * @brief Emitted when a file was copied to the server and is ready for editing
+     *
+     * @param url The inf:// URL to be used for editing this document, complete with nick name.
+     */
+    void fileCopiedToServer(const KUrl& url);
+
 private slots:
     /**
      * @brief Invoked when creation of a tube finishes.
      */
     void onCreateTubeFinished(Tp::PendingOperation*);
+
+    /**
+     * @brief Invoked when a job copying an initial file to the server finishes
+     */
+    void jobFinished(KJob*);
 
 private:
     Tp::StreamTubeServerPtr m_tubeServer;
