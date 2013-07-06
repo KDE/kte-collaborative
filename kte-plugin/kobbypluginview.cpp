@@ -47,6 +47,7 @@
 #include <KTextEditor/Editor>
 #include <KFileDialog>
 #include <KCMultiDialog>
+#include <KRun>
 
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
@@ -153,8 +154,13 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_saveCopyAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+S")), KAction::DefaultShortcut);
     m_saveCopyAction->setIcon(KIcon("document-save-as"));
 
+    m_openFileManagerAction = actionCollection()->addAction("kobby_open_file_manager", this, SLOT(openFileManagerActionClicked()));
+    m_openFileManagerAction->setText(i18n("Open file manager"));
+    m_openFileManagerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+F")), KAction::DefaultShortcut);
+    m_openFileManagerAction->setIcon(KIcon("system-file-manager"));
+
     m_shareWithContactAction = actionCollection()->addAction("kobby_share_with_contact", this, SLOT(shareActionClicked()));
-    m_shareWithContactAction->setText(i18n("Share document..."));
+    m_shareWithContactAction->setText(i18n("Share with contact..."));
     m_shareWithContactAction->setHelpText(i18n("Collaboratively edit the current document with an "
                                                "instant messenger contact"));
     m_shareWithContactAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+E")), KAction::DefaultShortcut);
@@ -191,13 +197,27 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_configureAction->setIcon(KIcon("configure"));
 
     m_actionsRequiringConnection << m_saveCopyAction << m_changeUserNameAction
-                                 << m_disconnectAction << m_clearHighlightAction;
+                                 << m_disconnectAction << m_clearHighlightAction
+                                 << m_openFileManagerAction;
 
     disableActions();
     if ( m_document ) {
         // See KobbyPlugin::addView
         documentBecameManaged(document);
     }
+}
+
+void KobbyPluginView::openFileManagerActionClicked()
+{
+    if ( ! m_document || ! m_document->document()->url().isValid() ) {
+        return;
+    }
+    KUrl url = m_document->document()->url();
+    if ( url.protocol() != "inf" ) {
+        return;
+    }
+    // TODO: make sure to use a KDE file manager, since others don't use KIO?
+    KRun::runUrl(url.upUrl(), KMimeType::findByUrl(url.upUrl())->name(), m_view);
 }
 
 void KobbyPluginView::configureActionClicked()

@@ -115,6 +115,7 @@ public slots:
     void createServerActionClicked();
     void clearHighlightActionClicked();
     void configureActionClicked();
+    void openFileManagerActionClicked();
 
     void openFile(KUrl);
 
@@ -131,6 +132,7 @@ private:
     KAction* m_disconnectAction;
     KAction* m_createServerAction;
     KAction* m_configureAction;
+    KAction* m_openFileManagerAction;
 
     // actions from the popup menu
     KAction* m_clearHighlightAction;
