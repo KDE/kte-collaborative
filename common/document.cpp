@@ -185,7 +185,6 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
         QString str = codec()->toUnicode( chunk.text() );
         ReadWriteTransaction transaction(kDocument());
-        kDocument()->blockSignals(true);
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // The compile-time check just verifies that the interface is present.
         // This does not guarantee that it is supported by the KTE implementation used here.
@@ -197,9 +196,10 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
 #endif
         else {
             kWarning() << "Text editor does not support the Buffer interface!";
+            kDocument()->blockSignals(true);
             kDocument()->insertText( startCursor, str );
+            kDocument()->blockSignals(false);
         }
-        kDocument()->blockSignals(false);
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_remote(offset+chunk.length())), user, false);
     }
     else
@@ -218,7 +218,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
         ReadWriteTransaction transaction(kDocument());
-        kDocument()->blockSignals(true);
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
         if ( m_bufferInterface ) {
@@ -230,9 +229,10 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 #endif
         else {
             kWarning() << "Text editor does not support the Buffer interface!";
+            kDocument()->blockSignals(true);
             kDocument()->removeText( range );
+            kDocument()->blockSignals(false);
         }
-        kDocument()->blockSignals(false);
         emit remoteChangedText(range, user, true);
     }
     else
