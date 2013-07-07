@@ -124,11 +124,15 @@ QColor ColorHelper::colorForUsername(const QString& username, unsigned char sat,
     for ( int i = 0; i < 360 / minDistance; i++ ) {
         closestDistance = 360;
         foreach ( const QColor& color, usedColors ) {
-            const uint distance = abs(color.hsvHue() - hue);
+            const int chue = color.hsvHue();
+            const uint distance = abs(chue - hue) <= 180 ? abs(chue - hue) : 360 - abs(chue - hue);
+            Q_ASSERT(distance <= 180); // if not, my maths is broken
             closestDistance = qMin(distance, closestDistance);
         }
         if ( closestDistance <= minDistance ) {
-            hue += minDistance;
+            // Go one point off the oposite of the color wheel,
+            // for a good chance for good contrast
+            hue += minDistance * (360 / minDistance / 2 - 1);
             hue = hue % 360;
         }
         else {
