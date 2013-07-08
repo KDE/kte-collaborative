@@ -274,6 +274,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
                 url.fileName().toAscii().data(), m_notePlugin->infPlugin(), INF_SESSION(session), true));
         g_object_unref(session);
         g_object_unref(user_table);
+        inf_session_set_user_status(INF_SESSION(session), user, INF_USER_UNAVAILABLE);
     }
     else {
         // There is no data to add, just create a new empty node
