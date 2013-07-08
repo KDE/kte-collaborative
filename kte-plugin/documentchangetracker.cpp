@@ -36,6 +36,7 @@ DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
     kDebug() << "change tracker created for" << document->document()->url() << "moving interface:" << m_iface;
     connect(m_document, SIGNAL(synchronizationBegins(ManagedDocument*)),
             this, SLOT(setupSignals()));
+    m_existingColors[QLatin1String("Initial document contents")] = QColor(Qt::transparent);
 }
 
 void DocumentChangeTracker::setupSignals()
