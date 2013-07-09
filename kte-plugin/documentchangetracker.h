@@ -68,6 +68,11 @@ public slots:
      */
     void clearHighlight();
 
+    /**
+     * @brief A map of colors which are being used already.
+     */
+    const QMap<QString, QColor>& usedColors() const;
+
 private:
     /**
      * @brief Finds empty ranges in m_ranges and deletes them.

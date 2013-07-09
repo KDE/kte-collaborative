@@ -58,7 +58,8 @@ bool NotifierWidget::event(QEvent* event)
     return QGraphicsView::event(event);
 }
 
-void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QInfinity::User* user)
+void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor,
+                                                 const QInfinity::User* user, const QColor& color)
 {
     if ( ! view ) {
         return;
@@ -96,7 +97,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
     NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);
     notifierWidget->rootObject()->setProperty("username", user->name());
-    notifierWidget->rootObject()->setProperty("widgetcolor", ColorHelper::colorForUsername(user->name()).name());
+    notifierWidget->rootObject()->setProperty("widgetcolor", color.name());
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
     // restart animation
     QMetaObject::invokeMethod(hideAnimation, "restart");

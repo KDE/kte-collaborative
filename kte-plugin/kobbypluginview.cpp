@@ -26,6 +26,7 @@
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
 #include "ktpintegration/inftube.h"
+#include <common/utils.h>
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
@@ -424,7 +425,9 @@ void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinit
 {
     KConfig config("ktecollaborative");
     if ( config.group("notifications").readEntry("displayWidgets", true) ) {
-        RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(), user);
+        const QColor color = ColorHelper::colorForUsername(user->name(), m_view, m_document->changeTracker()->usedColors());
+        RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(),
+                                                    user, color);
     }
 }
 

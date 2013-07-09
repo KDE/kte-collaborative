@@ -36,7 +36,8 @@ namespace QInfinity {
 class RemoteChangeNotifier : public QObject
 {
 public:
-    static void addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor, const QInfinity::User* user);
+    static void addNotificationWidget(KTextEditor::View* view, KTextEditor::Cursor cursor,
+                                      const QInfinity::User* user, const QColor& color);
     // TODO do those use enough memory to be worth freeing temporarily? Each one might eventually be re-used
     // if the user writes more text, so it's not really a leak.
     static QMap< QPair<KTextEditor::View*, QString>, QWidget* > existingWidgets;

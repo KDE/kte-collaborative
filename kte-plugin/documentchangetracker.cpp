@@ -166,4 +166,9 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
     addHighlightedRange(user->name(), range, userColor);
 }
 
+const QMap<QString, QColor>& DocumentChangeTracker::usedColors() const
+{
+    return m_existingColors;
+}
+
 #include "documentchangetracker.moc"
