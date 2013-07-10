@@ -173,7 +173,7 @@ void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
     kDebug() << "create tube finished; is error:" << operation->isError();
     kDebug() << "error message:" << operation->errorMessage();
     if ( operation->isError() ) {
-        KMessageBox::error(0, i18n("Failed to establish a connection to the seleceted contact. Error message was: \"%1\"",
+        KMessageBox::error(0, i18n("Failed to establish a connection to the selected contact. Error message was: \"%1\"",
                                    operation->errorMessage()));
     }
 }
