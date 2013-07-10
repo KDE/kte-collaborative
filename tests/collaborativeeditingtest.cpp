@@ -238,6 +238,20 @@ void CollaborativeEditingTest::testNewlines_data()
                                                                       << new InsertOperation(Cursor(1, 6), "ghijkl", 'A')
                                                                       << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'B') // remove empty first line
                                                                       << new InsertOperation(Cursor(1, 12), "mnopqr", 'A') );
+    QTest::newRow("newline_remove_while_typing2") << 1 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\na", 'A')
+                                                                      << new WaitForSyncOperation('B')
+                                                                      << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'B')
+                                                                      << new InsertOperation(Cursor(1, 1), "b", 'A') );
+    QTest::newRow("newline_remove_while_typing3") << 4 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "X\na", 'A')
+                                                                      << new WaitForSyncOperation('B')
+                                                                      << new InsertOperation(Cursor(0, 1), "b\n", 'A')
+                                                                      << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'B')
+                                                                      << new InsertOperation(Cursor(1, 0), "c\n\n", 'A') );
+    QTest::newRow("newline_remove_while_typing_multi") << 7 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "X\na\n\n", 'A')
+                                                                      << new WaitForSyncOperation('B')
+                                                                      << new InsertOperation(Cursor(0, 1), "b\nb\nb", 'A')
+                                                                      << new DeleteOperation(Range(Cursor(1, 0), Cursor(3, 0)), 'B')
+                                                                      << new InsertOperation(Cursor(1, 0), "c\nc\nc\nc", 'A') );
 }
 
 void CollaborativeEditingTest::testInsertionConsistency()
