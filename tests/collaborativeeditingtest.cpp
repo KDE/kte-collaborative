@@ -183,6 +183,63 @@ QString CollaborativeEditingTest::makeFileName()
     return "kobby_test_" + QString::number(qrand());
 }
 
+void CollaborativeEditingTest::testNewlines()
+{
+    QString fileName = makeFileName();
+    KTextEditor::Document* doc1 = newDocument_A(fileName);
+    KTextEditor::Document* doc2 = loadDocument_B(fileName);
+    KTextEditor::Document* raw = createDocumentInstance();
+
+    QFETCH(int, expectedLineCount);
+    QFETCH(QList<Operation*>, operations);
+    replayTransaction(operations, doc1, doc2);
+
+    wait(NEED_SYNC_CYCLES);
+
+    // can't compare to the raw document here, since the insertion order matters.
+    QCOMPARE(doc1->lines(), doc2->lines());
+    QCOMPARE(doc1->text(), doc2->text());
+
+    QCOMPARE(doc1->lines(), expectedLineCount);
+
+    delete doc1;
+    delete doc2;
+    delete raw;
+    qDeleteAll(operations);
+}
+
+void CollaborativeEditingTest::testNewlines_data()
+{
+    QTest::addColumn< int >("expectedLineCount");
+    QTest::addColumn< QList<Operation*> >("operations");
+
+    QTest::newRow("just_newlines") << 4 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\n\n\n") );
+    QTest::newRow("both_newlines") << 3 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\nabc", 'A')
+                                                                 << new InsertOperation(Cursor(0, 0), "\nabc", 'B') );
+    QTest::newRow("both_newlines2") << 6 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\nabc", 'A')
+                                                                  << new InsertOperation(Cursor(0, 0), "\nabc", 'B')
+                                                                  << new InsertOperation(Cursor(1, 1), "\ndef", 'A')
+                                                                  << new InsertOperation(Cursor(2, 0), "\nghi", 'A')
+                                                                  << new InsertOperation(Cursor(1, 1), "\njkl", 'B') );
+    QTest::newRow("both_newlines_sync") << 6 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\nabc", 'A')
+                                                                      << new InsertOperation(Cursor(0, 0), "\ndef", 'B')
+                                                                      << new WaitForSyncOperation('A')
+                                                                      << new InsertOperation(Cursor(1, 1), "\nghi", 'A')
+                                                                      << new InsertOperation(Cursor(2, 0), "\njkl", 'A')
+                                                                      << new WaitForSyncOperation('A')
+                                                                      << new InsertOperation(Cursor(3, 2), "\nnop", 'B') );
+    QTest::newRow("newlines_remove") << 2 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\nabc", 'A')
+                                                                      << new InsertOperation(Cursor(0, 0), "\ndef", 'B')
+                                                                      << new WaitForSyncOperation('B')
+                                                                      << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'A')
+                                                                      << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'B') );
+    QTest::newRow("newline_remove_while_typing") << 1 << ( QList<Operation*>() << new InsertOperation(Cursor(0, 0), "\nabcdef", 'A')
+                                                                      << new WaitForSyncOperation('B')
+                                                                      << new InsertOperation(Cursor(1, 6), "ghijkl", 'A')
+                                                                      << new DeleteOperation(Range(Cursor(0, 0), Cursor(1, 0)), 'B') // remove empty first line
+                                                                      << new InsertOperation(Cursor(1, 12), "mnopqr", 'A') );
+}
+
 void CollaborativeEditingTest::testInsertionConsistency()
 {
     QString fileName = makeFileName();

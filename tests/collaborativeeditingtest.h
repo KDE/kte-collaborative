@@ -73,6 +73,9 @@ public:
         , cursor(cursor)
         , text(text) { };
     virtual void apply(KTextEditor::Document* document) {
+        kDebug() << "applying:" << document->text() << cursor << text << document->lines();
+        QVERIFY(cursor.line() < document->lines());
+        QVERIFY(cursor.column() <= document->lineLength(cursor.line()));
         document->insertText(cursor, text);
     };
 private:
@@ -123,6 +126,9 @@ private slots:
 
     void testBasicCorrectness();
     void testBasicCorrectness_data();
+
+    void testNewlines();
+    void testNewlines_data();
 
     void testSnippets();
 
