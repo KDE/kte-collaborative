@@ -207,13 +207,13 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void localTextInserted( KTextEditor::Document *document,
             const KTextEditor::Range &range );
         void localTextRemoved( KTextEditor::Document *document,
-            const KTextEditor::Range &range );
+            const KTextEditor::Range &range, const QString& oldText );
 
     private:
-        unsigned int cursorToOffset_local( const KTextEditor::Cursor &cursor );
-        KTextEditor::Cursor offsetToCursor_local( unsigned int offset );
-        unsigned int cursorToOffset_remote( const KTextEditor::Cursor &cursor );
-        KTextEditor::Cursor offsetToCursor_remote( unsigned int offset );
+        unsigned int cursorToOffset_inf( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_inf( unsigned int offset );
+        unsigned int cursorToOffset_kte( const KTextEditor::Cursor &cursor );
+        KTextEditor::Cursor offsetToCursor_kte( unsigned int offset );
         void textOpPerformed();
 
         bool blockRemoteInsert;

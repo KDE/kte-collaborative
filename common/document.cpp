@@ -140,8 +140,8 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     kDebug() << "new text buffer for document" << kDocument;
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
-    connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&)),
-        this, SLOT(localTextRemoved(KTextEditor::Document*, const KTextEditor::Range&)) );
+    connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&, const QString&)),
+        this, SLOT(localTextRemoved(KTextEditor::Document*, const KTextEditor::Range&, const QString&)) );
 }
 
 KDocumentTextBuffer::~KDocumentTextBuffer()
@@ -177,19 +177,21 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
-    kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
-             << "(" << chunk.length() << " chars )" << "[blocked:" << blockRemoteInsert << "]" << "rw:" << kDocument()->isReadWrite();
 
     if( !blockRemoteInsert )
     {
-        KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
+        kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
+                 << "(" << chunk.length() << " chars )" << kDocument()->url();
+        KTextEditor::Cursor startCursor = offsetToCursor_inf( offset );
         QString str = codec()->toUnicode( chunk.text() );
         ReadWriteTransaction transaction(kDocument());
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // The compile-time check just verifies that the interface is present.
         // This does not guarantee that it is supported by the KTE implementation used here.
         if ( m_bufferInterface ) {
+            kDebug() << "buffer insert start vvvvvv";
             m_bufferInterface->insertTextRaw(startCursor.line(), startCursor.column(), str);
+            kDebug() << "buffer insert end   ^^^^^^";
         }
 #else
         if ( false ) { }
@@ -200,7 +202,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->insertText( startCursor, str );
             kDocument()->blockSignals(false);
         }
-        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_remote(offset+chunk.length())), user, false);
+        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_inf(offset+chunk.length())), user, false);
     }
     else
         blockRemoteInsert = false;
@@ -210,19 +212,21 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )
 {
-    kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset;
 
     if( !blockRemoteRemove )
     {
-        KTextEditor::Cursor startCursor = offsetToCursor_remote( offset );
-        KTextEditor::Cursor endCursor = offsetToCursor_remote( offset+length );
+        kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset << kDocument()->url();
+        KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
+        KTextEditor::Cursor endCursor = offsetToCursor_kte( offset+length );
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
         ReadWriteTransaction transaction(kDocument());
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
         if ( m_bufferInterface ) {
+            kDebug() << "buffer erase start vvvvvv";
             m_bufferInterface->removeTextRaw(startCursor.line(), startCursor.column(),
                                              endCursor.line(), endCursor.column());
+            kDebug() << "buffer erase end   ^^^^^^";
         }
 #else
         if ( false ) { }
@@ -257,7 +261,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     unsigned int offset;
     if( !m_user.isNull() )
     {
-        offset = cursorToOffset_local( range.start() );
+        offset = cursorToOffset_kte( range.start() );
         QInfinity::TextChunk chunk( encoding() );
         QString text = kDocument()->text( range );
         if( encoder() )
@@ -279,7 +283,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                 {
                     chunk.insertText( 0, encodedText, text.length(), m_user->id() );
                     blockRemoteInsert = true;
-                    kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer";
+                    kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
                     insertChunk( offset, chunk, m_user );
                 }
             }
@@ -292,25 +296,23 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 }
 
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
-    const KTextEditor::Range &range )
+    const KTextEditor::Range &range, const QString& oldText )
 {
     kDebug() << "local text removed:" << kDocument() << range;
     emit localChangedText(range, user(), true);
 
     Q_UNUSED(document)
     unsigned int offset;
-    unsigned int end;
     unsigned int len;
-    KTextEditor::Range chkRange;
 
     textOpPerformed();
     if( !m_user.isNull() )
     {
-        offset = cursorToOffset_local( range.start() );
-        end = cursorToOffset_local( range.end() );
-        len = end - offset;
+        offset = cursorToOffset_kte( range.start() );
+        len = oldText.length();
         blockRemoteRemove = true;
-        kDebug() << "ERASING TEXT with len" << len << "offset" << offset;
+        kDebug() << "ERASING TEXT" << oldText << "with len" << len << "offset" << offset << "range" << range;
+        kDebug() << offset << len << length();
         if( len > 0 )
             eraseText( offset, len, m_user );
         else
@@ -390,45 +392,55 @@ unsigned int KDocumentTextBuffer::undoCount() const
     return m_undoCount;
 }
 
-unsigned int KDocumentTextBuffer::cursorToOffset_local( const KTextEditor::Cursor &cursor )
+unsigned int KDocumentTextBuffer::cursorToOffset_inf( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
-    int i, cursor_line = cursor.line();
+    int cursor_line = cursor.line();
     QList<QByteArray> lines = slice(0, length())->text().split('\n');
-    for( i = 0; i < cursor_line; i++ )
+    kDebug() << lines;
+    for( int i = 0; i < cursor_line; i++ ) {
         offset += codec()->toUnicode(lines.at(i)).length() + 1; // Add newline
+    }
     offset += cursor.column();
     kDebug() << "cursor:" << cursor << "-> offset:" << offset;
     return offset;
 }
 
-KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_local( unsigned int offset )
+KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_inf( unsigned int offset )
 {
-    int soff = 0;
-    if( offset > 0 )
-        soff = offset;
-    int i;
+    int remaining = offset;
     QList<QByteArray> lines = slice(0, length())->text().split('\n');
-    for( i = 0; soff > codec()->toUnicode(lines.at(i)).length(); i++ ) {
-        soff -= codec()->toUnicode(lines.at(i)).length() + 1; // Subtract newline
-        if ( i == lines.size() - 1 ) {
+    kDebug() << lines << offset;
+    int i = 0;
+    while ( remaining > codec()->toUnicode(lines.at(i)).length() ) {
+        remaining -= codec()->toUnicode(lines.at(i)).length() + 1; // Subtract newline
+        i++;
+        if ( remaining == 0 ) {
+            break;
+        }
+        if ( i == lines.size() ) {
             kWarning() << "oops, invalid offset?";
+            Q_ASSERT(false);
             break;
         }
     }
-    return KTextEditor::Cursor( i, soff );
+    kDebug() << "offset" << offset << "-> Cursor(" << i << "," << remaining << ")";
+    return KTextEditor::Cursor( i, remaining );
 }
 
-unsigned int KDocumentTextBuffer::cursorToOffset_remote( const KTextEditor::Cursor &cursor )
+unsigned int KDocumentTextBuffer::cursorToOffset_kte( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
-    for( int i = 0; i < kDocument()->lineLength(i); i++ )
+    for( int i = 0; i < cursor.line(); i++ ) {
+        kDebug() << "LINE" << i;
         offset += kDocument()->lineLength(i) + 1; // Add newline
+    }
     offset += cursor.column();
+    kDebug() << kDocument()->text() << cursor << offset;
     return offset;
 }
 
-KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_remote( unsigned int offset )
+KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_kte( unsigned int offset )
 {
     int soff = 0;
     if( offset > 0 )

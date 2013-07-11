@@ -73,7 +73,7 @@ public:
         , cursor(cursor)
         , text(text) { };
     virtual void apply(KTextEditor::Document* document) {
-        kDebug() << "applying:" << document->text() << cursor << text << document->lines();
+        kDebug() << "applying:" << document->text() << cursor << text << document->lines() << document->url();
         QVERIFY(cursor.line() < document->lines());
         QVERIFY(cursor.column() <= document->lineLength(cursor.line()));
         document->insertText(cursor, text);
@@ -173,6 +173,8 @@ private:
         return 64261;
 //         return 6523;
     };
+    void compareTextBuffers(KTextEditor::Document* docA, KTextEditor::Document* docB);
+    void verifyTextBuffers(KTextEditor::Document* docA, KTextEditor::Document* docB);
     KobbyPlugin* m_plugin_A;
     KobbyPlugin* m_plugin_B;
     KService::Ptr m_documentService;

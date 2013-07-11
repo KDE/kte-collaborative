@@ -151,7 +151,8 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
                 return;
             }
             // Should not reach here, if I have understood the interface correctly :)
-            Q_ASSERT(false);
+            kWarning() << "whops, strange things are happening -- fix me";
+//             Q_ASSERT(false);
         }
         else if ( existing->contains(range) ) {
             // split this range; the old range turns into the second part...
