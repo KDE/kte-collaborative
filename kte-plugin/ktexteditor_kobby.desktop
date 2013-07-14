@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Service
 Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
+Comment[hu]=Együttműködő szerkesztés bővítmény a KTextEditorhoz az infinity protokollon alapulva
 Comment[nl]=Gezamenlijk bewerken plug-in voor KTextEditor, gebaseerd op het infinity protocol protocol
 Comment[pt]='Plugin' de edição colaborativa para o KTextEditor, baseado no protocolo 'infinity'
 Comment[pt_BR]=Plugin de edição colaborativa para o KTextEditor baseado no protocolo infinity
@@ -9,6 +10,7 @@ Comment[sv]=Insticksprogram till Ktexteditor för samredigering, baserad på pro
 Comment[uk]=Додаток спільного редагування до KTextEditor, заснований на протоколі infinity
 Comment[x-test]=xxCollaborative editing plugin for KTextEditor, based on the infinity protocolxx
 Name=KobbyPlugin
+Name[hu]=KobbyBővítmény
 Name[nl]=KobbyPlugin
 Name[pt]=KobbyPlugin
 Name[pt_BR]=KobbyPlugin
@@ -18,6 +20,7 @@ Name[uk]=KobbyPlugin
 Name[x-test]=xxKobbyPluginxx
 GenericName=Kobby plugin
 GenericName[cs]=Modul Kobby
+GenericName[hu]=Kobby bővítmény
 GenericName[nl]=Kobby-plug-in
 GenericName[pt]='Plugin' do Kobby
 GenericName[pt_BR]=Plugin do Kobby

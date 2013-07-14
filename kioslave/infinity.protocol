@@ -14,6 +14,7 @@ Icon=folder-remote
 maxInstances=20
 maxInstancesPerHost=1
 Description=Infinity kioslave
+Description[hu]=Infinity kioslave
 Description[nl]=Infinity kioslave
 Description[pt]=Kioslave 'infinity'
 Description[pt_BR]=Kioslave infinity
