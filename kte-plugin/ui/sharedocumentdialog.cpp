@@ -48,6 +48,11 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     connect(shareChatRoomButton, SIGNAL(clicked(bool)), SLOT(shareWithChatRoom()));
 }
 
+const InfTubeServer* ShareDocumentDialog::server() const
+{
+    return m_tubeServer;
+}
+
 void ShareDocumentDialog::shareWithContact()
 {
     accept();
@@ -58,7 +63,6 @@ void ShareDocumentDialog::shareWithContact()
         if ( m_tubeServer->offer(dialog.account(), dialog.contact(), DocumentList() << url) ) {
             m_view->document()->closeUrl();
             m_tubeServer->setNicknameFromAccount(dialog.account());
-            connect(m_tubeServer, SIGNAL(fileCopiedToServer(const KUrl&)), this, SIGNAL(shouldOpenDocument(KUrl)));
         }
     }
 }

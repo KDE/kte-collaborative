@@ -35,6 +35,7 @@ class ShareDocumentDialog : public KDialog
 Q_OBJECT
 public:
     explicit ShareDocumentDialog(KTextEditor::View* activeView);
+    const InfTubeServer* server() const;
 
 private slots:
     void shareWithContact();
