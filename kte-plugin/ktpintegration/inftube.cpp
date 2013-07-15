@@ -19,6 +19,8 @@
 
 #include "inftube.h"
 
+#include "infinoted.h"
+
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
 #include <KTp/contact-factory.h>
@@ -227,7 +229,7 @@ bool InfTubeServer::startInfinoted()
     m_serverProcess->setStandardOutputFile(serverDirectory() + "/infinoted.log");
     m_serverProcess->setStandardErrorFile(serverDirectory() + "/infinoted.errors");
     // TODO windows?
-    m_serverProcess->start("/usr/bin/env", QStringList() << "infinoted-0.5" << "--security-policy=no-tls"
+    m_serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
                                            << "-r" << serverDirectory() << "-p" << QString::number(m_port));
     m_serverProcess->waitForStarted(500);
     int timeout = 30; // 30 retries at 100 ms -> 3s

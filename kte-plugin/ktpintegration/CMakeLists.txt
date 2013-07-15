@@ -35,6 +35,13 @@ target_link_libraries(infinotetubehandler
                       ${TELEPATHY_QT4_LIBRARIES}
 )
 
+# find infinoted and tell the program
+find_program(infinoted infinoted-0.5 HINTS /usr/bin)
+if ( NOT infinoted )
+    message(FATAL_ERROR "Could not find infinoted (infinoted-0.5 executable), which is required to start collaborative sessions.")
+endif()
+configure_file(infinoted.h.in infinoted.h)
+
 install(TARGETS infinotetubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
 configure_file(org.freedesktop.Telepathy.Client.KTp.infinity.service.in
                ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service)
