@@ -25,7 +25,7 @@
 #include <kdialog.h>
 
 class InfTubeServer;
-class ConnectionManager;
+class ServerManager;
 namespace KTextEditor {
     class View;
 }

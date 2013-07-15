@@ -43,7 +43,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-ConnectionManager::ConnectionManager(QObject* parent): QObject(parent)
+ServerManager::ServerManager(QObject* parent): QObject(parent)
 {
     Tp::registerTypes();
     KTp::Debug::installCallback(true);
@@ -100,8 +100,8 @@ const QString InfTubeServer::serviceName() const
 InfTubeServer::InfTubeServer(QObject* parent)
     : m_serverProcess(0)
 {
-    ConnectionManager::instance()->add(this);
-    m_tubeServer = Tp::StreamTubeServer::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
+    ServerManager::instance()->add(this);
+    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
                                                 QStringList(), serviceName());
 }
 
@@ -262,7 +262,7 @@ InfTubeServer::~InfTubeServer()
 void InfTubeClient::listen()
 {
     kDebug() << "listen called";
-    m_tubeClient = Tp::StreamTubeClient::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
+    m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
                                                 QStringList(), QLatin1String("KTp.infinity"), true, true);
     kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
@@ -308,23 +308,23 @@ InfTubeClient::~InfTubeClient()
 
 }
 
-const ConnectionManager* InfTubeBase::connectionManager() const
+const ServerManager* InfTubeBase::connectionManager() const
 {
-    return ConnectionManager::instance();
+    return ServerManager::instance();
 }
 
-ConnectionManager* ConnectionManager::instance()
+ServerManager* ServerManager::instance()
 {
-    static ConnectionManager* m_self = new ConnectionManager();
+    static ServerManager* m_self = new ServerManager();
     return m_self;
 }
 
-void ConnectionManager::add(InfTubeServer* server)
+void ServerManager::add(InfTubeServer* server)
 {
     m_serverProcesses.append(server);
 }
 
-void ConnectionManager::shutdown()
+void ServerManager::shutdown()
 {
     qDeleteAll(m_serverProcesses);
     m_serverProcesses.clear();

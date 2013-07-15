@@ -44,7 +44,7 @@ namespace Tp {
     class StreamTubeClient;
 }
 
-class ConnectionManager;
+class ServerManager;
 
 typedef QList<Tp::ContactPtr> ContactList;
 typedef QList<KUrl> DocumentList;
@@ -90,7 +90,7 @@ public:
      */
     const QString& nickname() const;
 
-    const ConnectionManager* connectionManager() const;
+    const ServerManager* connectionManager() const;
 
 protected:
     unsigned int m_port;
@@ -224,11 +224,11 @@ private:
 /**
  * @brief Container for all tubes offered over time and for the Tp objects which are only needed once
  */
-class ConnectionManager : public QObject {
+class ServerManager : public QObject {
 Q_OBJECT
 public:
-    explicit ConnectionManager(QObject* parent = 0);
-    static ConnectionManager* instance();
+    explicit ServerManager(QObject* parent = 0);
+    static ServerManager* instance();
 
     void add(InfTubeServer* server);
 
