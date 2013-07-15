@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KTpApprover
+
+Name=KTE Collaborative
+Icon=kate
+Comment=User %1 wants to collaborate on a document with you
+
+X-KTp-ChannelType=org.freedesktop.Telepathy.Channel.Type.StreamTube
+X-KTp-Service=infinity
+X-KTp-Cancellable=true
