@@ -218,7 +218,7 @@ private:
      */
     const QVariantMap createHints(const DocumentList& documents) const;
 
-    const bool proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
+    bool proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
 };
 
 /**

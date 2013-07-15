@@ -131,7 +131,7 @@ const QVariantMap InfTubeServer::createHints(const DocumentList& documents) cons
     return hints;
 }
 
-const bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
+bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
     QVariantMap hints = createHints(documents);
 
