@@ -37,4 +37,4 @@ target_link_libraries( kobbycommon
     ${LIBQINFINITY_LIBRARIES}
 )
 
-install(TARGETS kobbycommon DESTINATION lib)
+install(TARGETS kobbycommon DESTINATION ${INSTALL_TARGETS_DEFAULT_ARGS})
