@@ -95,6 +95,7 @@ const QString InfTubeServer::serviceName() const
 }
 
 InfTubeServer::InfTubeServer(QObject* parent)
+    : m_serverProcess(0)
 {
     ConnectionManager::instance()->add(this);
     m_tubeServer = Tp::StreamTubeServer::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
@@ -120,27 +121,30 @@ void InfTubeServer::jobFinished(KJob* job)
     emit fileCopiedToServer(url);
 }
 
-bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document)
+const QVariantMap InfTubeServer::createHints(const DocumentList& documents) const
 {
-    return offer(account, ContactList() << contact, DocumentList() << document);
+    QVariantMap hints;
+    hints.insert("initialDocumentsSize", documents.size());
+    for ( int i = 0; i < documents.size(); i++ ) {
+        hints.insert("initialDocument" + QString::number(i), documents.at(i).fileName());
+    }
+    return hints;
 }
 
-bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
+const bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
+    QVariantMap hints = createHints(documents);
+
     kDebug() << "starting infinoted";
     if ( ! startInfinoted() ) {
         // TODO user-visible error handling
         kWarning() << "Failed to start infinoted. Check settings and installation.";
         return false;
     }
-    // construct a map of documents to open initially
-    QVariantMap hints;
-    hints.insert("initialDocumentsSize", documents.size());
-    for ( int i = 0; i < documents.size(); i++ ) {
-        hints.insert("initialDocument" + QString::number(i), documents.at(i).fileName());
-    }
+
     // set infinoted's socket as the local endpoint of the tube
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port, hints);
+
     // add the initial documents
     foreach ( const KUrl& document, documents ) {
         KUrl x = localUrl();
@@ -148,24 +152,48 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
         KIO::FileCopyJob* job = KIO::file_copy(document, x, -1, KIO::HideProgressInfo);
         connect(job, SIGNAL(finished(KJob*)), this, SLOT(jobFinished(KJob*)));
     }
-    QVariantMap request;
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
-                   TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
-                   (uint) Tp::HandleTypeContact);
-    request.insert(TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE + QLatin1String(".Service"),
-                   QLatin1String("infinity"));
-    // TODO !!!
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
-                   contacts.first()->handle().at(0));
+
+    requestBase.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
+                       TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
+    requestBase.insert(TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE + QLatin1String(".Service"),
+                       QLatin1String("infinity"));
+
     Tp::PendingChannelRequest* channelRequest;
-    channelRequest = account->ensureChannel(request,
+    channelRequest = account->createChannel(requestBase,
                                             QDateTime::currentDateTime(),
                                             "org.freedesktop.Telepathy.Client." + serviceName());
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
     return true;
+}
+
+bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const DocumentList& documents)
+{
+    kDebug() << "share with account requested";
+    QVariantMap request;
+    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
+                   (uint) Tp::HandleTypeContact);
+    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
+                   contact->handle().at(0));
+    return proceed(account, documents, request);
+}
+
+bool InfTubeServer::offer(Tp::AccountPtr account, const QString& chatroom, const DocumentList& documents)
+{
+    kDebug() << "share with chatroom" << chatroom << "requested";
+    QVariantMap request;
+    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
+                   (uint) Tp::HandleTypeRoom);
+    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetID"),
+                   chatroom);
+    return proceed(account, documents, request);
+}
+
+bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
+{
+    kWarning() << "not implemented";
+    return false;
 }
 
 void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
@@ -224,7 +252,9 @@ const QString InfTubeServer::serverDirectory() const
 
 InfTubeServer::~InfTubeServer()
 {
-    m_serverProcess->terminate();
+    if ( m_serverProcess ) {
+        m_serverProcess->terminate();
+    }
 }
 
 void InfTubeClient::listen()
@@ -272,6 +302,11 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
 InfTubeClient::~InfTubeClient()
 {
 
+}
+
+const ConnectionManager* InfTubeBase::connectionManager() const
+{
+    return ConnectionManager::instance();
 }
 
 ConnectionManager* ConnectionManager::instance()

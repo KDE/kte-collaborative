@@ -23,6 +23,7 @@
 #include "manageddocument.h"
 #include "kobbyplugin.h"
 #include "ui/remotechangenotifier.h"
+#include "ui/sharedocumentdialog.h"
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
 #include "ktpintegration/inftube.h"
@@ -31,12 +32,14 @@
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
+#include <KTp/Widgets/join-chat-room-dialog.h>
 
 #include <QLayout>
 #include <QLabel>
 #include <QAction>
 #include <QLineEdit>
 #include <QFormLayout>
+#include <QCommandLinkButton>
 
 #include <KLocalizedString>
 #include <KActionCollection>
@@ -400,16 +403,9 @@ void KobbyPluginView::shareActionClicked()
         KMessageBox::sorry(m_view, i18n("The document is already being shared."));
     }
     Tp::registerTypes();
-    KTp::ContactGridDialog dialog(m_view);
-    if ( dialog.exec() ) {
-        KUrl url = m_view->document()->url();
-        InfTubeServer* serverTube = new InfTubeServer(this);
-        if ( serverTube->offer(dialog.account(), dialog.contact(), url) ) {
-            m_view->document()->closeUrl();
-            serverTube->setNicknameFromAccount(dialog.account());
-            connect(serverTube, SIGNAL(fileCopiedToServer(const KUrl&)), this, SLOT(openFile(KUrl)));
-        }
-    }
+    ShareDocumentDialog dialog(m_view);
+    connect(&dialog, SIGNAL(shouldOpenDocument(KUrl)), this, SLOT(openFile(KUrl)));
+    dialog.exec();
 }
 
 void KobbyPluginView::openFile(KUrl url)

@@ -19,6 +19,7 @@ set( kobby_PART_SRCS
     kobbyplugin.cpp
     manageddocument.cpp
     ui/remotechangenotifier.cpp
+    ui/sharedocumentdialog.cpp
     settings/kcm_kte_collaborative.cpp
 )
 

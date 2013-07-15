@@ -44,6 +44,8 @@ namespace Tp {
     class StreamTubeClient;
 }
 
+class ConnectionManager;
+
 typedef QList<Tp::ContactPtr> ContactList;
 typedef QList<KUrl> DocumentList;
 
@@ -87,6 +89,8 @@ public:
      * @brief Get the nickname used in documents for this tube by default
      */
     const QString& nickname() const;
+
+    const ConnectionManager* connectionManager() const;
 
 protected:
     unsigned int m_port;
@@ -142,9 +146,24 @@ public:
     bool offer(Tp::AccountPtr account, const ContactList& contact, const DocumentList& documents);
 
     /**
-     * @brief Convenience overload, for offering a single document to a single contact.
+     * @brief Offer the given documents to the given contact
+     *
+     * @param account The account to use to create the offer
+     * @param contact The contact to share the documents with
+     * @param documents A list of documents to share. Must not be empty.
+     * @return bool true on success
      */
-    bool offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const KUrl& document);
+    bool offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const DocumentList& documents);
+
+    /**
+     * @brief Offer the given documents to an existing (!) chatroom.
+     *
+     * @param account The acconut to use to create the offer
+     * @param chatroom The chatroom to offer the tube to
+     * @param documents A list of documents to share initially. Must not be empty.
+     * @return bool true on success
+     */
+    bool offer(Tp::AccountPtr account, const QString& chatroom, const DocumentList& documents);
 
 signals:
     /**
@@ -190,6 +209,16 @@ private:
      * @brief Service name for the tube server to use on dbus.
      */
     const QString serviceName() const;
+
+    /**
+     * @brief Create a QVariantMap containing a list of documents to transmit with the tube ofer
+     *
+     * @param documents The doucments which you want to be opened initially
+     * @return const QVariantMap A QVariantMap containing the document list, suitable to be used in a tube request
+     */
+    const QVariantMap createHints(const DocumentList& documents) const;
+
+    const bool proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
 };
 
 /**
