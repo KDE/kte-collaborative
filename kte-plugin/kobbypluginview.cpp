@@ -401,6 +401,7 @@ void KobbyPluginView::shareActionClicked()
     }
     if ( m_view->document()->url().protocol() == "inf" ) {
         KMessageBox::sorry(m_view, i18n("The document is already being shared."));
+        return;
     }
     Tp::registerTypes();
     ShareDocumentDialog dialog(m_view);
