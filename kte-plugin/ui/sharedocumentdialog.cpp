@@ -35,6 +35,7 @@
 ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     : KDialog(activeView)
     , m_view(activeView)
+    , m_tubeServer(0)
 {
     setButtons(Cancel);
     QWidget* w = new QWidget();

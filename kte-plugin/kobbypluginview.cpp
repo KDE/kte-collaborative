@@ -404,8 +404,7 @@ void KobbyPluginView::shareActionClicked()
     }
     Tp::registerTypes();
     ShareDocumentDialog dialog(m_view);
-    dialog.exec();
-    if ( dialog.server() ) {
+    if ( dialog.exec() && dialog.server() ) {
         connect(dialog.server(), SIGNAL(fileCopiedToServer(KUrl)),
                 this, SLOT(openFile(KUrl)));
     }
