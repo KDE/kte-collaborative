@@ -98,7 +98,7 @@ public:
      * @return QColor The resulting color.
      */
     static QColor colorForUsername(const QString& username, unsigned char sat = 180, unsigned char brightness = 180,
-                                   const QMap<QString, QColor>& usedColors = QMap<QString, QColor>());
+                                   const QMap<QString, QColor>& usedColors = (QMap<QString, QColor>()));
 
     /**
      * @brief Like colorForUsername(QString, uchar, uchar), but determines params automatically
@@ -108,7 +108,7 @@ public:
      * @return QColor The resulting color.
      */
     static QColor colorForUsername(const QString& username, const KTextEditor::View* view,
-                                   const QMap<QString, QColor>& usedColors = QMap<QString, QColor>());
+                                   const QMap<QString, QColor>& usedColors = (QMap<QString, QColor>()));
 };
 
 #endif
