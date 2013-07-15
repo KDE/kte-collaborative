@@ -5,6 +5,7 @@ Rectangle {
     property string username: "not set"
     property string widgetcolor: "#FF9900";
     property string wasVisibleBefore: "false"
+    property double brightness: 0.0
     property bool outsideView: false
     property double defaultOpacity: 0.8
     color: "#00000000"
@@ -21,13 +22,14 @@ Rectangle {
         x: 8
         y: 11
         id: content
-        border.color: "black"
+        border.color: Qt.rgba(root.brightness, root.brightness, root.brightness, 1)
         border.width: 1
         Text {
             id: user_text
             text: root.username
             anchors.centerIn: parent
             font.pointSize: root.outsideView ? 6 : 8
+            color: parent.border.color
         }
         anchors.margins: 5
         width: user_text.width + 12

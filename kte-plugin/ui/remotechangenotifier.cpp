@@ -98,6 +98,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     NotifierWidget* notifierWidget = static_cast<NotifierWidget*>(useWidget);
     notifierWidget->rootObject()->setProperty("username", user->name());
     notifierWidget->rootObject()->setProperty("widgetcolor", color.name());
+    notifierWidget->rootObject()->setProperty("brightness", 1 - ColorHelper::y(color) / 255.0);
     QObject* hideAnimation = notifierWidget->rootObject()->findChild<QObject*>("hideAnimation");
     // restart animation
     QMetaObject::invokeMethod(hideAnimation, "restart");
