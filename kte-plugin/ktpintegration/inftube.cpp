@@ -162,7 +162,7 @@ bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList doc
                        QLatin1String("infinity"));
 
     Tp::PendingChannelRequest* channelRequest;
-    channelRequest = account->createChannel(requestBase,
+    channelRequest = account->ensureChannel(requestBase,
                                             QDateTime::currentDateTime(),
                                             "org.freedesktop.Telepathy.Client." + serviceName());
 
@@ -228,7 +228,6 @@ bool InfTubeServer::startInfinoted()
     m_serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
     m_serverProcess->setStandardOutputFile(serverDirectory() + "/infinoted.log");
     m_serverProcess->setStandardErrorFile(serverDirectory() + "/infinoted.errors");
-    // TODO windows?
     m_serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
                                            << "-r" << serverDirectory() << "-p" << QString::number(m_port));
     m_serverProcess->waitForStarted(500);
@@ -285,7 +284,7 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
     setNicknameFromAccount(account);
     url.setUser(nickname());
     if ( ! ok || initialSize == 0 ) {
-        KRun::run("dolphin " + url.url(), KUrl::List(), 0);
+        KRun::runUrl(url.url(), "inode/directory", 0);
     }
     else {
         for ( int i = 0; i < initialSize; i++ ) {
@@ -296,7 +295,9 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
                 continue;
             }
             url.setPath(path);
-            KRun::run("kwrite " + url.url(), KUrl::List(), 0);
+            KConfig config("ktecollaborative");
+            KConfigGroup group = config.group("applications");
+            KRun::run(group.readEntry("editor", "kwrite %u"), KUrl::List() << url, 0);
         }
     }
     emit connected();
