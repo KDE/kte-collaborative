@@ -502,6 +502,9 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
     m_sessionProxy->setParent( this );
     connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
         this, SLOT(slotViewCreated( KTextEditor::Document*, KTextEditor::View* )) );
+    foreach ( KTextEditor::View* view, kDocument()->views() ) {
+        slotViewCreated(kDocument(), view);
+    }
     connect( buffer, SIGNAL(canUndo( bool )),
         this, SLOT(slotCanUndo( bool )) );
     connect( buffer, SIGNAL(canRedo( bool )),
@@ -543,15 +546,17 @@ void InfTextDocument::leave()
 void InfTextDocument::undo()
 {
     m_buffer->performingUndo();
-    if( m_user )
+    if( m_user ) {
         m_session->undo( *m_user, 1 );
+    }
 }
 
 void InfTextDocument::redo()
 {
     m_buffer->performingRedo();
-    if( m_user )
+    if( m_user ) {
         m_session->redo( *m_user, 1 );
+    }
 }
 
 void InfTextDocument::slotSynchronized()
@@ -579,10 +584,10 @@ bool KDocumentTextBuffer::hasUser() const
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
     m_buffer->setUser( user );
-    m_user = dynamic_cast<QInfinity::AdoptedUser*>(user.data());
+    m_user = QInfinity::AdoptedUser::wrap(INF_ADOPTED_USER(user->gobject()));
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
-    kDebug() << "Join successful, user" << user->name() << "now online";
+    kDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
 }
 
 void InfTextDocument::slotJoinFailed( GError *gerror )
