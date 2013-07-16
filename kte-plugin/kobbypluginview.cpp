@@ -244,6 +244,11 @@ void KobbyPluginView::disableActions()
         action->setEnabled(false);
     }
     m_view->action("file_save")->setEnabled(true);
+    // TODO This is implementation-specific!
+    // In non-kate implementations, this might not properly re-enable the undo action after a
+    // collaborative document was saved in a different file or similar.
+    connect(m_view->action("edit_undo"), SIGNAL(triggered(bool)), m_view->document(), SLOT(undo()));
+    connect(m_view->action("edit_redo"), SIGNAL(triggered(bool)), m_view->document(), SLOT(redo()));
 }
 
 void KobbyPluginView::enableActions()
@@ -252,9 +257,11 @@ void KobbyPluginView::enableActions()
         action->setEnabled(true);
     }
     // When enabling the collaborative actions,
-    // we want to disable the built-in save.
+    // we want to disable the built-in save and undo.
     // TODO make Ctrl+S call the "Save copy" action somehow?
     m_view->action("file_save")->setEnabled(false);
+    m_view->action("edit_undo")->disconnect();
+    m_view->action("edit_redo")->disconnect();
 }
 
 void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
