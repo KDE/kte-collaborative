@@ -107,7 +107,10 @@ InfTubeServer::InfTubeServer(QObject* parent)
 
 void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
 {
-    m_nickname = QUrl::toPercentEncoding(account->nickname().replace('@', '-'));
+    m_nickname = QUrl::toPercentEncoding(
+        account->nickname().replace('@', '-')
+                           .replace(' ', '_')
+    );
 }
 
 const QString& InfTubeBase::nickname() const
