@@ -129,9 +129,6 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
     , m_kDocument( kDocument )
-#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
-    , m_bufferInterface( qobject_cast<KTextEditor::BufferInterface*>(kDocument) )
-#endif
     , m_changeCount( 0 )
     , m_undoCount( 0 )
     , undo_lock( false )
@@ -188,9 +185,9 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // The compile-time check just verifies that the interface is present.
         // This does not guarantee that it is supported by the KTE implementation used here.
-        if ( m_bufferInterface ) {
+        if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
             kDebug() << "buffer insert start vvvvvv";
-            m_bufferInterface->insertTextRaw(startCursor.line(), startCursor.column(), str);
+            iface->insertTextRaw(startCursor.line(), startCursor.column(), str);
             kDebug() << "buffer insert end   ^^^^^^";
         }
 #else
@@ -224,10 +221,10 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         ReadWriteTransaction transaction(kDocument());
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
-        if ( m_bufferInterface ) {
+        if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
             kDebug() << "buffer erase start vvvvvv";
-            m_bufferInterface->removeTextRaw(startCursor.line(), startCursor.column(),
-                                             endCursor.line(), endCursor.column());
+            iface->removeTextRaw(startCursor.line(), startCursor.column(),
+                                 endCursor.line(), endCursor.column());
             kDebug() << "buffer erase end   ^^^^^^";
         }
 #else

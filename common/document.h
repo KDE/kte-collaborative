@@ -218,9 +218,6 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         bool blockRemoteInsert;
         bool blockRemoteRemove;
         KTextEditor::Document *m_kDocument;
-#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
-        KTextEditor::BufferInterface* m_bufferInterface;
-#endif
         QPointer<QInfinity::User> m_user;
 
         // Undo/Redo management
