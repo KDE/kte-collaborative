@@ -23,6 +23,8 @@
 
 #include <QObject>
 #include <QPointer>
+#include <QStack>
+#include <QTimer>
 
 typedef struct _GError GError;
 
@@ -155,6 +157,35 @@ class KOBBYCOMMON_EXPORT Document
 
 };
 
+class UndoCounter : public QObject {
+Q_OBJECT
+public:
+    UndoCounter();
+    // Get the next step in in the undo stack, from the top,
+    // and move the pointer one step up
+    int previous();
+    // Get the previous step in the undo stack, from the top,
+    // and move the pointer one step down
+    int next();
+    // Should be called when an operation (insertion, removal) is performed
+    void pushOperation();
+    // Returns how many redos are possible
+    int redoCount();
+    // Returns how many undos are possible
+    int undoCount();
+    void reset();
+
+private:
+    QStack<int> m_undoCounts;
+    // Points above the current index in the stack we're in.
+    int m_stackPointer;
+    QTimer m_undoTimer;
+    bool m_shouldCreateNew;
+
+private slots:
+    void timeout();
+};
+
 /**
  * @brief Links together the InfTextBuffer and KTextEditor::Document
  *
@@ -184,11 +215,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         bool hasUser() const;
         QInfinity::User* user() const;
 
-        void resetUndoRedo();
-        void performingUndo();
-        void performingRedo();
-        unsigned int changeCount() const;
-        unsigned int undoCount() const;
+        void updateUndoRedoActions();
 
     Q_SIGNALS:
         void canUndo( bool enable );
@@ -214,6 +241,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         unsigned int cursorToOffset_kte( const KTextEditor::Cursor &cursor );
         KTextEditor::Cursor offsetToCursor_kte( unsigned int offset );
         void textOpPerformed();
+        void resetUndoRedo();
 
         bool blockRemoteInsert;
         bool blockRemoteRemove;
@@ -221,10 +249,9 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         QPointer<QInfinity::User> m_user;
 
         // Undo/Redo management
-        int m_changeCount;
-        int m_undoCount;
-        bool undo_lock;
-        bool redo_lock;
+        UndoCounter undoCounter;
+
+        friend class InfTextDocument;
 };
 
 /**
