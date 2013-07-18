@@ -132,7 +132,7 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
     , m_bufferInterface( qobject_cast<KTextEditor::BufferInterface*>(kDocument) )
 #endif
-    , m_insertCount( 0 )
+    , m_changeCount( 0 )
     , m_undoCount( 0 )
     , undo_lock( false )
     , redo_lock( false )
@@ -203,6 +203,8 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->blockSignals(false);
         }
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_inf(offset+chunk.length())), user, false);
+        emit canUndo(m_changeCount > 0);
+        emit canRedo(m_undoCount > 0);
     }
     else
         blockRemoteInsert = false;
@@ -238,6 +240,8 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
             kDocument()->blockSignals(false);
         }
         emit remoteChangedText(range, user, true);
+        emit canUndo(m_changeCount > 0);
+        emit canRedo(m_undoCount > 0);
     }
     else
         blockRemoteRemove = false;
@@ -330,9 +334,9 @@ void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
 void KDocumentTextBuffer::resetUndoRedo()
 {
     kDebug() << "reset";
-    if( m_insertCount )
+    if( m_changeCount )
     {
-        m_insertCount = 0;
+        m_changeCount = 0;
         emit( canUndo( false ) );
     }
     if( m_undoCount )
@@ -345,46 +349,30 @@ void KDocumentTextBuffer::resetUndoRedo()
 void KDocumentTextBuffer::performingUndo()
 {
     undo_lock = true;
-    if( m_insertCount )
-    {
-        m_insertCount--;
+    m_changeCount -= 1;
+    Q_ASSERT(m_changeCount >= 0);
+    if ( m_changeCount == 0 ) {
+        emit canUndo(false);
     }
-    if( !m_insertCount )
-    {
-        emit( canUndo( false ) );
-    }
-    if( m_undoCount )
-        m_undoCount++;
-    else
-    {
-        m_undoCount++;
-        emit( canRedo( true ) );
-    }
+    m_undoCount += 1;
+    emit canRedo(true);
 }
 
 void KDocumentTextBuffer::performingRedo()
 {
     redo_lock = true;
-    if( !m_insertCount )
-    {
-        m_insertCount++;
-        emit( canUndo( true ) );
+    m_undoCount -= 1;
+    Q_ASSERT(m_undoCount >= 0);
+    if ( m_undoCount == 0 ) {
+        emit canRedo(false);
     }
-    else
-        m_insertCount++;
-    if( m_undoCount )
-    {
-        m_undoCount--;
-    }
-    if( !m_undoCount )
-    {
-        emit( canRedo( false ) );
-    }
+    m_changeCount += 1;
+    emit canUndo(true);
 }
 
-unsigned int KDocumentTextBuffer::insertCount() const
+unsigned int KDocumentTextBuffer::changeCount() const
 {
-    return m_insertCount;
+    return m_changeCount;
 }
 
 unsigned int KDocumentTextBuffer::undoCount() const
@@ -458,27 +446,24 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_kte( unsigned int offset
 
 void KDocumentTextBuffer::textOpPerformed()
 {
-    if( undo_lock )
-    {
+    if ( ! m_user ) {
+        // cannot undo synchronization operations
+        return;
+    }
+    if ( undo_lock ) {
         undo_lock = false;
     }
-    else if( redo_lock )
-    {
+    else if( redo_lock ) {
         redo_lock = false;
     }
-    else
-    {
-        if( !m_insertCount )
-        {
-            m_insertCount++;
-            emit( canUndo( true ) );
+    else {
+        m_changeCount += 1;
+        if ( m_changeCount == 1 ) {
+            emit canUndo(true);
         }
-        else
-            m_insertCount++;
-        if( m_undoCount )
-        {
+        if ( m_undoCount > 0 ) {
             m_undoCount = 0;
-            emit( canRedo( false ) );
+            emit canRedo(false);
         }
     }
 }
@@ -545,6 +530,7 @@ void InfTextDocument::leave()
 
 void InfTextDocument::undo()
 {
+    kDebug() << "UNDO" << m_user;
     m_buffer->performingUndo();
     if( m_user ) {
         m_session->undo( *m_user, 1 );
@@ -553,6 +539,7 @@ void InfTextDocument::undo()
 
 void InfTextDocument::redo()
 {
+    kDebug() << "REDO";
     m_buffer->performingRedo();
     if( m_user ) {
         m_session->redo( *m_user, 1 );

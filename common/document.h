@@ -173,8 +173,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
             QObject *parent = 0 );
         ~KDocumentTextBuffer();
 
-        KTextEditor::Document *kDocument() const;
-        Document *document();
+        KTextEditor::Document* kDocument() const;
         void onInsertText( unsigned int offset,
             const QInfinity::TextChunk &chunk,
             QInfinity::User *user );
@@ -188,7 +187,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void resetUndoRedo();
         void performingUndo();
         void performingRedo();
-        unsigned int insertCount() const;
+        unsigned int changeCount() const;
         unsigned int undoCount() const;
 
     Q_SIGNALS:
@@ -225,11 +224,10 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         QPointer<QInfinity::User> m_user;
 
         // Undo/Redo management
-        unsigned int m_insertCount;
-        unsigned int m_undoCount;
+        int m_changeCount;
+        int m_undoCount;
         bool undo_lock;
         bool redo_lock;
-
 };
 
 /**
