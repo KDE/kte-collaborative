@@ -102,6 +102,9 @@ void KobbyStatusBar::sessionFullyReady()
 
 void KobbyStatusBar::usersChanged()
 {
+    if ( ! m_view->m_document->userTable() ) {
+        return;
+    }
     QList< QPointer< QInfinity::User > > users = m_view->m_document->userTable()->users();
     foreach ( const QPointer<QInfinity::User>& user, users ) {
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(usersChanged()), Qt::UniqueConnection);
