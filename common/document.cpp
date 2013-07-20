@@ -18,6 +18,9 @@
 
 #include "document.h"
 
+#include <libinftext/inf-text-undo-grouping.h>
+
+#include <libqinfinity/undogrouping.h>
 #include <libqinfinity/sessionproxy.h>
 #include <libqinfinity/session.h>
 #include <libqinfinity/textsession.h>
@@ -47,108 +50,6 @@
 
 namespace Kobby
 {
-
-UndoCounter::UndoCounter()
-    : m_undoCounts()
-    , m_stackPointer(0)
-    , m_undoTimer()
-    , m_shouldCreateNew(false)
-{
-    m_undoTimer.setInterval(300);
-    m_undoTimer.setSingleShot(true);
-    connect(&m_undoTimer, SIGNAL(timeout()), this, SLOT(timeout()));
-    reset();
-}
-
-void UndoCounter::reset()
-{
-    m_undoCounts.clear();
-    m_undoCounts.push(0);
-    m_stackPointer = 1;
-    m_shouldCreateNew = false;
-}
-
-int UndoCounter::next()
-{
-    kDebug() << m_stackPointer << m_undoCounts;
-    Q_ASSERT(undoCount() > 0);
-    const int result = m_undoCounts.at(m_stackPointer - 1);
-    m_stackPointer -= 1;
-    m_shouldCreateNew = true;
-    Q_ASSERT(m_stackPointer >= 0);
-    kDebug() << "undo step count:" << result;
-    return result;
-}
-
-int UndoCounter::previous()
-{
-    Q_ASSERT(redoCount() > 0);
-    const int result = m_undoCounts.at(m_stackPointer);
-    m_stackPointer += 1;
-    m_shouldCreateNew = true;
-    kDebug() << "redo step count:" << result;
-    return result;
-}
-
-void UndoCounter::timeout()
-{
-    if ( m_stackPointer != m_undoCounts.size() ) {
-        // Do not do anything if there's an ongoing undo, i.e. if
-        // edit, edit, edit, undo, timeout (or similar) happens
-        return;
-    }
-    // no empty operations
-    Q_ASSERT(m_undoCounts.at(m_stackPointer - 1) > 0);
-    m_shouldCreateNew = true;
-}
-
-int UndoCounter::redoCount()
-{
-    if ( m_undoCounts.size() == m_stackPointer ) {
-        return 0;
-    }
-    if ( m_undoCounts.top() == 0 ) {
-        return m_undoCounts.size() - m_stackPointer - 1;
-    }
-    else {
-        return m_undoCounts.size() - m_stackPointer;
-    }
-}
-
-int UndoCounter::undoCount()
-{
-    kDebug() << m_undoCounts << m_stackPointer;
-    if ( m_undoCounts.top() == 0 ) {
-        return qMax(0, m_stackPointer - 1);
-    }
-    else {
-        return m_stackPointer;
-    }
-}
-
-void UndoCounter::pushOperation()
-{
-    // Remove operations from the undo stack if the current top of the stack is not
-    // the position in the stack, i.e. if the user does
-    // edit, edit, edit, undo, edit (or similar)
-    kDebug() << m_stackPointer << redoCount() << m_undoCounts;
-    if ( m_undoCounts.size() >= m_stackPointer ) {
-        kDebug() << "REMOVING" << m_undoCounts << m_stackPointer << redoCount();
-        m_undoCounts.remove(qMax(0, m_stackPointer - 1), redoCount());
-        kDebug() << "</>REMOVING" << m_undoCounts;
-        if ( m_undoCounts.isEmpty() ) {
-            m_shouldCreateNew = true;
-        }
-    }
-    if ( m_shouldCreateNew ) {
-        m_undoCounts.push(0);
-        m_shouldCreateNew = false;
-    }
-    Q_ASSERT(! m_undoCounts.isEmpty());
-    m_stackPointer = m_undoCounts.size();
-    m_undoCounts.top() += 1;
-    m_undoTimer.start();
-}
 
 Document::Document( KTextEditor::Document* kDocument )
     : m_kDocument( kDocument )
@@ -231,14 +132,27 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , blockRemoteInsert( false )
     , blockRemoteRemove( false )
     , m_kDocument( kDocument )
-    , undoCounter()
+    , m_session(0)
+    , m_undoGrouping( QInfinity::UndoGrouping::wrap(inf_text_undo_grouping_new(), this) )
 {
     kDebug() << "new text buffer for document" << kDocument;
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
     connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&, const QString&)),
         this, SLOT(localTextRemoved(KTextEditor::Document*, const KTextEditor::Range&, const QString&)) );
-    undoCounter.reset();
+    m_undoTimer.setInterval(300);
+    m_undoTimer.setSingleShot(true);
+    connect( &m_undoTimer, SIGNAL(timeout()),
+        this, SLOT(nextUndoStep()) );
+}
+
+void KDocumentTextBuffer::nextUndoStep()
+{
+    kDebug() << "starting undo group";
+    if ( m_undoGrouping->hasOpenGroup() ) {
+        m_undoGrouping->endGroup();
+    }
+    m_undoGrouping->beginGroup();
 }
 
 KDocumentTextBuffer::~KDocumentTextBuffer()
@@ -247,7 +161,6 @@ KDocumentTextBuffer::~KDocumentTextBuffer()
 
 void KDocumentTextBuffer::resetUndoRedo()
 {
-    undoCounter.reset();
     emit canUndo(false);
     emit canRedo(false);
 }
@@ -433,8 +346,17 @@ void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
 
 void KDocumentTextBuffer::updateUndoRedoActions()
 {
-    emit canUndo(undoCounter.undoCount() > 0);
-    emit canRedo(undoCounter.redoCount() > 0);
+    emit canUndo(dynamic_cast<QInfinity::AdoptedSession*>(m_session)->canUndo(
+        *dynamic_cast<QInfinity::AdoptedUser*>(m_user.data()))
+    );
+    emit canRedo(dynamic_cast<QInfinity::AdoptedSession*>(m_session)->canRedo(
+        *dynamic_cast<QInfinity::AdoptedUser*>(m_user.data()))
+    );
+}
+
+void KDocumentTextBuffer::setSession(QInfinity::Session* session)
+{
+    m_session = session;
 }
 
 unsigned int KDocumentTextBuffer::cursorToOffset_inf( const KTextEditor::Cursor &cursor )
@@ -508,7 +430,8 @@ void KDocumentTextBuffer::textOpPerformed()
         return;
     }
     else {
-        undoCounter.pushOperation();
+        kDebug() << "starting undo timer";
+        m_undoTimer.start();
         updateUndoRedoActions();
     }
 }
@@ -577,7 +500,7 @@ void InfTextDocument::undo()
 {
     kDebug() << "UNDO" << m_user;
     if( m_user ) {
-        m_session->undo( *m_user, m_buffer->undoCounter.next() );
+        m_session->undo( *m_user, m_buffer->m_undoGrouping->undoSize() );
     }
     m_buffer->updateUndoRedoActions();
 }
@@ -586,7 +509,7 @@ void InfTextDocument::redo()
 {
     kDebug() << "REDO";
     if( m_user ) {
-        m_session->redo( *m_user, m_buffer->undoCounter.previous() );
+        m_session->redo( *m_user, m_buffer->m_undoGrouping->redoSize() );
     }
     m_buffer->updateUndoRedoActions();
 }
@@ -615,6 +538,12 @@ bool KDocumentTextBuffer::hasUser() const
 
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
+    if ( ! user ) {
+        // No idea why we get null users here when joining fails, but it happens.
+        kDebug() << "join failed";
+        return;
+    }
+    m_buffer->m_undoGrouping->initialize(m_session, user);
     m_buffer->setUser( user );
     kDebug() << user;
     m_user = QInfinity::AdoptedUser::wrap(INF_ADOPTED_USER(user->gobject()));
@@ -656,7 +585,7 @@ void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
 
 void InfTextDocument::slotCanUndo( bool enable )
 {
-    kDebug() << "set undo:" << enable;
+    kDebug() << "SET UNDO:" << enable;
     QAction *act;
     foreach( act, undoActions )
     {
@@ -666,6 +595,7 @@ void InfTextDocument::slotCanUndo( bool enable )
 
 void InfTextDocument::slotCanRedo( bool enable )
 {
+    kDebug() << "SET REDO:" << enable;
     QAction *act;
     foreach( act, redoActions )
     {

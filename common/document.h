@@ -50,6 +50,7 @@ namespace QInfinity
     class TextBuffer;
     class TextSession;
     class BrowserIter;
+    class UndoGrouping;
 }
 
 namespace Kobby
@@ -157,35 +158,6 @@ class KOBBYCOMMON_EXPORT Document
 
 };
 
-class UndoCounter : public QObject {
-Q_OBJECT
-public:
-    UndoCounter();
-    // Get the next step in in the undo stack, from the top,
-    // and move the pointer one step up
-    int previous();
-    // Get the previous step in the undo stack, from the top,
-    // and move the pointer one step down
-    int next();
-    // Should be called when an operation (insertion, removal) is performed
-    void pushOperation();
-    // Returns how many redos are possible
-    int redoCount();
-    // Returns how many undos are possible
-    int undoCount();
-    void reset();
-
-private:
-    QStack<int> m_undoCounts;
-    // Points above the current index in the stack we're in.
-    int m_stackPointer;
-    QTimer m_undoTimer;
-    bool m_shouldCreateNew;
-
-private slots:
-    void timeout();
-};
-
 /**
  * @brief Links together the InfTextBuffer and KTextEditor::Document
  *
@@ -214,6 +186,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void setUser( QPointer<QInfinity::User> user );
         bool hasUser() const;
         QInfinity::User* user() const;
+        void setSession( QInfinity::Session* session );
 
         void updateUndoRedoActions();
 
@@ -228,6 +201,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
 
     public Q_SLOTS:
         void joinFailed( GError *error );
+        void nextUndoStep();
 
     private Q_SLOTS:
         void localTextInserted( KTextEditor::Document *document,
@@ -249,7 +223,9 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         QPointer<QInfinity::User> m_user;
 
         // Undo/Redo management
-        UndoCounter undoCounter;
+        QInfinity::Session* m_session;
+        QTimer m_undoTimer;
+        QPointer<QInfinity::UndoGrouping> m_undoGrouping;
 
         friend class InfTextDocument;
 };
@@ -308,7 +284,6 @@ class KOBBYCOMMON_EXPORT InfTextDocument
         // Undo/Redo actions
         QList<QAction*> undoActions;
         QList<QAction*> redoActions;
-
 };
 
 }
