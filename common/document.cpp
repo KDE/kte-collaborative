@@ -631,7 +631,8 @@ void InfTextDocument::joinSession()
             userName = kDocument()->url().userName();
         }
         else {
-            userName = "UnnamedUser_" + QString::number(QTime::currentTime().second());
+            userName = "UnnamedUser_" + QString::number(qHash(QString::number(QTime::currentTime().second())
+                                                        + QString::number(QTime::currentTime().msec())));
         }
         kDebug() << "requesting join of user" << userName;
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
