@@ -200,7 +200,6 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void localChangedText( const KTextEditor::Range& range, QInfinity::User* user, bool removal );
 
     public Q_SLOTS:
-        void joinFailed( GError *error );
         void nextUndoStep();
 
     private Q_SLOTS:
