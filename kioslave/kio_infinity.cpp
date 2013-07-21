@@ -186,21 +186,22 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     loop.exec();
     if ( ! timeout.isActive() || ! m_connection->xmppConnection() ) {
         kDebug() << "failed to look up hostname";
-        error(KIO::ERR_COULD_NOT_CONNECT, peer.hostname);
+        error(KIO::ERR_UNKNOWN_HOST, peer.hostname);
         return false;
     }
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
 
     // TODO use the connectionEstablished() signal!
-    while ( browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
-        QCoreApplication::processEvents();
-        usleep(1000);
-        if ( ! timeout.isActive() ) {
-            kDebug() << "failed to connect";
-            error(KIO::ERR_COULD_NOT_CONNECT, i18n("Failed to connect to host %1, port %2: Operation timed out.", peer.hostname, peer.port));
-            return false;
-        }
+    connect(browser(), SIGNAL(connectionEstablished(const QInfinity::Browser*)),
+            &loop, SLOT(quit()));
+    connect(browser(), SIGNAL(error(const QInfinity::Browser*,QString)),
+            &loop, SLOT(quit()));
+    loop.exec();
+    if ( ! timeout.isActive() || browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
+        kDebug() << "failed to connect";
+        error(KIO::ERR_COULD_NOT_CONNECT, QString("%1:%2").arg(peer.hostname, QString::number(peer.port)));
+        return false;
     }
 
     connect(browser(), SIGNAL(nodeAdded(BrowserIter)),
