@@ -270,10 +270,11 @@ class KOBBYCOMMON_EXPORT InfTextDocument
             KTextEditor::View *view );
         void slotCanUndo( bool enable );
         void slotCanRedo( bool enable );
-        void joinSession();
+        void joinSession(const QString& forceUserName = QString());
     
     private:
         void synchronize();
+        void retryJoin(const QString& message);
         
         QPointer<QInfinity::SessionProxy> m_sessionProxy;
         QPointer<QInfinity::TextSession> m_session;

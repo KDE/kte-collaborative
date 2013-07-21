@@ -37,12 +37,17 @@
 #include <KLocalizedString>
 #include <KMessageBox>
 #include <KDebug>
+#include <KDialog>
+#include <KLineEdit>
+#include <KPushButton>
 
 #include <QString>
 #include <QTextCodec>
 #include <QTextEncoder>
 #include <QTime>
 #include <QAction>
+#include <QFormLayout>
+#include <QLabel>
 
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
 #include <ktexteditor/bufferinterface.h>
@@ -540,7 +545,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
     if ( ! user ) {
         // No idea why we get null users here when joining fails, but it happens.
-        kDebug() << "join failed";
+        slotJoinFailed(0);
         return;
     }
     m_buffer->m_undoGrouping->initialize(m_session, user);
@@ -555,9 +560,32 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 void InfTextDocument::slotJoinFailed( GError *gerror )
 {
     QString emsg = i18n( "Could not join session: " );
-    emsg.append( gerror->message );
-    throwFatalError( emsg );
+    if ( gerror ) {
+        emsg.append(gerror->message);
+    }
+    else {
+        emsg.append("Unknown error");
+    }
     kDebug() << "Join failed: " << emsg;
+    retryJoin(emsg);
+}
+
+void InfTextDocument::retryJoin(const QString& message)
+{
+    KDialog dialog;
+    dialog.setButtons(KDialog::Ok | KDialog::Cancel);
+    dialog.button(KDialog::Ok)->setText(i18n("Retry"));
+    QWidget w;
+    dialog.setMainWidget(&w);
+    w.setLayout(new QVBoxLayout);
+    w.layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
+    w.layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
+    KLineEdit username;
+    username.setClickMessage(i18n("Enter your user name..."));
+    w.layout()->addWidget(&username);
+    if ( dialog.exec() ) {
+        joinSession(username.text());
+    }
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
@@ -618,7 +646,7 @@ void InfTextDocument::synchronize()
     }
 }
 
-void InfTextDocument::joinSession()
+void InfTextDocument::joinSession(const QString& forceUserName)
 {
     if( m_session->status() == QInfinity::Session::Running )
     {
@@ -627,7 +655,10 @@ void InfTextDocument::joinSession()
         
         setLoadState( Document::Joining );
         QString userName;
-        if ( ! kDocument()->url().userName().isEmpty() ) {
+        if ( ! forceUserName.isEmpty() ) {
+            userName = forceUserName;
+        }
+        else if ( ! kDocument()->url().userName().isEmpty() ) {
             userName = kDocument()->url().userName();
         }
         else {
