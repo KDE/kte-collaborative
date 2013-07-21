@@ -543,14 +543,9 @@ bool KDocumentTextBuffer::hasUser() const
 
 void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
 {
-    if ( ! user ) {
-        // No idea why we get null users here when joining fails, but it happens.
-        slotJoinFailed(0);
-        return;
-    }
+    Q_ASSERT(user);
     m_buffer->m_undoGrouping->initialize(m_session, user);
     m_buffer->setUser( user );
-    kDebug() << user;
     m_user = QInfinity::AdoptedUser::wrap(INF_ADOPTED_USER(user->gobject()));
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
