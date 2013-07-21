@@ -574,6 +574,9 @@ void InfTextDocument::retryJoin(const QString& message)
     if ( dialog.exec() ) {
         joinSession(username.text());
     }
+    else {
+        throwFatalError(QString());
+    }
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,

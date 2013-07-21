@@ -164,7 +164,9 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
 {
     Q_ASSERT(document == m_infDocument);
     if ( document->kDocument() ) {
-        KMessageBox::error(document->kDocument()->widget(), i18n("Error opening document: %1", error));
+        if ( ! error.isEmpty() ) {
+            KMessageBox::error(document->kDocument()->widget(), i18n("Error opening document: %1", error));
+        }
         QTemporaryFile file;
         file.setAutoRemove(false);
         file.open();

@@ -139,6 +139,8 @@ class KOBBYCOMMON_EXPORT Document
          *
          * After this signal is recieved references to the
          * document instance are likely no longer valid.
+         * An empty message should not result in a user-visible action
+         * (e.g. a message box with the error).
          */
         void fatalError( Document *document,
             QString message );
