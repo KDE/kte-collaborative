@@ -172,6 +172,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel( this ));
     m_browserModel->setItemFactory(new Kobby::ItemFactory( this ));
     QObject::connect(m_connection.data(), SIGNAL(ready(Connection*)), &loop, SLOT(quit()));
+    QObject::connect(m_connection.data(), SIGNAL(error(Connection*,QString)), &loop, SLOT(quit()));
     m_connection->prepare();
 
     m_notePlugin = new Kobby::NotePlugin(this);
@@ -183,9 +184,9 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
     loop.exec();
-    if ( ! timeout.isActive() ) {
-        kDebug() << "timed out looking up hostname";
-        error(KIO::ERR_COULD_NOT_CONNECT, i18n("Failed to look up hostname %1: Operation timed out.", peer.hostname));
+    if ( ! timeout.isActive() || ! m_connection->xmppConnection() ) {
+        kDebug() << "failed to look up hostname";
+        error(KIO::ERR_COULD_NOT_CONNECT, peer.hostname);
         return false;
     }
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
