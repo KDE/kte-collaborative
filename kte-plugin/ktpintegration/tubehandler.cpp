@@ -37,4 +37,5 @@ int main(int argc, char** argv) {
     InfTubeClient* client = new InfTubeClient();
     client->listen();
     app.exec();
+    delete client;
 }

@@ -20,15 +20,15 @@
 #ifndef TUBESTEST_H
 #define TUBESTEST_H
 
-#include <telepathy-qt4/TelepathyQt/Types>
-#include <telepathy-qt4/TelepathyQt/StreamTubeChannel>
-#include <telepathy-qt4/TelepathyQt/IncomingStreamTubeChannel>
-#include <telepathy-qt4/TelepathyQt/OutgoingStreamTubeChannel>
-#include <telepathy-qt4/TelepathyQt/StreamTubeClient>
-#include <telepathy-qt4/TelepathyQt/StreamTubeServer>
-#include <telepathy-qt4/TelepathyQt/AccountManager>
-#include <telepathy-qt4/TelepathyQt/Account>
-#include <telepathy-qt4/TelepathyQt/ClientRegistrar>
+#include <TelepathyQt/Types>
+#include <TelepathyQt/StreamTubeChannel>
+#include <TelepathyQt/IncomingStreamTubeChannel>
+#include <TelepathyQt/OutgoingStreamTubeChannel>
+#include <TelepathyQt/StreamTubeClient>
+#include <TelepathyQt/StreamTubeServer>
+#include <TelepathyQt/AccountManager>
+#include <TelepathyQt/Account>
+#include <TelepathyQt/ClientRegistrar>
 #include <TelepathyQt/AbstractClientObserver>
 #include <TelepathyQt/ChannelClassSpecList>
 #include <KTp/telepathy-handler-application.h>
@@ -46,7 +46,6 @@ namespace Tp {
 
 class ServerManager;
 
-typedef QList<Tp::ContactPtr> ContactList;
 typedef QList<KUrl> DocumentList;
 
 inline Tp::ChannelClassSpecList channelClassList()
@@ -60,7 +59,8 @@ inline Tp::ChannelClassSpecList channelClassList()
  */
 class INFTUBE_EXPORT InfTubeBase : public QObject {
 public:
-    virtual ~InfTubeBase() { };
+    explicit InfTubeBase(QObject* parent = 0);
+    virtual ~InfTubeBase();
 
     enum ConnectionStatus {
         StatusConnected,
@@ -118,7 +118,6 @@ signals:
 
 private:
     Tp::StreamTubeClientPtr m_tubeClient;
-    QTcpSocket* m_socket;
 
 public slots:
     /**
@@ -143,7 +142,7 @@ public:
      * @param initialDocuments The documents all contacts should have opened initially
      * @return bool true if the request was successful
      */
-    bool offer(Tp::AccountPtr account, const ContactList& contact, const DocumentList& documents);
+    bool offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents);
 
     /**
      * @brief Offer the given documents to the given contact
@@ -153,7 +152,7 @@ public:
      * @param documents A list of documents to share. Must not be empty.
      * @return bool true on success
      */
-    bool offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const DocumentList& documents);
+    bool offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents);
 
     /**
      * @brief Offer the given documents to an existing (!) chatroom.
@@ -163,7 +162,7 @@ public:
      * @param documents A list of documents to share initially. Must not be empty.
      * @return bool true on success
      */
-    bool offer(Tp::AccountPtr account, const QString& chatroom, const DocumentList& documents);
+    bool offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents);
 
 signals:
     /**
@@ -192,6 +191,7 @@ private slots:
 private:
     Tp::StreamTubeServerPtr m_tubeServer;
     QProcess* m_serverProcess;
+    bool m_hasCreatedChannel;
 
     /**
      * @brief Starts infinoted on a free port (avilable through port())
@@ -218,7 +218,7 @@ private:
      */
     const QVariantMap createHints(const DocumentList& documents) const;
 
-    bool proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
+    bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
 };
 
 /**
@@ -232,10 +232,6 @@ public:
 
     void add(InfTubeServer* server);
 
-    Tp::AccountFactoryPtr accountFactory;
-    Tp::ConnectionFactoryPtr connectionFactory;
-    Tp::ContactFactoryPtr contactFactory;
-    Tp::ChannelFactoryPtr channelFactory;
     Tp::AccountManagerPtr accountManager;
 
 private:

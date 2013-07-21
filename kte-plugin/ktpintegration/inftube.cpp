@@ -43,39 +43,16 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-ServerManager::ServerManager(QObject* parent): QObject(parent)
+InfTubeBase::InfTubeBase(QObject* parent)
+    : QObject(parent)
+    , m_port(-1)
 {
-    Tp::registerTypes();
-    KTp::Debug::installCallback(true);
 
-    accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
-                                                                       Tp::Features() << Tp::Account::FeatureCore
-                                                                       << Tp::Account::FeatureAvatar
-                                                                       << Tp::Account::FeatureProtocolInfo
-                                                                       << Tp::Account::FeatureProfile
-                                                                       << Tp::Account::FeatureCapabilities);
+}
 
-    connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
-                                                                               Tp::Features() << Tp::Connection::FeatureCore
-                                                                               << Tp::Connection::FeatureRosterGroups
-                                                                               << Tp::Connection::FeatureRoster
-                                                                               << Tp::Connection::FeatureSelfContact);
+InfTubeBase::~InfTubeBase()
+{
 
-    contactFactory = KTp::ContactFactory::create(Tp::Features()  << Tp::Contact::FeatureAlias
-                                                                      << Tp::Contact::FeatureAvatarData
-                                                                      << Tp::Contact::FeatureSimplePresence
-                                                                      << Tp::Contact::FeatureCapabilities);
-
-    channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
-
-    accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
-                                                  accountFactory,
-                                                  connectionFactory,
-                                                  channelFactory,
-                                                  contactFactory);
-
-    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
-    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(deleteLater()));
 }
 
 unsigned int InfTubeBase::localPort() const
@@ -92,17 +69,9 @@ KUrl InfTubeBase::localUrl() const
     return url;
 }
 
-const QString InfTubeServer::serviceName() const
+const QString& InfTubeBase::nickname() const
 {
-    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
-}
-
-InfTubeServer::InfTubeServer(QObject* parent)
-    : m_serverProcess(0)
-{
-    ServerManager::instance()->add(this);
-    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
-                                                QStringList(), serviceName());
+    return m_nickname;
 }
 
 void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
@@ -113,9 +82,20 @@ void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
     );
 }
 
-const QString& InfTubeBase::nickname() const
+const QString InfTubeServer::serviceName() const
 {
-    return m_nickname;
+    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
+}
+
+InfTubeServer::InfTubeServer(QObject* parent)
+    : InfTubeBase(parent)
+    , m_tubeServer(0)
+    , m_serverProcess(0)
+    , m_hasCreatedChannel(false)
+{
+    ServerManager::instance()->add(this);
+    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
+                                                QStringList(), serviceName());
 }
 
 void InfTubeServer::jobFinished(KJob* job)
@@ -141,8 +121,10 @@ const QVariantMap InfTubeServer::createHints(const DocumentList& documents) cons
     return hints;
 }
 
-bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
+bool InfTubeServer::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
+    Q_ASSERT(! m_hasCreatedChannel);
+    m_hasCreatedChannel = true;
     QVariantMap hints = createHints(documents);
 
     kDebug() << "starting infinoted";
@@ -178,7 +160,7 @@ bool InfTubeServer::proceed(const Tp::AccountPtr account, const DocumentList doc
     return true;
 }
 
-bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, const DocumentList& documents)
+bool InfTubeServer::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
 {
     kDebug() << "share with account requested";
     QVariantMap request;
@@ -186,10 +168,10 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, 
                    (uint) Tp::HandleTypeContact);
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
                    contact->handle().at(0));
-    return proceed(account, documents, request);
+    return createRequest(account, documents, request);
 }
 
-bool InfTubeServer::offer(Tp::AccountPtr account, const QString& chatroom, const DocumentList& documents)
+bool InfTubeServer::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
 {
     kDebug() << "share with chatroom" << chatroom << "requested";
     QVariantMap request;
@@ -197,10 +179,10 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const QString& chatroom, const
                    (uint) Tp::HandleTypeRoom);
     request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetID"),
                    chatroom);
-    return proceed(account, documents, request);
+    return createRequest(account, documents, request);
 }
 
-bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
+bool InfTubeServer::offer(const Tp::AccountPtr& /*account*/, const Tp::Contacts& /*contact*/, const DocumentList& /*documents*/)
 {
     kWarning() << "not implemented";
     return false;
@@ -278,7 +260,7 @@ void InfTubeClient::listen()
     kDebug() << m_tubeClient->tubes();
 }
 
-void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
+void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
     kDebug() << "Tube accepted as Tcp, port:" << port;
     kDebug() << "parameters:" << tube->parameters();
@@ -313,6 +295,41 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostA
 InfTubeClient::~InfTubeClient()
 {
 
+}
+
+ServerManager::ServerManager(QObject* parent): QObject(parent)
+{
+    Tp::registerTypes();
+    KTp::Debug::installCallback(true);
+
+    Tp::AccountFactoryPtr accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
+                                                                       Tp::Features() << Tp::Account::FeatureCore
+                                                                       << Tp::Account::FeatureAvatar
+                                                                       << Tp::Account::FeatureProtocolInfo
+                                                                       << Tp::Account::FeatureProfile
+                                                                       << Tp::Account::FeatureCapabilities);
+
+    Tp::ConnectionFactoryPtr connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
+                                                                               Tp::Features() << Tp::Connection::FeatureCore
+                                                                               << Tp::Connection::FeatureRosterGroups
+                                                                               << Tp::Connection::FeatureRoster
+                                                                               << Tp::Connection::FeatureSelfContact);
+
+    Tp::ContactFactoryPtr contactFactory = KTp::ContactFactory::create(Tp::Features()  << Tp::Contact::FeatureAlias
+                                                                      << Tp::Contact::FeatureAvatarData
+                                                                      << Tp::Contact::FeatureSimplePresence
+                                                                      << Tp::Contact::FeatureCapabilities);
+
+    Tp::ChannelFactoryPtr channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
+
+    accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
+                                                  accountFactory,
+                                                  connectionFactory,
+                                                  channelFactory,
+                                                  contactFactory);
+
+    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
+    connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(deleteLater()));
 }
 
 const ServerManager* InfTubeBase::connectionManager() const
