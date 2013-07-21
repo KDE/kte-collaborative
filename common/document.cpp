@@ -571,6 +571,7 @@ void InfTextDocument::retryJoin(const QString& message)
     KLineEdit username;
     username.setClickMessage(i18n("Enter your user name..."));
     w.layout()->addWidget(&username);
+    username.setFocus();
     if ( dialog.exec() ) {
         joinSession(username.text());
     }
