@@ -103,7 +103,7 @@ void InfTubeServer::jobFinished(KJob* job)
     KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
     Q_ASSERT(j);
     if ( j->error() ) {
-        KMessageBox::error(0, i18n("Failed to share file: %1"), j->errorString());
+        KMessageBox::error(0, i18n("Failed to share file: %1", j->errorString()));
         return;
     }
     KUrl url = j->destUrl();
