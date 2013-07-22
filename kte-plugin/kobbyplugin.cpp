@@ -71,7 +71,7 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
     m_browserModel = new QInfinity::BrowserModel( this );
     m_browserModel->setItemFactory( new Kobby::ItemFactory( this ) );
     m_textPlugin = new Kobby::NotePlugin( this );
-    m_communicationManager = new QInfinity::CommunicationManager();
+    m_communicationManager = new QInfinity::CommunicationManager( this );
     m_browserModel->addPlugin( *m_textPlugin );
     kDebug() << "ok";
 }
@@ -79,8 +79,6 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
 KobbyPlugin::~KobbyPlugin()
 {
     qDeleteAll(m_managedDocuments);
-    delete m_browserModel;
-    delete m_communicationManager;
 }
 
 void KobbyPlugin::connectionPrepared(Connection* connection)
