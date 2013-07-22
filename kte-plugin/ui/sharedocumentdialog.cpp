@@ -59,7 +59,7 @@ void ShareDocumentDialog::shareWithContact()
     accept();
     KTp::ContactGridDialog dialog(this);
     if ( dialog.exec() ) {
-        m_tubeServer = new InfTubeServer(this);
+        m_tubeServer = new InfTubeServer(QApplication::instance());
         KUrl url = m_view->document()->url();
         if ( m_tubeServer->offer(dialog.account(), dialog.contact(), DocumentList() << url) ) {
             m_view->document()->closeUrl();
@@ -71,7 +71,7 @@ void ShareDocumentDialog::shareWithContact()
 void ShareDocumentDialog::shareWithChatRoom()
 {
     accept();
-    m_tubeServer = new InfTubeServer(this);
+    m_tubeServer = new InfTubeServer(QApplication::instance());
     KTp::JoinChatRoomDialog dialog(m_tubeServer->connectionManager()->accountManager, this);
     if ( dialog.exec() ) {
         if ( m_tubeServer->offer(dialog.selectedAccount(), dialog.selectedChatRoom(), DocumentList() << m_view->document()->url()) ) {
