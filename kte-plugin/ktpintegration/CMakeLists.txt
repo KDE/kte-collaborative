@@ -26,8 +26,8 @@ target_link_libraries(inftube
 install(TARGETS inftube ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 # the tube handler
-kde4_add_executable(infinotetubehandler tubehandler.cpp)
-target_link_libraries(infinotetubehandler
+kde4_add_executable(infinoteclienttubehandler clienttubehandler.cpp)
+target_link_libraries(infinoteclienttubehandler
                       inftube
                       ${KTP_LIBRARIES}
                       ${KDE4_KIO_LIBS}
@@ -42,7 +42,7 @@ if ( NOT infinoted )
 endif()
 configure_file(infinoted.h.in infinoted.h)
 
-install(TARGETS infinotetubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
+install(TARGETS infinoteclienttubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
 configure_file(org.freedesktop.Telepathy.Client.KTp.infinity.service.in
                ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service

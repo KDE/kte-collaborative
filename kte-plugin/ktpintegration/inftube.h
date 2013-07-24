@@ -92,6 +92,12 @@ public:
 
     const ServerManager* connectionManager() const;
 
+signals:
+    /**
+     * @brief Emitted when the connection has been established
+     */
+    void connected(InfTubeBase* self);
+
 protected:
     unsigned int m_port;
     QString m_nickname;
@@ -126,15 +132,8 @@ public slots:
     void tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr);
 };
 
-/**
- * @brief This class implements InfTubeBase and can be used to offer some documents to a contact.
- */
-class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
-Q_OBJECT
-public:
-    InfTubeServer(QObject* parent = 0);
-    virtual ~InfTubeServer();
-
+// This class is for requesting a new tube
+class INFTUBE_EXPORT InfTubeRequester : public InfTubeBase {
     /**
      * @brief Initiate editing a list of documents with the given contacts.
      *
@@ -164,49 +163,9 @@ public:
      */
     bool offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents);
 
-signals:
-    /**
-     * @brief Emitted when the connection has been established
-     */
-    void connected(InfTubeBase* self);
-
-    /**
-     * @brief Emitted when a file was copied to the server and is ready for editing
-     *
-     * @param url The inf:// URL to be used for editing this document, complete with nick name.
-     */
-    void fileCopiedToServer(const KUrl& url);
-
-private slots:
-    /**
-     * @brief Invoked when creation of a tube finishes.
-     */
-    void onCreateTubeFinished(Tp::PendingOperation*);
-
-    /**
-     * @brief Invoked when a job copying an initial file to the server finishes
-     */
-    void jobFinished(KJob*);
-
 private:
-    Tp::StreamTubeServerPtr m_tubeServer;
-    QProcess* m_serverProcess;
-    bool m_hasCreatedChannel;
-
     /**
-     * @brief Starts infinoted on a free port (avilable through port())
-     *
-     * @return bool true if successful, else false.
-     */
-    bool startInfinoted();
-
-    /**
-     * @brief Gets the directory to be used as the root directory of infinoted
-     */
-    const QString serverDirectory() const;
-
-    /**
-     * @brief Service name for the tube server to use on dbus.
+     * @brief Service name which the preferred handler uses on dbus
      */
     const QString serviceName() const;
 
@@ -219,6 +178,39 @@ private:
     const QVariantMap createHints(const DocumentList& documents) const;
 
     bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
+};
+
+// This class is for handling a requested tube. It will handle the channel request,
+// and set some parameters (such as the existing local endpoint if the channel is
+// already open), before handing the channel back to the requester.
+// It is supposed to exist in a separate process (see servertubehandler.cpp)
+class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
+Q_OBJECT
+public:
+    InfTubeServer(QObject* parent = 0);
+    virtual ~InfTubeServer();
+
+    /**
+     * @brief Create a StreamTubeServer instance and register it on dbus, to start listening for channel requests.
+     */
+    void registerHandler();
+
+public slots:
+    // Called when a new channel is requested
+    void channelRequested(...);
+
+private:
+    QList<Tp::StreamTubeChannelPtr> m_channels;
+    Tp::StreamTubeServerPtr m_tubeServer;
+    QList<QProcess*> m_serverProcesses;
+    bool m_hasCreatedChannel;
+
+    /**
+     * @brief Starts infinoted on the specified port
+     *
+     * @return bool true if successful, else false.
+     */
+    bool startInfinoted(unsigned short port);
 };
 
 /**

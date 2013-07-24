@@ -24,11 +24,12 @@
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
 #include <KTp/contact-factory.h>
-#include <telepathy-qt4/TelepathyQt/AccountFactory>
-#include <telepathy-qt4/TelepathyQt/AccountManager>
-#include <telepathy-qt4/TelepathyQt/StreamTubeClient>
-#include <telepathy-qt4/TelepathyQt/StreamTubeServer>
-#include <telepathy-qt4/TelepathyQt/PendingChannelRequest>
+#include <TelepathyQt/AccountFactory>
+#include <TelepathyQt/AccountManager>
+#include <TelepathyQt/StreamTubeClient>
+#include <TelepathyQt/StreamTubeServer>
+#include <TelepathyQt/PendingChannelRequest>
+#include <TelepathyQt/PendingReady>
 #include <TelepathyQt/ReferencedHandles>
 #include <TelepathyQt/ClientRegistrar>
 #include <TelepathyQt/ChannelClassSpecList>
@@ -84,7 +85,8 @@ void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
 
 const QString InfTubeServer::serviceName() const
 {
-    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid());
+    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid())
+                           + QString::number(reinterpret_cast<unsigned long long>(this));
 }
 
 InfTubeServer::InfTubeServer(QObject* parent)
@@ -156,7 +158,7 @@ bool InfTubeServer::createRequest(const Tp::AccountPtr account, const DocumentLi
                                             "org.freedesktop.Telepathy.Client." + serviceName());
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
-            this, SLOT(onCreateTubeFinished(Tp::PendingOperation*)));
+            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
     return true;
 }
 
@@ -188,7 +190,7 @@ bool InfTubeServer::offer(const Tp::AccountPtr& /*account*/, const Tp::Contacts&
     return false;
 }
 
-void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
+void InfTubeServer::onTubeRequestReady(Tp::PendingOperation* operation)
 {
     kDebug() << "create tube finished; is error:" << operation->isError();
     kDebug() << "error message:" << operation->errorMessage();
@@ -196,6 +198,29 @@ void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
         KMessageBox::error(0, i18n("Failed to establish a connection to the selected contact. Error message was: \"%1\"",
                                    operation->errorMessage()));
     }
+    else {
+        Tp::PendingChannelRequest* pending = qobject_cast<Tp::PendingChannelRequest*>(operation);
+        Tp::ChannelRequestPtr request = pending->channelRequest();
+        kDebug() << "GOT CHANNEL:" << request->channel();
+        connect(request->channel()->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureConnectionMonitoring),
+                SIGNAL(finished(Tp::PendingOperation*)), this, SLOT(channelReady(Tp::PendingOperation*)));
+        connect(dynamic_cast<Tp::StreamTubeChannel*>(request->channel().data()), SIGNAL(newConnection(uint)),
+                this, SLOT(newConnection(uint)));
+        m_channel = dynamic_cast<Tp::StreamTubeChannel*>(request->channel().data());
+    }
+}
+
+void InfTubeServer::channelReady(Tp::PendingOperation* operation)
+{
+    kDebug() << "READY";
+    kDebug() << dynamic_cast<Tp::StreamTubeChannel*>(qobject_cast<Tp::PendingReady*>(operation)->proxy().data())->ipAddress();
+}
+
+void InfTubeServer::newConnection(uint )
+{
+    kDebug() << "NEW CONNECTION";
+    kDebug() << m_channel->ipAddress();
+    m_channel->parameters();
 }
 
 bool InfTubeServer::startInfinoted()
@@ -243,6 +268,7 @@ const QString InfTubeServer::serverDirectory() const
 
 InfTubeServer::~InfTubeServer()
 {
+    kDebug() << "DESTROYING SERVER";
     if ( m_serverProcess ) {
         m_serverProcess->terminate();
     }
@@ -321,6 +347,12 @@ ServerManager::ServerManager(QObject* parent): QObject(parent)
                                                                       << Tp::Contact::FeatureCapabilities);
 
     Tp::ChannelFactoryPtr channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
+    channelFactory->addFeaturesForOutgoingStreamTubes(Tp::Features()
+                                                      << Tp::StreamTubeChannel::FeatureConnectionMonitoring
+                                                      << Tp::StreamTubeChannel::FeatureCore);
+    channelFactory->addFeaturesForIncomingStreamTubes(Tp::Features()
+                                                      << Tp::StreamTubeChannel::FeatureConnectionMonitoring
+                                                      << Tp::StreamTubeChannel::FeatureCore);
 
     accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
                                                   accountFactory,
