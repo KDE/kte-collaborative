@@ -25,9 +25,18 @@ target_link_libraries(inftube
 
 install(TARGETS inftube ${INSTALL_TARGETS_DEFAULT_ARGS})
 
-# the tube handler
+# the tube handlers
 kde4_add_executable(infinoteclienttubehandler clienttubehandler.cpp)
 target_link_libraries(infinoteclienttubehandler
+                      inftube
+                      ${KTP_LIBRARIES}
+                      ${KDE4_KIO_LIBS}
+                      ${KDE4_KDEUI_LIBS}
+                      ${TELEPATHY_QT4_LIBRARIES}
+)
+
+kde4_add_executable(infinoteservertubehandler servertubehandler.cpp)
+target_link_libraries(infinoteservertubehandler
                       inftube
                       ${KTP_LIBRARIES}
                       ${KDE4_KIO_LIBS}
@@ -43,9 +52,13 @@ endif()
 configure_file(infinoted.h.in infinoted.h)
 
 install(TARGETS infinoteclienttubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
-configure_file(org.freedesktop.Telepathy.Client.KTp.infinity.service.in
-               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinity.service
+install(TARGETS infinoteservertubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
+configure_file(org.freedesktop.Telepathy.Client.KTp.infinote.service.in
+               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote.service)
+configure_file(org.freedesktop.Telepathy.Client.KTp.infinote-server.service.in
+               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote-server.service)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote.service
+              ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote-server.service
         DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
-install(FILES KTp.infinity.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
+install(FILES KTp.infinote.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
 install(FILES kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services/ktp)

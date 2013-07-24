@@ -89,14 +89,19 @@ const QString InfTubeServer::serviceName() const
                            + QString::number(reinterpret_cast<unsigned long long>(this));
 }
 
+InfTubeRequester::InfTubeRequester(QObject* parent)
+    : InfTubeBase(parent)
+{
+
+}
+
 InfTubeServer::InfTubeServer(QObject* parent)
     : InfTubeBase(parent)
     , m_tubeServer(0)
-    , m_serverProcess(0)
     , m_hasCreatedChannel(false)
 {
     ServerManager::instance()->add(this);
-    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
+    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote-server",
                                                 QStringList(), serviceName());
 }
 
@@ -113,7 +118,7 @@ void InfTubeServer::jobFinished(KJob* job)
     emit fileCopiedToServer(url);
 }
 
-const QVariantMap InfTubeServer::createHints(const DocumentList& documents) const
+const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) const
 {
     QVariantMap hints;
     hints.insert("initialDocumentsSize", documents.size());
@@ -123,7 +128,7 @@ const QVariantMap InfTubeServer::createHints(const DocumentList& documents) cons
     return hints;
 }
 
-bool InfTubeServer::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
+bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
     Q_ASSERT(! m_hasCreatedChannel);
     m_hasCreatedChannel = true;
@@ -150,7 +155,7 @@ bool InfTubeServer::createRequest(const Tp::AccountPtr account, const DocumentLi
     requestBase.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
                        TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
     requestBase.insert(TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE + QLatin1String(".Service"),
-                       QLatin1String("infinity"));
+                       QLatin1String("infinote"));
 
     Tp::PendingChannelRequest* channelRequest;
     channelRequest = account->ensureChannel(requestBase,
@@ -162,7 +167,7 @@ bool InfTubeServer::createRequest(const Tp::AccountPtr account, const DocumentLi
     return true;
 }
 
-bool InfTubeServer::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
+bool InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
 {
     kDebug() << "share with account requested";
     QVariantMap request;
@@ -173,7 +178,7 @@ bool InfTubeServer::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& c
     return createRequest(account, documents, request);
 }
 
-bool InfTubeServer::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
+bool InfTubeRequester::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
 {
     kDebug() << "share with chatroom" << chatroom << "requested";
     QVariantMap request;
@@ -184,80 +189,54 @@ bool InfTubeServer::offer(const Tp::AccountPtr& account, const QString& chatroom
     return createRequest(account, documents, request);
 }
 
-bool InfTubeServer::offer(const Tp::AccountPtr& /*account*/, const Tp::Contacts& /*contact*/, const DocumentList& /*documents*/)
+bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contacts& /*contact*/, const DocumentList& /*documents*/)
 {
     kWarning() << "not implemented";
     return false;
 }
 
-void InfTubeServer::onTubeRequestReady(Tp::PendingOperation* operation)
+QString InfTubeServer::serverDirectoy(unsigned short port)
 {
-    kDebug() << "create tube finished; is error:" << operation->isError();
-    kDebug() << "error message:" << operation->errorMessage();
-    if ( operation->isError() ) {
-        KMessageBox::error(0, i18n("Failed to establish a connection to the selected contact. Error message was: \"%1\"",
-                                   operation->errorMessage()));
-    }
-    else {
-        Tp::PendingChannelRequest* pending = qobject_cast<Tp::PendingChannelRequest*>(operation);
-        Tp::ChannelRequestPtr request = pending->channelRequest();
-        kDebug() << "GOT CHANNEL:" << request->channel();
-        connect(request->channel()->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureConnectionMonitoring),
-                SIGNAL(finished(Tp::PendingOperation*)), this, SLOT(channelReady(Tp::PendingOperation*)));
-        connect(dynamic_cast<Tp::StreamTubeChannel*>(request->channel().data()), SIGNAL(newConnection(uint)),
-                this, SLOT(newConnection(uint)));
-        m_channel = dynamic_cast<Tp::StreamTubeChannel*>(request->channel().data());
-    }
-}
-
-void InfTubeServer::channelReady(Tp::PendingOperation* operation)
-{
-    kDebug() << "READY";
-    kDebug() << dynamic_cast<Tp::StreamTubeChannel*>(qobject_cast<Tp::PendingReady*>(operation)->proxy().data())->ipAddress();
-}
-
-void InfTubeServer::newConnection(uint )
-{
-    kDebug() << "NEW CONNECTION";
-    kDebug() << m_channel->ipAddress();
-    m_channel->parameters();
+    return QDir::tempPath() + "infinote/" + QString::number(port);
 }
 
 bool InfTubeServer::startInfinoted()
 {
     // Find a free port by letting the system choose one for a QTcpServer, then closing that
     // server and using the port it was assigned. Arguably not optimal but close enough.
+    int port;
     {
         QTcpServer s;
         s.listen(QHostAddress::LocalHost, 0);
-        m_port = s.serverPort();
+        port = s.serverPort();
         s.close();
     }
     // Ensure the server directory actually exists
-    QDir d(serverDirectory());
+    QDir d(serverDirectory(port));
     if ( ! d.exists() ) {
         d.mkpath(d.path());
     }
-    m_serverProcess = new QProcess;
-    m_serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
-    m_serverProcess->setStandardOutputFile(serverDirectory() + "/infinoted.log");
-    m_serverProcess->setStandardErrorFile(serverDirectory() + "/infinoted.errors");
-    m_serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
-                                           << "-r" << serverDirectory() << "-p" << QString::number(m_port));
-    m_serverProcess->waitForStarted(500);
+    QProcess* serverProcess = new QProcess;
+    m_serverProcesses << serverProcess;
+    serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
+    serverProcess->setStandardOutputFile(serverDirectory(port) + "/infinoted.log");
+    serverProcess->setStandardErrorFile(serverDirectory(port) + "/infinoted.errors");
+    serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
+                                           << "-r" << serverDirectory(port) << "-p" << QString::number(port));
+    serverProcess->waitForStarted(500);
     int timeout = 30; // 30 retries at 100 ms -> 3s
     for ( int i = 0; i < timeout; i ++ ) {
-        if ( m_serverProcess->state() != QProcess::Running ) {
+        if ( serverProcess->state() != QProcess::Running ) {
             kWarning() << "server did not start";
             return false;
         }
         QTcpSocket s;
-        s.connectToHost("localhost", m_port);
+        s.connectToHost("localhost", port);
         if ( s.waitForConnected(100) ) {
             break;
         }
     }
-    kDebug() << "successfully started infinioted on port" << m_port << "( root dir" << serverDirectory() << ")";
+    kDebug() << "successfully started infinioted on port" << port << "( root dir" << serverDirectory(port) << ")";
     return true;
 }
 
@@ -269,16 +248,13 @@ const QString InfTubeServer::serverDirectory() const
 InfTubeServer::~InfTubeServer()
 {
     kDebug() << "DESTROYING SERVER";
-    if ( m_serverProcess ) {
-        m_serverProcess->terminate();
-    }
 }
 
 void InfTubeClient::listen()
 {
     kDebug() << "listen called";
-    m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinity",
-                                                QStringList(), QLatin1String("KTp.infinity"), true, true);
+    m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
+                                                QStringList(), QLatin1String("KTp.infinote"), true, true);
     kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),

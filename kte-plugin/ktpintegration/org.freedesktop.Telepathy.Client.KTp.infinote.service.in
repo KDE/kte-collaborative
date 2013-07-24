@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.freedesktop.Telepathy.Client.KTp.infinote
+Exec=@LIBEXEC_INSTALL_DIR@/infinoteclienttubehandler

@@ -134,6 +134,8 @@ public slots:
 
 // This class is for requesting a new tube
 class INFTUBE_EXPORT InfTubeRequester : public InfTubeBase {
+public:
+    explicit InfTubeRequester(QObject* parent = 0);
     /**
      * @brief Initiate editing a list of documents with the given contacts.
      *
@@ -194,6 +196,8 @@ public:
      * @brief Create a StreamTubeServer instance and register it on dbus, to start listening for channel requests.
      */
     void registerHandler();
+
+    QString serverDirectoy(unsigned short port);
 
 public slots:
     // Called when a new channel is requested
