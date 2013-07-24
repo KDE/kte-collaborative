@@ -58,6 +58,7 @@ inline Tp::ChannelClassSpecList channelClassList()
  * which is common to both the receiving an the offering side.
  */
 class INFTUBE_EXPORT InfTubeBase : public QObject {
+Q_OBJECT
 public:
     explicit InfTubeBase(QObject* parent = 0);
     virtual ~InfTubeBase();
@@ -134,6 +135,7 @@ public slots:
 
 // This class is for requesting a new tube
 class INFTUBE_EXPORT InfTubeRequester : public InfTubeBase {
+Q_OBJECT
 public:
     explicit InfTubeRequester(QObject* parent = 0);
     /**
@@ -167,11 +169,6 @@ public:
 
 private:
     /**
-     * @brief Service name which the preferred handler uses on dbus
-     */
-    const QString serviceName() const;
-
-    /**
      * @brief Create a QVariantMap containing a list of documents to transmit with the tube ofer
      *
      * @param documents The doucments which you want to be opened initially
@@ -180,6 +177,8 @@ private:
     const QVariantMap createHints(const DocumentList& documents) const;
 
     bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
+public slots:
+    void onTubeRequestReady(Tp::PendingOperation*);
 };
 
 // This class is for handling a requested tube. It will handle the channel request,
@@ -197,11 +196,10 @@ public:
      */
     void registerHandler();
 
-    QString serverDirectoy(unsigned short port);
+    QString serverDirectory(unsigned short port) const;
 
 public slots:
-    // Called when a new channel is requested
-    void channelRequested(...);
+    void tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints);
 
 private:
     QList<Tp::StreamTubeChannelPtr> m_channels;
@@ -210,11 +208,11 @@ private:
     bool m_hasCreatedChannel;
 
     /**
-     * @brief Starts infinoted on the specified port
+     * @brief Starts infinoted and provides the port
      *
      * @return bool true if successful, else false.
      */
-    bool startInfinoted(unsigned short port);
+    bool startInfinoted(unsigned short* port);
 };
 
 /**

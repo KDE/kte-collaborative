@@ -44,6 +44,11 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+const QString serviceName()
+{
+    return "org.freedesktop.Telepathy.Client.KTp.infinote-server";
+}
+
 InfTubeBase::InfTubeBase(QObject* parent)
     : QObject(parent)
     , m_port(-1)
@@ -83,12 +88,6 @@ void InfTubeBase::setNicknameFromAccount(const Tp::AccountPtr& account)
     );
 }
 
-const QString InfTubeServer::serviceName() const
-{
-    return "KTp.infserver" + QString::number(QApplication::instance()->applicationPid())
-                           + QString::number(reinterpret_cast<unsigned long long>(this));
-}
-
 InfTubeRequester::InfTubeRequester(QObject* parent)
     : InfTubeBase(parent)
 {
@@ -100,23 +99,21 @@ InfTubeServer::InfTubeServer(QObject* parent)
     , m_tubeServer(0)
     , m_hasCreatedChannel(false)
 {
-    ServerManager::instance()->add(this);
-    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote-server",
-                                                QStringList(), serviceName());
+//     ServerManager::instance()->add(this);
 }
 
-void InfTubeServer::jobFinished(KJob* job)
-{
-    KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
-    Q_ASSERT(j);
-    if ( j->error() ) {
-        KMessageBox::error(0, i18n("Failed to share file: %1", j->errorString()));
-        return;
-    }
-    KUrl url = j->destUrl();
-    url.setUser(nickname());
-    emit fileCopiedToServer(url);
-}
+// void InfTubeServer::jobFinished(KJob* job)
+// {
+//     KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
+//     Q_ASSERT(j);
+//     if ( j->error() ) {
+//         KMessageBox::error(0, i18n("Failed to share file: %1", j->errorString()));
+//         return;
+//     }
+//     KUrl url = j->destUrl();
+//     url.setUser(nickname());
+//     emit fileCopiedToServer(url);
+// }
 
 const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) const
 {
@@ -130,19 +127,7 @@ const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) c
 
 bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
-    Q_ASSERT(! m_hasCreatedChannel);
-    m_hasCreatedChannel = true;
     QVariantMap hints = createHints(documents);
-
-    kDebug() << "starting infinoted";
-    if ( ! startInfinoted() ) {
-        // TODO user-visible error handling
-        kWarning() << "Failed to start infinoted. Check settings and installation.";
-        return false;
-    }
-
-    // set infinoted's socket as the local endpoint of the tube
-    m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), m_port, hints);
 
     // add the initial documents
     foreach ( const KUrl& document, documents ) {
@@ -160,11 +145,17 @@ bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const Documen
     Tp::PendingChannelRequest* channelRequest;
     channelRequest = account->ensureChannel(requestBase,
                                             QDateTime::currentDateTime(),
-                                            "org.freedesktop.Telepathy.Client." + serviceName());
+                                            "org.freedesktop.Telepathy.Client." + serviceName(),
+                                            hints);
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
     return true;
+}
+
+void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* )
+{
+    kDebug() << "TUBE REQUEST FINISHED";
 }
 
 bool InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
@@ -195,34 +186,54 @@ bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contac
     return false;
 }
 
-QString InfTubeServer::serverDirectoy(unsigned short port)
+void InfTubeServer::registerHandler()
+{
+    kDebug() << "registering handler with service name" << serviceName();
+    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote-server",
+                                                QStringList(), serviceName());
+    connect(m_tubeServer.data(), SIGNAL(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)),
+            this, SLOT(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)));
+}
+
+void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints )
+{
+    kDebug() << "tube requested";
+    kDebug() << channel->ipAddress();
+    // set infinoted's socket as the local endpoint of the tube
+    unsigned short port = -1;
+    startInfinoted(&port);
+    QVariantMap hints;
+    hints.insert("localSocket", QString::number(port));
+    m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), port, hints);
+}
+
+QString InfTubeServer::serverDirectory(unsigned short port) const
 {
     return QDir::tempPath() + "infinote/" + QString::number(port);
 }
 
-bool InfTubeServer::startInfinoted()
+bool InfTubeServer::startInfinoted(unsigned short* port)
 {
     // Find a free port by letting the system choose one for a QTcpServer, then closing that
     // server and using the port it was assigned. Arguably not optimal but close enough.
-    int port;
     {
         QTcpServer s;
         s.listen(QHostAddress::LocalHost, 0);
-        port = s.serverPort();
+        *port = s.serverPort();
         s.close();
     }
     // Ensure the server directory actually exists
-    QDir d(serverDirectory(port));
+    QDir d(serverDirectory(*port));
     if ( ! d.exists() ) {
         d.mkpath(d.path());
     }
     QProcess* serverProcess = new QProcess;
     m_serverProcesses << serverProcess;
     serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
-    serverProcess->setStandardOutputFile(serverDirectory(port) + "/infinoted.log");
-    serverProcess->setStandardErrorFile(serverDirectory(port) + "/infinoted.errors");
+    serverProcess->setStandardOutputFile(serverDirectory(*port) + "/infinoted.log");
+    serverProcess->setStandardErrorFile(serverDirectory(*port) + "/infinoted.errors");
     serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
-                                           << "-r" << serverDirectory(port) << "-p" << QString::number(port));
+                                           << "-r" << serverDirectory(*port) << "-p" << QString::number(*port));
     serverProcess->waitForStarted(500);
     int timeout = 30; // 30 retries at 100 ms -> 3s
     for ( int i = 0; i < timeout; i ++ ) {
@@ -231,18 +242,13 @@ bool InfTubeServer::startInfinoted()
             return false;
         }
         QTcpSocket s;
-        s.connectToHost("localhost", port);
+        s.connectToHost("localhost", *port);
         if ( s.waitForConnected(100) ) {
             break;
         }
     }
-    kDebug() << "successfully started infinioted on port" << port << "( root dir" << serverDirectory(port) << ")";
+    kDebug() << "successfully started infinioted on port" << *port << "( root dir" << serverDirectory(*port) << ")";
     return true;
-}
-
-const QString InfTubeServer::serverDirectory() const
-{
-    return QDir::tempPath() + "/infinoted-" + QString::number(QApplication::instance()->applicationPid());
 }
 
 InfTubeServer::~InfTubeServer()

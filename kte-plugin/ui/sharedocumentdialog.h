@@ -24,7 +24,7 @@
 
 #include <kdialog.h>
 
-class InfTubeServer;
+class InfTubeRequester;
 class ServerManager;
 namespace KTextEditor {
     class View;
@@ -35,7 +35,7 @@ class ShareDocumentDialog : public KDialog
 Q_OBJECT
 public:
     explicit ShareDocumentDialog(KTextEditor::View* activeView);
-    const InfTubeServer* server() const;
+    const InfTubeRequester* server() const;
 
 private slots:
     void shareWithContact();
@@ -46,7 +46,7 @@ signals:
 
 private:
     KTextEditor::View* m_view;
-    InfTubeServer* m_tubeServer;
+    InfTubeRequester* m_tubeServer;
 };
 
 #endif // SHAREDOCUMENTDIALOG_H
