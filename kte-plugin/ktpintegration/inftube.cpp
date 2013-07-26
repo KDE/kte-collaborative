@@ -46,7 +46,7 @@
 
 const QString serviceName()
 {
-    return "org.freedesktop.Telepathy.Client.KTp.infinote-server";
+    return "org.freedesktop.Telepathy.Client.KTp.infinoteServer";
 }
 
 InfTubeBase::InfTubeBase(QObject* parent)
@@ -145,7 +145,7 @@ bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const Documen
     Tp::PendingChannelRequest* channelRequest;
     channelRequest = account->ensureChannel(requestBase,
                                             QDateTime::currentDateTime(),
-                                            "org.freedesktop.Telepathy.Client." + serviceName(),
+                                            "org.freedesktop.Telepathy.Client.KTp.infinoteServer",
                                             hints);
 
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
@@ -188,9 +188,12 @@ bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contac
 
 void InfTubeServer::registerHandler()
 {
-    kDebug() << "registering handler with service name" << serviceName();
-    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote-server",
-                                                QStringList(), serviceName());
+    kDebug() << "registering handler";
+    m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
+                                                QStringList("infinote"), "KTp.infinoteServer", true);
+    m_tubeServer->exportTcpSocket(QHostAddress::LocalHost, 1);
+    kDebug() << m_tubeServer->clientName();
+    kDebug() << m_tubeServer->isRegistered();
     connect(m_tubeServer.data(), SIGNAL(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)),
             this, SLOT(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)));
 }
@@ -260,7 +263,7 @@ void InfTubeClient::listen()
 {
     kDebug() << "listen called";
     m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
-                                                QStringList(), QLatin1String("KTp.infinote"), true, true);
+                                                QStringList("infinote"), QLatin1String("KTp.infinote"), true, true);
     kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),
