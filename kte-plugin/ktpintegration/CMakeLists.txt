@@ -55,10 +55,10 @@ install(TARGETS infinoteclienttubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(TARGETS infinoteservertubehandler DESTINATION ${LIBEXEC_INSTALL_DIR})
 configure_file(org.freedesktop.Telepathy.Client.KTp.infinote.service.in
                ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote.service)
-configure_file(org.freedesktop.Telepathy.Client.KTp.infinote-server.service.in
-               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote-server.service)
+configure_file(org.freedesktop.Telepathy.Client.KTp.infinoteServer.service.in
+               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinoteServer.service)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote.service
-              ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinote-server.service
+              ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinoteServer.service
         DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
-install(FILES KTp.infinote.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
+install(FILES KTp.infinote.client KTp.infinoteServer.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
 install(FILES kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services/ktp)
