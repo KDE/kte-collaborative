@@ -177,9 +177,16 @@ private:
     const QVariantMap createHints(const DocumentList& documents) const;
 
     bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
+
+    DocumentList m_shareDocuments;
+
 public slots:
     void onTubeRequestReady(Tp::PendingOperation*);
     void onTubeReady(Tp::PendingOperation*);
+    void jobFinished(KJob* job);
+
+signals:
+    void collaborativeDocumentReady(KUrl url);
 };
 
 // This class is for handling a requested tube. It will handle the channel request,

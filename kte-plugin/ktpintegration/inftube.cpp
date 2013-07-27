@@ -102,18 +102,18 @@ InfTubeServer::InfTubeServer(QObject* parent)
 //     ServerManager::instance()->add(this);
 }
 
-// void InfTubeServer::jobFinished(KJob* job)
-// {
-//     KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
-//     Q_ASSERT(j);
-//     if ( j->error() ) {
-//         KMessageBox::error(0, i18n("Failed to share file: %1", j->errorString()));
-//         return;
-//     }
-//     KUrl url = j->destUrl();
-//     url.setUser(nickname());
-//     emit fileCopiedToServer(url);
-// }
+void InfTubeRequester::jobFinished(KJob* job)
+{
+    KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
+    Q_ASSERT(j);
+    if ( j->error() ) {
+        KMessageBox::error(0, i18n("Failed to share file: %1", j->errorString()));
+        return;
+    }
+    KUrl url = j->destUrl();
+    url.setUser(nickname());
+    emit collaborativeDocumentReady(url);
+}
 
 const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) const
 {
@@ -128,14 +128,7 @@ const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) c
 bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
 {
     QVariantMap hints = createHints(documents);
-
-    // add the initial documents
-    foreach ( const KUrl& document, documents ) {
-        KUrl x = localUrl();
-        x.setFileName(document.fileName());
-        KIO::FileCopyJob* job = KIO::file_copy(document, x, -1, KIO::HideProgressInfo);
-        connect(job, SIGNAL(finished(KJob*)), this, SLOT(jobFinished(KJob*)));
-    }
+    m_shareDocuments = documents;
 
     requestBase.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
                        TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
@@ -172,6 +165,22 @@ void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
     Tp::StreamTubeChannelPtr channel = Tp::StreamTubeChannelPtr::qObjectCast(ready->proxy());
     Q_ASSERT(channel);
     kDebug() << "parameters:" << channel->parameters();
+    if ( ! channel->parameters().contains("localSocket") ) {
+        kWarning() << "Got a tube without local socket set -- cannot continue";
+        return;
+    }
+    bool ok = false;
+    m_port = channel->parameters()["localSocket"].toUInt(&ok);
+    Q_ASSERT(ok);
+
+    // add the initial documents
+    foreach ( const KUrl& document, m_shareDocuments ) {
+        KUrl x = localUrl();
+        x.setFileName(document.fileName());
+        KIO::FileCopyJob* job = KIO::file_copy(document, x, -1, KIO::HideProgressInfo);
+        connect(job, SIGNAL(finished(KJob*)), this, SLOT(jobFinished(KJob*)));
+    }
+
 }
 
 bool InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)

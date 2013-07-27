@@ -64,6 +64,8 @@ void ShareDocumentDialog::shareWithContact()
         if ( m_tubeServer->offer(dialog.account(), dialog.contact(), DocumentList() << url) ) {
             m_view->document()->closeUrl();
             m_tubeServer->setNicknameFromAccount(dialog.account());
+            connect(m_tubeServer, SIGNAL(collaborativeDocumentReady(KUrl)),
+                    this, SIGNAL(shouldOpenDocument(KUrl)));
         }
     }
 }
@@ -77,7 +79,8 @@ void ShareDocumentDialog::shareWithChatRoom()
         if ( m_tubeServer->offer(dialog.selectedAccount(), dialog.selectedChatRoom(), DocumentList() << m_view->document()->url()) ) {
             m_tubeServer->setNicknameFromAccount(dialog.selectedAccount());
             m_view->document()->closeUrl();
-            connect(m_tubeServer, SIGNAL(fileCopiedToServer(KUrl)), this, SIGNAL(shouldOpenDocument(KUrl)));
+            connect(m_tubeServer, SIGNAL(collaborativeDocumentReady(KUrl)),
+                    this, SIGNAL(shouldOpenDocument(KUrl)));
         }
     }
 }
