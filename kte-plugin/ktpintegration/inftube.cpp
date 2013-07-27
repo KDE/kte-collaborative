@@ -153,9 +153,25 @@ bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const Documen
     return true;
 }
 
-void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* )
+void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* operation)
 {
     kDebug() << "TUBE REQUEST FINISHED";
+    Tp::ChannelRequestPtr req = qobject_cast<Tp::PendingChannelRequest*>(operation)->channelRequest();
+    Tp::StreamTubeChannel* channel = qobject_cast<Tp::StreamTubeChannel*>(req->channel().data());
+    kDebug() << "got ST channel" << channel;
+    Q_ASSERT(channel);
+    QObject::connect(channel->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureCore),
+        SIGNAL(finished(Tp::PendingOperation*)), this, SLOT(onTubeReady(Tp::PendingOperation*)));
+}
+
+void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
+{
+    kDebug() << "Tube ready:" << operation;
+    Tp::PendingReady* ready = qobject_cast<Tp::PendingReady*>(operation);
+    Q_ASSERT(ready);
+    Tp::StreamTubeChannelPtr channel = Tp::StreamTubeChannelPtr::qObjectCast(ready->proxy());
+    Q_ASSERT(channel);
+    kDebug() << "parameters:" << channel->parameters();
 }
 
 bool InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)

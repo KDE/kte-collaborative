@@ -179,6 +179,7 @@ private:
     bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
 public slots:
     void onTubeRequestReady(Tp::PendingOperation*);
+    void onTubeReady(Tp::PendingOperation*);
 };
 
 // This class is for handling a requested tube. It will handle the channel request,
