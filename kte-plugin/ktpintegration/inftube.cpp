@@ -212,7 +212,7 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannel
 
 QString InfTubeServer::serverDirectory(unsigned short port) const
 {
-    return QDir::tempPath() + "infinote/" + QString::number(port);
+    return QDir::tempPath() + "/infinote/server-" + QString::number(port);
 }
 
 bool InfTubeServer::startInfinoted(unsigned short* port)
