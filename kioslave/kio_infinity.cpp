@@ -256,7 +256,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         inf_user_table_add_user(user_table, user);
         g_object_unref(user);
 
-        InfTextDefaultBuffer* textBuffer = inf_text_default_buffer_new("utf8");
+        InfTextDefaultBuffer* textBuffer = inf_text_default_buffer_new("UTF-8");
 
         InfCommunicationManager* communication_manager =
                 infc_browser_get_communication_manager(INFC_BROWSER(browser()->gobject()));
@@ -266,8 +266,8 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         InfTextSession* session = inf_text_session_new_with_user_table(
                 communication_manager, INF_TEXT_BUFFER(textBuffer), io,
                 user_table, INF_SESSION_RUNNING, NULL, NULL);
-        inf_text_buffer_insert_text(INF_TEXT_BUFFER(textBuffer), 0, initialContents.data(),
-                                    initialContents.size(), initialContents.size(), user);
+        inf_text_buffer_insert_text(INF_TEXT_BUFFER(textBuffer), 0, initialContents,
+                                    initialContents.size(), QString(initialContents).size(), user);
 
         g_object_unref(io);
 
