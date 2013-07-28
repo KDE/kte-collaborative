@@ -223,14 +223,16 @@ void InfTubeServer::registerHandler()
             this, SLOT(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)));
 }
 
-void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints )
+void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
 {
     kDebug() << "tube requested";
     kDebug() << channel->ipAddress();
+    kDebug() << requestHints.allHints();
     // set infinoted's socket as the local endpoint of the tube
     unsigned short port = -1;
     startInfinoted(&port);
     QVariantMap hints;
+    hints = hints.unite(requestHints.allHints());
     hints.insert("localSocket", QString::number(port));
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), port, hints);
 }
