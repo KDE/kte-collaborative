@@ -104,16 +104,19 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         for ( int line = startLine; line <= endLine; line++ ) {
             KTextEditor::Range newlineRange(line, m_document->document()->lineLength(line), line + 1, 0);
             if ( KTextEditor::MovingRange* existing = rangeAt(newlineRange) ) {
-                kDebug() << "splitting range" << *existing << newlineRange;
-                KTextEditor::Range newRange(KTextEditor::Cursor(existing->end().line(), 0),
-                                            KTextEditor::Cursor(existing->end().line(), existing->end().column()));
-                kDebug() << newRange;
-                addHighlightedRange(QString(), newRange,
-                                    existing->attribute()->background().color());
-                existing->setRange(existing->start(),
-                                   KTextEditor::Cursor(existing->start().line(),
-                                                       m_document->document()->lineLength(existing->start().line()))
-                                  );
+                if ( existing->contains(newlineRange) ) {
+                    kDebug() << "splitting range" << *existing << newlineRange;
+                    KTextEditor::Range newRange(KTextEditor::Cursor(existing->end().line(), 0),
+                                                KTextEditor::Cursor(existing->end().line(), existing->end().column()));
+                    kDebug() << newRange;
+                    addHighlightedRange(QString(), newRange,
+                                        existing->attribute()->background().color());
+                    existing->setRange(existing->start(),
+                                    KTextEditor::Cursor(existing->start().line(),
+                                                        m_document->document()->lineLength(existing->start().line()))
+                                    );
+                }
+            }
             }
             const int lineSize = m_document->document()->lineLength(line);
             if ( lineSize == 0 ) {
