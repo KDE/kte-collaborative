@@ -79,6 +79,10 @@ private:
      */
     void cleanupRanges();
 
+    void splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor, const QInfinity::User* user);
+
+    KTextEditor::MovingRange* rangeAt(const KTextEditor::Range& range);
+
     /**
      * @brief Adds a range to the highlighted ranges.
      *
