@@ -117,7 +117,6 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
                                     );
                 }
             }
-            }
             const int lineSize = m_document->document()->lineLength(line);
             if ( lineSize == 0 ) {
                 // do not create empty highlight ranges
