@@ -269,8 +269,6 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         inf_text_buffer_insert_text(INF_TEXT_BUFFER(textBuffer), 0, initialContents.data(),
                                     initialContents.size(), initialContents.size(), user);
 
-        g_object_unref(io);
-
         req = NodeRequest::wrap(infc_browser_add_note_with_content(
                 INFC_BROWSER(browser()->gobject()), iter.infBrowserIter(),
                 url.fileName().toAscii().data(), m_notePlugin->infPlugin(), INF_SESSION(session), true));
