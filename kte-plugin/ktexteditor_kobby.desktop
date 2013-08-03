@@ -10,6 +10,7 @@ Comment[sv]=Insticksprogram till Ktexteditor för samredigering, baserad på pro
 Comment[uk]=Додаток спільного редагування до KTextEditor, заснований на протоколі infinity
 Comment[x-test]=xxCollaborative editing plugin for KTextEditor, based on the infinity protocolxx
 Name=KobbyPlugin
+Name[bs]=KobbyPlugin
 Name[hu]=KobbyBővítmény
 Name[nl]=KobbyPlugin
 Name[pt]=KobbyPlugin

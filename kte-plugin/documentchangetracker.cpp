@@ -83,7 +83,9 @@ void DocumentChangeTracker::addHighlightedRange(const QString& name, const KText
     attrib->setBackground(color);
     r->setAttribute(attrib);
     m_ranges << r;
-    m_existingColors[name] = color;
+    if ( ! name.isEmpty() ) {
+        m_existingColors[name] = color;
+    }
 }
 
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
@@ -95,15 +97,26 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
     cleanupRanges();
     const int startLine = range.start().line();
     const int endLine = range.end().line();
-    if ( m_document->document()->text(range, false) == QLatin1String("\n") ) {
-        // Special case optimization: just a newline was inserted; nothing needs to be done.
-        return;
-    }
-    else if ( startLine != endLine ) {
+    if ( startLine != endLine ) {
         // If the range spans multiple lines, add multiple moving ranges to avoid
         // highlighting the newlines.
         // TODO maybe we want this behaviour to be configurable?
         for ( int line = startLine; line <= endLine; line++ ) {
+            KTextEditor::Range newlineRange(line, m_document->document()->lineLength(line), line + 1, 0);
+            if ( KTextEditor::MovingRange* existing = rangeAt(newlineRange) ) {
+                if ( existing->contains(newlineRange) ) {
+                    kDebug() << "splitting range" << *existing << newlineRange;
+                    KTextEditor::Range newRange(KTextEditor::Cursor(existing->end().line(), 0),
+                                                KTextEditor::Cursor(existing->end().line(), existing->end().column()));
+                    kDebug() << newRange;
+                    addHighlightedRange(QString(), newRange,
+                                        existing->attribute()->background().color());
+                    existing->setRange(existing->start(),
+                                    KTextEditor::Cursor(existing->start().line(),
+                                                        m_document->document()->lineLength(existing->start().line()))
+                                    );
+                }
+            }
             const int lineSize = m_document->document()->lineLength(line);
             if ( lineSize == 0 ) {
                 // do not create empty highlight ranges
@@ -129,13 +142,12 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
 
     const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView(),
                                                             m_existingColors);
-    foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
-        if ( existing->start() > range.end() || existing->end() < range.start() ) {
-            continue;
-        }
 
+    KTextEditor::MovingRange* existing = rangeAt(range);
+
+    if ( existing ) {
         bool colorMatches = existing->attribute()->background().color() == userColor;
-        if ( colorMatches ) {
+        if ( colorMatches && range.start().line() == range.end().line() ) {
             if ( existing->contains(range) ) {
                 // The existing range has the same color and contains the insertion.
                 // It will auto-expand, and nothing needs to be done at all.
@@ -152,19 +164,35 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             }
             // Should not reach here, if I have understood the interface correctly :)
             kWarning() << "whops, strange things are happening -- fix me";
-//             Q_ASSERT(false);
+    //             Q_ASSERT(false);
         }
         else if ( existing->contains(range) ) {
-            // split this range; the old range turns into the second part...
-            KTextEditor::Cursor oldStart = existing->start();
-            existing->setRange(range.end(), existing->end());
-            // and a new one is created for the first part
-            KTextEditor::Range firstPartRaw(oldStart, range.start());
-            addHighlightedRange(user->name(), firstPartRaw, existing->attribute()->background().color());
-            // the range for the new text will be added below, after the loop.
+            splitRangeForInsertion(existing, range, user);
+            // the range for the new text will be added below.
         }
     }
     addHighlightedRange(user->name(), range, userColor);
+}
+
+KTextEditor::MovingRange* DocumentChangeTracker::rangeAt(const KTextEditor::Range& range)
+{
+    foreach ( KTextEditor::MovingRange* existing, m_ranges ) {
+        if ( existing->start() > range.end() || existing->end() < range.start() ) {
+            continue;
+        }
+        return existing;
+    }
+    return 0;
+}
+
+void DocumentChangeTracker::splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor, const QInfinity::User* user)
+{
+    // split this range; the old range turns into the second part...
+    KTextEditor::Cursor oldStart = existing->start();
+    existing->setRange(splitFor.end(), existing->end());
+    // and a new one is created for the first part
+    KTextEditor::Range firstPartRaw(oldStart, splitFor.start());
+    addHighlightedRange(QString(), firstPartRaw, existing->attribute()->background().color());
 }
 
 const QMap<QString, QColor>& DocumentChangeTracker::usedColors() const
