@@ -167,7 +167,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_openFileManagerAction->setIcon(KIcon("system-file-manager"));
 
     m_shareWithContactAction = actionCollection()->addAction("kobby_share_with_contact", this, SLOT(shareActionClicked()));
-    m_shareWithContactAction->setText(i18n("Share with contact..."));
+    m_shareWithContactAction->setText(i18n("Share document..."));
     m_shareWithContactAction->setHelpText(i18n("Collaboratively edit the current document with an "
                                                "instant messenger contact"));
     m_shareWithContactAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+E")), KAction::DefaultShortcut);
