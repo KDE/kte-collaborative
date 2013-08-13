@@ -53,6 +53,14 @@
 #include <KCMultiDialog>
 #include <KRun>
 
+void setTextColor(QWidget* textWidget, KColorScheme::ForegroundRole colorRole) {
+    QPalette p = textWidget->palette();
+    KColorScheme scheme(QPalette::Active);
+    QBrush brush = scheme.foreground(colorRole);
+    p.setBrush(QPalette::Foreground, brush);
+    textWidget->setPalette(p);
+}
+
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
     , m_connectionStatusLabel(new QLabel(this))
@@ -68,7 +76,6 @@ KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
 void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
 {
     QString text;
-    // TODO colors don't work. Find out why.
     KColorScheme::ForegroundRole role = KColorScheme::NormalText;
     if ( status == QInfinity::XmlConnection::Closed ) {
         // Since the connection will start opening immediately,
@@ -86,17 +93,13 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
     else if ( status == QInfinity::XmlConnection::Closing ) {
         text = i18n("Disconnecting...");
     }
-    QPalette p = m_connectionStatusLabel->palette();
-    KColorScheme::adjustForeground(p, role);
-    m_connectionStatusLabel->setPalette(p);
+    setTextColor(m_connectionStatusLabel, role);
     m_connectionStatusLabel->setText(text);
 }
 
 void KobbyStatusBar::sessionFullyReady()
 {
-    QPalette p = m_connectionStatusLabel->palette();
-    KColorScheme::adjustForeground(p, KColorScheme::PositiveText);
-    m_connectionStatusLabel->setPalette(p);
+    setTextColor(m_connectionStatusLabel, KColorScheme::PositiveText);
     m_connectionStatusLabel->setText( "<b>" + i18n("Connected to collaboration server.") + "</b>" );
 }
 
