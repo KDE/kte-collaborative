@@ -175,6 +175,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
                                                "instant messenger contact"));
     m_shareWithContactAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+E")), KAction::DefaultShortcut);
     m_shareWithContactAction->setIcon(KIcon("document-share"));
+    m_shareWithContactAction->setEnabled(m_view->document()->url().protocol() != "inf");
 
     m_changeUserNameAction = actionCollection()->addAction("kobby_change_user_name", this, SLOT(changeUserActionClicked()));
     m_changeUserNameAction->setText(i18n("Change user name..."));
@@ -292,6 +293,7 @@ void KobbyPluginView::enableUi()
     connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
             this, SLOT(documentReady(ManagedDocument*)), Qt::UniqueConnection);
     m_view->layout()->addWidget(m_statusBar);
+    m_shareWithContactAction->setEnabled(false);
 }
 
 void KobbyPluginView::disableUi()
@@ -299,6 +301,7 @@ void KobbyPluginView::disableUi()
     m_view->layout()->removeWidget(m_statusBar);
     delete m_statusBar;
     m_statusBar = 0;
+    m_shareWithContactAction->setEnabled(true);
     // Connections are disconnected automatically since m_document will be deleted
 }
 
@@ -407,12 +410,17 @@ void KobbyPluginView::saveCopyActionClicked()
 void KobbyPluginView::shareActionClicked()
 {
     if ( ! m_view->document()->url().isValid() ) {
-        KMessageBox::sorry(m_view, i18n("Please save the document locally before sharing it."));
-        return;
-    }
-    if ( m_view->document()->url().protocol() == "inf" ) {
-        KMessageBox::sorry(m_view, i18n("The document is already being shared."));
-        return;
+        const QString question = i18n("You must save the document before sharing it. Do you want to do that now?");
+        if ( KMessageBox::questionYesNo(m_view, question) != KMessageBox::Yes ) {
+            return;
+        }
+        QString saveName = KFileDialog::getSaveFileName();
+        if ( saveName.isEmpty() ) {
+            return;
+        }
+        if ( ! m_view->document()->saveAs(saveName) ) {
+            return;
+        }
     }
     Tp::registerTypes();
     ShareDocumentDialog dialog(m_view);
