@@ -24,6 +24,7 @@
 #include <ktpintegration/inftube.h>
 #include <KTp/Widgets/join-chat-room-dialog.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
+#include <KTp/Models/contacts-filter-model.h>
 #include <KLocalizedString>
 #include <KTextEditor/View>
 #include <KTextEditor/Document>
@@ -58,6 +59,8 @@ void ShareDocumentDialog::shareWithContact()
 {
     accept();
     KTp::ContactGridDialog dialog(this);
+    dialog.filter()->setCapabilityFilterFlags(KTp::ContactsFilterModel::FilterByTubes);
+    dialog.filter()->setTubesFilterStrings(QStringList() << "infinote");
     if ( dialog.exec() ) {
         m_tubeServer = new InfTubeRequester(QApplication::instance());
         KUrl url = m_view->document()->url();
