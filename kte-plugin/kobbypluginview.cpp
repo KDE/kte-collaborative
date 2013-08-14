@@ -300,10 +300,15 @@ void KobbyPluginView::enableUi()
             this, SLOT(documentReady(ManagedDocument*)), Qt::UniqueConnection);
     m_view->layout()->addWidget(m_statusBar);
     m_shareWithContactAction->setEnabled(false);
-    if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
-        iface->enableTextHints(300);
-        connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
-                this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
+
+    KConfig config("ktecollaborative");
+    KConfigGroup group = config.group("notifications");
+    if ( group.readEntry("enableTextHints", true) ) {
+        if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
+            iface->enableTextHints(300);
+            connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
+                    this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
+        }
     }
 }
 

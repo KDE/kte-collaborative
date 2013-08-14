@@ -47,8 +47,10 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     notificationsGroupBox->setLayout(notificationsLayout);
     m_highlightBackground = new QCheckBox();
     m_displayWidgets = new QCheckBox();
+    m_displayTextHints = new QCheckBox();
     notificationsLayout->addRow(i18n("Display popup widgets"), m_displayWidgets);
     notificationsLayout->addRow(i18n("Colorize text background"), m_highlightBackground);
+    notificationsLayout->addRow(i18n("Display text tooltips"), m_displayTextHints);
 
     QGroupBox* colorsGroupBox = new QGroupBox();
     colorsGroupBox->setTitle(i18n("Colors"));
@@ -70,6 +72,7 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     connect(m_saturationSilder, SIGNAL(sliderMoved(int)), SLOT(changed()));
     connect(m_highlightBackground, SIGNAL(toggled(bool)), SLOT(changed()));
     connect(m_displayWidgets, SIGNAL(toggled(bool)), SLOT(changed()));
+    connect(m_displayTextHints, SIGNAL(toggled(bool)), SLOT(changed()));
 }
 
 KCMKTECollaborative::~KCMKTECollaborative()
@@ -82,6 +85,7 @@ void KCMKTECollaborative::load()
     m_saturationSilder->setValue(m_colorsGroup.readEntry("saturation", 185));
     m_highlightBackground->setChecked(m_notifyGroup.readEntry("highlightBackground", true));
     m_displayWidgets->setChecked(m_notifyGroup.readEntry("displayWidgets", true));
+    m_displayTextHints->setChecked(m_notifyGroup.readEntry("enableTextHints", true));
 }
 
 void KCMKTECollaborative::save()
@@ -89,4 +93,5 @@ void KCMKTECollaborative::save()
     m_colorsGroup.writeEntry("saturation", m_saturationSilder->value());
     m_notifyGroup.writeEntry("highlightBackground", m_highlightBackground->isChecked());
     m_notifyGroup.writeEntry("displayWidgets", m_displayWidgets->isChecked());
+    m_notifyGroup.writeEntry("enableTextHints", m_displayTextHints->isChecked());
 }

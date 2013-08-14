@@ -51,6 +51,7 @@ private:
     // features
     QCheckBox* m_highlightBackground;
     QCheckBox* m_displayWidgets;
+    QCheckBox* m_displayTextHints;
 };
 
 #endif // KCM_KTE_COLLABORATIVE_H
