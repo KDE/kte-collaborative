@@ -23,6 +23,7 @@
 #include "kobbyplugin.h"
 
 #include <KDebug>
+#include <KMessageWidget>
 #include <QHBoxLayout>
 #include <QLayout>
 #include <QGroupBox>
@@ -62,7 +63,10 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
 
     // Assemble the UI
     setLayout(new QVBoxLayout());
-    layout()->addWidget(new QLabel(i18n("Some changes might only be applied for newly opened documents.")));
+    KMessageWidget* message = new KMessageWidget(i18n("Some changes might only be applied for newly opened documents."));
+    message->setMessageType(KMessageWidget::Information);
+    message->setCloseButtonVisible(false);
+    layout()->addWidget(message);
     layout()->addWidget(notificationsGroupBox);
     layout()->addWidget(colorsGroupBox);
     // Add a spacer to top-align the widgets
