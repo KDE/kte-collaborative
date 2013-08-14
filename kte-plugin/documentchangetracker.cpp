@@ -27,6 +27,7 @@
 #include <KTextEditor/MovingInterface>
 #include <KConfigGroup>
 #include <KConfig>
+#include <KLocalizedString>
 
 DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
     : QObject(document)
@@ -74,18 +75,30 @@ void DocumentChangeTracker::cleanupRanges()
     }
 }
 
-void DocumentChangeTracker::addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color)
+QString DocumentChangeTracker::userForCursor(const KTextEditor::Cursor& position) const
+{
+    foreach ( KTextEditor::MovingRange* range, m_ranges ) {
+        if ( range->contains(position) ) {
+            return range->attribute()->toolTip();
+        }
+    }
+    return i18nc("Refers to a person which is not known", "unknown user");
+}
+
+KTextEditor::MovingRange* DocumentChangeTracker::addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color)
 {
     // We allow empty ranges here, and invalidate them ourselves on the next insertion.
     KTextEditor::MovingRange* r = iface()->newMovingRange(range, KTextEditor::MovingRange::DoNotExpand,
                                                           KTextEditor::MovingRange::AllowEmpty);
     KTextEditor::Attribute::Ptr attrib(new KTextEditor::Attribute);
     attrib->setBackground(color);
+    attrib->setToolTip(name);
     r->setAttribute(attrib);
     m_ranges << r;
     if ( ! name.isEmpty() ) {
         m_existingColors[name] = color;
     }
+    return r;
 }
 
 void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QInfinity::User* user, bool removal)
@@ -167,7 +180,7 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
     //             Q_ASSERT(false);
         }
         else if ( existing->contains(range) ) {
-            splitRangeForInsertion(existing, range, user);
+            splitRangeForInsertion(existing, range);
             // the range for the new text will be added below.
         }
     }
@@ -185,14 +198,15 @@ KTextEditor::MovingRange* DocumentChangeTracker::rangeAt(const KTextEditor::Rang
     return 0;
 }
 
-void DocumentChangeTracker::splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor, const QInfinity::User* user)
+void DocumentChangeTracker::splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor)
 {
     // split this range; the old range turns into the second part...
     KTextEditor::Cursor oldStart = existing->start();
     existing->setRange(splitFor.end(), existing->end());
     // and a new one is created for the first part
     KTextEditor::Range firstPartRaw(oldStart, splitFor.start());
-    addHighlightedRange(QString(), firstPartRaw, existing->attribute()->background().color());
+    KTextEditor::MovingRange* r = addHighlightedRange(QString(), firstPartRaw, QColor());
+    r->setAttribute(existing->attribute());
 }
 
 const QMap<QString, QColor>& DocumentChangeTracker::usedColors() const

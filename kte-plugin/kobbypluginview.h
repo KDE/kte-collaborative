@@ -119,6 +119,8 @@ public slots:
 
     void openFile(KUrl);
 
+    void textHintRequested(const KTextEditor::Cursor& position, QString& hint);
+
 private:
     KTextEditor::View* m_view;
     KobbyStatusBar* m_statusBar;

@@ -33,6 +33,7 @@
 #include <libqinfinity/usertable.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
 #include <KTp/Widgets/join-chat-room-dialog.h>
+#include <ktexteditor/texthintinterface.h>
 
 #include <QLayout>
 #include <QLabel>
@@ -284,6 +285,11 @@ void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
     disableActions();
 }
 
+void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QString& hint)
+{
+    hint = i18nc("%1 is a user name", "Written by: <b>%1</b>", m_document->changeTracker()->userForCursor(position));
+}
+
 void KobbyPluginView::enableUi()
 {
     m_statusBar = new KobbyStatusBar(this);
@@ -294,6 +300,11 @@ void KobbyPluginView::enableUi()
             this, SLOT(documentReady(ManagedDocument*)), Qt::UniqueConnection);
     m_view->layout()->addWidget(m_statusBar);
     m_shareWithContactAction->setEnabled(false);
+    if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
+        iface->enableTextHints(300);
+        connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
+                this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
+    }
 }
 
 void KobbyPluginView::disableUi()
@@ -302,6 +313,9 @@ void KobbyPluginView::disableUi()
     delete m_statusBar;
     m_statusBar = 0;
     m_shareWithContactAction->setEnabled(true);
+    if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
+        iface->disableTextHints();
+    }
     // Connections are disconnected automatically since m_document will be deleted
 }
 

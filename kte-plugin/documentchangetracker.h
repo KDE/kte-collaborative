@@ -73,13 +73,21 @@ public slots:
      */
     const QMap<QString, QColor>& usedColors() const;
 
+    /**
+     * @brief Get the user name of the person that last changed "position".
+     *
+     * @param position The position to get the user name for
+     * @return QString readable name of the user who last changed this text
+     */
+    QString userForCursor(const KTextEditor::Cursor& position) const;
+
 private:
     /**
      * @brief Finds empty ranges in m_ranges and deletes them.
      */
     void cleanupRanges();
 
-    void splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor, const QInfinity::User* user);
+    void splitRangeForInsertion(KTextEditor::MovingRange* existing, const KTextEditor::Range& splitFor);
 
     KTextEditor::MovingRange* rangeAt(const KTextEditor::Range& range);
 
@@ -89,8 +97,9 @@ private:
      * @param range The raw range to start tracking
      * @param color The color to use for highlighting
      * @param bySelf should be true if text was inserted by the local user
+     * @return The range which was created
      */
-    void addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color);
+    KTextEditor::MovingRange* addHighlightedRange(const QString& name, const KTextEditor::Range& range, const QColor& color);
 
     ManagedDocument* const m_document;
     KTextEditor::Document* kDocument() const;
