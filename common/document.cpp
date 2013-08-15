@@ -212,7 +212,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         // This does not guarantee that it is supported by the KTE implementation used here.
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
             kDebug() << "buffer insert start vvvvvv";
-            iface->insertTextRaw(startCursor.line(), startCursor.column(), str);
+            iface->insertTextSilent(startCursor, str);
             kDebug() << "buffer insert end   ^^^^^^";
         }
 #else
@@ -246,8 +246,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         // see onInsertText
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
             kDebug() << "buffer erase start vvvvvv";
-            iface->removeTextRaw(startCursor.line(), startCursor.column(),
-                                 endCursor.line(), endCursor.column());
+            iface->removeTextSilent(KTextEditor::Range(startCursor, endCursor));
             kDebug() << "buffer erase end   ^^^^^^";
         }
 #else
