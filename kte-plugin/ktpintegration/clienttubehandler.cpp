@@ -33,8 +33,13 @@ int main(int argc, char** argv) {
     KCmdLineArgs::init(argc, argv, &about);
     kDebug() << "Starting tube acceptor";
 
+    qRegisterMetaType< ChannelList >("ChannelList");
+    qDBusRegisterMetaType< ChannelList >();
+
     KApplication app;
     InfTubeClient* client = new InfTubeClient();
+    InfTubeConnectionMonitor t(client, 0, client);
+    QDBusConnection::sessionBus().registerObject("/", client);
     client->listen();
     app.exec();
     delete client;

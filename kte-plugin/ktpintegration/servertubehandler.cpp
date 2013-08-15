@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
     KApplication app;
     InfTubeServer* server = new InfTubeServer();
-    InfTubeConnectionMonitor t(server);
+    InfTubeConnectionMonitor t(server, server, 0);
     QDBusConnection::sessionBus().registerObject("/", server);
     server->registerHandler();
     app.exec();

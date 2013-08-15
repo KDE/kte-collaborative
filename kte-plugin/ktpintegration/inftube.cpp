@@ -64,9 +64,33 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &mess
     return argument;
 }
 
-InfTubeConnectionMonitor::InfTubeConnectionMonitor(QObject* parent): QDBusAbstractAdaptor(parent)
+InfTubeConnectionMonitor::InfTubeConnectionMonitor(QObject* parent, InfTubeServer* server, InfTubeClient* client)
+    : QDBusAbstractAdaptor(parent)
+    , server(server)
+    , client(client)
 {
+    Q_ASSERT(!client xor !server);
+}
 
+ChannelList InfTubeConnectionMonitor::getChannels()
+{
+    QList<Tp::StreamTubeChannelPtr> source;
+    if ( client ) {
+        source = client->getChannels();
+    }
+    else {
+        source = server->getChannels();
+    }
+    ChannelList channels;
+    foreach ( const Tp::StreamTubeChannelPtr& channel, source ) {
+        QVariantMap result;
+        result["channelIdentifier"] = channel->objectPath() + channel->objectName();
+        result["targetHandleType"] = channel->targetHandleType();
+        result["targetHandle"] = channel->targetHandle();
+        result["localEndpoint"] = channel->ipAddress().second;
+        channels << result;
+    }
+    return channels;
 }
 
 InfTubeConnectionMonitor::~InfTubeConnectionMonitor()
@@ -241,6 +265,11 @@ bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contac
     return false;
 }
 
+QList< Tp::StreamTubeChannelPtr > InfTubeServer::getChannels() const
+{
+    return m_channels;
+}
+
 void InfTubeServer::registerHandler()
 {
     kDebug() << "registering handler";
@@ -272,6 +301,8 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannel
     hints.insert("localSocket", QString::number(port));
 
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), port, hints);
+
+    m_channels << channel;
 }
 
 QString InfTubeServer::serverDirectory(unsigned short port) const
@@ -323,6 +354,10 @@ InfTubeServer::~InfTubeServer()
     kDebug() << "DESTROYING SERVER";
 }
 
+QList<Tp::StreamTubeChannelPtr> InfTubeClient::getChannels() const {
+    return m_channels;
+};
+
 void InfTubeClient::listen()
 {
     kDebug() << "listen called";
@@ -364,6 +399,7 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
             KRun::run(group.readEntry("editor", "kwrite %u"), KUrl::List() << url, 0);
         }
     }
+    m_channels.append(tube);
     emit connected();
 }
 

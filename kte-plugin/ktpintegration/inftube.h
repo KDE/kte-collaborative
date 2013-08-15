@@ -119,6 +119,8 @@ public:
      */
     void listen();
 
+    QList<Tp::StreamTubeChannelPtr> getChannels() const;
+
 signals:
     /**
      * @brief Emitted as soon as the tube is connected.
@@ -127,6 +129,7 @@ signals:
 
 private:
     Tp::StreamTubeClientPtr m_tubeClient;
+    QList<Tp::StreamTubeChannelPtr> m_channels;
 
 public slots:
     /**
@@ -209,6 +212,8 @@ public:
 
     QString serverDirectory(unsigned short port) const;
 
+    QList<Tp::StreamTubeChannelPtr> getChannels() const;
+
 public slots:
     void tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints);
 
@@ -235,18 +240,14 @@ Q_CLASSINFO("D-Bus Interface", "org.kde.KTp.infinoteConnectionMonitor")
 Q_PROPERTY(ChannelList establishedConnections READ getChannels)
 
 public:
-    InfTubeConnectionMonitor(QObject* parent);
+    // Provide either client or server and set the other one to 0
+    InfTubeConnectionMonitor(QObject* parent, InfTubeServer* server, InfTubeClient* client);
     virtual ~InfTubeConnectionMonitor();
-    ChannelList getChannels() {
-        ChannelList channels;
-        QVariantMap result;
-        result["channelIdentifier"] = "BAr";
-        result["peerType"] = 13;
-        result["peerIdentifier"] = 13;
-        result["localEndpoint"] = 12345;
-        channels << result;
-        return channels;
-    };
+    ChannelList getChannels();
+
+private:
+    InfTubeServer* server;
+    InfTubeClient* client;
 };
 
 /**
