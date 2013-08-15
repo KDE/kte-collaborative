@@ -44,6 +44,36 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message) {
+    argument.beginArray(qMetaTypeId<QVariantMap>());
+    foreach ( const QVariantMap& channel, message ) {
+        argument.appendVariant(channel);
+    }
+    argument.endArray();
+    return argument;
+}
+
+const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &message) {
+    argument.beginArray();
+    while ( ! argument.atEnd() ) {
+        QVariantMap element;
+        argument >> element;
+        message.append(element);
+    }
+    argument.endArray();
+    return argument;
+}
+
+InfTubeConnectionMonitor::InfTubeConnectionMonitor(QObject* parent): QDBusAbstractAdaptor(parent)
+{
+
+}
+
+InfTubeConnectionMonitor::~InfTubeConnectionMonitor()
+{
+
+}
+
 const QString serviceName()
 {
     return "org.freedesktop.Telepathy.Client.KTp.infinoteServer";

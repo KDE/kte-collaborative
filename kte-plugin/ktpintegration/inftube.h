@@ -17,8 +17,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#ifndef TUBESTEST_H
-#define TUBESTEST_H
+#ifndef INFTUBE_H
+#define INFTUBE_H
 
 #include <TelepathyQt/Types>
 #include <TelepathyQt/StreamTubeChannel>
@@ -47,6 +47,8 @@ namespace Tp {
 class ServerManager;
 
 typedef QList<KUrl> DocumentList;
+typedef QList<QVariantMap> ChannelList;
+Q_DECLARE_METATYPE(ChannelList)
 
 inline Tp::ChannelClassSpecList channelClassList()
 {
@@ -195,6 +197,7 @@ signals:
 // It is supposed to exist in a separate process (see servertubehandler.cpp)
 class INFTUBE_EXPORT InfTubeServer : public InfTubeBase {
 Q_OBJECT
+
 public:
     InfTubeServer(QObject* parent = 0);
     virtual ~InfTubeServer();
@@ -221,6 +224,29 @@ private:
      * @return bool true if successful, else false.
      */
     bool startInfinoted(unsigned short* port);
+};
+
+INFTUBE_EXPORT QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message);
+INFTUBE_EXPORT const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &message);
+
+class INFTUBE_EXPORT InfTubeConnectionMonitor : public QDBusAbstractAdaptor {
+Q_OBJECT
+Q_CLASSINFO("D-Bus Interface", "org.kde.KTp.infinoteConnectionMonitor")
+Q_PROPERTY(ChannelList establishedConnections READ getChannels)
+
+public:
+    InfTubeConnectionMonitor(QObject* parent);
+    virtual ~InfTubeConnectionMonitor();
+    ChannelList getChannels() {
+        ChannelList channels;
+        QVariantMap result;
+        result["channelIdentifier"] = "BAr";
+        result["peerType"] = 13;
+        result["peerIdentifier"] = 13;
+        result["localEndpoint"] = 12345;
+        channels << result;
+        return channels;
+    };
 };
 
 /**
