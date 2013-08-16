@@ -77,11 +77,14 @@ InfTubeConnectionMonitor::InfTubeConnectionMonitor(QObject* parent, InfTubeServe
 ChannelList InfTubeConnectionMonitor::getChannels()
 {
     QList<Tp::StreamTubeChannelPtr> source;
+    QString nickname;
     if ( client ) {
         source = client->getChannels();
+        nickname = client->nickname();
     }
     else {
         source = server->getChannels();
+        nickname = server->nickname();
     }
     ChannelList channels;
     foreach ( const Tp::StreamTubeChannelPtr& channel, source ) {
@@ -90,6 +93,7 @@ ChannelList InfTubeConnectionMonitor::getChannels()
         result["targetHandleType"] = channel->targetHandleType();
         result["targetHandle"] = channel->targetContact()->id();
         result["localEndpoint"] = channel->ipAddress().second;
+        result["nickname"] = nickname;
         channels << result;
     }
     return channels;

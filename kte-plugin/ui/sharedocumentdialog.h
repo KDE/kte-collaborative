@@ -26,6 +26,8 @@
 
 class InfTubeRequester;
 class ServerManager;
+class KJob;
+
 namespace KTextEditor {
     class View;
 }
@@ -40,6 +42,8 @@ public:
 private slots:
     void shareWithContact();
     void shareWithChatRoom();
+    void shareWithExistingConnection(uint, QString);
+    void jobFinished(KJob* job);
 
 signals:
     void shouldOpenDocument(const KUrl& url);

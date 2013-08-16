@@ -24,6 +24,7 @@
 #include "inftube.h"
 
 #include <QWidget>
+#include <QItemSelectionModel>
 #include <QAbstractListModel>
 
 class QTableView;
@@ -40,6 +41,8 @@ public:
 
 private:
     ChannelList m_connections;
+
+    friend class ConnectionsWidget;
 };
 
 class INFTUBE_EXPORT ConnectionsWidget : public QWidget {
@@ -47,8 +50,12 @@ Q_OBJECT
 public:
     ConnectionsWidget();
 
+signals:
+    void connectionClicked(unsigned int localPort, QString nickname);
+
 private slots:
     void adjustTableSizes();
+    void rowClicked(QModelIndex);
 
 private:
     QTableView* m_connectionsView;

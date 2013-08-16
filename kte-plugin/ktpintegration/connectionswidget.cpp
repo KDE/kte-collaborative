@@ -35,15 +35,13 @@ ConnectionsModel::ConnectionsModel(QObject* parent)
     emit dataChanged(index(0, 0), index(rowCount(), columnCount(QModelIndex())));
 }
 
-int ConnectionsModel::rowCount(const QModelIndex& parent) const
+int ConnectionsModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    kDebug() << "row count called";
     return m_connections.count();
 }
 
-int ConnectionsModel::columnCount(const QModelIndex& parent) const
+int ConnectionsModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    kDebug() << "column count called";
     return 4;
 }
 
@@ -68,7 +66,6 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
 
 QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
 {
-    kDebug() << "data called" << index << role;
     if ( role == Qt::DisplayRole ) {
         switch ( index.column() ) {
             case 3:
@@ -90,6 +87,13 @@ void ConnectionsWidget::adjustTableSizes()
     m_connectionsView->resizeRowsToContents();
 }
 
+void ConnectionsWidget::rowClicked(QModelIndex index)
+{
+    ConnectionsModel* model = static_cast<ConnectionsModel*>(m_connectionsView->model());
+    const QVariantMap& channel = model->m_connections.at(index.row());
+    emit connectionClicked(channel["localEndpoint"].toInt(), channel["nickname"].toString());
+}
+
 ConnectionsWidget::ConnectionsWidget()
 {
     kDebug() << "creating connections widget";
@@ -102,6 +106,8 @@ ConnectionsWidget::ConnectionsWidget()
             this, SLOT(adjustTableSizes()));
     adjustTableSizes();
     m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(rowClicked(QModelIndex)));
 }
 
 #include "connectionswidget.moc"

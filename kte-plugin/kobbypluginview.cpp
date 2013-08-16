@@ -443,14 +443,14 @@ void KobbyPluginView::shareActionClicked()
     }
     Tp::registerTypes();
     ShareDocumentDialog dialog(m_view);
-    if ( dialog.exec() && dialog.server() ) {
-        connect(dialog.server(), SIGNAL(collaborativeDocumentReady(KUrl)),
-                this, SLOT(openFile(KUrl)));
-    }
+    connect(&dialog, SIGNAL(shouldOpenDocument(KUrl)),
+            this, SLOT(openFile(KUrl)));
+    dialog.exec();
 }
 
 void KobbyPluginView::openFile(KUrl url)
 {
+    kDebug() << "opening file" << url;
     m_view->document()->openUrl(url.url());
 }
 
