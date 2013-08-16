@@ -1,4 +1,5 @@
 set(inftube_SRCS
+    connectionswidget.cpp
     inftube.cpp
 )
 

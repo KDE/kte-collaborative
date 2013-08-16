@@ -234,6 +234,11 @@ private:
 INFTUBE_EXPORT QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message);
 INFTUBE_EXPORT const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &message);
 
+/**
+ * @brief Small custom dbus interface for retrieving all handled inf channels plus local endpoints
+ * To be used from the servertubehandler.cpp / clienttubehandler.cpp helper programs only.
+ * To retrieve the connections in your application, use InfTubeConnectionRetriever.
+ */
 class INFTUBE_EXPORT InfTubeConnectionMonitor : public QDBusAbstractAdaptor {
 Q_OBJECT
 Q_CLASSINFO("D-Bus Interface", "org.kde.KTp.infinoteConnectionMonitor")
@@ -248,6 +253,18 @@ public:
 private:
     InfTubeServer* server;
     InfTubeClient* client;
+};
+
+/**
+ * @brief The other end of InfTubeConnectionMonitor, contacts the server/client and gets the connections
+ */
+class INFTUBE_EXPORT InfTubeConnectionRetriever : public QObject {
+Q_OBJECT
+public:
+    ChannelList retrieveChannels();
+
+private:
+    ChannelList retrieveChannels(QDBusInterface& iface);
 };
 
 /**

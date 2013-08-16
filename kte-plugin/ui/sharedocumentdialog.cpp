@@ -33,6 +33,8 @@
 #include <QCommandLinkButton>
 #include <TelepathyQt/PendingReady>
 
+#include "ktpintegration/connectionswidget.h"
+
 ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     : KDialog(activeView)
     , m_view(activeView)
@@ -44,8 +46,10 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     setMainWidget(w);
     QCommandLinkButton* shareContactButton = new QCommandLinkButton(i18n("Share document with contact"));
     QCommandLinkButton* shareChatRoomButton = new QCommandLinkButton(i18n("Share document with chat room"));
+    ConnectionsWidget* connections = new ConnectionsWidget();
     w->layout()->addWidget(shareContactButton);
     w->layout()->addWidget(shareChatRoomButton);
+    w->layout()->addWidget(connections);
     connect(shareContactButton, SIGNAL(clicked(bool)), SLOT(shareWithContact()));
     connect(shareChatRoomButton, SIGNAL(clicked(bool)), SLOT(shareWithChatRoom()));
 }

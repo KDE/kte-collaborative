@@ -54,6 +54,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message) {
 }
 
 const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &message) {
+    kDebug() << "unmarshalling";
     argument.beginArray();
     while ( ! argument.atEnd() ) {
         QVariantMap element;
@@ -61,6 +62,7 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &mess
         message.append(element);
     }
     argument.endArray();
+    kDebug() << "done";
     return argument;
 }
 
@@ -91,6 +93,28 @@ ChannelList InfTubeConnectionMonitor::getChannels()
         channels << result;
     }
     return channels;
+}
+
+ChannelList InfTubeConnectionRetriever::retrieveChannels(QDBusInterface& iface)
+{
+    QDBusReply<QDBusVariant> reply = iface.call("Get", "org.kde.KTp.infinoteConnectionMonitor", "establishedConnections");
+    return qdbus_cast<ChannelList>(reply.value().variant());
+}
+
+ChannelList InfTubeConnectionRetriever::retrieveChannels()
+{
+    qRegisterMetaType< ChannelList >("ChannelList");
+    qDBusRegisterMetaType< ChannelList >();
+    ChannelList result;
+    QDBusInterface serverIface("org.freedesktop.Telepathy.Client.KTp.infinoteServer", "/", "org.freedesktop.DBus.Properties");
+    if ( serverIface.isValid() ) {
+        result << retrieveChannels(serverIface);
+    }
+    QDBusInterface clientIface("org.freedesktop.Telepathy.Client.KTp.infinoteClient", "/", "org.freedesktop.DBus.Properties");
+    if ( clientIface.isValid() ) {
+        result << retrieveChannels(clientIface);
+    }
+    return result;
 }
 
 InfTubeConnectionMonitor::~InfTubeConnectionMonitor()
