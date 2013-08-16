@@ -42,23 +42,23 @@ int ConnectionsModel::rowCount(const QModelIndex& /*parent*/) const
 
 int ConnectionsModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 4;
+    return 3;
 }
 
 QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
-        if ( section == 3 ) {
-            return "Channel identifier";
-        }
-        else if ( section == 1 ) {
-            return "Target handle type";
+//         if ( section == 3 ) {
+//             return "Channel identifier";
+//         }
+        if ( section == 1 ) {
+            return "Type";
         }
         else if ( section == 2 ) {
-            return "Target handle";
+            return "Peer";
         }
         else if ( section == 0 ) {
-            return "Local endpoint";
+            return "Port";
         }
     }
     return QAbstractItemModel::headerData(section, orientation, role);
@@ -68,10 +68,20 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
 {
     if ( role == Qt::DisplayRole ) {
         switch ( index.column() ) {
-            case 3:
-                return m_connections.at(index.row())["channelIdentifier"];
-            case 1:
-                return m_connections.at(index.row())["targetHandleType"];
+//             case 3:
+//                 return m_connections.at(index.row())["channelIdentifier"];
+            case 1: {
+                int type = m_connections.at(index.row())["targetHandleType"].toInt();
+                if ( type == Tp::HandleTypeContact ) {
+                    return "Contact";
+                }
+                else if ( type == Tp::HandleTypeRoom ) {
+                    return "Chatroom";
+                }
+                else {
+                    return "unknown";
+                }
+            }
             case 2:
                 return m_connections.at(index.row())["targetHandle"];
             case 0:
@@ -85,6 +95,7 @@ void ConnectionsWidget::adjustTableSizes()
 {
     m_connectionsView->resizeColumnsToContents();
     m_connectionsView->resizeRowsToContents();
+    m_connectionsView->horizontalHeader()->setStretchLastSection(true);
 }
 
 void ConnectionsWidget::rowClicked(QModelIndex index)
