@@ -26,14 +26,17 @@
 #include <QWidget>
 #include <QAbstractListModel>
 
-class QListView;
+class QTableView;
 
-class ConnectionsModel : public QAbstractListModel {
+// This is currently more of a debug-oriented than a user-oriented view.
+// It needs to be adjusted later on.
+class ConnectionsModel : public QAbstractTableModel {
 public:
     explicit ConnectionsModel(QObject* parent = 0);
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex& parent) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 private:
     ChannelList m_connections;
@@ -45,7 +48,7 @@ public:
     ConnectionsWidget();
 
 private:
-    QListView* m_connectionsView;
+    QTableView* m_connectionsView;
 };
 
 #endif // CONNECTIONSWIDGET_H

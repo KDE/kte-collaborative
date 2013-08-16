@@ -18,18 +18,21 @@
  ***************************************************************************/
 
 #include "connectionswidget.h"
-#include "inftube.h"
-#include <QListView>
+
 #include <QHBoxLayout>
 #include <QLayout>
+#include <QTableView>
+#include <QHeaderView>
+
+#include "inftube.h"
 
 ConnectionsModel::ConnectionsModel(QObject* parent)
-    : QAbstractListModel(parent)
+    : QAbstractTableModel(parent)
 {
     InfTubeConnectionRetriever r;
     m_connections = r.retrieveChannels();
     kDebug() << "channels:" << m_connections;
-    emit dataChanged(index(0), index(rowCount()));
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount(QModelIndex())));
 }
 
 int ConnectionsModel::rowCount(const QModelIndex& parent) const
@@ -41,14 +44,42 @@ int ConnectionsModel::rowCount(const QModelIndex& parent) const
 int ConnectionsModel::columnCount(const QModelIndex& parent) const
 {
     kDebug() << "column count called";
-    return 3;
+    return 4;
+}
+
+QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
+        if ( section == 0 ) {
+            return "Channel identifier";
+        }
+        else if ( section == 1 ) {
+            return "Target handle type";
+        }
+        else if ( section == 2 ) {
+            return "Target handle";
+        }
+        else if ( section == 3 ) {
+            return "Local endpoint";
+        }
+    }
+    return QAbstractItemModel::headerData(section, orientation, role);
 }
 
 QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
 {
     kDebug() << "data called" << index << role;
     if ( role == Qt::DisplayRole ) {
-        return m_connections.at(index.row())["channelIdentifier"];
+        switch ( index.column() ) {
+            case 0:
+                return m_connections.at(index.row())["channelIdentifier"];
+            case 1:
+                return m_connections.at(index.row())["targetHandleType"];
+            case 2:
+                return m_connections.at(index.row())["targetHandle"];
+            case 3:
+                return m_connections.at(index.row())["localEndpoint"];
+        }
     }
     return QVariant();
 }
@@ -56,9 +87,10 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
 ConnectionsWidget::ConnectionsWidget()
 {
     kDebug() << "creating connections widget";
-    m_connectionsView = new QListView();
+    m_connectionsView = new QTableView();
     setLayout(new QHBoxLayout());
     layout()->addWidget(m_connectionsView);
     ConnectionsModel* model = new ConnectionsModel(m_connectionsView);
     m_connectionsView->setModel(model);
+    m_connectionsView->horizontalHeader()->setVisible(true);
 }
