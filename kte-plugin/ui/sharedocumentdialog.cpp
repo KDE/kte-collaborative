@@ -28,9 +28,11 @@
 #include <KLocalizedString>
 #include <KTextEditor/View>
 #include <KTextEditor/Document>
+#include <KMessageWidget>
 
 #include <QLayout>
 #include <QCommandLinkButton>
+#include <QGroupBox>
 #include <TelepathyQt/PendingReady>
 
 #include "ktpintegration/connectionswidget.h"
@@ -44,14 +46,38 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     QWidget* w = new QWidget();
     w->setLayout(new QVBoxLayout());
     setMainWidget(w);
+
+    KMessageWidget* infobox = new KMessageWidget;
+    infobox->setCloseButtonVisible(false);
+    infobox->setMessageType(KMessageWidget::Information);
+    infobox->setWordWrap(true);
+    infobox->setIcon(KIcon("help-about"));
+    infobox->setText(i18n("<p>You can select a contact or chatroom to share this document with below.</p>"
+                          "<p>Since each such connection to a contact or chatroom can contain "
+                          "an arbitrary number of documents, you can also add this document "
+                          "to an existing connection.</p>"));
+    w->layout()->addWidget(infobox);
+
+    QGroupBox* newConnectionBox = new QGroupBox();
+    newConnectionBox->setTitle(i18n("Create a new connection"));
+    newConnectionBox->setLayout(new QVBoxLayout());
     QCommandLinkButton* shareContactButton = new QCommandLinkButton(i18n("Share document with contact"));
     QCommandLinkButton* shareChatRoomButton = new QCommandLinkButton(i18n("Share document with chat room"));
+    newConnectionBox->layout()->addWidget(shareContactButton);
+    newConnectionBox->layout()->addWidget(shareChatRoomButton);
+    w->layout()->addWidget(newConnectionBox);
+
+    QGroupBox* addToExistingBox = new QGroupBox();
+    addToExistingBox->setTitle(i18n("Add document to existing connection"));
     ConnectionsWidget* connections = new ConnectionsWidget();
-    w->layout()->addWidget(shareContactButton);
-    w->layout()->addWidget(shareChatRoomButton);
-    w->layout()->addWidget(connections);
+    addToExistingBox->setLayout(new QVBoxLayout());
+    addToExistingBox->layout()->addWidget(connections);
+    w->layout()->addWidget(addToExistingBox);
+
     connect(shareContactButton, SIGNAL(clicked(bool)), SLOT(shareWithContact()));
     connect(shareChatRoomButton, SIGNAL(clicked(bool)), SLOT(shareWithChatRoom()));
+
+    resize(600, 450);
 }
 
 const InfTubeRequester* ShareDocumentDialog::server() const

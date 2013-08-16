@@ -88,7 +88,7 @@ ChannelList InfTubeConnectionMonitor::getChannels()
         QVariantMap result;
         result["channelIdentifier"] = channel->objectPath() + channel->objectName();
         result["targetHandleType"] = channel->targetHandleType();
-        result["targetHandle"] = channel->targetHandle();
+        result["targetHandle"] = channel->targetContact()->id();
         result["localEndpoint"] = channel->ipAddress().second;
         channels << result;
     }

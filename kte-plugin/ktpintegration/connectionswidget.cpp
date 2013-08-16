@@ -101,6 +101,7 @@ ConnectionsWidget::ConnectionsWidget()
     connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             this, SLOT(adjustTableSizes()));
     adjustTableSizes();
+    m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 #include "connectionswidget.moc"
