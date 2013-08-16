@@ -110,7 +110,7 @@ ChannelList InfTubeConnectionRetriever::retrieveChannels()
     if ( serverIface.isValid() ) {
         result << retrieveChannels(serverIface);
     }
-    QDBusInterface clientIface("org.freedesktop.Telepathy.Client.KTp.infinoteClient", "/", "org.freedesktop.DBus.Properties");
+    QDBusInterface clientIface("org.freedesktop.Telepathy.Client.KTp.infinote", "/", "org.freedesktop.DBus.Properties");
     if ( clientIface.isValid() ) {
         result << retrieveChannels(clientIface);
     }
