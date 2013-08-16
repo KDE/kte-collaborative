@@ -42,10 +42,13 @@ private:
     ChannelList m_connections;
 };
 
-class INFTUBE_EXPORT ConnectionsWidget : public QWidget
-{
+class INFTUBE_EXPORT ConnectionsWidget : public QWidget {
+Q_OBJECT
 public:
     ConnectionsWidget();
+
+private slots:
+    void adjustTableSizes();
 
 private:
     QTableView* m_connectionsView;

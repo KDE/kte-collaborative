@@ -50,7 +50,7 @@ int ConnectionsModel::columnCount(const QModelIndex& parent) const
 QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
-        if ( section == 0 ) {
+        if ( section == 3 ) {
             return "Channel identifier";
         }
         else if ( section == 1 ) {
@@ -59,7 +59,7 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
         else if ( section == 2 ) {
             return "Target handle";
         }
-        else if ( section == 3 ) {
+        else if ( section == 0 ) {
             return "Local endpoint";
         }
     }
@@ -71,17 +71,23 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
     kDebug() << "data called" << index << role;
     if ( role == Qt::DisplayRole ) {
         switch ( index.column() ) {
-            case 0:
+            case 3:
                 return m_connections.at(index.row())["channelIdentifier"];
             case 1:
                 return m_connections.at(index.row())["targetHandleType"];
             case 2:
                 return m_connections.at(index.row())["targetHandle"];
-            case 3:
+            case 0:
                 return m_connections.at(index.row())["localEndpoint"];
         }
     }
     return QVariant();
+}
+
+void ConnectionsWidget::adjustTableSizes()
+{
+    m_connectionsView->resizeColumnsToContents();
+    m_connectionsView->resizeRowsToContents();
 }
 
 ConnectionsWidget::ConnectionsWidget()
@@ -92,5 +98,9 @@ ConnectionsWidget::ConnectionsWidget()
     layout()->addWidget(m_connectionsView);
     ConnectionsModel* model = new ConnectionsModel(m_connectionsView);
     m_connectionsView->setModel(model);
-    m_connectionsView->horizontalHeader()->setVisible(true);
+    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(adjustTableSizes()));
+    adjustTableSizes();
 }
+
+#include "connectionswidget.moc"
