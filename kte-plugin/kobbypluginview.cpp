@@ -24,6 +24,7 @@
 #include "kobbyplugin.h"
 #include "ui/remotechangenotifier.h"
 #include "ui/sharedocumentdialog.h"
+#include "ui/opencollabdocumentdialog.h"
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
 #include "ktpintegration/inftube.h"
@@ -372,39 +373,13 @@ void KobbyPluginView::createServerActionClicked()
 
 void KobbyPluginView::openActionClicked()
 {
-    KDialog* dialog = new KDialog(m_view);
-    QWidget* widget = new QWidget(dialog);
-    QFormLayout* layout = new QFormLayout();
-    widget->setLayout(layout);
-
-    QLineEdit* host = new QLineEdit();
-    layout->addRow(new QLabel(i18n("Remote host address:")), host);
-
-    QLineEdit* port = new QLineEdit("6523");
-    layout->addRow(new QLabel(i18n("Port:")), port);
-
-    QLineEdit* userName = new QLineEdit("UnnamedUser");
-    layout->addRow(new QLabel(i18n("User name:")), userName);
-
-    QLineEdit* password = new QLineEdit();
-    layout->addRow(new QLabel(i18n("Password (optional):")), password);
-
-    dialog->setMainWidget(widget);
-
-    if ( dialog->exec() == KDialog::Accepted ) {
-        KUrl url;
-        url.setHost(host->text());
-        url.setPort(port->text().toInt());
-        url.setPath(QLatin1String("/"));
-        url.setUser(userName->text());
-        url.setPassword(password->text());
-        url.setProtocol("inf");
-        KUrl result = KFileDialog::getOpenUrl(url);
+    OpenCollabDocumentDialog dialog;
+    if ( dialog.exec() == KDialog::Accepted ) {
+        KUrl result = KFileDialog::getOpenUrl(dialog.selectedBaseUrl());
         if ( result.isValid() ) {
             m_view->document()->openUrl(KUrl(result));
         }
     }
-    delete dialog;
 }
 
 void KobbyPluginView::saveCopyActionClicked()
