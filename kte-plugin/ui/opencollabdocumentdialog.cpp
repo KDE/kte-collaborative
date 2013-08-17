@@ -93,7 +93,7 @@ KUrl OpenCollabDocumentDialog::selectedBaseUrl() const
     url.setPath(QLatin1String("/"));
     if ( m_selectedConnection.first != 0 ) {
         // read parameters from clicked connection
-        url.setHost("localhost");
+        url.setHost("127.0.0.1");
         url.setPort(m_selectedConnection.first);
         url.setUser(m_selectedConnection.second);
     }
