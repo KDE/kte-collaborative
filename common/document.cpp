@@ -139,6 +139,7 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , m_kDocument( kDocument )
     , m_session(0)
     , m_undoGrouping( QInfinity::UndoGrouping::wrap(inf_text_undo_grouping_new(), this) )
+    , m_aboutToClose( false )
 {
     kDebug() << "new text buffer for document" << kDocument;
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
@@ -199,6 +200,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     const QInfinity::TextChunk &chunk,
     QInfinity::User *user )
 {
+    if ( m_aboutToClose ) return;
 
     if( !blockRemoteInsert )
     {
@@ -228,12 +230,15 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     }
     else
         blockRemoteInsert = false;
+
+    checkConsistency();
 }
 
 void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )
 {
+    if ( m_aboutToClose ) return;
 
     if( !blockRemoteRemove )
     {
@@ -262,11 +267,40 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     }
     else
         blockRemoteRemove = false;
+
+    checkConsistency();
+}
+
+void KDocumentTextBuffer::checkConsistency()
+{
+    QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
+    QString documentContents = kDocument()->text();
+    if ( bufferContents != documentContents ) {
+        KUrl url = kDocument()->url();
+        kDocument()->setModified(false);
+        m_aboutToClose = true;
+        kDocument()->closeUrl();
+        KDialog* dialog = new KDialog;
+        dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+        QLabel* label = new QLabel(i18n("Sorry, an internal error occured in the text synchronization component.<br>"
+                                        "You can try to reload the document or disconnect."));
+        label->setWordWrap(true);
+        dialog->setMainWidget(label);
+        dialog->button(KDialog::Ok)->setText(i18n("Reload document"));
+        dialog->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+        DocumentReopenHelper* helper = new DocumentReopenHelper(url, kDocument());
+        connect(dialog, SIGNAL(accepted()), helper, SLOT(reopen()));
+        // We must not use exec() here, since that will create a nested event loop,
+        // which might handle incoming network events. This can easily get very messy.
+        dialog->show();
+    }
 }
 
 void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
     const KTextEditor::Range &range )
 {
+    if ( m_aboutToClose ) return;
+
     kDebug() << "local text inserted" << kDocument() << "(range" << range << ")" << m_user;
     emit localChangedText(range, user(), false);
     Q_UNUSED(document)
@@ -312,6 +346,8 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     const KTextEditor::Range &range, const QString& oldText )
 {
+    if ( m_aboutToClose ) return;
+
     kDebug() << "local text removed:" << kDocument() << range;
     emit localChangedText(range, user(), true);
 

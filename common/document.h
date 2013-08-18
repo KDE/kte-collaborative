@@ -25,6 +25,8 @@
 #include <QPointer>
 #include <QStack>
 #include <QTimer>
+#include <KUrl>
+#include <KTextEditor/Document>
 
 typedef struct _GError GError;
 
@@ -113,7 +115,6 @@ class KOBBYCOMMON_EXPORT Document
          */
         Document::LoadState loadState() const;
 
-
         virtual int type() const;
 
         virtual void leave() { }
@@ -192,6 +193,8 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
 
         void updateUndoRedoActions();
 
+        void checkConsistency();
+
     Q_SIGNALS:
         void canUndo( bool enable );
         void canRedo( bool enable );
@@ -228,7 +231,28 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         QTimer m_undoTimer;
         QPointer<QInfinity::UndoGrouping> m_undoGrouping;
 
+        bool m_aboutToClose;
+
         friend class InfTextDocument;
+};
+
+class DocumentReopenHelper : public QObject {
+Q_OBJECT
+public:
+    DocumentReopenHelper(KUrl url, KTextEditor::Document* document)
+        : QObject()
+        , oldUrl(url)
+        , document(document) {};
+
+public slots:
+    void reopen() {
+        document->openUrl(oldUrl);
+        deleteLater();
+    };
+
+private:
+    KUrl oldUrl;
+    KTextEditor::Document* document;
 };
 
 /**

@@ -114,9 +114,9 @@ void ManagedDocument::unsubscribe()
     kDebug() << "should unsubscribe document";
     if ( m_infDocument ) {
         m_infDocument->leave();
-        delete m_infDocument;
+        m_infDocument->deleteLater();
         m_infDocument = 0;
-        delete m_textBuffer;
+        m_textBuffer->deleteLater();
         m_textBuffer = 0;
     }
 }
