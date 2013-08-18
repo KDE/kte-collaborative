@@ -116,7 +116,7 @@ void ManagedDocument::unsubscribe()
         m_infDocument->leave();
         m_infDocument->deleteLater();
         m_infDocument = 0;
-        m_textBuffer->deleteLater();
+        m_textBuffer->shutdown();
         m_textBuffer = 0;
     }
 }

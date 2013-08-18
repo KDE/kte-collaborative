@@ -234,6 +234,12 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     checkConsistency();
 }
 
+void KDocumentTextBuffer::shutdown()
+{
+    m_aboutToClose = true;
+    deleteLater();
+}
+
 void KDocumentTextBuffer::onEraseText( unsigned int offset,
     unsigned int length,
     QInfinity::User *user )

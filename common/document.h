@@ -194,6 +194,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void updateUndoRedoActions();
 
         void checkConsistency();
+        void shutdown();
 
     Q_SIGNALS:
         void canUndo( bool enable );
