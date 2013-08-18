@@ -136,6 +136,7 @@ public slots:
      * @brief Called when a tube gets accepted.
      */
     void tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr);
+    void tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString);
 };
 
 // This class is for requesting a new tube
@@ -216,6 +217,7 @@ public:
 
 public slots:
     void tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints);
+    void tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString);
 
 private:
     QList<Tp::StreamTubeChannelPtr> m_channels;

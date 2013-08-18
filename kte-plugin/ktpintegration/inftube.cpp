@@ -176,14 +176,6 @@ InfTubeRequester::InfTubeRequester(QObject* parent)
 
 }
 
-InfTubeServer::InfTubeServer(QObject* parent)
-    : InfTubeBase(parent)
-    , m_tubeServer(0)
-    , m_hasCreatedChannel(false)
-{
-//     ServerManager::instance()->add(this);
-}
-
 void InfTubeRequester::jobFinished(KJob* job)
 {
     KIO::FileCopyJob* j = qobject_cast<KIO::FileCopyJob*>(job);
@@ -298,6 +290,15 @@ QList< Tp::StreamTubeChannelPtr > InfTubeServer::getChannels() const
     return m_channels;
 }
 
+InfTubeServer::InfTubeServer(QObject* parent)
+    : InfTubeBase(parent)
+    , m_tubeServer(0)
+    , m_hasCreatedChannel(false)
+{
+
+}
+
+
 void InfTubeServer::registerHandler()
 {
     kDebug() << "registering handler";
@@ -308,6 +309,16 @@ void InfTubeServer::registerHandler()
     kDebug() << m_tubeServer->isRegistered();
     connect(m_tubeServer.data(), SIGNAL(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)),
             this, SLOT(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)));
+    connect(m_tubeServer.data(), SIGNAL(tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString)),
+            this, SLOT(tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString)));
+}
+
+void InfTubeServer::tubeClosed(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QString , QString )
+{
+    kDebug() << "tube closed" << channel;
+    if ( m_channels.contains(channel) ) {
+        m_channels.removeAll(channel);
+    }
 }
 
 void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
@@ -395,7 +406,17 @@ void InfTubeClient::listen()
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),
             this, SLOT(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)));
+    connect(m_tubeClient.data(), SIGNAL(tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString)),
+            this, SLOT(tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString)));
     kDebug() << m_tubeClient->tubes();
+}
+
+void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr channel, QString , QString )
+{
+    kDebug() << "tube closed";
+    if ( m_channels.contains(channel) ) {
+        m_channels.removeAll(channel);
+    }
 }
 
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
