@@ -16,9 +16,7 @@ find_package(KTp REQUIRED)
 
 include(KDE4Defaults)
 
-# find_package(Msgfmt REQUIRED)
-# find_package(Gettext REQUIRED)
-# add_subdirectory( po )
+add_definitions("-DENABLE_TAB_HACK")
 
 add_subdirectory(kte-plugin)
 add_subdirectory(kioslave)

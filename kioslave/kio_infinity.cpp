@@ -233,6 +233,9 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     dataReq();
     QByteArray initialContents;
     int result = readData(initialContents);
+#ifdef ENABLE_TAB_HACK
+    initialContents = initialContents.replace('\t', "    ");
+#endif
     kDebug() << "data:" << result;
     if ( result < 0 ) {
         error(KIO::ERR_INTERNAL, "Failed to read data");

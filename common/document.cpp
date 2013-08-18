@@ -307,40 +307,37 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 
     textOpPerformed();
     unsigned int offset;
-    if( !m_user.isNull() )
-    {
-        offset = cursorToOffset_kte( range.start() );
-        QInfinity::TextChunk chunk( encoding() );
-        QString text = kDocument()->text( range );
-        if( encoder() )
-        {
-            if( text.isEmpty() )
-            {
-                kDebug() << "Skipping empty insert.";
-            }
-            else
-            {
-                QByteArray encodedText = codec()->fromUnicode( text );
-                if( encodedText.size() == 0 )
-                {
-                    kDebug() << "Got empty encoded text from non empty string "
-                                "Skipping insertion";
-                    Q_ASSERT(false);
-                }
-                else
-                {
-                    chunk.insertText( 0, encodedText, text.length(), m_user->id() );
-                    blockRemoteInsert = true;
-                    kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
-                    insertChunk( offset, chunk, m_user );
-                }
-            }
-        }
-        else
-            kDebug() << "No encoder for text codec.";
-    }
-    else
+    if( m_user.isNull() ) {
         kDebug() << "Could not insert text: No local user set.";
+        return;
+    }
+    offset = cursorToOffset_kte(range.start());
+    QInfinity::TextChunk chunk(encoding());
+    QString text = kDocument()->text(range);
+#ifdef ENABLE_TAB_HACK
+    if ( text.contains('\t') ) {
+        text = text.replace('\t', "    ");
+        kDocument()->blockSignals(true);
+        kDocument()->replaceText(range, text);
+        kDocument()->blockSignals(false);
+    }
+#endif
+    Q_ASSERT(encoder());
+    if ( text.isEmpty() ) {
+        kDebug() << "Skipping empty insert.";
+        return;
+    }
+    QByteArray encodedText = codec()->fromUnicode( text );
+    if ( encodedText.size() == 0 ) {
+        kDebug() << "Got empty encoded text from non empty string "
+                    "Skipping insertion";
+    }
+    else {
+        chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+        blockRemoteInsert = true;
+        kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
+        insertChunk( offset, chunk, m_user );
+    }
 }
 
 void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
