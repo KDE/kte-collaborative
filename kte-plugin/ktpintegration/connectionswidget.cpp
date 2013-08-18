@@ -23,6 +23,8 @@
 #include <QLayout>
 #include <QTableView>
 #include <QHeaderView>
+#include <QLabel>
+#include <KLocalizedString>
 
 #include "inftube.h"
 
@@ -108,17 +110,25 @@ void ConnectionsWidget::rowClicked(QModelIndex index)
 ConnectionsWidget::ConnectionsWidget()
 {
     kDebug() << "creating connections widget";
-    m_connectionsView = new QTableView();
-    setLayout(new QHBoxLayout());
-    layout()->addWidget(m_connectionsView);
+    m_connectionsView = new QTableView(this);
     ConnectionsModel* model = new ConnectionsModel(m_connectionsView);
-    m_connectionsView->setModel(model);
-    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            this, SLOT(adjustTableSizes()));
-    adjustTableSizes();
-    m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(rowClicked(QModelIndex)));
+    setLayout(new QHBoxLayout());
+    if ( model->rowCount() == 0 ) {
+        delete m_connectionsView;
+        QLabel* l = new QLabel(i18n("No active connections."));
+        l->setAlignment(Qt::AlignHCenter);
+        layout()->addWidget(l);
+    }
+    else {
+        layout()->addWidget(m_connectionsView);
+        m_connectionsView->setModel(model);
+        connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+                this, SLOT(adjustTableSizes()));
+        adjustTableSizes();
+        m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
+                this, SLOT(rowClicked(QModelIndex)));
+    }
 }
 
 #include "connectionswidget.moc"
