@@ -230,21 +230,26 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
-    dataReq();
-    QByteArray initialContents;
-    int result = readData(initialContents);
+    QByteArray buffer, initialContents;
+    int size = 0, bytesRead = 1;
+    while ( bytesRead != 0 ) {
+        dataReq();
+        bytesRead = readData(buffer);
+        initialContents.append(buffer);
+        size += bytesRead;
+        kDebug() << "read" << bytesRead << "bytes";
+    }
 #ifdef ENABLE_TAB_HACK
     initialContents = initialContents.replace('\t', "    ");
 #endif
-    kDebug() << "data:" << result;
-    if ( result < 0 ) {
+    if ( size < 0 ) {
         error(KIO::ERR_INTERNAL, "Failed to read data");
         return;
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     QInfinity::NodeRequest* req = 0;
-    kDebug() << "adding note with content:" << result << "bytes";
-    if ( result > 0 ) {
+    kDebug() << "adding note with content:" << size << "bytes";
+    if ( size > 0 ) {
         // There is actually data to add to the node
         InfUser* user = INF_USER(g_object_new(
                 INF_TEXT_TYPE_USER,
