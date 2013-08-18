@@ -27,11 +27,14 @@
 #include <QItemSelectionModel>
 #include <QAbstractListModel>
 
+class QStackedWidget;
+class QLabel;
 class QTableView;
 
 // This is currently more of a debug-oriented than a user-oriented view.
 // It needs to be adjusted later on.
 class ConnectionsModel : public QAbstractTableModel {
+Q_OBJECT
 public:
     explicit ConnectionsModel(QObject* parent = 0);
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
@@ -41,8 +44,14 @@ public:
 
 private:
     ChannelList m_connections;
+    Tp::AccountManagerPtr m_accountManager;
+    QVector<Tp::StreamTubeChannelPtr> m_channels;
 
     friend class ConnectionsWidget;
+
+public slots:
+    void channelReady(Tp::PendingOperation*);
+    void accountManagerReady(Tp::PendingOperation*);
 };
 
 class INFTUBE_EXPORT ConnectionsWidget : public QWidget {
@@ -55,10 +64,13 @@ signals:
 
 private slots:
     void adjustTableSizes();
+    void checkIfEmpty();
     void rowClicked(QModelIndex);
 
 private:
     QTableView* m_connectionsView;
+    QLabel* m_noConnectionsLabel;
+    QStackedWidget* m_stack;
 };
 
 #endif // CONNECTIONSWIDGET_H

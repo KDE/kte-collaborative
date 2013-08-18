@@ -33,6 +33,7 @@
 #include <TelepathyQt/ReferencedHandles>
 #include <TelepathyQt/ClientRegistrar>
 #include <TelepathyQt/ChannelClassSpecList>
+#include <TelepathyQt/ContactManager>
 #include <unistd.h>
 #include <KIO/Job>
 #include <KRun>
@@ -94,6 +95,7 @@ ChannelList InfTubeConnectionMonitor::getChannels()
         result["targetHandle"] = channel->targetContact()->id();
         result["localEndpoint"] = channel->ipAddress().second;
         result["nickname"] = nickname;
+        result["accountPath"] = channel->property("accountPath");
         channels << result;
     }
     return channels;
@@ -321,7 +323,7 @@ void InfTubeServer::tubeClosed(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr
     }
 }
 
-void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
+void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
 {
     kDebug() << "tube requested";
     kDebug() << "is connected:" << channel->state();
@@ -341,7 +343,8 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr , Tp::OutgoingStreamTubeChannel
 
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), port, hints);
 
-    m_channels << channel;
+    channel->setProperty("accountPath", account->objectPath());
+    m_channels.append(channel);
 }
 
 QString InfTubeServer::serverDirectory(unsigned short port) const
@@ -448,6 +451,7 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
             KRun::run(group.readEntry("editor", "kwrite %u"), KUrl::List() << url, 0);
         }
     }
+    tube->setProperty("accountPath", account->objectPath());
     m_channels.append(tube);
     emit connected();
 }
@@ -457,7 +461,7 @@ InfTubeClient::~InfTubeClient()
 
 }
 
-ServerManager::ServerManager(QObject* parent): QObject(parent)
+Tp::AccountManagerPtr getAccountManager()
 {
     Tp::registerTypes();
     KTp::Debug::installCallback(true);
@@ -488,11 +492,16 @@ ServerManager::ServerManager(QObject* parent): QObject(parent)
                                                       << Tp::StreamTubeChannel::FeatureConnectionMonitoring
                                                       << Tp::StreamTubeChannel::FeatureCore);
 
-    accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(),
-                                                  accountFactory,
-                                                  connectionFactory,
-                                                  channelFactory,
-                                                  contactFactory);
+    return Tp::AccountManager::create(QDBusConnection::sessionBus(),
+                                      accountFactory,
+                                      connectionFactory,
+                                      channelFactory,
+                                      contactFactory);
+}
+
+ServerManager::ServerManager(QObject* parent): QObject(parent)
+{
+    accountManager = getAccountManager();
 
     connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
     connect(QApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(deleteLater()));

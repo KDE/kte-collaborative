@@ -55,6 +55,8 @@ inline Tp::ChannelClassSpecList channelClassList()
     return Tp::ChannelClassSpecList() << Tp::ChannelClassSpec::incomingStreamTube("infinity");
 }
 
+Tp::AccountManagerPtr getAccountManager();
+
 /**
  * This class defines the API for routing infinity traffic through a TP tube
  * which is common to both the receiving an the offering side.

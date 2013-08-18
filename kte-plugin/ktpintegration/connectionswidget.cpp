@@ -24,17 +24,67 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QLabel>
+#include <QStackedWidget>
 #include <KLocalizedString>
+
+#include <TelepathyQt/ContactManager>
+#include <TelepathyQt/PendingContacts>
+#include <TelepathyQt/PendingReady>
 
 #include "inftube.h"
 
 ConnectionsModel::ConnectionsModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
+    m_accountManager = getAccountManager();
+    connect(m_accountManager->becomeReady(Tp::Features() << Tp::AccountManager::FeatureCore),
+            SIGNAL(finished(Tp::PendingOperation*)),
+            SLOT(accountManagerReady(Tp::PendingOperation*)));
+}
+
+void ConnectionsModel::accountManagerReady(Tp::PendingOperation* )
+{
     InfTubeConnectionRetriever r;
-    m_connections = r.retrieveChannels();
+    const ChannelList channels = r.retrieveChannels();
+    if ( channels.size() > 0 ){
+        beginInsertRows(QModelIndex(), 0, channels.size() - 1);
+        m_connections = channels;
+        endInsertRows();
+    }
     kDebug() << "channels:" << m_connections;
+    foreach ( const QVariantMap& channelData, m_connections ) {
+        kDebug() << "constructing tube for channel" << channelData;
+        kDebug() << "accounts:" << m_accountManager->allAccounts();
+        foreach ( const Tp::AccountPtr account,  m_accountManager->allAccounts() ) {
+            kDebug() << account->objectPath();
+        }
+        Tp::AccountPtr account = m_accountManager->accountForPath(channelData["accountPath"].toString());
+        Tp::StreamTubeChannelPtr channel = Tp::StreamTubeChannel::create(account->connection(),
+                                                                         channelData["channelIdentifier"].toString(),
+                                                                         QVariantMap());
+        m_channels << channel;
+        connect(channel->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureCore),
+                SIGNAL(finished(Tp::PendingOperation*)),
+                SLOT(channelReady(Tp::PendingOperation*)));
+    }
     emit dataChanged(index(0, 0), index(rowCount(), columnCount(QModelIndex())));
+}
+
+void ConnectionsModel::channelReady(Tp::PendingOperation* operation)
+{
+    kDebug() << "channel ready" << rowCount() << "channels total";
+    Tp::StreamTubeChannelPtr channel;
+    channel = Tp::StreamTubeChannelPtr::qObjectCast(qobject_cast<Tp::PendingReady*>(operation)->proxy());
+    int i = -1;
+    for ( ChannelList::iterator it = m_connections.begin(); it != m_connections.end(); it++ ) {
+        i += 1;
+        kDebug() << "correct id:" << ((*it)["channelIdentifier"].toString() == channel->objectPath());
+        if ( (*it)["channelIdentifier"].toString() != channel->objectPath() ) {
+            continue;
+        }
+        (*it)["icon"] = channel->targetContact()->avatarData().fileName;
+        dataChanged(index(i, 0), index(i, columnCount(QModelIndex())));
+    }
 }
 
 int ConnectionsModel::rowCount(const QModelIndex& /*parent*/) const
@@ -50,9 +100,6 @@ int ConnectionsModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
-//         if ( section == 3 ) {
-//             return "Channel identifier";
-//         }
         if ( section == 1 ) {
             return "Type";
         }
@@ -68,10 +115,22 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
 
 QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
 {
+    if ( role == Qt::DecorationRole ) {
+        switch ( index.column() ) {
+            case 2: {
+                QVariantMap channel = m_connections.at(index.row());
+                int type = channel["targetHandleType"].toInt();
+                kDebug() << channel;
+                if ( type == Tp::HandleTypeContact ) {
+                    return QIcon(channel["icon"].toString());
+                }
+            }
+            default:
+                return QVariant();
+        }
+    }
     if ( role == Qt::DisplayRole ) {
         switch ( index.column() ) {
-//             case 3:
-//                 return m_connections.at(index.row())["channelIdentifier"];
             case 1: {
                 int type = m_connections.at(index.row())["targetHandleType"].toInt();
                 if ( type == Tp::HandleTypeContact ) {
@@ -110,24 +169,37 @@ void ConnectionsWidget::rowClicked(QModelIndex index)
 ConnectionsWidget::ConnectionsWidget()
 {
     kDebug() << "creating connections widget";
-    m_connectionsView = new QTableView(this);
+    m_connectionsView = new QTableView();
     ConnectionsModel* model = new ConnectionsModel(m_connectionsView);
-    setLayout(new QHBoxLayout());
-    if ( model->rowCount() == 0 ) {
-        delete m_connectionsView;
-        QLabel* l = new QLabel(i18n("No active connections."));
-        l->setAlignment(Qt::AlignHCenter);
-        layout()->addWidget(l);
+    m_connectionsView->setModel(model);
+
+    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(adjustTableSizes()));
+    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(checkIfEmpty()));
+    m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(rowClicked(QModelIndex)));
+
+    setLayout(new QHBoxLayout);
+    m_noConnectionsLabel = new QLabel(i18n("No active connections."));
+    m_noConnectionsLabel->setAlignment(Qt::AlignHCenter);
+    m_stack = new QStackedWidget;
+    m_stack->addWidget(m_noConnectionsLabel);
+    m_stack->addWidget(m_connectionsView);
+    layout()->addWidget(m_stack);
+
+    checkIfEmpty();
+    adjustTableSizes();
+}
+
+void ConnectionsWidget::checkIfEmpty()
+{
+    if ( m_connectionsView->model()->rowCount() == 0 ) {
+        m_stack->setCurrentIndex(0);
     }
     else {
-        layout()->addWidget(m_connectionsView);
-        m_connectionsView->setModel(model);
-        connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-                this, SLOT(adjustTableSizes()));
-        adjustTableSizes();
-        m_connectionsView->setSelectionBehavior(QAbstractItemView::SelectRows);
-        connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
-                this, SLOT(rowClicked(QModelIndex)));
+        m_stack->setCurrentIndex(1);
     }
 }
 
