@@ -360,6 +360,14 @@ void InfinityProtocol::listDir(const KUrl &url)
         return;
     }
 
+    if ( url.path().isEmpty() ) {
+        KUrl newUrl(url);
+        newUrl.setPath("/");
+        redirection(newUrl);
+        finished();
+        return;
+    }
+
     QInfinity::BrowserIter iter = iterForUrl(url);
 
     if ( ! iter.isExplored() ) {
