@@ -279,6 +279,10 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 
 void KDocumentTextBuffer::checkConsistency()
 {
+    if ( m_session->status() == QInfinity::Session::Synchronizing ) {
+        // don't check consistency while synchronizing
+        return;
+    }
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
