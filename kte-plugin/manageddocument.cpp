@@ -147,7 +147,8 @@ void ManagedDocument::lookupFailed()
 {
     // If the lookup fails, try again after a few seconds.
     // TODO this is a workaround for race conditions in the "file added" notifications, fix it!
-    if ( m_connectionRetries < 4 ) {
+    if ( m_connectionRetries < 5 ) {
+        connect(browser(), SIGNAL(nodeAdded(BrowserIter)), SLOT(subscribe()));
         QTimer::singleShot(3000, this, SLOT(subscribe()));
     }
     else {
