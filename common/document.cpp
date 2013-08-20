@@ -672,6 +672,11 @@ void InfTextDocument::synchronize()
         slotSynchronized();
     else if( m_session->status() == QInfinity::Session::Synchronizing )
     {
+        {
+            ReadWriteTransaction t(kDocument());
+            kDocument()->clear();
+        }
+        kDebug() << "document contents at sync begin:" << kDocument()->text();
         setLoadState( Document::Synchronizing );
         connect( m_session, SIGNAL(synchronizationComplete()),
             this, SLOT(slotSynchronized()) );
