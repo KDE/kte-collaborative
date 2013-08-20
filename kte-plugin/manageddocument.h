@@ -61,12 +61,6 @@ public:
     virtual ~ManagedDocument();
 
     /**
-     * @brief Subscribe to this document, to get notified of changes and also upload own changes.
-     * This operation is asynchroneous.
-     */
-    void subscribe();
-
-    /**
      * @brief Unsubscribe this document, to stop receiving and sending updates.
      */
     void unsubscribe();
@@ -127,6 +121,12 @@ public:
 
 public slots:
     /**
+     * @brief Subscribe to this document, to get notified of changes and also upload own changes.
+     * This operation is asynchroneous.
+     */
+    void subscribe();
+
+    /**
      * @brief Invoked when a subscription is ready to be finished (i.e. the iter is known)
      * @param iter The browser iter (like an "internal URI") for the document
      */
@@ -158,6 +158,14 @@ public slots:
      */
     void unrecoverableError(Document*,QString);
 
+    /**
+     * @brief Invoked when an error occurs in looking up the iter for the document.
+     * That usually means the file doesn't exist.
+     * @note If the file does not exist, this will try to create the file, once.
+     * @return void
+     */
+    void lookupFailed();
+
 signals:
     /**
      * @brief Emitted when a document is completely synchronized and ready to be used (user can start typing etc).
@@ -187,6 +195,7 @@ private:
     // local URL to copy the document to if requested
     QString m_localSavePath;
     DocumentChangeTracker* m_changeTracker;
+    int m_connectionRetries;
 };
 
 typedef QMap<KTextEditor::Document*, ManagedDocument*> ManagedDocumentList;

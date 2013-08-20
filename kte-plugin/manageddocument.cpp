@@ -35,6 +35,7 @@
 
 #include <KMessageBox>
 #include <KLocalizedString>
+#include <KIO/Job>
 
 #include <QTimer>
 #include <QFile>
@@ -55,6 +56,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_sessionStatus(QInfinity::Session::Closed)
     , m_localSavePath()
     , m_changeTracker(new DocumentChangeTracker(this))
+    , m_connectionRetries(0)
 {
     kDebug() << "now managing document" << document << document->url();
     // A document must not be edited before it is connected, since changes done will
@@ -136,7 +138,24 @@ void ManagedDocument::subscribe()
     IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash), browser());
     connect(helper, SIGNAL(done(QInfinity::BrowserIter)),
             this, SLOT(finishSubscription(QInfinity::BrowserIter)));
+    connect(helper, SIGNAL(failed()),
+            this, SLOT(lookupFailed()));
     helper->begin();
+}
+
+void ManagedDocument::lookupFailed()
+{
+    // If the lookup fails, try again after a few seconds.
+    // TODO this is a workaround for race conditions in the "file added" notifications, fix it!
+    if ( m_connectionRetries < 4 ) {
+        QTimer::singleShot(3000, this, SLOT(subscribe()));
+    }
+    else {
+        unsubscribe();
+        KMessageBox::error(document()->widget(),
+                           i18n("Failed to open file %1, make sure it exists.", document()->url().url()));
+    }
+    m_connectionRetries += 1;
 }
 
 void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QInfinity::SessionProxy > proxy)
@@ -221,3 +240,4 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
 }
 
+#include "manageddocument.moc"
