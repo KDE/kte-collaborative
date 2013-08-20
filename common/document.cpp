@@ -226,12 +226,12 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->insertText( startCursor, str );
             kDocument()->blockSignals(false);
         }
+        kDebug() << "done inserting text";
+        checkConsistency();
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_inf(offset+chunk.length())), user, false);
     }
     else
         blockRemoteInsert = false;
-
-    checkConsistency();
 }
 
 void KDocumentTextBuffer::shutdown()
@@ -269,12 +269,12 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
             kDocument()->removeText( range );
             kDocument()->blockSignals(false);
         }
+        kDebug() << "done removing text";
+        checkConsistency();
         emit remoteChangedText(range, user, true);
     }
     else
         blockRemoteRemove = false;
-
-    checkConsistency();
 }
 
 void KDocumentTextBuffer::checkConsistency()
