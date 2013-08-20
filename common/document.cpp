@@ -227,8 +227,8 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->blockSignals(false);
         }
         kDebug() << "done inserting text";
-        checkConsistency();
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_inf(offset+chunk.length())), user, false);
+        checkConsistency();
     }
     else
         blockRemoteInsert = false;
@@ -270,8 +270,8 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
             kDocument()->blockSignals(false);
         }
         kDebug() << "done removing text";
-        checkConsistency();
         emit remoteChangedText(range, user, true);
+        checkConsistency();
     }
     else
         blockRemoteRemove = false;
@@ -279,10 +279,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 
 void KDocumentTextBuffer::checkConsistency()
 {
-    if ( m_session->status() == QInfinity::Session::Synchronizing ) {
-        // don't check consistency while synchronizing
-        return;
-    }
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
@@ -347,6 +343,7 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
         blockRemoteInsert = true;
         kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
         insertChunk( offset, chunk, m_user );
+        checkConsistency();
     }
 }
 
@@ -374,9 +371,11 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
             eraseText( offset, len, m_user );
         else
             kDebug() << "0 legth delete operation. Skipping.";
+        checkConsistency();
     }
     else
         kDebug() << "Could not remove text: No local user set.";
+
 }
 
 void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
