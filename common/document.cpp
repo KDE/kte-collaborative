@@ -288,7 +288,7 @@ void KDocumentTextBuffer::checkConsistency()
         kDocument()->closeUrl();
         KDialog* dialog = new KDialog;
         dialog->setButtons(KDialog::Ok | KDialog::Cancel);
-        QLabel* label = new QLabel(i18n("Sorry, an internal error occured in the text synchronization component.<br>"
+        QLabel* label = new QLabel(i18n("Sorry, an internal error occurred in the text synchronization component.<br>"
                                         "You can try to reload the document or disconnect."));
         label->setWordWrap(true);
         dialog->setMainWidget(label);

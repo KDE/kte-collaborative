@@ -87,7 +87,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
 
         // check if loading the QML file was successful, otherwise abort
         if ( ! widget->rootContext() ) {
-            kWarning() << "Errors occured while loading" << src;
+            kWarning() << "Errors occurred while loading" << src;
             return;
         }
 
