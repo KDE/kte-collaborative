@@ -228,7 +228,11 @@ void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* operation)
     Tp::ChannelRequestPtr req = qobject_cast<Tp::PendingChannelRequest*>(operation)->channelRequest();
     Tp::StreamTubeChannel* channel = qobject_cast<Tp::StreamTubeChannel*>(req->channel().data());
     kDebug() << "got ST channel" << channel;
-    Q_ASSERT(channel);
+    if ( ! channel ) {
+        KMessageBox::error(0, i18n("Did not get a valid channel object from Telepathy. Check your installation.<br>"
+                                   "Error message was: <b>%1</b>", operation->errorMessage()));
+        return;
+    }
     QObject::connect(channel->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureCore),
         SIGNAL(finished(Tp::PendingOperation*)), this, SLOT(onTubeReady(Tp::PendingOperation*)));
 }
