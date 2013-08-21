@@ -105,7 +105,7 @@ void ShareDocumentDialog::shareWithExistingConnection(uint port, QString nicknam
     kDebug() << "share with existing connection clicked";
     KUrl dest;
     dest.setProtocol("inf");
-    dest.setHost("localhost");
+    dest.setHost("127.0.0.1");
     dest.setPort(port);
     dest.setUser(nickname);
     dest.setFileName(m_view->document()->url().fileName());
