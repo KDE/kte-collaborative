@@ -26,6 +26,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QGroupBox>
+#include <QPushButton>
 
 #include <KLocalizedString>
 #include <KMessageWidget>
@@ -46,26 +47,31 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     m_password = new KLineEdit();
     m_password->setClickMessage(i18n("Leave blank if not required by the server"));
 
-    KMessageWidget* tip = new KMessageWidget();
-    tip->setMessageType(KMessageWidget::Information);
-    tip->setWordWrap(true);
-    tip->setText(i18n("If you want to save a set of manually entered parameters for later, just add "
-                      "a bookmark in the file dialog which opens after entering the parameters. "
-                      "When you want to re-use them, just select File -> Open and click the bookmark."));
-    widget->layout()->addWidget(tip);
-
     QGroupBox* manualGroup = new QGroupBox(i18n("Manually enter connection parameters"));
-    QFormLayout* layout = new QFormLayout();
-    manualGroup->setLayout(layout);
-    layout->addRow(new QLabel(i18n("Remote host address:")), m_host);
-    layout->addRow(new QLabel(i18n("Port:")), m_port);
-    layout->addRow(new QLabel(i18n("User name:")), m_userName);
-    layout->addRow(new QLabel(i18n("Password (optional):")), m_password);
+    m_advancedSettingsLayout = new QFormLayout();
+    manualGroup->setLayout(m_advancedSettingsLayout);
+    m_tip = new KMessageWidget();
+    m_tip->setMessageType(KMessageWidget::Information);
+    m_tip->setWordWrap(true);
+    m_tip->setText(i18n("If you want to save a set of manually entered parameters for later, just add "
+                        "a bookmark in the file dialog which opens after entering the parameters. "
+                        "When you want to re-use them, just select File -> Open and click the bookmark."));
+    m_advancedSettingsLayout->addRow(m_tip);
+    m_tip->setVisible(false); // Hide the tip, and only show it when needed
+    m_advancedSettingsLayout->addRow(new QLabel(i18n("Remote host address:")), m_host);
+    QPushButton* advancedButton = new QPushButton("Advanced...");
+    m_advancedSettingsLayout->addWidget(advancedButton);
+    connect(advancedButton, SIGNAL(clicked(bool)), this, SLOT(showAdvanced(bool)));
+
+    // Show the tip when the user actually uses the feature
+    connect(advancedButton, SIGNAL(clicked(bool)), this, SLOT(showTip()));
+    connect(m_host, SIGNAL(textChanged(QString)), this, SLOT(showTip()));
 
     // Construct the box for selecting an existing connection
     QGroupBox* existingGroup = new QGroupBox(i18n("Choose an existing telepathy-based connection"));
     existingGroup->setLayout(new QHBoxLayout());
     ConnectionsWidget* connections = new ConnectionsWidget();
+    connections->setHelpMessage(i18n("Click a connection to open a document from there."));
     existingGroup->layout()->addWidget(connections);
 
     // Put it all together
@@ -78,6 +84,20 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     setMainWidget(widget);
 
     resize(600, 450);
+}
+
+void OpenCollabDocumentDialog::showTip()
+{
+    m_tip->setVisible(true);
+}
+
+void OpenCollabDocumentDialog::showAdvanced(bool)
+{
+    // Hide the "Advanced" button
+    qobject_cast<QWidget*>(QObject::sender())->hide();
+    m_advancedSettingsLayout->addRow(new QLabel(i18n("Port:")), m_port);
+    m_advancedSettingsLayout->addRow(new QLabel(i18n("User name:")), m_userName);
+    m_advancedSettingsLayout->addRow(new QLabel(i18n("Password (optional):")), m_password);
 }
 
 void OpenCollabDocumentDialog::connectionClicked(uint port, QString user)

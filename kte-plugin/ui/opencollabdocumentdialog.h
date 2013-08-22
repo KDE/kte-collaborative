@@ -25,6 +25,8 @@
 
 #include <KDialog>
 
+class KMessageWidget;
+class QFormLayout;
 class KLineEdit;
 
 class OpenCollabDocumentDialog : public KDialog
@@ -40,12 +42,18 @@ public:
 
 public slots:
     void connectionClicked(uint,QString);
+    void showAdvanced(bool);
+
+private slots:
+    void showTip();
 
 private:
     KLineEdit* m_password;
     KLineEdit* m_userName;
     KLineEdit* m_port;
     KLineEdit* m_host;
+    QFormLayout* m_advancedSettingsLayout;
+    KMessageWidget* m_tip;
 
     QPair<unsigned int, QString> m_selectedConnection;
 };
