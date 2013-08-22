@@ -64,7 +64,9 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     newConnectionBox->setTitle(i18n("Create a new connection"));
     newConnectionBox->setLayout(new QVBoxLayout());
     QCommandLinkButton* shareContactButton = new QCommandLinkButton(i18n("Share document with contact"));
+    shareContactButton->setIcon(KIcon("im-user"));
     QCommandLinkButton* shareChatRoomButton = new QCommandLinkButton(i18n("Share document with chat room"));
+    shareChatRoomButton->setIcon(KIcon("resource-group"));
     newConnectionBox->layout()->addWidget(shareContactButton);
     newConnectionBox->layout()->addWidget(shareChatRoomButton);
     w->layout()->addWidget(newConnectionBox);
