@@ -375,8 +375,11 @@ void KobbyPluginView::saveCopyActionClicked()
     if ( ! m_document ) {
         return;
     }
+    // Suggest the original URL of the document in the save dialog.
+    // Not necessarily valid, but that doesn't hurt.
+    KUrl suggestedUrl(m_document->document()->property("oldUrl").toString());
     if ( m_document->localSavePath().isEmpty() ) {
-        const QString saveUrl = KFileDialog::getSaveFileName();
+        const QString saveUrl = KFileDialog::getSaveFileName(suggestedUrl);
         kDebug() << "saving to url" << saveUrl;
         if ( saveUrl.isEmpty() ) {
             return;
@@ -414,6 +417,7 @@ void KobbyPluginView::shareActionClicked()
 void KobbyPluginView::openFile(KUrl url)
 {
     kDebug() << "opening file" << url;
+    m_view->document()->setProperty("oldUrl", m_view->document()->url().url());
     m_view->document()->openUrl(url.url());
 }
 
