@@ -17,6 +17,7 @@
  */
 
 #include "document.h"
+#include "utils.h"
 
 #include <libinftext/inf-text-undo-grouping.h>
 
@@ -703,11 +704,11 @@ void InfTextDocument::joinSession(const QString& forceUserName)
             userName = "UnnamedUser_" + QString::number(qHash(QString::number(QTime::currentTime().second())
                                                         + QString::number(QTime::currentTime().msec())));
         }
-        kDebug() << "requesting join of user" << userName;
+        kDebug() << "requesting join of user" << userName << ColorHelper::colorForUsername(userName).hue();
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
             *m_session,
             userName,
-            10 );
+            ColorHelper::colorForUsername(userName).hue() / 360.0 );
         connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
             this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
         connect( req, SIGNAL(failed(GError*)),
