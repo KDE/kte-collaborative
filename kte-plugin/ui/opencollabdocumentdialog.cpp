@@ -59,7 +59,7 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     m_advancedSettingsLayout->addRow(m_tip);
     m_tip->setVisible(false); // Hide the tip, and only show it when needed
     m_advancedSettingsLayout->addRow(new QLabel(i18n("Remote host address:")), m_host);
-    QPushButton* advancedButton = new QPushButton("Advanced...");
+    QPushButton* advancedButton = new QPushButton(i18n("Advanced..."));
     m_advancedSettingsLayout->addWidget(advancedButton);
     connect(advancedButton, SIGNAL(clicked(bool)), this, SLOT(showAdvanced(bool)));
 
