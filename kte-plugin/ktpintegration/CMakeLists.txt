@@ -46,7 +46,7 @@ target_link_libraries(infinoteservertubehandler
 )
 
 # find infinoted and tell the program
-find_program(infinoted infinoted-0.5 HINTS /usr/bin)
+find_program(infinoted infinoted-0.5 NAMES infinoted infinoted-0.5 HINTS /usr/bin)
 if ( NOT infinoted )
     message(FATAL_ERROR "Could not find infinoted (infinoted-0.5 executable), which is required to start collaborative sessions.")
 endif()
