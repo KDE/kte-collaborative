@@ -59,6 +59,11 @@ Q_OBJECT
 public:
     ConnectionsWidget();
 
+    /**
+     * @brief Set a help message to be displayed in a label when there's at least one connection item.
+     */
+    void setHelpMessage(const QString& message);
+
 signals:
     void connectionClicked(unsigned int localPort, QString nickname);
 
@@ -70,6 +75,7 @@ private slots:
 private:
     QTableView* m_connectionsView;
     QLabel* m_noConnectionsLabel;
+    QLabel* m_helpMessageLabel;
     QStackedWidget* m_stack;
 };
 

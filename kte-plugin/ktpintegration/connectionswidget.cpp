@@ -166,12 +166,24 @@ void ConnectionsWidget::rowClicked(QModelIndex index)
     emit connectionClicked(channel["localEndpoint"].toInt(), channel["nickname"].toString());
 }
 
+void ConnectionsWidget::setHelpMessage(const QString& message)
+{
+    m_helpMessageLabel->setText(message);
+    m_helpMessageLabel->setVisible(true);
+}
+
 ConnectionsWidget::ConnectionsWidget()
 {
     kDebug() << "creating connections widget";
+
+    // Build the widget for table + help message, if applicable
+    QWidget* tableWidget = new QWidget();
+    tableWidget->setLayout(new QVBoxLayout());
     m_connectionsView = new QTableView();
     ConnectionsModel* model = new ConnectionsModel(m_connectionsView);
     m_connectionsView->setModel(model);
+    m_helpMessageLabel = new QLabel();
+    m_helpMessageLabel->setVisible(false); // will be set to visible by setHelpMessage()
 
     connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             this, SLOT(adjustTableSizes()));
@@ -181,12 +193,17 @@ ConnectionsWidget::ConnectionsWidget()
     connect(m_connectionsView, SIGNAL(clicked(QModelIndex)),
             this, SLOT(rowClicked(QModelIndex)));
 
-    setLayout(new QHBoxLayout);
-    m_noConnectionsLabel = new QLabel(i18n("No active connections."));
+    tableWidget->layout()->addWidget(m_helpMessageLabel);
+    tableWidget->layout()->addWidget(m_connectionsView);
+
+    // Build the label if thre's no connections
+    m_noConnectionsLabel = new QLabel("<i>" % i18n("No active connections.") % "</i>");
     m_noConnectionsLabel->setAlignment(Qt::AlignHCenter);
+
+    setLayout(new QHBoxLayout);
     m_stack = new QStackedWidget;
     m_stack->addWidget(m_noConnectionsLabel);
-    m_stack->addWidget(m_connectionsView);
+    m_stack->addWidget(tableWidget);
     layout()->addWidget(m_stack);
 
     checkIfEmpty();

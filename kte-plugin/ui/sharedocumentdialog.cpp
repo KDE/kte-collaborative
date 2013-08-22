@@ -72,8 +72,8 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     QGroupBox* addToExistingBox = new QGroupBox();
     addToExistingBox->setLayout(new QVBoxLayout());
     addToExistingBox->setTitle(i18n("Add document to existing connection"));
-    addToExistingBox->layout()->addWidget(new QLabel(i18n("Click a row to add the document to that connection.")));
     ConnectionsWidget* connections = new ConnectionsWidget();
+    connections->setHelpMessage(i18n("Click a row to add the document to that connection."));
     addToExistingBox->layout()->addWidget(connections);
     w->layout()->addWidget(addToExistingBox);
 
