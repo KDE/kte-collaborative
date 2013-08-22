@@ -192,13 +192,6 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     m_disconnectAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+W")), KAction::DefaultShortcut);
     m_disconnectAction->setIcon(KIcon("network-disconnect"));
 
-    m_createServerAction = actionCollection()->addAction("kobby_create_server", this, SLOT(createServerActionClicked()));
-    m_createServerAction->setText(i18n("Start collaborative server..."));
-    m_createServerAction->setHelpText(i18n("Host a collaboration session. Other persons can join the session "
-                                           "by using the \"Open collaborative document\" action."));
-    m_createServerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+N")), KAction::DefaultShortcut);
-    m_createServerAction->setIcon(KIcon("network-connect"));
-
     // TODO: disable this for non-collab documents
     m_clearHighlightAction = actionCollection()->addAction("kobby_clear_highlight", this, SLOT(clearHighlightActionClicked()));
     m_clearHighlightAction->setText(i18n("Clear user highlights"));
@@ -364,11 +357,6 @@ void KobbyPluginView::changeUserName(const QString& newUserName)
     document->setModified(false);
     document->closeUrl();
     document->openUrl(url);
-}
-
-void KobbyPluginView::createServerActionClicked()
-{
-
 }
 
 void KobbyPluginView::openActionClicked()

@@ -112,7 +112,6 @@ public slots:
     void saveCopyActionClicked();
     void shareActionClicked();
     void changeUserActionClicked();
-    void createServerActionClicked();
     void clearHighlightActionClicked();
     void configureActionClicked();
     void openFileManagerActionClicked();
@@ -132,7 +131,6 @@ private:
     KAction* m_shareWithContactAction;
     KAction* m_changeUserNameAction;
     KAction* m_disconnectAction;
-    KAction* m_createServerAction;
     KAction* m_configureAction;
     KAction* m_openFileManagerAction;
 
