@@ -25,10 +25,12 @@
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QLabel>
+#include <QCheckBox>
 #include <QVariant>
 
 #include <KLocalizedString>
 #include <KDebug>
+#include <kconfig.h>
 
 SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
@@ -72,6 +74,33 @@ QPair< QString, QString > SelectEditorWidget::selectedEntry() const
         }
     }
     return QPair<QString, QString>();
+}
+
+SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
+    : KDialog(parent, flags)
+{
+    QWidget* main = new QWidget();
+    main->setLayout(new QVBoxLayout);
+    setMainWidget(main);
+    QLabel* text = new QLabel(i18n("It seems you are trying to open a collaborative document for the first time."));
+    text->setWordWrap(true);
+    main->layout()->addWidget(text);
+
+    m_selectWidget = new SelectEditorWidget();
+    main->layout()->addWidget(m_selectWidget);
+}
+
+QPair< QString, QString > SelectEditorDialog::selectedEntry() const
+{
+    return m_selectWidget->selectedEntry();
+}
+
+void SelectEditorDialog::accept()
+{
+    KConfig config("ktecollaborative");
+    KConfigGroup group(config.group("applications"));
+    group.writeEntry("editor", m_selectWidget->selectedEntry().first);
+    KDialog::accept();
 }
 
 #include "selecteditorwidget.moc"

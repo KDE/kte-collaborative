@@ -37,10 +37,12 @@ int main(int argc, char** argv) {
     qDBusRegisterMetaType< ChannelList >();
 
     KApplication app;
-    InfTubeClient* client = new InfTubeClient();
-    InfTubeConnectionMonitor t(client, 0, client);
-    QDBusConnection::sessionBus().registerObject("/", client);
-    client->listen();
+    // We don't have a main window, we just create some dialogs occasionally.
+    // Don't exit when those are closed.
+    app.setQuitOnLastWindowClosed(false);
+    InfTubeClient client;
+    InfTubeConnectionMonitor t(&client, 0, &client);
+    QDBusConnection::sessionBus().registerObject("/", &client);
+    client.listen();
     app.exec();
-    delete client;
 }

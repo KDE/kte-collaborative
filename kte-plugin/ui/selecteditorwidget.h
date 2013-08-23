@@ -25,6 +25,9 @@
 
 #include <QWidget>
 #include <QMap>
+#include <KDialog>
+
+class QCheckBox;
 
 /**
  * @brief Widget used in the KCM and the "Select editor" dialog to select the default application for collab documents.
@@ -47,6 +50,25 @@ signals:
 private:
     QMap<QString, QString> m_validChoices;
     QWidget* m_buttonsGroup;
+};
+
+/**
+ * @brief Simple dialog containing the above widget.
+ */
+class SelectEditorDialog : public KDialog
+{
+Q_OBJECT
+public:
+    SelectEditorDialog(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    virtual void accept();
+
+    /**
+     * @brief @see \c SelectEditorWidget selectedEntry
+     */
+    QPair<QString, QString> selectedEntry() const;
+
+private:
+    SelectEditorWidget* m_selectWidget;
 };
 
 #endif // SELECTEDITORWIDGET_H

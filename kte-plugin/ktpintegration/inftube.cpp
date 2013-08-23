@@ -20,6 +20,7 @@
 #include "inftube.h"
 
 #include "infinoted.h"
+#include "../ui/selecteditorwidget.h"
 
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
@@ -34,16 +35,17 @@
 #include <TelepathyQt/ClientRegistrar>
 #include <TelepathyQt/ChannelClassSpecList>
 #include <TelepathyQt/ContactManager>
-#include <unistd.h>
 #include <KIO/Job>
 #include <KRun>
 #include <KDebug>
 #include <KMessageBox>
 #include <KLocalizedString>
+#include <KStandardDirs>
 #include <krun.h>
 
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <unistd.h>
 
 QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message) {
     argument.beginArray(qMetaTypeId<QVariantMap>());
@@ -386,8 +388,9 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
             return false;
         }
         QTcpSocket s;
-        s.connectToHost("localhost", *port);
+        s.connectToHost("127.0.0.1", *port);
         if ( s.waitForConnected(100) ) {
+            usleep(30000);
             break;
         }
     }
@@ -426,12 +429,30 @@ void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr
     }
 }
 
+bool InfTubeClient::tryOpenDocument(const KUrl& url)
+{
+    KUrl dir = url.upUrl();
+    KConfig config("ktecollaborative");
+    KConfigGroup group = config.group("applications");
+    QString command = group.readEntry("editor", "kwrite %u");
+    command = command.replace("%u", url.url());
+    command = command.replace("%d", dir.url());
+    command = command.replace("%h", url.host() % ( url.port() ? (":" + QString::number(url.port())) : QString()));
+    QString executable = command.split(' ').first();
+    QString arguments = QStringList(command.split(' ').mid(1, -1)).join(" ");
+    QString executablePath = KStandardDirs::findExe(executable);
+    qDebug() << executable << arguments << executablePath;
+    if ( executablePath.isEmpty() ) {
+        return false;
+    }
+    return KRun::runCommand(executablePath + " " + arguments, 0);
+}
+
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
     kDebug() << "Tube accepted as Tcp, port:" << port;
     kDebug() << "parameters:" << tube->parameters();
     // TODO error handling
-    // TODO proper selection of application(s) to run
     m_port = port;
     bool ok = false;
     const int initialSize = tube->parameters().contains("initialDocumentsSize") ? tube->parameters()["initialDocumentsSize"].toInt(&ok) : 0;
@@ -450,9 +471,13 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
                 continue;
             }
             url.setPath(path);
-            KConfig config("ktecollaborative");
-            KConfigGroup group = config.group("applications");
-            KRun::run(group.readEntry("editor", "kwrite %u"), KUrl::List() << url, 0);
+            // Retry until the user selects a working application, or aborts
+            while ( ! tryOpenDocument(url) ) {
+                SelectEditorDialog dlg;
+                if ( ! dlg.exec() ) {
+                    break;
+                }
+            }
         }
     }
     tube->setProperty("accountPath", account->objectPath());

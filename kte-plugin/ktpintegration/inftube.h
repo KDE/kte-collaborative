@@ -133,6 +133,15 @@ private:
     Tp::StreamTubeClientPtr m_tubeClient;
     QList<Tp::StreamTubeChannelPtr> m_channels;
 
+private:
+    /**
+     * @brief Try to open the given document based on the current configuration in KConfig
+     *
+     * @param url The URL to open
+     * @return bool true if the command could be executed, false otherwise
+     */
+    bool tryOpenDocument(const KUrl& url);
+
 public slots:
     /**
      * @brief Called when a tube gets accepted.
