@@ -69,6 +69,16 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &mess
     return argument;
 }
 
+QList<Tp::StreamTubeChannelPtr> cleanupChannelList(const QList<Tp::StreamTubeChannelPtr>& list) {
+    QList<Tp::StreamTubeChannelPtr> result;
+    foreach ( const Tp::StreamTubeChannelPtr& ptr, list ) {
+        if ( ptr->ipAddress().second != 0 && ptr->isValid() ) {
+            result << ptr;
+        }
+    }
+    return result;
+}
+
 InfTubeConnectionMonitor::InfTubeConnectionMonitor(QObject* parent, InfTubeServer* server, InfTubeClient* client)
     : QDBusAbstractAdaptor(parent)
     , server(server)
@@ -295,6 +305,7 @@ bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contac
 
 QList< Tp::StreamTubeChannelPtr > InfTubeServer::getChannels() const
 {
+    m_channels = cleanupChannelList(m_channels);
     return m_channels;
 }
 
@@ -404,6 +415,7 @@ InfTubeServer::~InfTubeServer()
 }
 
 QList<Tp::StreamTubeChannelPtr> InfTubeClient::getChannels() const {
+    m_channels = cleanupChannelList(m_channels);
     return m_channels;
 };
 

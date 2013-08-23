@@ -131,7 +131,7 @@ signals:
 
 private:
     Tp::StreamTubeClientPtr m_tubeClient;
-    QList<Tp::StreamTubeChannelPtr> m_channels;
+    mutable QList<Tp::StreamTubeChannelPtr> m_channels;
 
 private:
     /**
@@ -231,7 +231,7 @@ public slots:
     void tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString);
 
 private:
-    QList<Tp::StreamTubeChannelPtr> m_channels;
+    mutable QList<Tp::StreamTubeChannelPtr> m_channels;
     Tp::StreamTubeServerPtr m_tubeServer;
     QList<QProcess*> m_serverProcesses;
     bool m_hasCreatedChannel;
