@@ -28,6 +28,7 @@
 
 class QCheckBox;
 class QSlider;
+class SelectEditorWidget;
 
 /**
  * @brief This class is the configuration module for the plugin, accessible usually through the plugins list (wrench icon)
@@ -46,12 +47,16 @@ private:
     // Group containing configuration related to enabled notifier features,
     // especially background coloring + popup widgets
     KConfigGroup m_notifyGroup;
+    // Group containing "default application" configuration
+    KConfigGroup m_applicationsGroup;
     // colors
     QSlider* m_saturationSilder;
     // features
     QCheckBox* m_highlightBackground;
     QCheckBox* m_displayWidgets;
     QCheckBox* m_displayTextHints;
+    // default application
+    SelectEditorWidget* m_selectEditorWidget;
 };
 
 #endif // KCM_KTE_COLLABORATIVE_H

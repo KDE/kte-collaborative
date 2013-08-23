@@ -22,6 +22,8 @@
 #include "kcm_kte_collaborative.h"
 #include "kobbyplugin.h"
 
+#include "ui/selecteditorwidget.h"
+
 #include <KDebug>
 #include <KMessageWidget>
 #include <QHBoxLayout>
@@ -40,8 +42,9 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     KConfig* config = new KConfig("ktecollaborative");
     m_colorsGroup = config->group("colors");
     m_notifyGroup = config->group("notifications");
+    m_applicationsGroup = config->group("applications");
 
-    // Create config group boxes
+    // Create notifications group box
     QGroupBox* notificationsGroupBox = new QGroupBox();
     notificationsGroupBox->setTitle(i18n("Highlights and Notifications"));
     QFormLayout* notificationsLayout = new QFormLayout();
@@ -53,6 +56,7 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     notificationsLayout->addRow(i18n("Colorize text background"), m_highlightBackground);
     notificationsLayout->addRow(i18n("Display text tooltips"), m_displayTextHints);
 
+    // Create colors group box
     QGroupBox* colorsGroupBox = new QGroupBox();
     colorsGroupBox->setTitle(i18n("Colors"));
     QFormLayout* colorsLayout = new QFormLayout();
@@ -60,6 +64,13 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     m_saturationSilder = new QSlider(Qt::Horizontal);
     m_saturationSilder->setRange(30, 255);
     colorsLayout->addRow(i18n("Highlight saturation"), m_saturationSilder);
+
+    // Create default application group box
+    QGroupBox* defaultApplicationBox = new QGroupBox();
+    defaultApplicationBox->setTitle(i18n("Default application"));
+    defaultApplicationBox->setLayout(new QHBoxLayout);
+    m_selectEditorWidget = new SelectEditorWidget(m_applicationsGroup.readEntry("editor"));
+    defaultApplicationBox->layout()->addWidget(m_selectEditorWidget);
 
     // Assemble the UI
     setLayout(new QVBoxLayout());
@@ -69,6 +80,7 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     layout()->addWidget(message);
     layout()->addWidget(notificationsGroupBox);
     layout()->addWidget(colorsGroupBox);
+    layout()->addWidget(defaultApplicationBox);
     // Add a spacer to top-align the widgets
     layout()->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
@@ -77,6 +89,7 @@ KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& ar
     connect(m_highlightBackground, SIGNAL(toggled(bool)), SLOT(changed()));
     connect(m_displayWidgets, SIGNAL(toggled(bool)), SLOT(changed()));
     connect(m_displayTextHints, SIGNAL(toggled(bool)), SLOT(changed()));
+    connect(m_selectEditorWidget, SIGNAL(selectionChanged()), SLOT(changed()));
 }
 
 KCMKTECollaborative::~KCMKTECollaborative()
@@ -98,4 +111,5 @@ void KCMKTECollaborative::save()
     m_notifyGroup.writeEntry("highlightBackground", m_highlightBackground->isChecked());
     m_notifyGroup.writeEntry("displayWidgets", m_displayWidgets->isChecked());
     m_notifyGroup.writeEntry("enableTextHints", m_displayTextHints->isChecked());
+    m_applicationsGroup.writeEntry("editor", m_selectEditorWidget->selectedEntry().first);
 }

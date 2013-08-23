@@ -22,6 +22,7 @@ set( kobby_PART_SRCS
     ui/sharedocumentdialog.cpp
     ui/opencollabdocumentdialog.cpp
     settings/kcm_kte_collaborative.cpp
+    ui/selecteditorwidget.cpp
 )
 
 add_definitions(-fPIC)
