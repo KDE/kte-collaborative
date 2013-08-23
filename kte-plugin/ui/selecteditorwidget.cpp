@@ -48,14 +48,12 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
 
     m_buttonsGroup = new QWidget;
     m_buttonsGroup->setLayout(new QVBoxLayout);
+    bool haveSuggestion = false;
     foreach ( const QString& choice, m_validChoices.keys() ) {
         const QString& readableName = m_validChoices[choice];
         QRadioButton* radio = new QRadioButton(readableName);
         radio->setProperty("command", choice);
-        if ( selectedEntry == choice ) {
-            // pre-select the passed one
-            radio->setChecked(true);
-        }
+
         connect(radio, SIGNAL(toggled(bool)), this, SIGNAL(selectionChanged()));
         m_buttonsGroup->layout()->addWidget(radio);
 
@@ -66,6 +64,24 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
             radio->setEnabled(false);
             radio->setToolTip(i18nc("%1 is an application name",
                                     "This application (\"%1\") is not installed on your computer.", appname));
+        }
+        else if ( selectedEntry == choice ) {
+            // pre-select the passed one
+            radio->setChecked(true);
+            haveSuggestion = true;
+        }
+    }
+
+    if ( ! haveSuggestion ) {
+        QStringList preferredDefaults = QStringList() << "kate" << "kwrite" << "gobby" << "dolphin" << "kile";
+        foreach ( const QString& preferred, preferredDefaults ) {
+            foreach ( QRadioButton* button, m_buttonsGroup->findChildren<QRadioButton*>() ) {
+                if ( button->isEnabled() && button->property("command").toString().startsWith(preferred) ) {
+                    button->setChecked(true);
+                    haveSuggestion = true;
+                }
+            }
+            if ( haveSuggestion ) break;
         }
     }
 
