@@ -434,14 +434,19 @@ bool InfTubeClient::tryOpenDocument(const KUrl& url)
     KUrl dir = url.upUrl();
     KConfig config("ktecollaborative");
     KConfigGroup group = config.group("applications");
-    QString command = group.readEntry("editor", "kwrite %u");
+    // We do not set a default value here, so the dialog is always
+    // displayed the first time the user uses the feature.
+    QString command = group.readEntry("editor", "");
+    if ( command.isEmpty() ) {
+        return false;
+    }
+
     command = command.replace("%u", url.url());
     command = command.replace("%d", dir.url());
     command = command.replace("%h", url.host() % ( url.port() ? (":" + QString::number(url.port())) : QString()));
     QString executable = command.split(' ').first();
     QString arguments = QStringList(command.split(' ').mid(1, -1)).join(" ");
     QString executablePath = KStandardDirs::findExe(executable);
-    qDebug() << executable << arguments << executablePath;
     if ( executablePath.isEmpty() ) {
         return false;
     }
