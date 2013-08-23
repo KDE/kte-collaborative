@@ -46,6 +46,7 @@
 #include <QTextCodec>
 #include <QTextEncoder>
 #include <QTime>
+#include <QTemporaryFile>
 #include <QAction>
 #include <QFormLayout>
 #include <QLabel>
@@ -285,8 +286,13 @@ void KDocumentTextBuffer::checkConsistency()
     if ( bufferContents != documentContents ) {
         KUrl url = kDocument()->url();
         kDocument()->setModified(false);
+        kDocument()->setReadWrite(false);
         m_aboutToClose = true;
-        kDocument()->closeUrl();
+        QTemporaryFile f;
+        f.setAutoRemove(false);
+        f.open();
+        f.close();
+        kDocument()->saveAs(f.fileName());
         KDialog* dialog = new KDialog;
         dialog->setButtons(KDialog::Ok | KDialog::Cancel);
         QLabel* label = new QLabel(i18n("Sorry, an internal error occurred in the text synchronization component.<br>"
