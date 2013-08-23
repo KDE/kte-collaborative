@@ -378,6 +378,7 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
         s.listen(QHostAddress::LocalHost, 0);
         *port = s.serverPort();
         s.close();
+        usleep(200000);
     }
     // Ensure the server directory actually exists
     QDir d(serverDirectory(*port));
@@ -404,7 +405,7 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
             break;
         }
     }
-    usleep(100000);
+    usleep(200000);
     kDebug() << "successfully started infinioted on port" << *port << "( root dir" << serverDirectory(*port) << ")";
     return true;
 }
