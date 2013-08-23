@@ -31,11 +31,11 @@
 #include <KLocalizedString>
 #include <KDebug>
 #include <kconfig.h>
+#include <kstandarddirs.h>
 
 SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
-    // TODO: grey those out which are not installed
     // %u: full URL; %d: full URL without filename; %h: hostname:port
     m_validChoices.insert("dolphin %d", i18n("Display folder in Dolphin"));
     m_validChoices.insert("gobby-0.5 -c %h", i18n("Start %1", QLatin1String("Gobby")));
@@ -49,7 +49,6 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     m_buttonsGroup->setLayout(new QVBoxLayout);
     foreach ( const QString& choice, m_validChoices.keys() ) {
         const QString& readableName = m_validChoices[choice];
-        kDebug() << choice << m_validChoices[choice] << readableName;
         QRadioButton* radio = new QRadioButton(readableName);
         radio->setProperty("command", choice);
         if ( selectedEntry == choice ) {
@@ -58,6 +57,15 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
         }
         connect(radio, SIGNAL(toggled(bool)), this, SIGNAL(selectionChanged()));
         m_buttonsGroup->layout()->addWidget(radio);
+
+        const QString appname = choice.split(' ').first();
+        if ( KStandardDirs::findExe(appname).isEmpty() ) {
+            // The application is not actually installed, forbid selecting it
+            radio->setChecked(false);
+            radio->setEnabled(false);
+            radio->setToolTip(i18nc("%1 is an application name",
+                                    "This application (\"%1\") is not installed on your computer.", appname));
+        }
     }
 
     setLayout(new QVBoxLayout);
