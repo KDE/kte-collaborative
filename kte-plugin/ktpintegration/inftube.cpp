@@ -401,10 +401,10 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
         QTcpSocket s;
         s.connectToHost("127.0.0.1", *port);
         if ( s.waitForConnected(100) ) {
-            usleep(30000);
             break;
         }
     }
+    usleep(100000);
     kDebug() << "successfully started infinioted on port" << *port << "( root dir" << serverDirectory(*port) << ")";
     return true;
 }
