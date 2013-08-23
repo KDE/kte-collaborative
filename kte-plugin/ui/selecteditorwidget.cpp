@@ -30,6 +30,7 @@
 
 #include <KLocalizedString>
 #include <KDebug>
+#include <KPushButton>
 #include <kconfig.h>
 #include <kstandarddirs.h>
 
@@ -96,6 +97,9 @@ SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
 
     m_selectWidget = new SelectEditorWidget();
     main->layout()->addWidget(m_selectWidget);
+
+    button(KDialog::Ok)->setText(i18n("Continue"));
+    button(KDialog::Cancel)->setText(i18n("Cancel and reject document"));
 }
 
 QPair< QString, QString > SelectEditorDialog::selectedEntry() const
