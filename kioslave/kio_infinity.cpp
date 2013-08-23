@@ -192,7 +192,6 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
 
-    // TODO use the connectionEstablished() signal!
     connect(browser(), SIGNAL(connectionEstablished(const QInfinity::Browser*)),
             &loop, SLOT(quit()));
     connect(browser(), SIGNAL(error(const QInfinity::Browser*,QString)),
