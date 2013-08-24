@@ -36,10 +36,13 @@
 #include <KMessageBox>
 #include <KLocalizedString>
 #include <KIO/Job>
+#include <KDialog>
+#include <KPushButton>
 
 #include <QTimer>
 #include <QFile>
 #include <QTemporaryFile>
+#include <QLabel>
 
 using namespace QInfinity;
 
@@ -184,14 +187,20 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
 {
     Q_ASSERT(document == m_infDocument);
     if ( document->kDocument() ) {
-        if ( ! error.isEmpty() ) {
-            KMessageBox::error(document->kDocument()->widget(), i18n("Error opening document: %1", error));
-        }
         QTemporaryFile file;
         file.setAutoRemove(false);
         file.open();
         file.close();
         document->kDocument()->saveAs(KUrl(file.fileName()));
+        if ( ! error.isEmpty() ) {
+            // We must not use exec() here (so no KMessageBox!) or we will run into
+            // nested-event-loop-network-code trouble.
+            KDialog* dlg = new KDialog();
+            dlg->setMainWidget(new QLabel(i18n("Error opening document: %1", error)));
+            dlg->setButtons(KDialog::Cancel);
+            dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+            dlg->show();
+        }
     }
 }
 
