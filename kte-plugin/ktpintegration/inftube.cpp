@@ -432,7 +432,7 @@ void InfTubeClient::listen()
 {
     kDebug() << "listen called";
     m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
-                                                QStringList("infinote"), QLatin1String("KTp.infinote"), true, true);
+                                                QStringList("infinote"), QLatin1String("KTp.infinote"), true, false);
     kDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),

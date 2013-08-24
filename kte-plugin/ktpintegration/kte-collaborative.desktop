@@ -23,5 +23,5 @@ Comment[uk]=Користувач %1 хоче спільно з вами попр
 Comment[x-test]=xxUser %1 wants to collaborate on a document with youxx
 
 X-KTp-ChannelType=org.freedesktop.Telepathy.Channel.Type.StreamTube
-X-KTp-Service=infinity
+X-KTp-Service=infinote
 X-KTp-Cancellable=true
