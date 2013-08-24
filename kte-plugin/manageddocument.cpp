@@ -199,6 +199,7 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
             dlg->setMainWidget(new QLabel(i18n("Error opening document: %1", error)));
             dlg->setButtons(KDialog::Cancel);
             dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+            dlg->setAttribute(Qt::WA_DeleteOnClose);
             dlg->show();
         }
     }
