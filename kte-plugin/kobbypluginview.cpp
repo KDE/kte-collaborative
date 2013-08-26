@@ -245,7 +245,9 @@ void KobbyPluginView::disableActions()
     foreach ( KAction* action, m_actionsRequiringConnection ) {
         action->setEnabled(false);
     }
-    m_view->action("file_save")->setEnabled(true);
+    if ( QAction* save = m_view->action("file_save") ) {
+        save->setEnabled(true);
+    }
 }
 
 void KobbyPluginView::enableActions()
@@ -256,7 +258,9 @@ void KobbyPluginView::enableActions()
     // When enabling the collaborative actions,
     // we want to disable the built-in save and undo.
     // TODO make Ctrl+S call the "Save copy" action somehow?
-    m_view->action("file_save")->setEnabled(false);
+    if ( QAction* save = m_view->action("file_save") ) {
+        save->setEnabled(false);
+    }
 }
 
 void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
