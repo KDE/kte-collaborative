@@ -43,7 +43,7 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     m_validChoices.insert("kwrite %u", i18n("Open in %1", QLatin1String("KWrite")));
     m_validChoices.insert("kate %u", i18n("Open in %1", QLatin1String("Kate")));
     m_validChoices.insert("kile %u", i18n("Open in %1", QLatin1String("Kile")));
-    m_validChoices.insert("kdevelop %u", i18n("Open in %1", "KDevelop"));
+    m_validChoices.insert("kdevelop %u", i18n("Open in %1", QLatin1String("KDevelop")));
 
     m_buttonsGroup = new QWidget;
     m_buttonsGroup->setLayout(new QVBoxLayout);
