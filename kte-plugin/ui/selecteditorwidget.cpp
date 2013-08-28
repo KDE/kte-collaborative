@@ -72,7 +72,7 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     }
 
     if ( ! haveSuggestion ) {
-        QStringList preferredDefaults = QStringList() << "kate" << "kwrite" << "gobby" << "dolphin" << "kile";
+        QStringList preferredDefaults = QStringList() << "kate" << "kwrite" << "kdevelop" << "gobby" << "dolphin" << "kile";
         foreach ( const QString& preferred, preferredDefaults ) {
             foreach ( QRadioButton* button, m_buttonsGroup->findChildren<QRadioButton*>() ) {
                 if ( button->isEnabled() && button->property("command").toString().startsWith(preferred) ) {
