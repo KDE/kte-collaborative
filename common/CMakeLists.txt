@@ -28,6 +28,11 @@ set(
 )
 
 kde4_add_library(kobbycommon SHARED ${KOBBY_COMMON_SRCS})
+set_target_properties( kobbycommon
+    PROPERTIES
+    VERSION 0.0.95
+    SOVERSION 0.0.95
+)
 target_link_libraries( kobbycommon
     ${KDE4_KDEUI_LIBS}
     ${KDE4_KFILE_LIBS}
