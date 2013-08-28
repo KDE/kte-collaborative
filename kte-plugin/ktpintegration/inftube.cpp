@@ -203,37 +203,6 @@ void InfTubeRequester::jobFinished(KJob* job)
     emit collaborativeDocumentReady(url);
 }
 
-const QVariantMap InfTubeRequester::createHints(const DocumentList& documents) const
-{
-    QVariantMap hints;
-    hints.insert("initialDocumentsSize", documents.size());
-    for ( int i = 0; i < documents.size(); i++ ) {
-        hints.insert("initialDocument" + QString::number(i), documents.at(i).fileName());
-    }
-    return hints;
-}
-
-bool InfTubeRequester::createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase)
-{
-    QVariantMap hints = createHints(documents);
-    m_shareDocuments = documents;
-
-    requestBase.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".ChannelType"),
-                       TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE);
-    requestBase.insert(TP_QT_IFACE_CHANNEL_TYPE_STREAM_TUBE + QLatin1String(".Service"),
-                       QLatin1String("infinote"));
-
-    Tp::PendingChannelRequest* channelRequest;
-    channelRequest = account->ensureChannel(requestBase,
-                                            QDateTime::currentDateTime(),
-                                            "org.freedesktop.Telepathy.Client.KTp.infinoteServer",
-                                            hints);
-
-    connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)),
-            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
-    return true;
-}
-
 void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* operation)
 {
     kDebug() << "TUBE REQUEST FINISHED";
@@ -275,32 +244,31 @@ void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
 
 }
 
-bool InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
+Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents)
 {
-    kDebug() << "share with account requested";
-    QVariantMap request;
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
-                   (uint) Tp::HandleTypeContact);
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandle"),
-                   contact->handle().at(0));
-    return createRequest(account, documents, request);
+    m_shareDocuments = documents;
+    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, contacts, documents);
+    connect(req, SIGNAL(finished(Tp::PendingOperation*)),
+            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
+    return req;
 }
 
-bool InfTubeRequester::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
+Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
 {
-    kDebug() << "share with chatroom" << chatroom << "requested";
-    QVariantMap request;
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetHandleType"),
-                   (uint) Tp::HandleTypeRoom);
-    request.insert(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetID"),
-                   chatroom);
-    return createRequest(account, documents, request);
+    m_shareDocuments = documents;
+    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, contact, documents);
+    connect(req, SIGNAL(finished(Tp::PendingOperation*)),
+            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
+    return req;
 }
 
-bool InfTubeRequester::offer(const Tp::AccountPtr& /*account*/, const Tp::Contacts& /*contact*/, const DocumentList& /*documents*/)
+Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
 {
-    kWarning() << "not implemented";
-    return false;
+    m_shareDocuments = documents;
+    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, chatroom, documents);
+    connect(req, SIGNAL(finished(Tp::PendingOperation*)),
+            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
+    return req;
 }
 
 QList< Tp::StreamTubeChannelPtr > InfTubeServer::getChannels() const

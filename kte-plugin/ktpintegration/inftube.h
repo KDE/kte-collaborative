@@ -40,13 +40,14 @@
 
 #include "inftube_export.h"
 
+#include "fileShareRequest.h"
+
 namespace Tp {
     class StreamTubeClient;
 }
 
 class ServerManager;
 
-typedef QList<KUrl> DocumentList;
 typedef QList<QVariantMap> ChannelList;
 Q_DECLARE_METATYPE(ChannelList)
 
@@ -161,9 +162,9 @@ public:
      *
      * @param contacts The list of contacts to edit documents with
      * @param initialDocuments The documents all contacts should have opened initially
-     * @return bool true if the request was successful
+     * @return the channel request or 0 on failure
      */
-    bool offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents);
+    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents);
 
     /**
      * @brief Offer the given documents to the given contact
@@ -171,9 +172,9 @@ public:
      * @param account The account to use to create the offer
      * @param contact The contact to share the documents with
      * @param documents A list of documents to share. Must not be empty.
-     * @return bool true on success
+     * @return the channel request or 0 on failure
      */
-    bool offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents);
+    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents);
 
     /**
      * @brief Offer the given documents to an existing (!) chatroom.
@@ -181,9 +182,9 @@ public:
      * @param account The acconut to use to create the offer
      * @param chatroom The chatroom to offer the tube to
      * @param documents A list of documents to share initially. Must not be empty.
-     * @return bool true on success
+     * @return the channel request or 0 on failure
      */
-    bool offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents);
+    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents);
 
 private:
     /**
