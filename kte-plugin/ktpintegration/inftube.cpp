@@ -358,6 +358,23 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
     hints = hints.unite(requestHints.allHints());
     hints.insert("localSocket", QString::number(port));
 
+    if ( hints.contains("needToOpenDocument") && hints["needToOpenDocument"].toBool() == true ) {
+        // For tubes requested from e.g. ktp-contact-list, the server side
+        // also needs to open the document.
+        KUrl localUrl;
+        localUrl.setProtocol("inf");
+        localUrl.setHost("127.0.0.1");
+        localUrl.setUser(account->displayName());
+        localUrl.setPort(port);
+        bool ok = false;
+        QVector<QString> paths = documentsListFromParameters(hints, &ok);
+        // TODO error handling
+        foreach ( const QString& path, paths ) {
+            localUrl.setPath(path);
+            tryOpenDocumentWithDialog(localUrl);
+        }
+    }
+
     m_tubeServer->exportTcpSocket(QHostAddress(QHostAddress::LocalHost), port, hints);
 
     channel->setProperty("accountPath", account->objectPath());
@@ -450,7 +467,7 @@ void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr
     }
 }
 
-bool InfTubeClient::tryOpenDocument(const KUrl& url)
+bool tryOpenDocument(const KUrl& url)
 {
     KUrl dir = url.upUrl();
     KConfig config("ktecollaborative");
@@ -474,38 +491,61 @@ bool InfTubeClient::tryOpenDocument(const KUrl& url)
     return KRun::runCommand(executablePath + " " + arguments, 0);
 }
 
+bool tryOpenDocumentWithDialog(const KUrl& url)
+{
+    while ( ! tryOpenDocument(url) ) {
+        SelectEditorDialog dlg;
+        if ( ! dlg.exec() ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok) {
+    QVector<QString> items;
+
+    const int initialSize = parameters.contains("initialDocumentsSize") ?
+                            parameters["initialDocumentsSize"].toInt(ok) : 0;
+    if ( ! *ok ) {
+        return items;
+    }
+    for ( int i = 0; i < initialSize; i++ ) {
+        const QString key = "initialDocument" + QString::number(i);
+        const QString path = parameters[key].toString();
+        if ( path.isEmpty() ) {
+            kWarning() << "invalid path at index" << i;
+            continue;
+        }
+        items << path;
+    }
+    return items;
+}
+
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
     kDebug() << "Tube accepted as Tcp, port:" << port;
     kDebug() << "parameters:" << tube->parameters();
     // TODO error handling
     m_port = port;
-    bool ok = false;
-    const int initialSize = tube->parameters().contains("initialDocumentsSize") ? tube->parameters()["initialDocumentsSize"].toInt(&ok) : 0;
     KUrl url = localUrl();
     setNicknameFromAccount(account);
     url.setUser(nickname());
-    if ( ! ok || initialSize == 0 ) {
+
+    // Handle opening the attached documents
+    bool ok = false;
+    QVector<QString> paths = documentsListFromParameters(tube->parameters(), &ok);
+    if ( ! ok ) {
         KRun::runUrl(url.url(), "inode/directory", 0);
     }
     else {
-        for ( int i = 0; i < initialSize; i++ ) {
-            const QString key = "initialDocument" + QString::number(i);
-            const QString path = tube->parameters().contains(key) ? tube->parameters()[key].toString() : QString();
-            if ( path.isEmpty() ) {
-                kWarning() << "invalid path at index" << i;
-                continue;
-            }
+        foreach ( const QString& path, paths ) {
             url.setPath(path);
             // Retry until the user selects a working application, or aborts
-            while ( ! tryOpenDocument(url) ) {
-                SelectEditorDialog dlg;
-                if ( ! dlg.exec() ) {
-                    break;
-                }
-            }
+            tryOpenDocumentWithDialog(url);
         }
     }
+
     tube->setProperty("accountPath", account->objectPath());
     m_channels.append(tube);
     emit connected();
