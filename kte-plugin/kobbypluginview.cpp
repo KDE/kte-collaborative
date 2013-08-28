@@ -115,7 +115,7 @@ void KobbyStatusBar::usersChanged()
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(usersChanged()), Qt::UniqueConnection);
     }
     QList< QPointer< QInfinity::User > > activeUsers = m_view->m_document->userTable()->activeUsers();
-    if ( activeUsers.length() > 4 ) {
+    if ( activeUsers.length() > 6 ) {
         m_usersLabel->setText(i18n("Users: You and %1 others", activeUsers.size() - 1));
     }
     else {
