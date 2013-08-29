@@ -32,6 +32,7 @@
 #include <TelepathyQt/AbstractClientObserver>
 #include <TelepathyQt/ChannelClassSpecList>
 #include <KTp/telepathy-handler-application.h>
+#include <KTp/actions.h>
 
 #include <KJob>
 #include <KUrl>
@@ -40,7 +41,7 @@
 
 #include "inftube_export.h"
 
-#include "fileShareRequest.h"
+typedef KTp::Actions::DocumentList DocumentList;
 
 namespace Tp {
     class StreamTubeClient;
@@ -167,7 +168,9 @@ public:
      * @param documents A list of documents to share. Must not be empty.
      * @return the channel request or 0 on failure
      */
-    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents);
+    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account,
+                                     const Tp::ContactPtr& contact,
+                                     const KTp::Actions::DocumentList& documents);
 
     /**
      * @brief Offer the given documents to an existing (!) chatroom.
@@ -177,20 +180,12 @@ public:
      * @param documents A list of documents to share initially. Must not be empty.
      * @return the channel request or 0 on failure
      */
-    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents);
+    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account,
+                                     const QString& chatroom,
+                                     const KTp::Actions::DocumentList& documents);
 
 private:
-    /**
-     * @brief Create a QVariantMap containing a list of documents to transmit with the tube ofer
-     *
-     * @param documents The doucments which you want to be opened initially
-     * @return const QVariantMap A QVariantMap containing the document list, suitable to be used in a tube request
-     */
-    const QVariantMap createHints(const DocumentList& documents) const;
-
-    bool createRequest(const Tp::AccountPtr account, const DocumentList documents, QVariantMap requestBase);
-
-    DocumentList m_shareDocuments;
+    KTp::Actions::DocumentList m_shareDocuments;
 
 public slots:
     void onTubeRequestReady(Tp::PendingOperation*);
