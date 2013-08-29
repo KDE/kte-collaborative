@@ -20,6 +20,7 @@
  */
 
 #include "kobbyplugin.h"
+#include "../version.h"
 
 #include "common/connection.h"
 #include "common/document.h"
@@ -58,7 +59,7 @@ K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory,
                              registerPlugin<KCMKTECollaborative>("ktexteditor_kobby_config");
 )
 K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "kte-collaborative",
-                                          ki18n( "Collaborative Editing" ), "1.0", ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
+                                          ki18n( "Collaborative Editing" ), KTECOLLAB_VERSION_STRING, ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
 
 KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )

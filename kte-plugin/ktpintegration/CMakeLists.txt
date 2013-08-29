@@ -17,8 +17,8 @@ include_directories(
 kde4_add_library(inftube SHARED ${inftube_SRCS})
 set_target_properties( inftube
     PROPERTIES
-    VERSION 0.0.95
-    SOVERSION 0.0.95
+    VERSION ${KTECOLLAB_VERSION_STRING}
+    SOVERSION ${KTECOLLAB_VERSION_STRING}
 )
 
 target_link_libraries(inftube
