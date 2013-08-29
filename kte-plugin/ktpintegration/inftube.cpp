@@ -333,8 +333,19 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
         localUrl.setUser(account->displayName());
         localUrl.setPort(port);
         bool ok = false;
-        QVector<QString> paths = documentsListFromParameters(hints, &ok);
+        QVector<KUrl> sources;
+        QVector<QString> paths = documentsListFromParameters(hints, &ok, &sources);
         // TODO error handling
+        for ( int i = 0; i < sources.size(); i++ ) {
+            const QString path = paths.at(i);
+            localUrl.setPath(path);
+            const KUrl source = sources.at(i);
+            if ( source.isValid() ) {
+                // TODO waiting?
+                kDebug() << "copying file" << source;
+                KIO::file_copy(source, localUrl, KIO::HideProgressInfo);
+            }
+        }
         foreach ( const QString& path, paths ) {
             localUrl.setPath(path);
             tryOpenDocumentWithDialog(localUrl);
@@ -468,7 +479,7 @@ bool tryOpenDocumentWithDialog(const KUrl& url)
     return true;
 }
 
-QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok) {
+QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok, QVector<KUrl>* sourcePaths) {
     QVector<QString> items;
 
     const int initialSize = parameters.contains("initialDocumentsSize") ?
@@ -484,6 +495,9 @@ QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool
             continue;
         }
         items << path;
+        if ( sourcePaths ) {
+            *sourcePaths << KUrl(parameters[key + "_source"].toString());
+        }
     }
     return items;
 }

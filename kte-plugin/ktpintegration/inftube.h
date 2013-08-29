@@ -64,7 +64,9 @@ inline Tp::ChannelClassSpecList channelClassList()
   */
 bool tryOpenDocument(const KUrl& url);
 bool tryOpenDocumentWithDialog(const KUrl& url);
-QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok);
+QVector<QString> documentsListFromParameters(const QVariantMap& parameters,
+                                             bool* ok,
+                                             QVector<KUrl>* sourcePaths=0);
 
 Tp::AccountManagerPtr getAccountManager();
 
