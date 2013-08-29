@@ -57,7 +57,6 @@ QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message) {
 }
 
 const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &message) {
-    kDebug() << "unmarshalling";
     argument.beginArray();
     while ( ! argument.atEnd() ) {
         QVariantMap element;
@@ -65,7 +64,6 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, ChannelList &mess
         message.append(element);
     }
     argument.endArray();
-    kDebug() << "done";
     return argument;
 }
 
