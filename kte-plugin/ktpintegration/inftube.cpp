@@ -25,6 +25,7 @@
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
 #include <KTp/contact-factory.h>
+#include <KTp/actions.h>
 #include <TelepathyQt/AccountFactory>
 #include <TelepathyQt/AccountManager>
 #include <TelepathyQt/StreamTubeClient>
@@ -242,19 +243,10 @@ void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
 
 }
 
-Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents)
-{
-    m_shareDocuments = documents;
-    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, contacts, documents);
-    connect(req, SIGNAL(finished(Tp::PendingOperation*)),
-            this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
-    return req;
-}
-
 Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
 {
     m_shareDocuments = documents;
-    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, contact, documents);
+    Tp::PendingChannelRequest* req = KTp::Actions::startCollaborativeEditing(account, contact, documents);
     connect(req, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
     return req;
@@ -263,7 +255,7 @@ Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account
 Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const QString& chatroom, const DocumentList& documents)
 {
     m_shareDocuments = documents;
-    Tp::PendingChannelRequest* req = FileShareRequest::offer(account, chatroom, documents);
+    Tp::PendingChannelRequest* req = KTp::Actions::startCollaborativeEditing(account, chatroom, documents);
     connect(req, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onTubeRequestReady(Tp::PendingOperation*)));
     return req;

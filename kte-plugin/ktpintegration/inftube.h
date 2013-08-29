@@ -160,15 +160,6 @@ Q_OBJECT
 public:
     explicit InfTubeRequester(QObject* parent = 0);
     /**
-     * @brief Initiate editing a list of documents with the given contacts.
-     *
-     * @param contacts The list of contacts to edit documents with
-     * @param initialDocuments The documents all contacts should have opened initially
-     * @return the channel request or 0 on failure
-     */
-    Tp::PendingChannelRequest* offer(const Tp::AccountPtr& account, const Tp::Contacts& contacts, const DocumentList& documents);
-
-    /**
      * @brief Offer the given documents to the given contact
      *
      * @param account The account to use to create the offer
