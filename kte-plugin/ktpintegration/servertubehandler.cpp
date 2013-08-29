@@ -37,10 +37,10 @@ int main(int argc, char** argv) {
     qDBusRegisterMetaType< ChannelList >();
 
     KApplication app;
-    InfTubeServer* server = new InfTubeServer();
-    InfTubeConnectionMonitor t(server, server, 0);
-    QDBusConnection::sessionBus().registerObject("/", server);
-    server->registerHandler();
+    app.setQuitOnLastWindowClosed(false);
+    InfTubeServer server;
+    InfTubeConnectionMonitor t(&server, &server, 0);
+    QDBusConnection::sessionBus().registerObject("/", &server);
+    server.registerHandler();
     app.exec();
-    delete server;
 }
