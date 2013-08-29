@@ -35,9 +35,9 @@ class FileShareRequest {
     static const QVariantMap createHints(const DocumentList& documents)
     {
         QVariantMap hints;
-        hints.insert("initialDocumentsSize", documents.size());
+        hints.insert(QLatin1String("initialDocumentsSize"), documents.size());
         for ( int i = 0; i < documents.size(); i++ ) {
-            hints.insert("initialDocument" + QString::number(i), documents.at(i).fileName());
+            hints.insert(QLatin1String("initialDocument") + QString::number(i), documents.at(i).fileName());
         }
         return hints;
     }
@@ -54,7 +54,7 @@ class FileShareRequest {
         Tp::PendingChannelRequest* channelRequest;
         channelRequest = account->ensureChannel(requestBase,
                                                 QDateTime::currentDateTime(),
-                                                "org.freedesktop.Telepathy.Client.KTp.infinoteServer",
+                                                QLatin1String("org.freedesktop.Telepathy.Client.KTp.infinoteServer"),
                                                 hints);
 
         return channelRequest;
