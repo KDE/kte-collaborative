@@ -53,7 +53,9 @@ ShareDocumentDialog::ShareDocumentDialog(KTextEditor::View* activeView)
     infobox->setCloseButtonVisible(false);
     infobox->setMessageType(KMessageWidget::Information);
     infobox->setWordWrap(true);
+#if KDE_VERSION_MAJOR == 4 && KDE_VERSION_MINOR >= 11 || KDE_VERSION_MAJOR > 4
     infobox->setIcon(KIcon("help-about"));
+#endif
     infobox->setText(i18n("<p>You can select a contact or chatroom to share this document with below.</p>"
                           "<p>Since each such connection to a contact or chatroom can contain "
                           "an arbitrary number of documents, you can also add this document "
