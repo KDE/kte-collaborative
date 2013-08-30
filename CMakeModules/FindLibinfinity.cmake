@@ -26,7 +26,7 @@ else( LIBINFINITY_LIBRARIES AND LIBINFINITY_INCLUDES )
 	
 	if( ${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4 )
 		include(UsePkgConfig)
-		pkgconfig(libinfinity-0.5
+		pkgconfig(libinfinity-0.6
 			_LIBINFINITY_INCLUDE_DIR
 			_LIBINFINITY_LIBRARY_DIR
 			_LIBINFINITY_LINKER_FLAGS
@@ -43,12 +43,12 @@ else( LIBINFINITY_LIBRARIES AND LIBINFINITY_INCLUDES )
 			/usr/local/include
 			/opt/local/include
 		PATH_SUFFIXES
-			libinfinity-0.5
+			libinfinity-0.6
 	)
 	
 	find_library( LIBINFINITY_LIBRARY
 		NAMES
-			infinity-0.5
+			infinity-0.6
 		PATHS
 			${_LIBINFINITY_LIBRARY_DIR}
 			/usr/lib

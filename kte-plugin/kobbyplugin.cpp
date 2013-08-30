@@ -107,7 +107,7 @@ void KobbyPlugin::subscribeNewDocuments()
         if ( ! browser ) {
             continue;
         }
-        if ( browser->connectionStatus() == INFC_BROWSER_CONNECTED && ! document->isSubscribed() ) {
+        if ( browser->connectionStatus() == INF_BROWSER_OPEN && ! document->isSubscribed() ) {
             document->subscribe();
         }
     }

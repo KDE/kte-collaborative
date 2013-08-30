@@ -77,19 +77,6 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 
 }
 
-void InfinityProtocol::directoryChanged(const QInfinity::BrowserIter iter)
-{
-    QInfinity::BrowserIter copy(iter);
-    if ( copy.parent() && infc_browser_iter_get_explore_request(copy.infBrowser(), copy.infBrowserIter()) ) {
-        kDebug() << "directory is being explored:" << iter.path() << "-- not emitting changed signal";
-        return;
-    }
-    KUrl url("inf://" + m_connectedTo.hostname + ":" + QString::number(m_connectedTo.port) + copy.path());
-    QString dir = url.upUrl().url();
-    kDebug() << "directory changed::" << dir << copy.path();
-    OrgKdeKDirNotifyInterface::emitFilesAdded(dir);
-}
-
 InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArray& app_socket)
     : QObject()
     , SlaveBase("inf", pool_socket, app_socket)
@@ -189,24 +176,19 @@ bool InfinityProtocol::doConnect(const Peer& peer)
         error(KIO::ERR_UNKNOWN_HOST, peer.hostname);
         return false;
     }
-    m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
     m_connection->open();
+    m_browserModel->addConnection(static_cast<QInfinity::XmlConnection*>(m_connection->xmppConnection()), "kio_root");
 
     connect(browser(), SIGNAL(connectionEstablished(const QInfinity::Browser*)),
             &loop, SLOT(quit()));
     connect(browser(), SIGNAL(error(const QInfinity::Browser*,QString)),
             &loop, SLOT(quit()));
     loop.exec();
-    if ( ! timeout.isActive() || browser()->connectionStatus() != INFC_BROWSER_CONNECTED ) {
+    if ( ! timeout.isActive() || browser()->connectionStatus() != INF_BROWSER_OPEN ) {
         kDebug() << "failed to connect";
         error(KIO::ERR_COULD_NOT_CONNECT, QString("%1:%2").arg(peer.hostname, QString::number(peer.port)));
         return false;
     }
-
-    connect(browser(), SIGNAL(nodeAdded(BrowserIter)),
-            this, SLOT(directoryChanged(BrowserIter)), Qt::UniqueConnection);
-    connect(browser(), SIGNAL(nodeRemoved(BrowserIter)),
-            this, SLOT(directoryChanged(BrowserIter)), Qt::UniqueConnection);
 
     m_connectedTo = peer;
     return true;
@@ -276,9 +258,14 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         inf_text_buffer_insert_text(INF_TEXT_BUFFER(textBuffer), 0, initialContents,
                                     initialContents.size(), QString(initialContents).size(), user);
 
-        req = NodeRequest::wrap(infc_browser_add_note_with_content(
-                INFC_BROWSER(browser()->gobject()), iter.infBrowserIter(),
-                url.fileName().toAscii().data(), m_notePlugin->infPlugin(), INF_SESSION(session), true));
+        req = NodeRequest::wrap( inf_browser_add_note(
+                INF_BROWSER(browser()->gobject()),
+                iter.infBrowserIter(),
+                url.fileName().toAscii().data(),
+                m_notePlugin->infPlugin()->note_type,
+                0,
+                INF_SESSION(session),
+                true) );
         g_object_unref(session);
         g_object_unref(user_table);
         inf_session_set_user_status(INF_SESSION(session), user, INF_USER_UNAVAILABLE);

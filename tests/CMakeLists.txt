@@ -11,6 +11,7 @@ include_directories(
     ../kte-plugin
     ../
     ${LIBQINFINITY_INCLUDES}
+    ${CMAKE_BINARY_DIR}
 )
 
 target_link_libraries( collaborativeeditingtest
