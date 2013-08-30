@@ -58,6 +58,8 @@ namespace QInfinity
 namespace Kobby
 {
 
+class NotePlugin;
+
 /**
  * @brief A base class for interacting with Documents.
  *
@@ -176,6 +178,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
     public:
         KDocumentTextBuffer( KTextEditor::Document* kDocument,
             const QString &encoding,
+            Kobby::NotePlugin* plugin,
             QObject *parent = 0 );
         ~KDocumentTextBuffer();
 

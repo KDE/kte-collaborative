@@ -107,7 +107,7 @@ void KobbyStatusBar::sessionFullyReady()
 
 void KobbyStatusBar::usersChanged()
 {
-    if ( ! m_view->m_document->userTable() ) {
+    if ( ! m_view->m_document || ! m_view->m_document->userTable() ) {
         return;
     }
     QList< QPointer< QInfinity::User > > users = m_view->m_document->userTable()->users();
@@ -293,7 +293,14 @@ void KobbyPluginView::enableUi()
     m_statusBar = new KobbyStatusBar(this);
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
             statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)), Qt::UniqueConnection);
+
+    // Call all the slots once to ensure a consistent state
     statusBar()->connectionStatusChanged(m_document->connection(), m_document->connection()->status());
+    if ( m_document->isReady() ) {
+        statusBar()->sessionFullyReady();
+        statusBar()->usersChanged();
+    }
+
     connect(m_document, SIGNAL(documentReady(ManagedDocument*)),
             this, SLOT(documentReady(ManagedDocument*)), Qt::UniqueConnection);
     m_view->layout()->addWidget(m_statusBar);

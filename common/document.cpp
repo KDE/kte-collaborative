@@ -18,6 +18,7 @@
 
 #include "document.h"
 #include "utils.h"
+#include "noteplugin.h"
 
 #include <libinftext/inf-text-undo-grouping.h>
 
@@ -107,12 +108,13 @@ bool Document::isDirty()
 
 void Document::setLoadState( Document::LoadState state )
 {
-    if( state != LoadState() )
+    if( state != loadState() )
     {
         m_loadState = state;
         emit( loadStateChanged( this, state ) );
-        if( state == Document::Complete )
+        if( state == Document::Complete ) {
             emit( loadingComplete( this ) );
+        }
     }
 }
 
@@ -134,6 +136,7 @@ void Document::throwFatalError( const QString &message )
 
 KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     const QString &encoding,
+    Kobby::NotePlugin* plugin,
     QObject *parent )
     : QInfinity::AbstractTextBuffer( encoding, parent )
     , blockRemoteInsert( false )
@@ -143,6 +146,7 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , m_undoGrouping( QInfinity::UndoGrouping::wrap(inf_text_undo_grouping_new(), this) )
     , m_aboutToClose( false )
 {
+    plugin->registerTextBuffer(kDocument->url().path(), this);
     kDebug() << "new text buffer for document" << kDocument;
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );

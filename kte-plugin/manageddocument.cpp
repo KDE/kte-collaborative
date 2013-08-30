@@ -24,6 +24,7 @@
 #include "documentchangetracker.h"
 #include "common/connection.h"
 #include "common/utils.h"
+#include <common/noteplugin.h>
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/browser.h>
@@ -54,6 +55,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_notePlugin(plugin)
     , m_connection(connection)
     , m_subscribed(false)
+    , m_ready(false)
     , m_infDocument(0)
     , m_iterId(0)
     , m_sessionStatus(QInfinity::Session::Closed)
@@ -117,6 +119,7 @@ Kobby::Connection* ManagedDocument::connection() const
 void ManagedDocument::unsubscribe()
 {
     kDebug() << "should unsubscribe document";
+    m_ready = false;
     if ( m_infDocument ) {
         m_infDocument->leave();
         m_infDocument->deleteLater();
@@ -210,7 +213,13 @@ void ManagedDocument::synchronizationComplete(Kobby::Document* /*document*/)
     // Only after the connection has been established and synchronization is finished,
     // the user is allowed to edit the document.
     document()->setReadWrite(true);
+    m_ready = true;
     emit documentReady(this);
+}
+
+bool ManagedDocument::isReady() const
+{
+    return m_ready;
 }
 
 void ManagedDocument::disconnected(Kobby::Connection* )
@@ -219,6 +228,7 @@ void ManagedDocument::disconnected(Kobby::Connection* )
     // set to read-only, to prevent a user from further editing the document
     // without saving it somewhere.
     document()->setReadWrite(false);
+    m_ready = false;
 }
 
 UserTable* ManagedDocument::userTable() const
@@ -245,7 +255,7 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     QPointer< QInfinity::Browser > browser = iter.browser();
     QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
                      this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)), Qt::UniqueConnection);
-    m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8");
+    m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8", static_cast<Kobby::NotePlugin*>(m_notePlugin));
     kDebug() << "created text buffer";
     m_iterId = iter.id();
     browser->subscribeSession(iter, m_notePlugin, m_textBuffer);

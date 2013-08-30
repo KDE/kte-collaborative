@@ -36,15 +36,19 @@ class DocumentBuilder;
 class KOBBYCOMMON_EXPORT NotePlugin
     : public QInfinity::NotePlugin
 {
-
     public:
         NotePlugin( QObject *parent = 0 );
+
+        void registerTextBuffer(const QString& path, KDocumentTextBuffer* textBuffer);
 
         QInfinity::Session *createSession(QInfinity::CommunicationManager *commMgr,
             QInfinity::Session::Status sess_status,
             QInfinity::CommunicationJoinedGroup *syncGroup,
             QInfinity::XmlConnection *syncConnection,
-            void* userData );
+            const QString& path );
+
+    private:
+        QHash<QString, KDocumentTextBuffer*> buffers;
 
 };
 
