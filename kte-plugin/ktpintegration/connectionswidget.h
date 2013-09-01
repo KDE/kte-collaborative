@@ -49,9 +49,9 @@ private:
 
     friend class ConnectionsWidget;
 
-public slots:
-    void channelReady(Tp::PendingOperation*);
-    void accountManagerReady(Tp::PendingOperation*);
+private slots:
+    void onChannelReady(Tp::PendingOperation*);
+    void onAccountManagerReady(Tp::PendingOperation*);
 };
 
 class INFTUBE_EXPORT ConnectionsWidget : public QWidget {
