@@ -89,15 +89,18 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     layout()->addWidget(m_buttonsGroup);
 }
 
-QPair< QString, QString > SelectEditorWidget::selectedEntry() const
+SelectEditorWidget::EditorEntry SelectEditorWidget::selectedEntry() const
 {
+    EditorEntry entry;
     foreach ( const QRadioButton* button, m_buttonsGroup->findChildren<QRadioButton*>() ) {
         if ( button->isChecked() ) {
             const QString& command = button->property("command").toString();
-            return QPair<QString, QString>(command, m_validChoices[command]);
+            entry.command = command;
+            entry.readableName = m_validChoices[command];
+            break;
         }
     }
-    return QPair<QString, QString>();
+    return entry;
 }
 
 SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
@@ -117,7 +120,7 @@ SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
     button(KDialog::Cancel)->setText(i18n("Cancel and reject document"));
 }
 
-QPair< QString, QString > SelectEditorDialog::selectedEntry() const
+SelectEditorWidget::EditorEntry SelectEditorDialog::selectedEntry() const
 {
     return m_selectWidget->selectedEntry();
 }
@@ -126,7 +129,7 @@ void SelectEditorDialog::accept()
 {
     KConfig config("ktecollaborative");
     KConfigGroup group(config.group("applications"));
-    group.writeEntry("editor", m_selectWidget->selectedEntry().first);
+    group.writeEntry("editor", m_selectWidget->selectedEntry().command);
     KDialog::accept();
 }
 

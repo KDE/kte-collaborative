@@ -36,13 +36,18 @@ class SelectEditorWidget : public QWidget
 {
 Q_OBJECT
 public:
+    struct EditorEntry {
+        QString readableName;
+        QString command;
+    };
+
     SelectEditorWidget(const QString& selectedEntry = QString(), QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     /**
      * @brief Returns the currently selected entry
      * @return QPair< QString, QString > command to run (first) and readable name (second)
      */
-    QPair<QString, QString> selectedEntry() const;
+    EditorEntry selectedEntry() const;
 
 signals:
     void selectionChanged();
@@ -65,7 +70,7 @@ public:
     /**
      * @brief @see \c SelectEditorWidget selectedEntry
      */
-    QPair<QString, QString> selectedEntry() const;
+    SelectEditorWidget::EditorEntry selectedEntry() const;
 
 private:
     SelectEditorWidget* m_selectWidget;
