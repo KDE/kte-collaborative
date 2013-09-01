@@ -58,6 +58,8 @@ namespace QInfinity
 namespace Kobby
 {
 
+int countUnicodeCharacters(const QString& str);
+
 /**
  * @brief A base class for interacting with Documents.
  *
@@ -215,10 +217,11 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
             const KTextEditor::Range &range, const QString& oldText );
 
     private:
-        unsigned int cursorToOffset_inf( const KTextEditor::Cursor &cursor );
+        // All offsets are in unicode code points, all cursors are in utf-16 surrogates.
+        KTextEditor::Cursor offsetRelativeTo_kte(const KTextEditor::Cursor& cursor,
+                                                 const unsigned int offset);
         KTextEditor::Cursor offsetToCursor_inf( unsigned int offset );
         unsigned int cursorToOffset_kte( const KTextEditor::Cursor &cursor );
-        KTextEditor::Cursor offsetToCursor_kte( unsigned int offset );
         void textOpPerformed();
         void resetUndoRedo();
 

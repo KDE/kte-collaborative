@@ -251,8 +251,8 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     if( !blockRemoteRemove )
     {
         kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset << kDocument()->url();
-        KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
-        KTextEditor::Cursor endCursor = offsetToCursor_kte( offset+length );
+        KTextEditor::Cursor startCursor = offsetToCursor_inf(offset);
+        KTextEditor::Cursor endCursor = offsetRelativeTo_kte(startCursor, length);
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
         ReadWriteTransaction transaction(kDocument());
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
@@ -314,17 +314,16 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 {
     if ( m_aboutToClose ) return;
 
-    kDebug() << "local text inserted" << kDocument() << "(range" << range << ")" << m_user;
     emit localChangedText(range, user(), false);
     Q_UNUSED(document)
 
     textOpPerformed();
-    unsigned int offset;
     if( m_user.isNull() ) {
         kDebug() << "Could not insert text: No local user set.";
         return;
     }
-    offset = cursorToOffset_kte(range.start());
+    unsigned int offset = cursorToOffset_kte(range.start());
+    kDebug() << "local text inserted" << kDocument() << "( range" << range << ")" << m_user << "offset:" << offset;
     QInfinity::TextChunk chunk(encoding());
     QString text = kDocument()->text(range);
 #ifdef ENABLE_TAB_HACK
@@ -346,10 +345,11 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
                     "Skipping insertion";
     }
     else {
-        chunk.insertText( 0, encodedText, text.length(), m_user->id() );
+        chunk.insertText( 0, encodedText, countUnicodeCharacters(text), m_user->id() );
         blockRemoteInsert = true;
         kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
         insertChunk( offset, chunk, m_user );
+        kDebug() << "done inserting chunk";
         checkConsistency();
     }
 }
@@ -363,14 +363,12 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
     emit localChangedText(range, user(), true);
 
     Q_UNUSED(document)
-    unsigned int offset;
-    unsigned int len;
 
     textOpPerformed();
     if( !m_user.isNull() )
     {
-        offset = cursorToOffset_kte( range.start() );
-        len = oldText.length();
+        unsigned int offset = cursorToOffset_kte( range.start() );
+        unsigned int len = countUnicodeCharacters(oldText);
         blockRemoteRemove = true;
         kDebug() << "ERASING TEXT" << oldText << "with len" << len << "offset" << offset << "range" << range;
         kDebug() << offset << len << length();
@@ -405,40 +403,65 @@ void KDocumentTextBuffer::setSession(QInfinity::Session* session)
     m_session = session;
 }
 
-unsigned int KDocumentTextBuffer::cursorToOffset_inf( const KTextEditor::Cursor &cursor )
-{
-    unsigned int offset = 0;
-    int cursor_line = cursor.line();
-    QList<QByteArray> lines = slice(0, length())->text().split('\n');
-    kDebug() << lines;
-    for( int i = 0; i < cursor_line; i++ ) {
-        offset += codec()->toUnicode(lines.at(i)).length() + 1; // Add newline
+// Gives the offset in str which corresponds to @p codePoints unicode code points
+// codePoints will be 0 when all characters could be converted.
+int surrogatesForCodePoints(const QString& str, unsigned int& codePoints) {
+    int offset = 0;
+    const int available = str.length();
+    Q_ASSERT( ! str[0].isLowSurrogate() ); // first two bytes must not be low surrogate
+    for ( ; codePoints > 0; codePoints -- ) {
+        if ( offset >= available ) {
+            break;
+        }
+        if ( str[offset].isHighSurrogate() ) {
+            // high surrogate
+            offset += 2;
+        }
+        else {
+            // normal character
+            offset += 1;
+        }
     }
-    offset += cursor.column();
-    kDebug() << "cursor:" << cursor << "-> offset:" << offset;
     return offset;
+}
+
+int countUnicodeCharacters(const QString& str) {
+    int characters = 0;
+    int len = str.length();
+    int pos = 0;
+    while ( pos < len ) {
+        characters += 1;
+        if ( str[pos].isHighSurrogate() ) {
+            pos += 2;
+        }
+        else {
+            pos += 1;
+        }
+    }
+    return characters;
+}
+
+KTextEditor::Cursor KDocumentTextBuffer::offsetRelativeTo_kte(const KTextEditor::Cursor& cursor, unsigned int offset)
+{
+    int lineno = cursor.line();
+    const QString& firstLine = kDocument()->line(lineno).mid(cursor.column());
+    unsigned int remaining = offset;
+    int surrogates = surrogatesForCodePoints(firstLine, remaining);
+    while ( remaining > 0 ) {
+        lineno += 1;
+        const QString& line = kDocument()->line(lineno);
+        Q_ASSERT( ! line.isNull() );
+        surrogates = surrogatesForCodePoints(line, remaining);
+    }
+    return cursor + KTextEditor::Cursor(lineno, surrogates);
 }
 
 KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_inf( unsigned int offset )
 {
-    int remaining = offset;
-    QList<QByteArray> lines = slice(0, length())->text().split('\n');
-    kDebug() << lines << offset;
-    int i = 0;
-    while ( remaining > codec()->toUnicode(lines.at(i)).length() ) {
-        remaining -= codec()->toUnicode(lines.at(i)).length() + 1; // Subtract newline
-        i++;
-        if ( remaining == 0 ) {
-            break;
-        }
-        if ( i == lines.size() ) {
-            kWarning() << "oops, invalid offset?";
-            Q_ASSERT(false);
-            break;
-        }
-    }
-    kDebug() << "offset" << offset << "-> Cursor(" << i << "," << remaining << ")";
-    return KTextEditor::Cursor( i, remaining );
+    QList<QByteArray> lines = slice(0, offset)->text().split('\n');
+    // count utf-16 surrogates
+    int remaining = codec()->toUnicode(lines.last()).length();
+    return KTextEditor::Cursor(lines.count() - 1, remaining);
 }
 
 unsigned int KDocumentTextBuffer::cursorToOffset_kte( const KTextEditor::Cursor &cursor )
@@ -446,27 +469,10 @@ unsigned int KDocumentTextBuffer::cursorToOffset_kte( const KTextEditor::Cursor 
     unsigned int offset = 0;
     for( int i = 0; i < cursor.line(); i++ ) {
         kDebug() << "LINE" << i;
-        offset += kDocument()->lineLength(i) + 1; // Add newline
+        offset += countUnicodeCharacters(kDocument()->line(i)) + 1; // Add newline
     }
-    offset += cursor.column();
-    kDebug() << kDocument()->text() << cursor << offset;
+    offset += countUnicodeCharacters(kDocument()->line(cursor.line()).left(cursor.column()));
     return offset;
-}
-
-KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_kte( unsigned int offset )
-{
-    int soff = 0;
-    if( offset > 0 )
-        soff = offset;
-    int i;
-    for( i = 0; soff > kDocument()->lineLength(i); i++ ) {
-        soff -= kDocument()->lineLength(i) + 1; // Subtract newline
-        if ( kDocument()->lineLength(i) == -1 ) {
-            kWarning() << "oops, invalid offset?" << i << offset;
-            break;
-        }
-    }
-    return KTextEditor::Cursor( i, soff );
 }
 
 void KDocumentTextBuffer::textOpPerformed()
@@ -591,6 +597,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
     kDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
+    kDebug() << "in document" << kDocument()->url();
 }
 
 void InfTextDocument::slotJoinFailed( GError *gerror )
