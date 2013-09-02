@@ -26,6 +26,7 @@
 
 #include <kdedmodule.h>
 
+class OrgKdeKDirNotifyInterface;
 class InfinoteNotifier : public KDEDModule, QDBusContext
 {
     Q_OBJECT
@@ -33,6 +34,11 @@ class InfinoteNotifier : public KDEDModule, QDBusContext
 
 public:
     InfinoteNotifier(QObject *parent, const QVariantList &);
+    OrgKdeKDirNotifyInterface* m_notifyIface;
+
+private slots:
+    void enteredDirectory(QString);
+    void leftDirectory(QString);
 };
 
 #endif // INFINOTENOTIFIER_H

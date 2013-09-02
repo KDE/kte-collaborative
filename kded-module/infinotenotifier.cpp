@@ -24,14 +24,34 @@
 #include "kpluginfactory.h"
 
 #include <QDebug>
+#include <kdirnotify.h>
 
 K_PLUGIN_FACTORY(InfinoteNotifierFactory, registerPlugin<InfinoteNotifier>();)
 K_EXPORT_PLUGIN(InfinoteNotifierFactory("infinotenotifier"))
 
 InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
     : KDEDModule(parent)
+    , m_notifyIface(new OrgKdeKDirNotifyInterface(QString(), QString(), QDBusConnection::sessionBus(), this))
 {
     qDebug() << "Loaded module";
+    qDebug() << connect(m_notifyIface, SIGNAL(enteredDirectory(QString)), SLOT(enteredDirectory(QString)));
+    qDebug() << connect(m_notifyIface, SIGNAL(leftDirectory(QString)), SLOT(leftDirectory(QString)));
+}
+
+void InfinoteNotifier::enteredDirectory(QString path)
+{
+    if ( ! path.startsWith("inf") ) {
+        return;
+    }
+    qDebug() << "entered directory" << path;
+}
+
+void InfinoteNotifier::leftDirectory(QString path)
+{
+    if ( ! path.startsWith("inf") ) {
+        return;
+    }
+    qDebug() << "left directory" << path;
 }
 
 #include "infinotenotifier.moc"
