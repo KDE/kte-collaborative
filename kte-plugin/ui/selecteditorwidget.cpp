@@ -26,6 +26,7 @@
 #include <QRadioButton>
 #include <QLabel>
 #include <QCheckBox>
+#include <QButtonGroup>
 #include <QVariant>
 
 #include <KLocalizedString>
@@ -45,8 +46,10 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     m_validChoices.insert("kile %u", i18n("Open in %1", QLatin1String("Kile")));
     m_validChoices.insert("kdevelop %u", i18n("Open in %1", QLatin1String("KDevelop")));
 
-    m_buttonsGroup = new QWidget;
-    m_buttonsGroup->setLayout(new QVBoxLayout);
+    QWidget* buttonsWidget = new QWidget;
+    buttonsWidget->setLayout(new QVBoxLayout);
+    m_buttonsGroup = new QButtonGroup(buttonsWidget);
+
     bool haveSuggestion = false;
     foreach ( const QString& choice, m_validChoices.keys() ) {
         const QString& readableName = m_validChoices[choice];
@@ -54,7 +57,8 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
         radio->setProperty("command", choice);
 
         connect(radio, SIGNAL(toggled(bool)), this, SIGNAL(selectionChanged()));
-        m_buttonsGroup->layout()->addWidget(radio);
+        m_buttonsGroup->addButton(radio);
+        buttonsWidget->layout()->addWidget(radio);
 
         const QString appname = choice.split(' ').first();
         if ( KStandardDirs::findExe(appname).isEmpty() ) {
@@ -62,7 +66,7 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
             radio->setChecked(false);
             radio->setEnabled(false);
             radio->setToolTip(i18nc("%1 is an application name",
-                                    "This application (\"%1\") is not installed on your computer.", appname));
+                                    "The application \"%1\" is not installed on your computer.", appname));
         }
         else if ( selectedEntry == choice ) {
             // pre-select the passed one
@@ -74,7 +78,7 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
     if ( ! haveSuggestion ) {
         QStringList preferredDefaults = QStringList() << "kate" << "kwrite" << "kdevelop" << "gobby" << "dolphin" << "kile";
         foreach ( const QString& preferred, preferredDefaults ) {
-            foreach ( QRadioButton* button, m_buttonsGroup->findChildren<QRadioButton*>() ) {
+            foreach ( QAbstractButton* button, m_buttonsGroup->buttons() ) {
                 if ( button->isEnabled() && button->property("command").toString().startsWith(preferred) ) {
                     button->setChecked(true);
                     haveSuggestion = true;
@@ -86,19 +90,17 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
 
     setLayout(new QVBoxLayout);
     layout()->addWidget(new QLabel(i18n("What action should be taken for collaborative documents by default?")));
-    layout()->addWidget(m_buttonsGroup);
+    layout()->addWidget(buttonsWidget);
 }
 
 SelectEditorWidget::EditorEntry SelectEditorWidget::selectedEntry() const
 {
     EditorEntry entry;
-    foreach ( const QRadioButton* button, m_buttonsGroup->findChildren<QRadioButton*>() ) {
-        if ( button->isChecked() ) {
-            const QString& command = button->property("command").toString();
-            entry.command = command;
-            entry.readableName = m_validChoices[command];
-            break;
-        }
+    QAbstractButton* checked = m_buttonsGroup->checkedButton();
+    if ( checked ) {
+        const QString& command = checked->property("command").toString();
+        entry.command = command;
+        entry.readableName = m_validChoices[command];
     }
     return entry;
 }

@@ -27,6 +27,7 @@
 #include <QMap>
 #include <KDialog>
 
+class QButtonGroup;
 class QCheckBox;
 
 /**
@@ -54,7 +55,7 @@ signals:
 
 private:
     QMap<QString, QString> m_validChoices;
-    QWidget* m_buttonsGroup;
+    QButtonGroup* m_buttonsGroup;
 };
 
 /**
