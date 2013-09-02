@@ -45,7 +45,7 @@ public:
 
     /**
      * @brief Returns the currently selected entry
-     * @return QPair< QString, QString > command to run (first) and readable name (second)
+     * @return a struct describing the selected entry, i.e. its command and readable name.
      */
     EditorEntry selectedEntry() const;
 
