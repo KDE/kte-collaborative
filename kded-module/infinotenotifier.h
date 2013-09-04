@@ -23,10 +23,35 @@
 #define INFINOTENOTIFIER_H
 
 #include <QtDBus/QDBusContext>
+#include <QSet>
+#include <QSharedPointer>
 
 #include <kdedmodule.h>
+#include <common/connection.h>
 
+namespace QInfinity {
+    class BrowserModel;
+    class ConnectionItem;
+    class XmlConnection;
+    class Connection;
+    class BrowserIter;
+}
 class OrgKdeKDirNotifyInterface;
+
+using Kobby::Connection;
+using QInfinity::BrowserIter;
+
+struct Host {
+    Host(const QString& hostname, unsigned short port) : hostname(hostname), port(port) { };
+    bool operator==(const Host& other) const { return hostname == other.hostname && port == other.port; };
+    QString hostname;
+    unsigned short port;
+};
+
+unsigned int qHash(const Host& host) {
+    return qHash(host.hostname) + host.port;
+};
+
 class InfinoteNotifier : public KDEDModule, QDBusContext
 {
     Q_OBJECT
@@ -34,11 +59,24 @@ class InfinoteNotifier : public KDEDModule, QDBusContext
 
 public:
     InfinoteNotifier(QObject *parent, const QVariantList &);
-    OrgKdeKDirNotifyInterface* m_notifyIface;
 
 private slots:
     void enteredDirectory(QString);
     void leftDirectory(QString);
+    void connectionReady(Connection*);
+    void itemAdded(BrowserIter);
+    void itemRemoved(BrowserIter);
+
+private:
+    void ensureInWatchlist(const QString& url);
+    void removeFromWatchlist(const QString& url);
+
+private:
+    OrgKdeKDirNotifyInterface* m_notifyIface;
+    QSet<QString> m_watchedUrls;
+    QSharedPointer<QInfinity::BrowserModel> m_browserModel;
+    QHash<Host, QInfinity::ConnectionItem*> m_hostConnectionMap;
+    QHash<QInfinity::XmlConnection*, QInfinity::ConnectionItem*> m_connectionItemMap;
 };
 
 #endif // INFINOTENOTIFIER_H
