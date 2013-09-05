@@ -44,6 +44,16 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* brows
     kDebug() << "finding iter for" << m_remainingComponents;
 };
 
+void IterLookupHelper::setDeleteOnFinish(bool deleteOnFinish)
+{
+    if ( deleteOnFinish ) {
+        connect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+    }
+    else {
+        disconnect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+    }
+}
+
 bool IterLookupHelper::success() const
 {
     return m_wasSuccessful;

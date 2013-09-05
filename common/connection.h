@@ -21,6 +21,7 @@
 #include <libqinfinity/xmlconnection.h>
 
 #include <QObject>
+#include <QDebug>
 
 #include <glib.h>
 
@@ -34,6 +35,15 @@ namespace QInfinity
 
 namespace Kobby
 {
+
+struct Host {
+    Host(const QString& hostname, int port) : hostname(hostname), port(port == -1 ? 6523 : port) { };
+    Host() : port(0) { };
+    bool operator==(const Host& other) const { return hostname == other.hostname && port == other.port; };
+    bool isValid() { return ! hostname.isNull() && port != 0; };
+    QString hostname;
+    int port;
+};
 
 /**
  * @brief Ties connection/creation monitoring to simple interface.
@@ -62,6 +72,8 @@ class KOBBYCOMMON_EXPORT Connection
         QInfinity::XmppConnection *xmppConnection() const;
         // Returns the status of the connection.
         QInfinity::XmlConnection::Status status() const;
+        // Returns the host this connection is for.
+        Host host() const;
 
     Q_SIGNALS:
         void connecting( Connection *conn );
@@ -82,8 +94,7 @@ class KOBBYCOMMON_EXPORT Connection
         void slotError( const GError *err );
 
     private:
-        QString m_hostname;
-        unsigned int m_port;
+        Host m_host;
         // A unique identifier for a particular host/port combination, usually host:port.
         const QString m_name;
         QInfinity::XmlConnection::Status m_connectionStatus;

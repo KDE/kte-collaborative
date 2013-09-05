@@ -36,17 +36,12 @@ namespace QInfinity {
     class Connection;
     class BrowserIter;
 }
+class KUrl;
 class OrgKdeKDirNotifyInterface;
 
 using Kobby::Connection;
+using Kobby::Host;
 using QInfinity::BrowserIter;
-
-struct Host {
-    Host(const QString& hostname, unsigned short port) : hostname(hostname), port(port) { };
-    bool operator==(const Host& other) const { return hostname == other.hostname && port == other.port; };
-    QString hostname;
-    unsigned short port;
-};
 
 unsigned int qHash(const Host& host) {
     return qHash(host.hostname) + host.port;
@@ -66,6 +61,7 @@ private slots:
     void connectionReady(Connection*);
     void itemAdded(BrowserIter);
     void itemRemoved(BrowserIter);
+    void connectionError(Connection*,QString);
 
 private:
     void ensureInWatchlist(const QString& url);
@@ -73,9 +69,9 @@ private:
 
 private:
     OrgKdeKDirNotifyInterface* m_notifyIface;
-    QSet<QString> m_watchedUrls;
+    QSet<KUrl> m_watchedUrls;
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
-    QHash<Host, QInfinity::ConnectionItem*> m_hostConnectionMap;
+    QHash<QInfinity::ConnectionItem*, Host> m_connectionHostMap;
     QHash<QInfinity::XmlConnection*, QInfinity::ConnectionItem*> m_connectionItemMap;
 };
 

@@ -22,6 +22,7 @@
 #include "infinotenotifier.h"
 #include <common/itemfactory.h>
 #include <common/connection.h>
+#include <common/utils.h>
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/browser.h>
@@ -30,14 +31,20 @@
 
 #include <QDebug>
 #include <QSharedPointer>
+#include <QApplication>
 
 #include <kdirnotify.h>
 #include <KDE/KUrl>
+#include <KDE/KDebug>
 
 K_PLUGIN_FACTORY(InfinoteNotifierFactory, registerPlugin<InfinoteNotifier>();)
 K_EXPORT_PLUGIN(InfinoteNotifierFactory("infinotenotifier"))
 
 using namespace Kobby;
+
+Host hostForUrl(const KUrl& url) {
+    return Host(url.host(), url.port());
+}
 
 InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
     : KDEDModule(parent)
@@ -52,31 +59,68 @@ InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
 void InfinoteNotifier::ensureInWatchlist(const QString& url_)
 {
     KUrl url(url_);
-    if ( ! m_browserModel ) {
-        m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel(this));
-    }
-    // We do not handle errors here at all. If the connection fails, it'll not be watched.
-    QSharedPointer<Kobby::Connection> conn(new Kobby::Connection(url.host(), url.port(), QString(), this));
-    m_browserModel->setItemFactory(new Kobby::ItemFactory(this));
-    QInfinity::XmlConnection* xmlConnection = static_cast<QInfinity::XmlConnection*>(conn->xmppConnection());
-    QInfinity::ConnectionItem* connItem = m_browserModel->addConnection(xmlConnection, url.host() + QString::number(url.port()));
-    QObject::connect(conn.data(), SIGNAL(ready(Connection*)), this, SLOT(connectionReady(Connection*)));
-    conn->prepare();
-
-    m_hostConnectionMap.insert(Host(url.host(), url.port()), connItem);
-    m_connectionItemMap.insert(xmlConnection, connItem);
-}
-
-void InfinoteNotifier::connectionReady(Connection* conn)
-{
-    if ( ! conn || ! conn->xmppConnection() || ! m_connectionItemMap.contains(conn->xmppConnection()) ) {
+    if ( m_watchedUrls.contains(url) ) {
         return;
     }
+    if ( ! m_browserModel ) {
+        m_browserModel = QSharedPointer<QInfinity::BrowserModel>(new QInfinity::BrowserModel(this));
+        m_browserModel->setItemFactory(new Kobby::ItemFactory(this));
+    }
+    m_watchedUrls.insert(url);
+    Host host(url.host(), url.port());
+    bool haveConnectionForHost = m_connectionHostMap.values().contains(host);
+    if ( haveConnectionForHost ) {
+        return;
+    }
+    // We do not handle errors here at all. If the connection fails, it'll not be watched.
+    qDebug() << "creating connection for" << url;
+    Kobby::Connection* conn = new Kobby::Connection(host.hostname, host.port, QString(), this);
+    QObject::connect(conn, SIGNAL(ready(Connection*)), this, SLOT(connectionReady(Connection*)));
+    QObject::connect(conn, SIGNAL(error(Connection*,QString)), SLOT(connectionError(Connection*,QString)));
+    conn->prepare();
+}
+
+void InfinoteNotifier::connectionError(Connection* , QString error)
+{
+    qDebug() << "connection error:" << error;
+}
+
+void InfinoteNotifier::connectionReady(Connection* conn_)
+{
+    qDebug() << "connection ready:" << conn_;
+    if ( ! conn_ || ! conn_->xmppConnection() ) {
+        return;
+    }
+    Kobby::Connection* conn = dynamic_cast<Kobby::Connection*>(conn_);
+    if ( ! conn ) {
+        return;
+    }
+
+    qDebug() << "adding connection";
     QInfinity::XmlConnection* xmlConnection = static_cast<QInfinity::XmlConnection*>(conn->xmppConnection());
+    QInfinity::ConnectionItem* connItem = m_browserModel->addConnection(xmlConnection,
+        conn->host().hostname + QString::number(conn->host().port)
+    );
+
+    m_connectionHostMap.insert(connItem, conn->host());
+    m_connectionItemMap.insert(xmlConnection, connItem);
+
+    qDebug() << "opening connection";
     conn->open();
     QInfinity::Browser* browser = m_connectionItemMap.value(xmlConnection)->browser();
     if ( ! browser ) {
         return;
+    }
+
+    // Ensure all wateched directories are explored
+    foreach ( const KUrl& watched, m_watchedUrls ) {
+        const Host host = hostForUrl(watched);
+        if ( host == conn->host() ) {
+            IterLookupHelper* helper = new IterLookupHelper(watched.path(), browser);
+            helper->setDeleteOnFinish();
+            connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
+                    helper, SLOT(begin()));
+        }
     }
 
     connect(browser, SIGNAL(nodeAdded(BrowserIter)),
@@ -85,14 +129,31 @@ void InfinoteNotifier::connectionReady(Connection* conn)
             this, SLOT(itemRemoved(BrowserIter)), Qt::UniqueConnection);
 }
 
-void InfinoteNotifier::itemAdded(BrowserIter )
+void InfinoteNotifier::itemAdded(BrowserIter iter)
 {
+    QInfinity::XmlConnection* connection = iter.browser()->connection();
+    if ( ! m_connectionItemMap.contains(connection) ) {
+        return;
+    }
+    QInfinity::ConnectionItem* connItem = m_connectionItemMap[connection];
+    const Host& host = m_connectionHostMap[connItem];
+    foreach ( const KUrl& url, m_watchedUrls ) {
+        if ( hostForUrl(url) == host ) {
+            qDebug() << "emitting changed:" << url;
+            OrgKdeKDirNotifyInterface::emitFilesAdded(url.url());
+        }
+    }
     qDebug() << "item added";
 }
 
-void InfinoteNotifier::itemRemoved(BrowserIter )
+void InfinoteNotifier::itemRemoved(BrowserIter /*iter*/)
 {
     qDebug() << "item removed";
+}
+
+void InfinoteNotifier::removeFromWatchlist(const QString& /*url*/)
+{
+
 }
 
 void InfinoteNotifier::enteredDirectory(QString path)
@@ -101,7 +162,7 @@ void InfinoteNotifier::enteredDirectory(QString path)
         return;
     }
     qDebug() << "entered directory" << path;
-    m_watchedUrls.insert(path);
+    ensureInWatchlist(path);
     qDebug() << "have watched:" << m_watchedUrls;
 }
 
@@ -112,6 +173,7 @@ void InfinoteNotifier::leftDirectory(QString path)
     }
     qDebug() << "left directory" << path;
     m_watchedUrls.remove(path);
+    removeFromWatchlist(path);
     qDebug() << "have watched:" << m_watchedUrls;
 }
 

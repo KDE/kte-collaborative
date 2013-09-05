@@ -59,6 +59,7 @@ public:
     };
     QInfinity::BrowserIter result() const;
     bool success() const;
+    void setDeleteOnFinish(bool deleteOnFinish = true);
 
 signals:
     void done(QInfinity::BrowserIter found);
