@@ -251,7 +251,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
     if( !blockRemoteRemove )
     {
         kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset << kDocument()->url();
-        KTextEditor::Cursor startCursor = offsetToCursor_inf(offset);
+        KTextEditor::Cursor startCursor = offsetRelativeTo_kte(KTextEditor::Cursor(0, 0), offset);
         KTextEditor::Cursor endCursor = offsetRelativeTo_kte(startCursor, length);
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
         ReadWriteTransaction transaction(kDocument());
@@ -408,7 +408,7 @@ void KDocumentTextBuffer::setSession(QInfinity::Session* session)
 int surrogatesForCodePoints(const QString& str, unsigned int& codePoints) {
     int offset = 0;
     const int available = str.length();
-    Q_ASSERT( ! str[0].isLowSurrogate() ); // first two bytes must not be low surrogate
+    Q_ASSERT( str.size() == 0 || ! str[0].isLowSurrogate() ); // first two bytes must not be low surrogate
     for ( ; codePoints > 0; codePoints -- ) {
         if ( offset >= available ) {
             break;
@@ -448,12 +448,17 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetRelativeTo_kte(const KTextEditor:
     unsigned int remaining = offset;
     int surrogates = surrogatesForCodePoints(firstLine, remaining);
     while ( remaining > 0 ) {
+        remaining -= 1; // for the newline character
         lineno += 1;
+        if ( remaining == 0 ) {
+            surrogates = 0;
+            break;
+        }
         const QString& line = kDocument()->line(lineno);
-        Q_ASSERT( ! line.isNull() );
+        Q_ASSERT( lineno < kDocument()->lines() );
         surrogates = surrogatesForCodePoints(line, remaining);
     }
-    return cursor + KTextEditor::Cursor(lineno, surrogates);
+    return KTextEditor::Cursor(lineno, lineno == cursor.line() ? cursor.column() + surrogates : surrogates);
 }
 
 KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_inf( unsigned int offset )
