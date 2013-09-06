@@ -71,14 +71,17 @@ class InfinoteNotifier : public KDEDModule, QDBusContext
 
 public:
     InfinoteNotifier(QObject *parent, const QVariantList &);
+    virtual ~InfinoteNotifier();
 
 private slots:
     void enteredDirectory(QString);
     void leftDirectory(QString);
     void connectionReady(Connection*);
+    void connectionError(Connection*,QString);
+    void connectionDisconnected(Connection*);
+    void connectionEstablished(const QInfinity::Browser*);
     void itemAdded(BrowserIter);
     void itemRemoved(BrowserIter);
-    void connectionError(Connection*,QString);
     void notificationFired();
 
 private:
@@ -89,8 +92,8 @@ private:
     OrgKdeKDirNotifyInterface* m_notifyIface;
     QSet<KUrl> m_watchedUrls;
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
-    QHash<QInfinity::ConnectionItem*, Host> m_connectionHostMap;
-    QHash<QInfinity::XmlConnection*, QInfinity::ConnectionItem*> m_connectionItemMap;
+    QMap<QInfinity::ConnectionItem*, Host> m_connectionHostMap;
+    QMap<QInfinity::XmlConnection*, QInfinity::ConnectionItem*> m_connectionItemMap;
     QHash<Host, QInfinity::Browser*> m_hostBrowserMap;
 
     struct QueuedNotificationSet : public QSet<QueuedNotification*> {

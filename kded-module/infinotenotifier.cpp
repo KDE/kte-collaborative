@@ -52,12 +52,18 @@ Host hostForUrl(const KUrl& url) {
 
 InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
     : KDEDModule(parent)
+    , QDBusContext()
     , m_notifyIface(new OrgKdeKDirNotifyInterface(QString(), QString(), QDBusConnection::sessionBus(), this))
     , m_browserModel(0)
 {
     qDebug() << "Loaded module";
     connect(m_notifyIface, SIGNAL(enteredDirectory(QString)), SLOT(enteredDirectory(QString)));
     connect(m_notifyIface, SIGNAL(leftDirectory(QString)), SLOT(leftDirectory(QString)));
+}
+
+InfinoteNotifier::~InfinoteNotifier()
+{
+    qDebug() << "unloaded module";
 }
 
 void InfinoteNotifier::ensureInWatchlist(const QString& url_)
@@ -86,7 +92,22 @@ void InfinoteNotifier::ensureInWatchlist(const QString& url_)
     Kobby::Connection* conn = new Kobby::Connection(host.hostname, host.port, QString(), this);
     QObject::connect(conn, SIGNAL(ready(Connection*)), this, SLOT(connectionReady(Connection*)));
     QObject::connect(conn, SIGNAL(error(Connection*,QString)), SLOT(connectionError(Connection*,QString)));
+    QObject::connect(conn, SIGNAL(disconnecting(Connection*)), SLOT(connectionDisconnected(Connection*)));
+    QObject::connect(conn, SIGNAL(disconnected(Connection*)), SLOT(connectionDisconnected(Connection*)));
     conn->prepare();
+}
+
+void InfinoteNotifier::connectionDisconnected(Connection* connection)
+{
+    QInfinity::ConnectionItem* item = m_connectionItemMap[connection->xmppConnection()];
+    Host host = m_connectionHostMap[item];
+    if ( ! item || ! host.isValid() ) {
+        return;
+    }
+    m_browserModel->removeRows(item->index().row(), 1, QModelIndex());
+    m_hostBrowserMap.take(host);
+    m_connectionHostMap.take(item);
+    m_connectionItemMap.take(connection->xmppConnection());
 }
 
 void InfinoteNotifier::connectionError(Connection* , QString error)
@@ -115,10 +136,21 @@ void InfinoteNotifier::connectionReady(Connection* conn)
     qDebug() << "opening connection";
     conn->open();
 
+    connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
+            this, SLOT(connectionEstablished(const QInfinity::Browser*)));
+    connect(browser, SIGNAL(nodeAdded(BrowserIter)),
+            this, SLOT(itemAdded(BrowserIter)), Qt::UniqueConnection);
+    connect(browser, SIGNAL(nodeRemoved(BrowserIter)),
+            this, SLOT(itemRemoved(BrowserIter)), Qt::UniqueConnection);
+}
+
+void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser_)
+{
+    QInfinity::Browser* browser = const_cast<QInfinity::Browser*>(browser_); // sorry
     // Ensure all wateched directories are explored
     foreach ( const KUrl& watched, m_watchedUrls ) {
         const Host host = hostForUrl(watched);
-        if ( host == conn->host() ) {
+        if ( host == m_connectionHostMap[m_connectionItemMap[browser->connection()]] ) {
             IterLookupHelper* helper = new IterLookupHelper(watched.path(), browser);
             helper->setDeleteOnFinish();
             helper->setExploreResult();
@@ -127,18 +159,17 @@ void InfinoteNotifier::connectionReady(Connection* conn)
                     helper, SLOT(begin()));
         }
     }
-
-    connect(browser, SIGNAL(nodeAdded(BrowserIter)),
-            this, SLOT(itemAdded(BrowserIter)), Qt::UniqueConnection);
-    connect(browser, SIGNAL(nodeRemoved(BrowserIter)),
-            this, SLOT(itemRemoved(BrowserIter)), Qt::UniqueConnection);
 }
 
 void InfinoteNotifier::itemAdded(BrowserIter iter)
 {
     qDebug() << "item added";
     QInfinity::XmlConnection* connection = iter.browser()->connection();
-    if ( ! m_connectionItemMap.contains(connection) ) {
+    if ( ! connection
+         || iter.browser()->connectionStatus() != INFC_BROWSER_CONNECTED
+         || connection->status() != QInfinity::XmlConnection::Open
+         || ! m_connectionItemMap.contains(connection) )
+    {
         return;
     }
     QInfinity::ConnectionItem* connItem = m_connectionItemMap[connection];
