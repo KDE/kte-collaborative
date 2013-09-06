@@ -89,7 +89,7 @@ void IterLookupHelper::setExploreResult(bool exploreResult)
 
 void IterLookupHelper::exploreIfDirectory(QInfinity::BrowserIter iter)
 {
-    if ( iter.isDirectory() ) {
+    if ( iter.isDirectory() && ! iter.isExplored() ) {
         iter.explore();
     }
 }
