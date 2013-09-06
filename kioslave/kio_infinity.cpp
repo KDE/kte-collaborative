@@ -66,6 +66,11 @@ int KDE_EXPORT kdemain( int argc, char **argv )
         exit(-1);
     }
 
+    // Make sure the notification kded module is loaded
+    QDBusInterface iface("org.kde.kded", "/kded", "org.kde.kded");
+    QDBusReply<bool> result = iface.call("loadModule", "infinotenotifier");
+    kDebug() << "trying to load kded module" << result.value();
+
     QInfinity::init();
 
     InfinityProtocol slave(argv[2], argv[3]);
