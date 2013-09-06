@@ -1,0 +1,13 @@
+[Global]
+IconName=accessories-text-editor
+Comment=Collaborative text editing
+
+[Context/filenotification]
+Name=FileNotification
+Comment=Used for file added or removed notifications
+
+[Event/fileShared]
+Name=File Shared
+Comment=A new file was added to the collaboration server.
+Contexts=filenotification
+Action=Popup

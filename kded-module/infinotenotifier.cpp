@@ -36,6 +36,10 @@
 #include <kdirnotify.h>
 #include <KDE/KUrl>
 #include <KDE/KDebug>
+#include <KDE/KNotification>
+#include <KDE/KLocalizedString>
+#include <KDE/KMimeType>
+#include <KDE/KIconLoader>
 
 namespace Kobby {
 
@@ -142,14 +146,16 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
     foreach ( const KUrl& url, m_watchedUrls ) {
         if ( hostForUrl(url) == host ) {
             qDebug() << "queuing for update:" << url;
-            m_notifyQueue.insertOrUpdateUrl(url.url(), this);
+            QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
+            item->addedFiles.insert(iter.path());
         }
     }
 }
 
-void InfinoteNotifier::itemRemoved(BrowserIter /*iter*/)
+void InfinoteNotifier::itemRemoved(BrowserIter iter)
 {
     qDebug() << "item removed";
+    itemAdded(iter);
 }
 
 void InfinoteNotifier::removeFromWatchlist(const QString& /*url*/)
@@ -184,6 +190,18 @@ void InfinoteNotifier::notificationFired()
     qDebug() << "emitting changed:" << notification->url;
     OrgKdeKDirNotifyInterface::emitFilesAdded(notification->url);
     m_notifyQueue.remove(notification);
+    KUrl url(notification->url);
+    qDebug() << "files added:" << notification->addedFiles;
+    if ( ! notification->addedFiles.isEmpty() ) {
+        KNotification* message = new KNotification("fileShared");
+        message->setText(i18n("A new file was added for collaborative editing."));
+        KIconLoader loader;
+        message->setPixmap(loader.loadMimeTypeIcon(KMimeType::findByPath(url.url())->iconName(),
+                                                   KIconLoader::Dialog));
+        message->setActions(QStringList(i18n("Open in editor")));
+        message->sendEvent();
+    }
+    delete notification;
 }
 
 QueuedNotification::QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent)
@@ -196,19 +214,21 @@ QueuedNotification::QueuedNotification(const QString& notifyUrl, int msecs, QObj
     timer->start(msecs);
 }
 
-void InfinoteNotifier::QueuedNotificationSet::insertOrUpdateUrl(const QString& notifyUrl, InfinoteNotifier* parent, int msecs)
+QueuedNotification* InfinoteNotifier::QueuedNotificationSet::insertOrUpdateUrl(const QString& notifyUrl,
+                                                                               InfinoteNotifier* parent, int msecs)
 {
     foreach ( QueuedNotification* item, *this ) {
         if ( item->url == notifyUrl ) {
             // The item is already queued, update it
             item->timer->start(msecs);
-            return;
+            return item;
         }
     }
     // Otherwise, enqueue the item.
     QueuedNotification* queued = new QueuedNotification(notifyUrl, msecs, parent);
     connect(queued, SIGNAL(fired()), parent, SLOT(notificationFired()));
     insert(queued);
+    return queued;
 }
 
 }

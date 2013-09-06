@@ -57,6 +57,7 @@ Q_OBJECT
 public:
     QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent = 0);
     const QString url;
+    QSet<QString> addedFiles;
     QTimer* timer;
 
 signals:
@@ -93,7 +94,7 @@ private:
     QHash<Host, QInfinity::Browser*> m_hostBrowserMap;
 
     struct QueuedNotificationSet : public QSet<QueuedNotification*> {
-        void insertOrUpdateUrl(const QString& notifyUrl, InfinoteNotifier* parent, int msecs=4000);
+        QueuedNotification* insertOrUpdateUrl(const QString& notifyUrl, Kobby::InfinoteNotifier* parent, int msecs = 4000);
     };
     friend struct QueuedNotificationSet;
     QueuedNotificationSet m_notifyQueue;
