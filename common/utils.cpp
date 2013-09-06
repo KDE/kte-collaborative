@@ -77,6 +77,23 @@ QInfinity::BrowserIter IterLookupHelper::result() const
     return m_currentIter;
 }
 
+void IterLookupHelper::setExploreResult(bool exploreResult)
+{
+    if ( exploreResult ) {
+        connect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(exploreIfDirectory(QInfinity::BrowserIter)));
+    }
+    else {
+        disconnect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(exploreIfDirectory(QInfinity::BrowserIter)));
+    }
+}
+
+void IterLookupHelper::exploreIfDirectory(QInfinity::BrowserIter iter)
+{
+    if ( iter.isDirectory() ) {
+        iter.explore();
+    }
+}
+
 void IterLookupHelper::directoryExplored()
 {
     kDebug() << "directory explored";

@@ -60,6 +60,7 @@ public:
     QInfinity::BrowserIter result() const;
     bool success() const;
     void setDeleteOnFinish(bool deleteOnFinish = true);
+    void setExploreResult(bool exploreResult = true);
 
 signals:
     void done(QInfinity::BrowserIter found);
@@ -71,6 +72,7 @@ public slots:
         explore(m_currentIter);
     };
     void directoryExplored();
+    void exploreIfDirectory(QInfinity::BrowserIter);
 
 protected:
     void explore(QInfinity::BrowserIter directory);

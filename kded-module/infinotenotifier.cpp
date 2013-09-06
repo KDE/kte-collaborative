@@ -37,10 +37,10 @@
 #include <KDE/KUrl>
 #include <KDE/KDebug>
 
+namespace Kobby {
+
 K_PLUGIN_FACTORY(InfinoteNotifierFactory, registerPlugin<InfinoteNotifier>();)
 K_EXPORT_PLUGIN(InfinoteNotifierFactory("infinotenotifier"))
-
-using namespace Kobby;
 
 Host hostForUrl(const KUrl& url) {
     return Host(url.host(), url.port());
@@ -70,6 +70,11 @@ void InfinoteNotifier::ensureInWatchlist(const QString& url_)
     Host host(url.host(), url.port());
     bool haveConnectionForHost = m_connectionHostMap.values().contains(host);
     if ( haveConnectionForHost ) {
+        qDebug() << "exploring" << url.url();
+        IterLookupHelper* helper = new IterLookupHelper(url.path(), m_hostBrowserMap[host]);
+        helper->setDeleteOnFinish();
+        helper->setExploreResult();
+        helper->begin();
         return;
     }
     // We do not handle errors here at all. If the connection fails, it'll not be watched.
@@ -85,14 +90,10 @@ void InfinoteNotifier::connectionError(Connection* , QString error)
     qDebug() << "connection error:" << error;
 }
 
-void InfinoteNotifier::connectionReady(Connection* conn_)
+void InfinoteNotifier::connectionReady(Connection* conn)
 {
-    qDebug() << "connection ready:" << conn_;
-    if ( ! conn_ || ! conn_->xmppConnection() ) {
-        return;
-    }
-    Kobby::Connection* conn = dynamic_cast<Kobby::Connection*>(conn_);
-    if ( ! conn ) {
+    qDebug() << "connection ready:" << conn;
+    if ( ! conn || ! conn->xmppConnection() ) {
         return;
     }
 
@@ -102,15 +103,13 @@ void InfinoteNotifier::connectionReady(Connection* conn_)
         conn->host().hostname + QString::number(conn->host().port)
     );
 
+    QInfinity::Browser* browser = connItem->browser();
     m_connectionHostMap.insert(connItem, conn->host());
     m_connectionItemMap.insert(xmlConnection, connItem);
+    m_hostBrowserMap.insert(conn->host(), browser);
 
     qDebug() << "opening connection";
     conn->open();
-    QInfinity::Browser* browser = m_connectionItemMap.value(xmlConnection)->browser();
-    if ( ! browser ) {
-        return;
-    }
 
     // Ensure all wateched directories are explored
     foreach ( const KUrl& watched, m_watchedUrls ) {
@@ -118,6 +117,8 @@ void InfinoteNotifier::connectionReady(Connection* conn_)
         if ( host == conn->host() ) {
             IterLookupHelper* helper = new IterLookupHelper(watched.path(), browser);
             helper->setDeleteOnFinish();
+            helper->setExploreResult();
+            helper->begin();
             connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
                     helper, SLOT(begin()));
         }
@@ -131,6 +132,7 @@ void InfinoteNotifier::connectionReady(Connection* conn_)
 
 void InfinoteNotifier::itemAdded(BrowserIter iter)
 {
+    qDebug() << "item added";
     QInfinity::XmlConnection* connection = iter.browser()->connection();
     if ( ! m_connectionItemMap.contains(connection) ) {
         return;
@@ -139,11 +141,10 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
     const Host& host = m_connectionHostMap[connItem];
     foreach ( const KUrl& url, m_watchedUrls ) {
         if ( hostForUrl(url) == host ) {
-            qDebug() << "emitting changed:" << url;
-            OrgKdeKDirNotifyInterface::emitFilesAdded(url.url());
+            qDebug() << "queuing for update:" << url;
+            m_notifyQueue.insertOrUpdateUrl(url.url(), this);
         }
     }
-    qDebug() << "item added";
 }
 
 void InfinoteNotifier::itemRemoved(BrowserIter /*iter*/)
@@ -175,6 +176,41 @@ void InfinoteNotifier::leftDirectory(QString path)
     m_watchedUrls.remove(path);
     removeFromWatchlist(path);
     qDebug() << "have watched:" << m_watchedUrls;
+}
+
+void InfinoteNotifier::notificationFired()
+{
+    QueuedNotification* notification = qobject_cast<QueuedNotification*>(QObject::sender());
+    qDebug() << "emitting changed:" << notification->url;
+    OrgKdeKDirNotifyInterface::emitFilesAdded(notification->url);
+    m_notifyQueue.remove(notification);
+}
+
+QueuedNotification::QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent)
+    : QObject(parent)
+    , url(notifyUrl)
+    , timer(new QTimer)
+{
+    connect(timer, SIGNAL(timeout()), this, SIGNAL(fired()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(deleteLater()));
+    timer->start(msecs);
+}
+
+void InfinoteNotifier::QueuedNotificationSet::insertOrUpdateUrl(const QString& notifyUrl, InfinoteNotifier* parent, int msecs)
+{
+    foreach ( QueuedNotification* item, *this ) {
+        if ( item->url == notifyUrl ) {
+            // The item is already queued, update it
+            item->timer->start(msecs);
+            return;
+        }
+    }
+    // Otherwise, enqueue the item.
+    QueuedNotification* queued = new QueuedNotification(notifyUrl, msecs, parent);
+    connect(queued, SIGNAL(fired()), parent, SLOT(notificationFired()));
+    insert(queued);
+}
+
 }
 
 #include "infinotenotifier.moc"

@@ -29,12 +29,14 @@
 #include <kdedmodule.h>
 #include <common/connection.h>
 
+class QTimer;
 namespace QInfinity {
     class BrowserModel;
     class ConnectionItem;
     class XmlConnection;
     class Connection;
     class BrowserIter;
+    class Browser;
 }
 class KUrl;
 class OrgKdeKDirNotifyInterface;
@@ -43,8 +45,22 @@ using Kobby::Connection;
 using Kobby::Host;
 using QInfinity::BrowserIter;
 
-unsigned int qHash(const Host& host) {
+namespace Kobby {
+
+unsigned int qHash(const Host& host)
+{
     return qHash(host.hostname) + host.port;
+}
+
+class QueuedNotification : public QObject {
+Q_OBJECT
+public:
+    QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent = 0);
+    const QString url;
+    QTimer* timer;
+
+signals:
+    void fired();
 };
 
 class InfinoteNotifier : public KDEDModule, QDBusContext
@@ -62,6 +78,7 @@ private slots:
     void itemAdded(BrowserIter);
     void itemRemoved(BrowserIter);
     void connectionError(Connection*,QString);
+    void notificationFired();
 
 private:
     void ensureInWatchlist(const QString& url);
@@ -73,6 +90,15 @@ private:
     QSharedPointer<QInfinity::BrowserModel> m_browserModel;
     QHash<QInfinity::ConnectionItem*, Host> m_connectionHostMap;
     QHash<QInfinity::XmlConnection*, QInfinity::ConnectionItem*> m_connectionItemMap;
+    QHash<Host, QInfinity::Browser*> m_hostBrowserMap;
+
+    struct QueuedNotificationSet : public QSet<QueuedNotification*> {
+        void insertOrUpdateUrl(const QString& notifyUrl, InfinoteNotifier* parent, int msecs=4000);
+    };
+    friend struct QueuedNotificationSet;
+    QueuedNotificationSet m_notifyQueue;
 };
+
+}
 
 #endif // INFINOTENOTIFIER_H
