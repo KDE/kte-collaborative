@@ -23,6 +23,8 @@
 #include <ktexteditor/configinterface.h>
 
 #include <QStringList>
+#include <QDBusInterface>
+#include <QDBusReply>
 #include <KTextEditor/View>
 #include <KConfigGroup>
 #include <KConfig>
@@ -64,6 +66,15 @@ bool tryOpenDocumentWithDialog(const KUrl& url)
         }
     }
     return true;
+}
+
+bool ensureKdedModuleLoaded()
+{
+    // Make sure the notification kded module is loaded
+    QDBusInterface iface("org.kde.kded", "/kded", "org.kde.kded");
+    QDBusReply<bool> result = iface.call("loadModule", "infinotenotifier");
+    kDebug() << "trying to load kded module; success:" << result.value();
+    return result.value();
 }
 
 IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
