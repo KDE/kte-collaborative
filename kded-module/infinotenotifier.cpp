@@ -169,6 +169,11 @@ void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser_)
 void InfinoteNotifier::itemAdded(BrowserIter iter)
 {
     qDebug() << "item added";
+    QInfinity::BrowserIter copy(iter);
+    if ( copy.parent() && infc_browser_iter_get_explore_request(copy.infBrowser(), copy.infBrowserIter()) ) {
+        // the directory is just being explored, so the added signal is not a "real" one
+        return;
+    }
     QInfinity::XmlConnection* connection = iter.browser()->connection();
     if ( ! connection
          || iter.browser()->connectionStatus() != INFC_BROWSER_CONNECTED
