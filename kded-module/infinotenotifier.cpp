@@ -230,9 +230,16 @@ void InfinoteNotifier::notificationFired()
         message->setPixmap(loader.loadMimeTypeIcon(KMimeType::findByPath(url.url())->iconName(),
                                                    KIconLoader::Dialog));
         message->setActions(QStringList(i18n("Open in editor")));
+        message->setComponentData(KComponentData("infinotenotifier"));
+        connect(message, SIGNAL(action1Activated()), SLOT(messageActionActivated()));
         message->sendEvent();
     }
     delete notification;
+}
+
+void InfinoteNotifier::messageActionActivated()
+{
+
 }
 
 QueuedNotification::QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent)

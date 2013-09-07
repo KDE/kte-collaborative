@@ -83,6 +83,7 @@ private slots:
     void itemAdded(BrowserIter);
     void itemRemoved(BrowserIter);
     void notificationFired();
+    void messageActionActivated();
 
 private:
     void ensureInWatchlist(const QString& url);
