@@ -171,7 +171,8 @@ void ConnectionsWidget::setHelpMessage(const QString& message)
     m_helpMessageLabel->setVisible(true);
 }
 
-ConnectionsWidget::ConnectionsWidget()
+ConnectionsWidget::ConnectionsWidget(QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
 {
     kDebug() << "creating connections widget";
 
