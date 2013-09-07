@@ -82,19 +82,6 @@ int KDE_EXPORT kdemain( int argc, char **argv )
 
 }
 
-void InfinityProtocol::directoryChanged(const QInfinity::BrowserIter iter)
-{
-    QInfinity::BrowserIter copy(iter);
-    if ( copy.parent() && infc_browser_iter_get_explore_request(copy.infBrowser(), copy.infBrowserIter()) ) {
-        kDebug() << "directory is being explored:" << iter.path() << "-- not emitting changed signal";
-        return;
-    }
-    KUrl url("inf://" + m_connectedTo.hostname + ":" + QString::number(m_connectedTo.port) + copy.path());
-    QString dir = url.upUrl().url();
-    kDebug() << "directory changed::" << dir << copy.path();
-    OrgKdeKDirNotifyInterface::emitFilesAdded(dir);
-}
-
 InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArray& app_socket)
     : QObject()
     , SlaveBase("inf", pool_socket, app_socket)
@@ -207,11 +194,6 @@ bool InfinityProtocol::doConnect(const Peer& peer)
         error(KIO::ERR_COULD_NOT_CONNECT, QString("%1:%2").arg(peer.hostname, QString::number(peer.port)));
         return false;
     }
-
-    connect(browser(), SIGNAL(nodeAdded(BrowserIter)),
-            this, SLOT(directoryChanged(BrowserIter)), Qt::UniqueConnection);
-    connect(browser(), SIGNAL(nodeRemoved(BrowserIter)),
-            this, SLOT(directoryChanged(BrowserIter)), Qt::UniqueConnection);
 
     m_connectedTo = peer;
     return true;

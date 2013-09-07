@@ -95,7 +95,6 @@ signals:
 
 public slots:
     void slotRequestError(GError* error);
-    void directoryChanged(const BrowserIter iter);
 
 private:
     // Checks if a connection to the given peer is open already.
