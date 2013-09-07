@@ -64,6 +64,7 @@ InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
 InfinoteNotifier::~InfinoteNotifier()
 {
     qDebug() << "unloaded module";
+    m_browserModel.clear();
 }
 
 void InfinoteNotifier::ensureInWatchlist(const QString& url_)
@@ -102,6 +103,10 @@ void InfinoteNotifier::connectionDisconnected(Connection* connection)
     QInfinity::ConnectionItem* item = m_connectionItemMap[connection->xmppConnection()];
     Host host = m_connectionHostMap[item];
     if ( ! item || ! host.isValid() ) {
+        return;
+    }
+    if ( ! m_browserModel ) {
+        // destroying module
         return;
     }
     m_browserModel->removeRows(item->index().row(), 1, QModelIndex());
