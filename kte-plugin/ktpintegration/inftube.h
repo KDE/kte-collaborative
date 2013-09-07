@@ -57,14 +57,6 @@ inline Tp::ChannelClassSpecList channelClassList()
     return Tp::ChannelClassSpecList() << Tp::ChannelClassSpec::incomingStreamTube("infinity");
 }
 
-/**
-  * @brief Try to open the given document based on the current configuration in KConfig
-  *
-  * @param url The URL to open
-  * @return bool true if the command could be executed, false otherwise
-  */
-bool tryOpenDocument(const KUrl& url);
-bool tryOpenDocumentWithDialog(const KUrl& url);
 QVector<QString> documentsListFromParameters(const QVariantMap& parameters,
                                              bool* ok,
                                              QVector<KUrl>* sourcePaths=0);

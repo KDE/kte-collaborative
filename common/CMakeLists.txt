@@ -25,6 +25,7 @@ set(
     itemfactory.cpp
     noteplugin.cpp
     utils.cpp
+    selecteditorwidget.cpp
 )
 
 kde4_add_library(kobbycommon SHARED ${KOBBY_COMMON_SRCS})

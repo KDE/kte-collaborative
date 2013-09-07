@@ -20,7 +20,8 @@
 #include "inftube.h"
 
 #include "infinoted.h"
-#include "../ui/selecteditorwidget.h"
+#include "common/selecteditorwidget.h"
+#include "common/utils.h"
 
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
@@ -434,41 +435,6 @@ void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr
     if ( m_channels.contains(channel) ) {
         m_channels.removeAll(channel);
     }
-}
-
-bool tryOpenDocument(const KUrl& url)
-{
-    KUrl dir = url.upUrl();
-    KConfig config("ktecollaborative");
-    KConfigGroup group = config.group("applications");
-    // We do not set a default value here, so the dialog is always
-    // displayed the first time the user uses the feature.
-    QString command = group.readEntry("editor", "");
-    if ( command.isEmpty() ) {
-        return false;
-    }
-
-    command = command.replace("%u", url.url());
-    command = command.replace("%d", dir.url());
-    command = command.replace("%h", url.host() % ( url.port() ? (":" + QString::number(url.port())) : QString()));
-    QString executable = command.split(' ').first();
-    QString arguments = QStringList(command.split(' ').mid(1, -1)).join(" ");
-    QString executablePath = KStandardDirs::findExe(executable);
-    if ( executablePath.isEmpty() ) {
-        return false;
-    }
-    return KRun::runCommand(executablePath + " " + arguments, 0);
-}
-
-bool tryOpenDocumentWithDialog(const KUrl& url)
-{
-    while ( ! tryOpenDocument(url) ) {
-        SelectEditorDialog dlg;
-        if ( ! dlg.exec() ) {
-            return false;
-        }
-    }
-    return true;
 }
 
 QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok, QVector<KUrl>* sourcePaths) {

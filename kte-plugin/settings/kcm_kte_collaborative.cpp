@@ -22,7 +22,7 @@
 #include "kcm_kte_collaborative.h"
 #include "kobbyplugin.h"
 
-#include "ui/selecteditorwidget.h"
+#include "common/selecteditorwidget.h"
 
 #include <KDebug>
 #include <KMessageWidget>
