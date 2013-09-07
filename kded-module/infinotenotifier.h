@@ -87,7 +87,6 @@ private slots:
 
 private:
     void ensureInWatchlist(const QString& url);
-    void removeFromWatchlist(const QString& url);
 
 private:
     OrgKdeKDirNotifyInterface* m_notifyIface;

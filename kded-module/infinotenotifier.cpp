@@ -110,6 +110,11 @@ void InfinoteNotifier::connectionDisconnected(Connection* connection)
         // destroying module
         return;
     }
+    foreach ( const KUrl& url, m_watchedUrls ) {
+        if ( hostForUrl(url) == host ) {
+            m_watchedUrls.remove(url);
+        }
+    }
     m_browserModel->removeRows(item->index().row(), 1, QModelIndex());
     m_hostBrowserMap.take(host);
     m_connectionHostMap.take(item);
@@ -206,11 +211,6 @@ void InfinoteNotifier::itemRemoved(BrowserIter iter)
     itemAdded(iter);
 }
 
-void InfinoteNotifier::removeFromWatchlist(const QString& /*url*/)
-{
-
-}
-
 void InfinoteNotifier::enteredDirectory(QString path)
 {
     if ( ! path.startsWith("inf") ) {
@@ -228,7 +228,6 @@ void InfinoteNotifier::leftDirectory(QString path)
     }
     qDebug() << "left directory" << path;
     m_watchedUrls.remove(path);
-    removeFromWatchlist(path);
     qDebug() << "have watched:" << m_watchedUrls;
 }
 
