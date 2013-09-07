@@ -1,28 +1,60 @@
 kte-collaborative: Collaborative Text Editor for KDE
 
 Terminology
----------------------
+-----------
 Infinote Server: Server hosting collaborative editing sessions
-
 Session: A collaborative editing instance of a note
-
 Note: An editable document on an infinote server
 
+Description of the source tree
+------------------------------
+Here's a short description of where what source code is located.
+The program consists of 4 main components:
+    - The KTextEditor plugin (kte-plugin/ directory): a plugin for KTextEditor which is loaded
+      in e.g. kate. It is responsible for the actual collaborative editing, i.e. synchronization
+      of the text buffer. This includes the text highlighting and popup widgets.
+      It also provides the "Collaborative" menu and its actions.
+      It will treat any document starting with inf:// as a collaborative document.
+    - The KIO slave (kioslave/ directory): a KIO slave, which is responsible for listing files
+      on collaborative servers. It offers the inf:// protocol for that purpose. Clicking a document
+      with that protocol will open it in e.g. kate, which notices its URL starts with inf:// and will
+      thus try to synchronize it. Read about the KDE KIO framework for more information; this specific
+      protocol implementation is rather simple.
+    - Telepathy integration (kte-plugin/ktpintegration directory). This mainly consists of some front-end
+      code (dialogs etc.) for creating channel requests, and two small programs (the server- and client tube
+      handler) which handle channels on the offering and receiving end, respectively.
+      The way this works is quite complicated, and will require a separate document to be explained.
+    - The kded module: This is a small module which runs in the background, and is responsible for updating
+      the file views in e.g. dolphin. It also displays "A collaborative document was added" notifications
+      in the tray.
+
+And now, the other way round; which directory contains what?
+    common/             Stuff which is common to more than one of the above components is located here.
+                        That is mostly the connection stuff, the text buffer sync stuff (needed for the KIO),
+                        the document tree related things ("browsers", representations of files/folders on a server),
+                        and various smaller utility functions.
+    kded-module/        The kded module, as described above.
+    kioslave/           The KIO slave, as described above.
+    kte-plugin/         The KTextEditor plugin itself.
+        ui/             Dialogs and widgets used in the KTE plugin.
+        settings/       The settings module reachable from Collaborative -> Configure
+        ktpintegration/ Integration with Telepathy and KDE-Telepathy. Contains the client- and server side
+                        channel handlers, and classes for creating requests.
+                        Arguably, the client- and server side channel handlers are not really part of the KTE
+                        plugin and could be located in a separate directory, but are currently not.
+    tests/              Unit tests. Currently, there's only unit tests for the text buffer synchronization.
 
 Starting an Infinote Serever
-----------------------
+----------------------------
 kte-collaborative does not have the ability to start an infinote server.  If you would like
 to run an infinote server, you can use the 'infinoted' application installed
 with libinfinity.
-
 Example usage, using no encryption:
 infinoted --security-polity=no-tls
-
 On some systems, the executable might be called infinoted-0.5 or -0.6.
 
-
 Connecting to an Infinote Server
----------------------
+--------------------------------
 kte-collaborative treats each file with an URL which uses the inf:// protocol as a collaborative
 document. You can thus just open inf://myusername@servername.tld:port/path/to/document.txt in the
 editor, and the plugin should connect you to the session. You can also use the File -> Open dialog
@@ -30,4 +62,3 @@ to select the document after entering the base URL. Alternatively, you can use C
 Open collaborative document for a nice GUI for entering connection parameters.
 You can also use Telepathy to establish pseudo peer-to-peer connections to jabber contacts from
 the same menu.
-
