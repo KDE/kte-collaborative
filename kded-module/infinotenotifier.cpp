@@ -40,6 +40,7 @@
 #include <KDE/KLocalizedString>
 #include <KDE/KMimeType>
 #include <KDE/KIconLoader>
+#include <KDE/KRun>
 
 namespace Kobby {
 
@@ -185,10 +186,16 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
     QInfinity::ConnectionItem* connItem = m_connectionItemMap[connection];
     const Host& host = m_connectionHostMap[connItem];
     foreach ( const KUrl& url, m_watchedUrls ) {
+        // There might be multiple queued notifications for different formats of the
+        // same URL. However, a notification will only show for one of them, since
+        // the files added are only attached to one of them.
         if ( hostForUrl(url) == host ) {
             qDebug() << "queuing for update:" << url;
             QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
-            item->addedFiles.insert(iter.path());
+            if ( ! iter.isDirectory() ) {
+                // do not show notifications for creting directories, those are worthless
+                item->addedFiles.insert(iter.path());
+            }
         }
     }
 }
@@ -228,18 +235,34 @@ void InfinoteNotifier::leftDirectory(QString path)
 void InfinoteNotifier::notificationFired()
 {
     QueuedNotification* notification = qobject_cast<QueuedNotification*>(QObject::sender());
-    qDebug() << "emitting changed:" << notification->url;
     OrgKdeKDirNotifyInterface::emitFilesAdded(notification->url);
     m_notifyQueue.remove(notification);
     KUrl url(notification->url);
-    qDebug() << "files added:" << notification->addedFiles;
     if ( ! notification->addedFiles.isEmpty() ) {
+        const int count = notification->addedFiles.count();
+        QString typeString;
         KNotification* message = new KNotification("fileShared");
-        message->setText(i18n("A new file was added for collaborative editing."));
+        if ( count == 1 ) {
+            typeString = *notification->addedFiles.begin();
+            message->setText(i18nc("%1 is a file name", "%1 was added for collaborative editing.", typeString));
+            message->setActions(QStringList(i18n("Edit")));
+            KUrl fullUrl(url);
+            fullUrl.setPath(typeString);
+            message->setProperty("openFile", fullUrl.url());
+            // Use the file's mime type icon
+        }
+        else {
+            message->setText(i18n("Some files were added for collaborative editing."));
+            message->setActions(QStringList(i18n("Show folder")));
+            KUrl folder(notification->url);
+            folder.setPath("/");
+            message->setProperty("openFolder", folder.url());
+            // Use a folder icon
+            typeString = "/";
+        }
         KIconLoader loader;
-        message->setPixmap(loader.loadMimeTypeIcon(KMimeType::findByPath(url.url())->iconName(),
+        message->setPixmap(loader.loadMimeTypeIcon(KMimeType::findByPath(typeString)->iconName(),
                                                    KIconLoader::Dialog));
-        message->setActions(QStringList(i18n("Open in editor")));
         message->setComponentData(KComponentData("infinotenotifier"));
         connect(message, SIGNAL(action1Activated()), SLOT(messageActionActivated()));
         message->sendEvent();
@@ -249,7 +272,21 @@ void InfinoteNotifier::notificationFired()
 
 void InfinoteNotifier::messageActionActivated()
 {
-
+    QObject* message = QObject::sender();
+    const QString openFile = message->property("openFile").toString();
+    const QString openFolder = message->property("openFolder").toString();
+    if ( ! openFile.isEmpty() ) {
+        tryOpenDocumentWithDialog(KUrl(openFile));
+    }
+    else if ( ! openFolder.isEmpty() ) {
+        // Unfortunately, we must run dolphin instead of the user's default file
+        // manager, since the latter is not guaranteed to support KIO.
+        KRun::runCommand("dolphin " + openFolder, 0);
+    }
+    if ( KNotification* notification = qobject_cast<KNotification*>(message) ) {
+        // the cast should never fail, but since this a kded module extra guards don't hurt
+        notification->close();
+    }
 }
 
 QueuedNotification::QueuedNotification(const QString& notifyUrl, int msecs, QObject* parent)
