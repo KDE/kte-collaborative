@@ -78,7 +78,8 @@ void StatusOverlay::loadStateChanged(Document* , Document::LoadState state)
     }
     if ( state == Document::Complete ) {
         displayText(i18n("Done."));
-        hide();
+        rootObject()->setProperty("opacity", 0.0);
+        QTimer::singleShot(400, this, SLOT(hide()));
     }
 }
 
