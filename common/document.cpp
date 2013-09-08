@@ -208,7 +208,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
     {
         kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
                  << "(" << chunk.length() << " chars )" << kDocument()->url();
-        KTextEditor::Cursor startCursor = offsetToCursor_inf( offset );
+        KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
         QString str = codec()->toUnicode( chunk.text() );
         ReadWriteTransaction transaction(kDocument());
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
@@ -229,7 +229,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->blockSignals(false);
         }
         kDebug() << "done inserting text";
-        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_inf(offset+chunk.length())), user, false);
+        emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_kte(offset+chunk.length())), user, false);
         checkConsistency();
     }
     else

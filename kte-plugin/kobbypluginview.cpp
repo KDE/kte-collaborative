@@ -25,6 +25,7 @@
 #include "ui/remotechangenotifier.h"
 #include "ui/sharedocumentdialog.h"
 #include "ui/opencollabdocumentdialog.h"
+#include "ui/statusoverlay.h"
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
 #include "ktpintegration/inftube.h"
@@ -270,8 +271,6 @@ void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
     }
     m_document = document;
     enableUi();
-    connect(document, SIGNAL(synchroinzationProgress(double)),
-            this, SLOT(synchronizationProgress(double)));
 }
 
 void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
@@ -285,11 +284,6 @@ void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
     disableActions();
 }
 
-void KobbyPluginView::synchronizationProgress(double progress)
-{
-    kDebug() << "sync progress:" << progress;
-}
-
 void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QString& hint)
 {
     hint = i18nc("%1 is a user name", "Written by: <b>%1</b>", m_document->changeTracker()->userForCursor(position));
@@ -297,6 +291,16 @@ void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QSt
 
 void KobbyPluginView::enableUi()
 {
+    m_statusOverlay = new StatusOverlay(m_view);
+    m_statusOverlay->move(0, 0);
+    connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
+            m_statusOverlay, SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
+    connect(m_document, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
+            m_statusOverlay, SLOT(loadStateChanged(Document*,Document::LoadState)));
+    connect(m_document, SIGNAL(synchroinzationProgress(double)),
+            m_statusOverlay, SLOT(progress(double)));
+    m_statusOverlay->show();
+
     m_statusBar = new KobbyStatusBar(this);
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
             statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)), Qt::UniqueConnection);
@@ -322,6 +326,11 @@ void KobbyPluginView::disableUi()
     m_view->layout()->removeWidget(m_statusBar);
     delete m_statusBar;
     m_statusBar = 0;
+
+    m_statusOverlay->hide();
+    delete m_statusOverlay;
+    m_statusOverlay = 0;
+
     m_shareWithContactAction->setEnabled(true);
     if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
         iface->disableTextHints();

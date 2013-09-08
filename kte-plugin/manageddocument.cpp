@@ -181,6 +181,8 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
             this, SLOT(unrecoverableError(Document*,QString)));
     connect(m_infDocument, SIGNAL(loadingComplete(Document*)),
             this, SLOT(synchronizationComplete(Document*)));
+    connect(m_infDocument, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
+            this, SIGNAL(loadStateChanged(Document*,Document::LoadState)));
     m_textBuffer->setSession(proxy->session());
     emit synchronizationBegins(this);
 }
