@@ -39,6 +39,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/kobby
     ${CMAKE_SOURCE_DIR}/kobby/dialogs
     ${CMAKE_SOURCE_DIR}/kobby/data
+    ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}/kobby
 )
 

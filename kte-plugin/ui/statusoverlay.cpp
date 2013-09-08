@@ -19,6 +19,8 @@
  *
  */
 #include "statusoverlay.h"
+#include "version.h"
+
 #include <libqinfinity/session.h>
 
 #include <KStandardDirs>
@@ -47,6 +49,12 @@ StatusOverlay::StatusOverlay(KTextEditor::View* parent)
     m_view->installEventFilter(this);
     resizeToView();
     displayText(i18n("Initializing..."));
+
+    QObject* textWidget = rootObject()->findChild<QObject*>("subtitle");
+    QString subtitle = i18n("KTextEditor collaborative editing plugin version %1",
+                            QString(KTECOLLAB_VERSION_STRING)) + "<br>" +
+                       i18n("using libinfinity version %1", QString(LIBINFINITY_VERSION));
+    textWidget->setProperty("text", subtitle);
 }
 
 void StatusOverlay::progress(double percentage)

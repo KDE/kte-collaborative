@@ -33,6 +33,15 @@ Rectangle {
         anchors.verticalCenterOffset: -20
     }
 
+    Text {
+        objectName: "subtitle"
+        color: "#AAAAAA"
+        horizontalAlignment: Text.AlignHCenter
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: 40
+        text: "<no text>"
+    }
+
     ListView {
         z: 2
         id: pbar
