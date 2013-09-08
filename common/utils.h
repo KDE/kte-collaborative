@@ -26,14 +26,23 @@
 #include <QColor>
 #include <KDebug>
 
-#include <glib.h>
-
 #include <libqinfinity/browser.h>
 #include <libqinfinity/browseriter.h>
 
 namespace KTextEditor {
 class View;
 }
+
+/**
+  * @brief Try to open the given document based on the current configuration in KConfig
+  *
+  * @param url The URL to open
+  * @return bool true if the command could be executed, false otherwise
+  */
+KOBBYCOMMON_EXPORT bool tryOpenDocument(const KUrl& url);
+KOBBYCOMMON_EXPORT bool tryOpenDocumentWithDialog(const KUrl& url);
+
+KOBBYCOMMON_EXPORT bool ensureKdedModuleLoaded();
 
 // Helper class for finding the BrowserIter for a directory.
 // libinfinity works with documents (or directories) only as "iters",
@@ -59,6 +68,8 @@ public:
     };
     QInfinity::BrowserIter result() const;
     bool success() const;
+    void setDeleteOnFinish(bool deleteOnFinish = true);
+    void setExploreResult(bool exploreResult = true);
 
 signals:
     void done(QInfinity::BrowserIter found);
@@ -70,6 +81,7 @@ public slots:
         explore(m_currentIter);
     };
     void directoryExplored();
+    void exploreIfDirectory(QInfinity::BrowserIter);
 
 protected:
     void explore(QInfinity::BrowserIter directory);

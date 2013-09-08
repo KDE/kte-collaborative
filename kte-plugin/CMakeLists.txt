@@ -21,8 +21,8 @@ set( kobby_PART_SRCS
     ui/remotechangenotifier.cpp
     ui/sharedocumentdialog.cpp
     ui/opencollabdocumentdialog.cpp
+    ui/statusoverlay.cpp
     settings/kcm_kte_collaborative.cpp
-    ui/selecteditorwidget.cpp
 )
 
 add_definitions(-fPIC)
@@ -65,4 +65,4 @@ target_link_libraries( ktexteditor_kobby
 install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR} )
 install(FILES ktexteditor_kobby.desktop settings/ktexteditor_kobby_config.desktop DESTINATION  ${SERVICES_INSTALL_DIR})
 install(FILES ktexteditor_kobbyui.rc  DESTINATION  ${DATA_INSTALL_DIR}/ktexteditor_kobby)
-install(FILES ui/notifywidget.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)
+install(FILES ui/notifywidget.qml ui/overlay.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)

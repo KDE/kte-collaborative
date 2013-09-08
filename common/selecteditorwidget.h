@@ -27,35 +27,43 @@
 #include <QMap>
 #include <KDialog>
 
+#include "kobbycommon_export.h"
+
+class QButtonGroup;
 class QCheckBox;
 
 /**
  * @brief Widget used in the KCM and the "Select editor" dialog to select the default application for collab documents.
  */
-class SelectEditorWidget : public QWidget
+class KOBBYCOMMON_EXPORT SelectEditorWidget : public QWidget
 {
 Q_OBJECT
 public:
+    struct EditorEntry {
+        QString readableName;
+        QString command;
+    };
+
     SelectEditorWidget(const QString& selectedEntry = QString(), QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     /**
      * @brief Returns the currently selected entry
-     * @return QPair< QString, QString > command to run (first) and readable name (second)
+     * @return a struct describing the selected entry, i.e. its command and readable name.
      */
-    QPair<QString, QString> selectedEntry() const;
+    EditorEntry selectedEntry() const;
 
 signals:
     void selectionChanged();
 
 private:
     QMap<QString, QString> m_validChoices;
-    QWidget* m_buttonsGroup;
+    QButtonGroup* m_buttonsGroup;
 };
 
 /**
  * @brief Simple dialog containing the above widget.
  */
-class SelectEditorDialog : public KDialog
+class KOBBYCOMMON_EXPORT SelectEditorDialog : public KDialog
 {
 Q_OBJECT
 public:
@@ -65,7 +73,7 @@ public:
     /**
      * @brief @see \c SelectEditorWidget selectedEntry
      */
-    QPair<QString, QString> selectedEntry() const;
+    SelectEditorWidget::EditorEntry selectedEntry() const;
 
 private:
     SelectEditorWidget* m_selectWidget;

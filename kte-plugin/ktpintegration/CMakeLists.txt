@@ -1,7 +1,6 @@
 set(inftube_SRCS
     connectionswidget.cpp
     inftube.cpp
-    ../ui/selecteditorwidget.cpp
 )
 
 set(IS_KTP_INTERNAL_MODULE TRUE) # aw yeah
@@ -12,6 +11,8 @@ include_directories(
     ${KDE4_INCLUDES}
     ${TELEPATHY_QT4_INCLUDE_DIR}
     ${KTP_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}
+    ${LIBQINFINITY_INCLUDES}
 )
 
 kde4_add_library(inftube SHARED ${inftube_SRCS})
@@ -22,6 +23,7 @@ set_target_properties( inftube
 )
 
 target_link_libraries(inftube
+                      kobbycommon
                       ${KDE4_KDEUI_LIBS}
                       ${TELEPATHY_QT4_LIBRARIES}
                       ${KTP_LIBRARIES}

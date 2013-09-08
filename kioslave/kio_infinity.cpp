@@ -66,6 +66,8 @@ int KDE_EXPORT kdemain( int argc, char **argv )
         exit(-1);
     }
 
+    ensureKdedModuleLoaded();
+
     QInfinity::init();
 
     InfinityProtocol slave(argv[2], argv[3]);
@@ -129,6 +131,7 @@ void InfinityProtocol::stat(const KUrl& url)
     entry.insert(KIO::UDSEntry::UDS_SIZE, 0);
     entry.insert(KIO::UDSEntry::UDS_DISPLAY_NAME, iter.name());
     entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG);
+    entry.insert(KIO::UDSEntry::UDS_ACCESS, 0x777);
     statEntry(entry);
 
     finished();
@@ -372,6 +375,7 @@ void InfinityProtocol::listDir(const KUrl &url)
             UDSEntry entry;
             entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
             entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
+            entry.insert( KIO::UDSEntry::UDS_ACCESS, 0x777 );
             listEntry(entry, false);
         } while ( iter.next() );
     }

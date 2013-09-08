@@ -31,8 +31,9 @@ class QStackedWidget;
 class QLabel;
 class QTableView;
 
-// This is currently more of a debug-oriented than a user-oriented view.
-// It needs to be adjusted later on.
+/// Model for the @c ConnectionsWidget, containing existing Tp-based connections.
+/// This is currently more of a debug-oriented than a user-oriented view.
+/// It needs to be adjusted later on.
 class ConnectionsModel : public QAbstractTableModel {
 Q_OBJECT
 public:
@@ -49,15 +50,19 @@ private:
 
     friend class ConnectionsWidget;
 
-public slots:
-    void channelReady(Tp::PendingOperation*);
-    void accountManagerReady(Tp::PendingOperation*);
+private slots:
+    void onChannelReady(Tp::PendingOperation*);
+    void onAccountManagerReady(Tp::PendingOperation*);
 };
 
+/**
+ * @brief Widget for displaying a list of existing Tp-based connections.
+ * You can do something if the user clicks a row. Used e.g. in the "Open collab document" dialog.
+ */
 class INFTUBE_EXPORT ConnectionsWidget : public QWidget {
 Q_OBJECT
 public:
-    ConnectionsWidget();
+    ConnectionsWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     /**
      * @brief Set a help message to be displayed in a label when there's at least one connection item.
@@ -65,6 +70,12 @@ public:
     void setHelpMessage(const QString& message);
 
 signals:
+    /**
+     * @brief Emitted when the user single-clicks a connection row.
+     * The hostname is always "localhost" for the kind of connection listed here.
+     * @param localPort the port of the connection
+     * @param nickname a suggested nickname to use
+     */
     void connectionClicked(unsigned int localPort, QString nickname);
 
 private slots:

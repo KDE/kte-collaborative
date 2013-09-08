@@ -19,42 +19,39 @@
  *
  */
 
-#ifndef OPENCOLLABDOCUMENTDIALOG_H
-#define OPENCOLLABDOCUMENTDIALOG_H
+#ifndef STATUSOVERLAY_H
+#define STATUSOVERLAY_H
 
-#include <KDialog>
+#include <QDeclarativeView>
+#include <libqinfinity/xmlconnection.h>
 
-class KMessageWidget;
-class QFormLayout;
-class KLineEdit;
+#include "common/document.h"
 
-class OpenCollabDocumentDialog : public KDialog
+struct Connection;
+using Kobby::Document;
+namespace KTextEditor {
+    class View;
+}
+
+class StatusOverlay : public QDeclarativeView
 {
 Q_OBJECT
 public:
-    explicit OpenCollabDocumentDialog(QWidget* parent = 0, Qt::WindowFlags flags = 0);
-
-    /**
-     * @brief The URL the user has selected to open a document from. Only valid after the dialog was accepted.
-     */
-    KUrl selectedBaseUrl() const;
+    explicit StatusOverlay(KTextEditor::View* parent);
+    virtual bool eventFilter(QObject* watched, QEvent* e);
+    void displayText(const QString& text);
 
 public slots:
-    void connectionClicked(uint,QString);
-    void showAdvanced(bool);
-
-private slots:
-    void showTip();
+    void progress(double percentage);
+    void loadStateChanged(Document*,Document::LoadState);
+    void connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status);
 
 private:
-    KLineEdit* m_password;
-    KLineEdit* m_userName;
-    KLineEdit* m_port;
-    KLineEdit* m_host;
-    QFormLayout* m_advancedSettingsLayout;
-    KMessageWidget* m_tip;
+    void resizeToView();
+    void setProgressBar(double percentage);
 
-    QPair<unsigned int, QString> m_selectedConnection;
+private:
+    KTextEditor::View* m_view;
 };
 
-#endif // OPENCOLLABDOCUMENTDIALOG_H
+#endif // STATUSOVERLAY_H

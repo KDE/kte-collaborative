@@ -39,10 +39,10 @@ ConnectionsModel::ConnectionsModel(QObject* parent)
     m_accountManager = getAccountManager();
     connect(m_accountManager->becomeReady(Tp::Features() << Tp::AccountManager::FeatureCore),
             SIGNAL(finished(Tp::PendingOperation*)),
-            SLOT(accountManagerReady(Tp::PendingOperation*)));
+            SLOT(onAccountManagerReady(Tp::PendingOperation*)));
 }
 
-void ConnectionsModel::accountManagerReady(Tp::PendingOperation* )
+void ConnectionsModel::onAccountManagerReady(Tp::PendingOperation* )
 {
     InfTubeConnectionRetriever r;
     const ChannelList channels = r.retrieveChannels();
@@ -65,12 +65,11 @@ void ConnectionsModel::accountManagerReady(Tp::PendingOperation* )
         m_channels << channel;
         connect(channel->becomeReady(Tp::Features() << Tp::StreamTubeChannel::FeatureCore),
                 SIGNAL(finished(Tp::PendingOperation*)),
-                SLOT(channelReady(Tp::PendingOperation*)));
+                SLOT(onChannelReady(Tp::PendingOperation*)));
     }
-    emit dataChanged(index(0, 0), index(rowCount(), columnCount(QModelIndex())));
 }
 
-void ConnectionsModel::channelReady(Tp::PendingOperation* operation)
+void ConnectionsModel::onChannelReady(Tp::PendingOperation* operation)
 {
     kDebug() << "channel ready" << rowCount() << "channels total";
     Tp::StreamTubeChannelPtr channel;
@@ -101,13 +100,13 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
 {
     if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
         if ( section == 1 ) {
-            return "Type";
+            return i18n("Type");
         }
         else if ( section == 2 ) {
-            return "Peer";
+            return i18n("Peer");
         }
         else if ( section == 0 ) {
-            return "Port";
+            return i18n("Port");
         }
     }
     return QAbstractItemModel::headerData(section, orientation, role);
@@ -118,7 +117,7 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
     if ( role == Qt::DecorationRole ) {
         switch ( index.column() ) {
             case 2: {
-                QVariantMap channel = m_connections.at(index.row());
+                const QVariantMap& channel = m_connections.at(index.row());
                 int type = channel["targetHandleType"].toInt();
                 kDebug() << channel;
                 if ( type == Tp::HandleTypeContact ) {
@@ -131,22 +130,22 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
     }
     if ( role == Qt::DisplayRole ) {
         switch ( index.column() ) {
+            case 0:
+                return m_connections.at(index.row())["localEndpoint"];
             case 1: {
                 int type = m_connections.at(index.row())["targetHandleType"].toInt();
                 if ( type == Tp::HandleTypeContact ) {
-                    return "Contact";
+                    return i18n("Contact");
                 }
                 else if ( type == Tp::HandleTypeRoom ) {
-                    return "Chatroom";
+                    return i18n("Chatroom");
                 }
                 else {
-                    return "unknown";
+                    return i18n("unknown");
                 }
             }
             case 2:
                 return m_connections.at(index.row())["targetHandle"];
-            case 0:
-                return m_connections.at(index.row())["localEndpoint"];
         }
     }
     return QVariant();
@@ -172,7 +171,8 @@ void ConnectionsWidget::setHelpMessage(const QString& message)
     m_helpMessageLabel->setVisible(true);
 }
 
-ConnectionsWidget::ConnectionsWidget()
+ConnectionsWidget::ConnectionsWidget(QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
 {
     kDebug() << "creating connections widget";
 
@@ -185,7 +185,9 @@ ConnectionsWidget::ConnectionsWidget()
     m_helpMessageLabel = new QLabel();
     m_helpMessageLabel->setVisible(false); // will be set to visible by setHelpMessage()
 
-    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+    connect(model, SIGNAL(rowsInserted(const QModelIndex&,int,int)),
+            this, SLOT(adjustTableSizes()));
+    connect(model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
             this, SLOT(adjustTableSizes()));
     connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             this, SLOT(checkIfEmpty()));

@@ -175,6 +175,8 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     m_proxy = proxy;
     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
                      this, SLOT(sessionStatusChanged()));
+    QObject::connect(proxy->session(), SIGNAL(progress(double)),
+                     this, SIGNAL(synchroinzationProgress(double)));
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());
@@ -182,6 +184,8 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
             this, SLOT(unrecoverableError(Document*,QString)));
     connect(m_infDocument, SIGNAL(loadingComplete(Document*)),
             this, SLOT(synchronizationComplete(Document*)));
+    connect(m_infDocument, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
+            this, SIGNAL(loadStateChanged(Document*,Document::LoadState)));
     m_textBuffer->setSession(proxy->session());
     emit synchronizationBegins(this);
 }

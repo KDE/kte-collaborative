@@ -20,7 +20,8 @@
 #include "inftube.h"
 
 #include "infinoted.h"
-#include "../ui/selecteditorwidget.h"
+#include "common/selecteditorwidget.h"
+#include "common/utils.h"
 
 #include <KTp/debug.h>
 #include <KTp/Widgets/contact-grid-dialog.h>
@@ -47,6 +48,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <unistd.h>
+#include <kdirnotify.h>
 
 QDBusArgument &operator<<(QDBusArgument &argument, const ChannelList& message) {
     argument.beginArray(qMetaTypeId<QVariantMap>());
@@ -240,7 +242,6 @@ void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
         KIO::FileCopyJob* job = KIO::file_copy(document, x, -1, KIO::HideProgressInfo);
         connect(job, SIGNAL(finished(KJob*)), this, SLOT(jobFinished(KJob*)));
     }
-
 }
 
 Tp::PendingChannelRequest* InfTubeRequester::offer(const Tp::AccountPtr& account, const Tp::ContactPtr& contact, const DocumentList& documents)
@@ -316,14 +317,14 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
     hints = hints.unite(requestHints.allHints());
     hints.insert("localSocket", QString::number(port));
 
+    KUrl localUrl;
+    localUrl.setProtocol("inf");
+    localUrl.setHost("127.0.0.1");
+    localUrl.setUser(account->displayName());
+    localUrl.setPort(port);
     if ( hints.contains("needToOpenDocument") && hints["needToOpenDocument"].toBool() == true ) {
         // For tubes requested from e.g. ktp-contact-list, the server side
         // also needs to open the document.
-        KUrl localUrl;
-        localUrl.setProtocol("inf");
-        localUrl.setHost("127.0.0.1");
-        localUrl.setUser(account->displayName());
-        localUrl.setPort(port);
         bool ok = false;
         QVector<KUrl> sources;
         QVector<QString> paths = documentsListFromParameters(hints, &ok, &sources);
@@ -348,6 +349,11 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
 
     channel->setProperty("accountPath", account->objectPath());
     m_channels.append(channel);
+
+    ensureKdedModuleLoaded();
+    localUrl.setPath("/");
+    kDebug() << "emitting entered URL" << localUrl;
+    OrgKdeKDirNotifyInterface::emitEnteredDirectory(localUrl.url());
 }
 
 QString username() {
@@ -436,41 +442,6 @@ void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr
     }
 }
 
-bool tryOpenDocument(const KUrl& url)
-{
-    KUrl dir = url.upUrl();
-    KConfig config("ktecollaborative");
-    KConfigGroup group = config.group("applications");
-    // We do not set a default value here, so the dialog is always
-    // displayed the first time the user uses the feature.
-    QString command = group.readEntry("editor", "");
-    if ( command.isEmpty() ) {
-        return false;
-    }
-
-    command = command.replace("%u", url.url());
-    command = command.replace("%d", dir.url());
-    command = command.replace("%h", url.host() % ( url.port() ? (":" + QString::number(url.port())) : QString()));
-    QString executable = command.split(' ').first();
-    QString arguments = QStringList(command.split(' ').mid(1, -1)).join(" ");
-    QString executablePath = KStandardDirs::findExe(executable);
-    if ( executablePath.isEmpty() ) {
-        return false;
-    }
-    return KRun::runCommand(executablePath + " " + arguments, 0);
-}
-
-bool tryOpenDocumentWithDialog(const KUrl& url)
-{
-    while ( ! tryOpenDocument(url) ) {
-        SelectEditorDialog dlg;
-        if ( ! dlg.exec() ) {
-            return false;
-        }
-    }
-    return true;
-}
-
 QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool* ok, QVector<KUrl>* sourcePaths) {
     QVector<QString> items;
 
@@ -521,6 +492,12 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
     tube->setProperty("accountPath", account->objectPath());
     m_channels.append(tube);
     emit connected();
+
+    // Notify that we should now watch this directory, for when files are added later on
+    ensureKdedModuleLoaded();
+    url.setPath("/");
+    kDebug() << "emitting entered URL" << url;
+    OrgKdeKDirNotifyInterface::emitEnteredDirectory(url.url());
 }
 
 InfTubeClient::~InfTubeClient()

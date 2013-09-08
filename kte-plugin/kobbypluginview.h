@@ -31,6 +31,7 @@
 
 #include "common/document.h"
 
+class StatusOverlay;
 namespace Kobby {
     class Connection;
 }
@@ -123,6 +124,7 @@ public slots:
 private:
     KTextEditor::View* m_view;
     KobbyStatusBar* m_statusBar;
+    StatusOverlay* m_statusOverlay;
     ManagedDocument* m_document;
 
     // actions from the "Collaborative" menu

@@ -22,7 +22,7 @@
 #include "kcm_kte_collaborative.h"
 #include "kobbyplugin.h"
 
-#include "ui/selecteditorwidget.h"
+#include "common/selecteditorwidget.h"
 
 #include <KDebug>
 #include <KMessageWidget>
@@ -111,5 +111,5 @@ void KCMKTECollaborative::save()
     m_notifyGroup.writeEntry("highlightBackground", m_highlightBackground->isChecked());
     m_notifyGroup.writeEntry("displayWidgets", m_displayWidgets->isChecked());
     m_notifyGroup.writeEntry("enableTextHints", m_displayTextHints->isChecked());
-    m_applicationsGroup.writeEntry("editor", m_selectEditorWidget->selectedEntry().first);
+    m_applicationsGroup.writeEntry("editor", m_selectEditorWidget->selectedEntry().command);
 }
