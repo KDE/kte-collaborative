@@ -38,13 +38,19 @@ public:
      * @brief The URL the user has selected to open a document from. Only valid after the dialog was accepted.
      */
     KUrl selectedBaseUrl() const;
+    virtual void accept();
+
+signals:
+    void shouldOpenDocument(const KUrl&);
 
 public slots:
     void connectionClicked(uint,QString);
+    void acceptedWithManualConnection();
     void showAdvanced(bool);
 
 private slots:
     void showTip();
+    void requestFileToOpen();
 
 private:
     KLineEdit* m_password;

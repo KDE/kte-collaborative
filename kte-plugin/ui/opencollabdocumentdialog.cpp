@@ -30,6 +30,8 @@
 #include <KLocalizedString>
 #include <KMessageWidget>
 #include <KLineEdit>
+#include <KFileDialog>
+#include <KPushButton>
 
 OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFlags flags)
     : KDialog(parent, flags)
@@ -80,6 +82,8 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     connect(connections, SIGNAL(connectionClicked(uint,QString)),
             this, SLOT(connectionClicked(uint,QString)));
 
+    connect(button(KDialog::Ok), SIGNAL(clicked(bool)), SLOT(acceptedWithManualConnection()));
+
     setMainWidget(widget);
 
     resize(600, 450);
@@ -103,6 +107,33 @@ void OpenCollabDocumentDialog::connectionClicked(uint port, QString user)
 {
     m_selectedConnection = qMakePair(port, user);
     accept();
+    requestFileToOpen();
+}
+
+void OpenCollabDocumentDialog::acceptedWithManualConnection()
+{
+    requestFileToOpen();
+}
+
+void OpenCollabDocumentDialog::requestFileToOpen()
+{
+    // request URL to open
+    KUrl result = KFileDialog::getOpenUrl(selectedBaseUrl());
+    if ( result.isValid() ) {
+        emit shouldOpenDocument(result);
+        QDialog::accept();
+    }
+    else {
+        reject();
+    }
+}
+
+void OpenCollabDocumentDialog::accept()
+{
+    // Disable everything in this dialog; we'll close it later
+    foreach ( QWidget* widget, findChildren<QWidget*>() ) {
+        widget->setDisabled(true);
+    }
 }
 
 KUrl OpenCollabDocumentDialog::selectedBaseUrl() const

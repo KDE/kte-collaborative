@@ -380,13 +380,11 @@ void KobbyPluginView::changeUserName(const QString& newUserName)
 
 void KobbyPluginView::openActionClicked()
 {
-    OpenCollabDocumentDialog dialog;
-    if ( dialog.exec() == KDialog::Accepted ) {
-        KUrl result = KFileDialog::getOpenUrl(dialog.selectedBaseUrl());
-        if ( result.isValid() ) {
-            m_view->document()->openUrl(KUrl(result));
-        }
-    }
+    OpenCollabDocumentDialog* dialog = new OpenCollabDocumentDialog();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    connect(dialog, SIGNAL(shouldOpenDocument(KUrl)),
+            m_view->document(), SLOT(openUrl(KUrl)));
+    dialog->show();
 }
 
 void KobbyPluginView::saveCopyActionClicked()
