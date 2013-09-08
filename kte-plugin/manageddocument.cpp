@@ -172,6 +172,8 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
     m_proxy = proxy;
     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
                      this, SLOT(sessionStatusChanged()));
+    QObject::connect(proxy->session(), SIGNAL(progress(double)),
+                     this, SIGNAL(synchroinzationProgress(double)));
     QInfinity::TextSession* textSession = dynamic_cast<QInfinity::TextSession*>(proxy->session().data());
     m_infDocument = new Kobby::InfTextDocument(proxy.data(), textSession,
                                                m_textBuffer, document()->documentName());

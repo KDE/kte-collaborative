@@ -106,6 +106,7 @@ public slots:
     void documentBecameManaged(ManagedDocument*);
     void documentBecameUnmanaged(ManagedDocument*);
     void documentReady(ManagedDocument*);
+    void synchronizationProgress(double);
 
     void disconnectActionClicked();
     void openActionClicked();

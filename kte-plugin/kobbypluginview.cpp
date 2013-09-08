@@ -270,6 +270,8 @@ void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
     }
     m_document = document;
     enableUi();
+    connect(document, SIGNAL(synchroinzationProgress(double)),
+            this, SLOT(synchronizationProgress(double)));
 }
 
 void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
@@ -281,6 +283,11 @@ void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
     m_document = 0;
     disableUi();
     disableActions();
+}
+
+void KobbyPluginView::synchronizationProgress(double progress)
+{
+    kDebug() << "sync progress:" << progress;
 }
 
 void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QString& hint)
@@ -324,7 +331,6 @@ void KobbyPluginView::disableUi()
 
 void KobbyPluginView::disconnectActionClicked()
 {
-    // TODO
     m_document->document()->saveAs(KUrl(QDir::tempPath() + m_document->document()->url().encodedPath()));
 }
 

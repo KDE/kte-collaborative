@@ -179,6 +179,12 @@ signals:
      */
     void synchronizationBegins(ManagedDocument* document);
 
+    /**
+     * @brief Emitted when a new sync chunk arrives.
+     * @param percentage Percentage synchronized so far (1.0 is finished)
+     */
+    void synchroinzationProgress(double percentage);
+
 private:
     Kobby::KDocumentTextBuffer* m_textBuffer;
     KTextEditor::Document* m_document;
