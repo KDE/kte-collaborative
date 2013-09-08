@@ -461,19 +461,15 @@ KTextEditor::Cursor KDocumentTextBuffer::offsetRelativeTo_kte(const KTextEditor:
     return KTextEditor::Cursor(lineno, lineno == cursor.line() ? cursor.column() + surrogates : surrogates);
 }
 
-KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_inf( unsigned int offset )
+KTextEditor::Cursor KDocumentTextBuffer::offsetToCursor_kte( unsigned int offset )
 {
-    QList<QByteArray> lines = slice(0, offset)->text().split('\n');
-    // count utf-16 surrogates
-    int remaining = codec()->toUnicode(lines.last()).length();
-    return KTextEditor::Cursor(lines.count() - 1, remaining);
+    return offsetRelativeTo_kte(KTextEditor::Cursor(0, 0), offset);
 }
 
 unsigned int KDocumentTextBuffer::cursorToOffset_kte( const KTextEditor::Cursor &cursor )
 {
     unsigned int offset = 0;
     for( int i = 0; i < cursor.line(); i++ ) {
-        kDebug() << "LINE" << i;
         offset += countUnicodeCharacters(kDocument()->line(i)) + 1; // Add newline
     }
     offset += countUnicodeCharacters(kDocument()->line(cursor.line()).left(cursor.column()));
