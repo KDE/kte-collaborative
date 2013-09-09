@@ -20,9 +20,11 @@
  */
 
 #include "infinotenotifier.h"
-#include <common/itemfactory.h>
-#include <common/connection.h>
-#include <common/utils.h>
+
+#include "common/itemfactory.h"
+#include "common/connection.h"
+#include "common/utils.h"
+#include "version.h"
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/browser.h>
@@ -41,19 +43,32 @@
 #include <KDE/KMimeType>
 #include <KDE/KIconLoader>
 #include <KDE/KRun>
+#include <KAboutData>
+#include <KUniqueApplication>
+#include <KCmdLineArgs>
+
+int main(int argc, char **argv) {
+    KAboutData about( "infinotenotifier", "kte-collaborative",
+                      ki18n("infinotenotifier"), KTECOLLAB_VERSION_STRING,
+                      ki18n("Notification helper for Collaborative Editing"), KAboutData::License_GPL_V2 );
+    KCmdLineArgs::init(argc, argv, &about);
+    KUniqueApplication a;
+    Kobby::InfinoteNotifier notifier;
+    if ( ! KUniqueApplication::start() ) {
+        kDebug() << "notifier is already running";
+        return 0;
+    }
+    return a.exec();
+}
 
 namespace Kobby {
-
-K_PLUGIN_FACTORY(InfinoteNotifierFactory, registerPlugin<InfinoteNotifier>();)
-K_EXPORT_PLUGIN(InfinoteNotifierFactory("infinotenotifier"))
 
 Host hostForUrl(const KUrl& url) {
     return Host(url.host(), url.port());
 }
 
-InfinoteNotifier::InfinoteNotifier(QObject* parent, const QVariantList& )
-    : KDEDModule(parent)
-    , QDBusContext()
+InfinoteNotifier::InfinoteNotifier(QObject* parent)
+    : QObject(parent)
     , m_notifyIface(new OrgKdeKDirNotifyInterface(QString(), QString(), QDBusConnection::sessionBus(), this))
     , m_browserModel(0)
 {

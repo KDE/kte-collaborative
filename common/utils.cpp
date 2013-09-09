@@ -23,13 +23,12 @@
 #include <ktexteditor/configinterface.h>
 
 #include <QStringList>
-#include <QDBusInterface>
-#include <QDBusReply>
 #include <KTextEditor/View>
 #include <KConfigGroup>
 #include <KConfig>
 #include <KStandardDirs>
 #include <KRun>
+#include <KToolInvocation>
 
 using QInfinity::ExploreRequest;
 
@@ -68,13 +67,11 @@ bool tryOpenDocumentWithDialog(const KUrl& url)
     return true;
 }
 
-bool ensureKdedModuleLoaded()
+bool ensureNotifierModuleLoaded()
 {
-    // Make sure the notification kded module is loaded
-    QDBusInterface iface("org.kde.kded", "/kded", "org.kde.kded");
-    QDBusReply<bool> result = iface.call("loadModule", "infinotenotifier");
-    kDebug() << "trying to load kded module; success:" << result.value();
-    return result.value();
+    KStandardDirs d;
+    QString desktopPath = d.findResource("services", "infinotenotifier.desktop");
+    return KToolInvocation::startServiceByDesktopPath(desktopPath) == 0;
 }
 
 IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)

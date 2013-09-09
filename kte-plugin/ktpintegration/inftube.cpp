@@ -350,7 +350,7 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
     channel->setProperty("accountPath", account->objectPath());
     m_channels.append(channel);
 
-    ensureKdedModuleLoaded();
+    ensureNotifierModuleLoaded();
     localUrl.setPath("/");
     kDebug() << "emitting entered URL" << localUrl;
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(localUrl.url());
@@ -494,7 +494,7 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
     emit connected();
 
     // Notify that we should now watch this directory, for when files are added later on
-    ensureKdedModuleLoaded();
+    ensureNotifierModuleLoaded();
     url.setPath("/");
     kDebug() << "emitting entered URL" << url;
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(url.url());

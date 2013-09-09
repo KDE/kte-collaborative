@@ -84,13 +84,13 @@ signals:
  * As a secondary task, it can also display popup notifications for the user, to tell that
  * someone has shared a new file.
  */
-class InfinoteNotifier : public KDEDModule, QDBusContext
+class InfinoteNotifier : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.InfinoteNotifier")
 
 public:
-    InfinoteNotifier(QObject *parent, const QVariantList &);
+    InfinoteNotifier(QObject *parent = 0);
     virtual ~InfinoteNotifier();
 
 private slots:
