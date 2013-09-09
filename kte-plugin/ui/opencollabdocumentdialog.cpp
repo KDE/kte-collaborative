@@ -87,6 +87,7 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     setMainWidget(widget);
 
     resize(600, 450);
+    m_host->setFocus();
 }
 
 void OpenCollabDocumentDialog::showTip()
