@@ -615,6 +615,7 @@ void InfTextDocument::slotSynchronized()
     setLoadState( Document::SynchronizationComplete );
     joinSession();
     m_buffer->resetUndoRedo();
+    kDocument()->setModified(false);
 }
 
 void InfTextDocument::slotSynchronizationFailed( GError *gerror )
