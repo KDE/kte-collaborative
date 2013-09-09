@@ -52,6 +52,7 @@ private:
 
 private:
     KTextEditor::View* m_view;
+    QTime m_maxUpdateRateTimer;
 };
 
 #endif // STATUSOVERLAY_H

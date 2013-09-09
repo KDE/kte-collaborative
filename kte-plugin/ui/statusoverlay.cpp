@@ -55,13 +55,17 @@ StatusOverlay::StatusOverlay(KTextEditor::View* parent)
                             QString(KTECOLLAB_VERSION_STRING)) + "<br>" +
                        i18n("using libinfinity version %1", QString(LIBINFINITY_VERSION));
     textWidget->setProperty("text", subtitle);
+    m_maxUpdateRateTimer.start();
 }
 
 void StatusOverlay::progress(double percentage)
 {
-    setProgressBar(percentage);
-    displayText(i18nc("%1 is a progress percentage", "Synchronizing document... %1%", static_cast<int>(percentage*100)));
-    repaint();
+    if ( m_maxUpdateRateTimer.elapsed() > 100 ) {
+        setProgressBar(percentage);
+        displayText(i18nc("%1 is a progress percentage", "Synchronizing document... %1%", static_cast<int>(percentage*100)));
+        repaint();
+        m_maxUpdateRateTimer.restart();
+    }
 }
 
 void StatusOverlay::setProgressBar(double percentage)
