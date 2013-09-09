@@ -206,7 +206,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
 
     if( !blockRemoteInsert )
     {
-        kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
+        kDebug() << "REMOTE INSERT TEXT offset" << offset << kDocument()
                  << "(" << chunk.length() << " chars )" << kDocument()->url();
         KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
         QString str = codec()->toUnicode( chunk.text() );
@@ -215,9 +215,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         // The compile-time check just verifies that the interface is present.
         // This does not guarantee that it is supported by the KTE implementation used here.
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
-            kDebug() << "buffer insert start vvvvvv";
             iface->insertTextSilent(startCursor, str);
-            kDebug() << "buffer insert end   ^^^^^^";
         }
 #else
         if ( false ) { }
@@ -228,7 +226,6 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
             kDocument()->insertText( startCursor, str );
             kDocument()->blockSignals(false);
         }
-        kDebug() << "done inserting text";
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_kte(offset+chunk.length())), user, false);
         checkConsistency();
     }
@@ -258,9 +255,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
-            kDebug() << "buffer erase start vvvvvv";
             iface->removeTextSilent(KTextEditor::Range(startCursor, endCursor));
-            kDebug() << "buffer erase end   ^^^^^^";
         }
 #else
         if ( false ) { }
@@ -271,7 +266,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
             kDocument()->removeText( range );
             kDocument()->blockSignals(false);
         }
-        kDebug() << "done removing text";
         emit remoteChangedText(range, user, true);
         checkConsistency();
     }
