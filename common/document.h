@@ -196,6 +196,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void updateUndoRedoActions();
 
         void checkConsistency();
+        void checkLineEndings();
         void shutdown();
 
     Q_SIGNALS:
@@ -215,6 +216,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
             const KTextEditor::Range &range );
         void localTextRemoved( KTextEditor::Document *document,
             const KTextEditor::Range &range, const QString& oldText );
+        void replaceLineEndings();
 
     private:
         // All offsets are in unicode code points, all cursors are in utf-16 surrogates.

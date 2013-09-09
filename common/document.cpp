@@ -489,6 +489,49 @@ void KDocumentTextBuffer::textOpPerformed()
     }
 }
 
+void KDocumentTextBuffer::checkLineEndings()
+{
+    QString bufferContents = kDocument()->text();
+    if ( bufferContents.contains("\r\n") || bufferContents.contains("\r") ) {
+        KDialog* dlg = new KDialog(kDocument()->activeView());
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->setButtons(KDialog::Ok | KDialog::Cancel);
+        dlg->button(KDialog::Ok)->setText(i18n("Continue"));
+        QLabel* l = new QLabel(i18n("The document you opened contains non-standard line endings. "
+                                    "Do you want to convert them to the standard \"\\n\" format?<br><br>"
+                                    "<i>Note: This change will be synchronized to the server.</i>"), dlg);
+        l->setWordWrap(true);
+        dlg->setMainWidget(l);
+        connect(dlg, SIGNAL(okClicked()), this, SLOT(replaceLineEndings()));
+        dlg->show();
+    }
+}
+
+void KDocumentTextBuffer::replaceLineEndings()
+{
+    const QStringList lines = kDocument()->textLines( KTextEditor::Range(
+        KTextEditor::Cursor::start(),
+        KTextEditor::Cursor(kDocument()->lines(), kDocument()->lineLength(kDocument()->lines() - 1) )) );
+    for ( int i = lines.count() - 1; i >= 0; i-- ) {
+        QString line = lines[i];
+        int offset = 0;
+        while ( ( offset = line.lastIndexOf('\r') ) != -1 ) {
+            int replaceLen = 1;
+            if ( offset - 1 < line.length() ) {
+                // check if this \r is part of a \r\n
+                if ( line[offset+1] == '\n' ) {
+                    replaceLen = 2;
+                }
+            }
+            KTextEditor::Cursor replaceStart(i, offset);
+            KTextEditor::Cursor replaceEnd(i, offset+replaceLen);
+            KTextEditor::Range replaceRange = KTextEditor::Range(replaceStart, replaceEnd);
+            kDocument()->replaceText(replaceRange, "\n");
+            line.replace(offset, replaceLen, '\n');
+        }
+    }
+}
+
 /* Accepting the session and buffer as parameters, although we
    could obtain them from the session proxy, ensures some type
    safety. */
@@ -597,6 +640,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     m_user = QInfinity::AdoptedUser::wrap(INF_ADOPTED_USER(user->gobject()));
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
+    m_buffer->checkLineEndings();
     kDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
     kDebug() << "in document" << kDocument()->url();
 }
