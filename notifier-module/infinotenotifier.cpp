@@ -73,7 +73,7 @@ InfinoteNotifier::InfinoteNotifier(QObject* parent)
     , m_notifyIface(new OrgKdeKDirNotifyInterface(QString(), QString(), QDBusConnection::sessionBus(), this))
     , m_browserModel(0)
 {
-    qDebug() << "Loaded module";
+    kDebug() << "Loaded module";
     QInfinity::init();
     connect(m_notifyIface, SIGNAL(enteredDirectory(QString)), SLOT(enteredDirectory(QString)));
     connect(m_notifyIface, SIGNAL(leftDirectory(QString)), SLOT(leftDirectory(QString)));
@@ -81,7 +81,7 @@ InfinoteNotifier::InfinoteNotifier(QObject* parent)
 
 InfinoteNotifier::~InfinoteNotifier()
 {
-    qDebug() << "unloaded module";
+    kDebug() << "unloaded module";
     m_browserModel.clear();
 }
 
@@ -99,7 +99,7 @@ void InfinoteNotifier::ensureInWatchlist(const QString& url_)
     Host host(url.host(), url.port());
     bool haveConnectionForHost = m_connectionHostMap.values().contains(host);
     if ( haveConnectionForHost ) {
-        qDebug() << "exploring" << url.url();
+        kDebug() << "exploring" << url.url();
         IterLookupHelper* helper = new IterLookupHelper(url.path(), m_hostBrowserMap[host]);
         helper->setDeleteOnFinish();
         helper->setExploreResult();
@@ -107,7 +107,7 @@ void InfinoteNotifier::ensureInWatchlist(const QString& url_)
         return;
     }
     // We do not handle errors here at all. If the connection fails, it'll not be watched.
-    qDebug() << "creating connection for" << url;
+    kDebug() << "creating connection for" << url;
     Kobby::Connection* conn = new Kobby::Connection(host.hostname, host.port, QString(), this);
     QObject::connect(conn, SIGNAL(ready(Connection*)), this, SLOT(connectionReady(Connection*)));
     QObject::connect(conn, SIGNAL(error(Connection*,QString)), SLOT(connectionError(Connection*,QString)));
@@ -140,17 +140,17 @@ void InfinoteNotifier::connectionDisconnected(Connection* connection)
 
 void InfinoteNotifier::connectionError(Connection* , QString error)
 {
-    qDebug() << "connection error:" << error;
+    kDebug() << "connection error:" << error;
 }
 
 void InfinoteNotifier::connectionReady(Connection* conn)
 {
-    qDebug() << "connection ready:" << conn;
+    kDebug() << "connection ready:" << conn;
     if ( ! conn || ! conn->xmppConnection() ) {
         return;
     }
 
-    qDebug() << "adding connection";
+    kDebug() << "adding connection";
     QInfinity::XmlConnection* xmlConnection = static_cast<QInfinity::XmlConnection*>(conn->xmppConnection());
     QInfinity::ConnectionItem* connItem = m_browserModel->addConnection(xmlConnection,
         conn->host().hostname + QString::number(conn->host().port)
@@ -161,7 +161,7 @@ void InfinoteNotifier::connectionReady(Connection* conn)
     m_connectionItemMap.insert(xmlConnection, connItem);
     m_hostBrowserMap.insert(conn->host(), browser);
 
-    qDebug() << "opening connection";
+    kDebug() << "opening connection";
     conn->open();
 
     connect(browser, SIGNAL(connectionEstablished(const QInfinity::Browser*)),
@@ -191,7 +191,7 @@ void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser_)
 
 void InfinoteNotifier::itemAdded(BrowserIter iter)
 {
-    qDebug() << "item added";
+    kDebug() << "item added";
     QInfinity::BrowserIter copy(iter);
     if ( copy.parent() && infc_browser_iter_get_explore_request(copy.infBrowser(), copy.infBrowserIter()) ) {
         // the directory is just being explored, so the added signal is not a "real" one
@@ -212,7 +212,7 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
         // same URL. However, a notification will only show for one of them, since
         // the files added are only attached to one of them.
         if ( hostForUrl(url) == host ) {
-            qDebug() << "queuing for update:" << url;
+            kDebug() << "queuing for update:" << url;
             QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
             if ( ! iter.isDirectory() ) {
                 // do not show notifications for creting directories, those are worthless
@@ -224,7 +224,7 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
 
 void InfinoteNotifier::itemRemoved(BrowserIter iter)
 {
-    qDebug() << "item removed";
+    kDebug() << "item removed";
     itemAdded(iter);
 }
 
@@ -233,9 +233,9 @@ void InfinoteNotifier::enteredDirectory(QString path)
     if ( ! path.startsWith("inf") ) {
         return;
     }
-    qDebug() << "entered directory" << path;
+    kDebug() << "entered directory" << path;
     ensureInWatchlist(path);
-    qDebug() << "have watched:" << m_watchedUrls;
+    kDebug() << "have watched:" << m_watchedUrls;
 }
 
 void InfinoteNotifier::leftDirectory(QString path)
@@ -243,9 +243,9 @@ void InfinoteNotifier::leftDirectory(QString path)
     if ( ! path.startsWith("inf") ) {
         return;
     }
-    qDebug() << "left directory" << path;
+    kDebug() << "left directory" << path;
     m_watchedUrls.remove(path);
-    qDebug() << "have watched:" << m_watchedUrls;
+    kDebug() << "have watched:" << m_watchedUrls;
 }
 
 void InfinoteNotifier::notificationFired()

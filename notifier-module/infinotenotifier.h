@@ -26,7 +26,6 @@
 #include <QSet>
 #include <QSharedPointer>
 
-#include <kdedmodule.h>
 #include <common/connection.h>
 
 class QTimer;
@@ -76,7 +75,7 @@ signals:
 };
 
 /**
- * @brief KDED module for updating infinity directory views and sending notifications.
+ * @brief Notification daemon for updating infinity directory views and sending notifications.
  * The infinity protocol sends push notifications when files are added or removed. The main
  * task of this kded module is to keep track of what directories are being displayed in a file
  * manager or other file view (e.g. kate "File system" side bar) and emit signals on the
@@ -86,8 +85,7 @@ signals:
  */
 class InfinoteNotifier : public QObject
 {
-    Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.kde.InfinoteNotifier")
+Q_OBJECT
 
 public:
     InfinoteNotifier(QObject *parent = 0);
