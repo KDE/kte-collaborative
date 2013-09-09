@@ -327,7 +327,6 @@ void KobbyPluginView::disableUi()
     delete m_statusBar;
     m_statusBar = 0;
 
-    m_statusOverlay->hide();
     delete m_statusOverlay;
     m_statusOverlay = 0;
 
