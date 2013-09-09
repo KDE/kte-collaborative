@@ -84,6 +84,7 @@ void StatusOverlay::loadStateChanged(Document* , Document::LoadState state)
         displayText(i18n("Done."));
         rootObject()->setProperty("opacity", 0.0);
         QTimer::singleShot(400, this, SLOT(hide()));
+        QTimer::singleShot(400, this, SLOT(deleteLater()));
     }
 }
 
@@ -93,7 +94,7 @@ void StatusOverlay::connectionStatusChanged(Connection* , QInfinity::XmlConnecti
         displayText(i18n("Connecting..."));
     }
     if ( status == QInfinity::XmlConnection::Open ) {
-        displayText(i18n("Synchronizing document..."));
+        displayText(i18n("Initiating synchronization..."));
     }
 }
 

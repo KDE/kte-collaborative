@@ -463,6 +463,7 @@ void KobbyPluginView::documentReady(ManagedDocument* doc)
             statusBar(), SLOT(usersChanged()));
     m_statusBar->usersChanged();
     statusBar()->sessionFullyReady();
+    m_statusOverlay = 0; // will delete itself
 
     enableActions();
 }

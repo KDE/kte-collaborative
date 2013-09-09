@@ -158,6 +158,7 @@ void ManagedDocument::lookupFailed()
         unsubscribe();
         KMessageBox::error(document()->widget(),
                            i18n("Failed to open file %1, make sure it exists.", document()->url().url()));
+        document()->closeUrl();
     }
     m_connectionRetries += 1;
 }
