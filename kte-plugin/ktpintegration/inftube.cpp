@@ -356,17 +356,9 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(localUrl.url());
 }
 
-QString username() {
-#ifdef Q_OS_WIN
-    return qgetenv("USERNAME");
-#else
-    return qgetenv("USER");
-#endif
-}
-
 QString InfTubeServer::serverDirectory(unsigned short port) const
 {
-    return QDir::tempPath() + "/infinote-" + username() + "/server-" + QString::number(port);
+    return QDir::tempPath() + "/infinote-" + getUserName() + "/server-" + QString::number(port);
 }
 
 bool InfTubeServer::startInfinoted(unsigned short* port)

@@ -43,6 +43,8 @@ KOBBYCOMMON_EXPORT bool tryOpenDocument(const KUrl& url);
 KOBBYCOMMON_EXPORT bool tryOpenDocumentWithDialog(const KUrl& url);
 
 KOBBYCOMMON_EXPORT bool ensureNotifierModuleLoaded();
+KOBBYCOMMON_EXPORT QString getUserName();
+
 
 // Helper class for finding the BrowserIter for a directory.
 // libinfinity works with documents (or directories) only as "iters",

@@ -74,6 +74,20 @@ bool ensureNotifierModuleLoaded()
     return KToolInvocation::startServiceByDesktopPath(desktopPath) == 0;
 }
 
+QString getUserName()
+{
+    QString user;
+#ifdef Q_OS_WIN
+    user = qgetenv("USERNAME");
+#else
+    user = qgetenv("USER");
+#endif
+    if ( user.length() > 0 ) {
+        user[0] = user[0].toUpper();
+    }
+    return user;
+}
+
 IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
         : QObject()
         , m_browser(browser)
