@@ -28,6 +28,7 @@
 #include <libqinfinity/browsermodel.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/browser.h>
+#include <libqinfinity/init.h>
 
 #include "kpluginfactory.h"
 
@@ -73,6 +74,7 @@ InfinoteNotifier::InfinoteNotifier(QObject* parent)
     , m_browserModel(0)
 {
     qDebug() << "Loaded module";
+    QInfinity::init();
     connect(m_notifyIface, SIGNAL(enteredDirectory(QString)), SLOT(enteredDirectory(QString)));
     connect(m_notifyIface, SIGNAL(leftDirectory(QString)), SLOT(leftDirectory(QString)));
 }
