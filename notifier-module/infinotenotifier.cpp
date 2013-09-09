@@ -207,6 +207,7 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
     }
     QInfinity::ConnectionItem* connItem = m_connectionItemMap[connection];
     const Host& host = m_connectionHostMap[connItem];
+    bool haveAddedFile = false;
     foreach ( const KUrl& url, m_watchedUrls ) {
         // There might be multiple queued notifications for different formats of the
         // same URL. However, a notification will only show for one of them, since
@@ -214,9 +215,10 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
         if ( hostForUrl(url) == host ) {
             kDebug() << "queuing for update:" << url;
             QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
-            if ( ! iter.isDirectory() ) {
+            if ( ! iter.isDirectory() && ! haveAddedFile ) {
                 // do not show notifications for creting directories, those are worthless
                 item->addedFiles.insert(iter.path());
+                haveAddedFile = true;
             }
         }
     }
