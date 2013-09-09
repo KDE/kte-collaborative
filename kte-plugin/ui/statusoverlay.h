@@ -27,11 +27,14 @@
 
 #include "common/document.h"
 
-struct Connection;
-using Kobby::Document;
+namespace Kobby {
+    class Connection;
+}
 namespace KTextEditor {
     class View;
 }
+using Kobby::Document;
+using Kobby::Connection;
 
 class StatusOverlay : public QDeclarativeView
 {
