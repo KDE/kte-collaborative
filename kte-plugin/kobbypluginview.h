@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QLabel>
+#include <QPushButton>
 #include <KTextEditor/View>
 #include <KUrl>
 
@@ -120,6 +121,11 @@ public slots:
      * @brief Invoked when the user table changes, i.e. user name change, user joined/left
      */
     void userTableChanged();
+    void showAll();
+    void showOnline();
+
+signals:
+    void needSizeCheck();
 
 private:
     /**
@@ -132,10 +138,16 @@ private:
 private:
     QInfinity::UserTable* m_userTable;
     /// Text in front of the user list, e.g. "Users:"
-    QLabel* m_prefix;
+    QPushButton* m_prefix;
     KobbyPluginView* m_view;
     QList<UserLabel*> m_userLabels;
     bool m_isExpanded;
+
+    enum ShowUserPolicy {
+        ShowAll,
+        ShowOnlyOnline
+    };
+    ShowUserPolicy m_listPolicy;
 };
 
 /**

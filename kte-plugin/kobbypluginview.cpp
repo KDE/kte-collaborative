@@ -44,6 +44,7 @@
 #include <QFormLayout>
 #include <QCommandLinkButton>
 #include <QPaintEngine>
+#include <QMenu>
 
 #include <KLocalizedString>
 #include <KActionCollection>
@@ -68,11 +69,36 @@ void setTextColor(QWidget* textWidget, KColorScheme::ForegroundRole colorRole) {
 HorizontalUsersList::HorizontalUsersList(KobbyPluginView* view, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , m_userTable(0)
-    , m_prefix(new QLabel(this))
+    , m_prefix(new QPushButton(this))
     , m_view(view)
+    , m_listPolicy(ShowOnlyOnline)
 {
     setLayout(new QHBoxLayout);
     layout()->addWidget(m_prefix);
+    m_prefix->setFlat(true);
+    QMenu* menu = new QMenu(m_prefix);
+    QAction* showAllAction = new QAction(KIcon("im-user-away"), i18n("Show all users"), m_prefix);
+    QAction* showOnlineAction = new QAction(KIcon("im-user"), i18n("Show online users"), m_prefix);
+    menu->addAction(showAllAction);
+    menu->addAction(showOnlineAction);
+    m_prefix->setMenu(menu);
+
+    connect(showAllAction, SIGNAL(triggered(bool)), this, SLOT(showAll()));
+    connect(showOnlineAction, SIGNAL(triggered(bool)), this, SLOT(showOnline()));
+}
+
+void HorizontalUsersList::showAll()
+{
+    m_listPolicy = ShowAll;
+    userTableChanged();
+    emit needSizeCheck();
+}
+
+void HorizontalUsersList::showOnline()
+{
+    m_listPolicy = ShowOnlyOnline;
+    userTableChanged();
+    emit needSizeCheck();
 }
 
 void HorizontalUsersList::setUserTable(QInfinity::UserTable* table)
@@ -126,6 +152,8 @@ UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
     // the difference between the old and the new size gives the increment which would
     // occur if the label was displayed.
     m_labelIncrement = sizeHint().width() - small;
+    // do not display the label initially to avoid flicker
+    m_nameLabel->setVisible(false);
 
     colorBox->setToolTip(name);
 }
@@ -146,18 +174,20 @@ void HorizontalUsersList::userTableChanged()
     foreach ( const QPointer<QInfinity::User>& user, users ) {
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(userTableChanged()), Qt::UniqueConnection);
     }
-    QList< QPointer< QInfinity::User > > activeUsers = m_userTable->activeUsers();
-    if ( activeUsers.length() > 25 ) {
-        m_prefix->setText(i18nc("tells how many users are online", "%1 users online in session", activeUsers.size() - 1));
+    if ( m_listPolicy == ShowOnlyOnline ) {
+        users = m_userTable->activeUsers();
+    }
+    if ( users.length() > 25 ) {
+        m_prefix->setText(i18nc("tells how many users are online", "%1 users (<b>%2</b> online)",
+                                m_userTable->users().size(), m_userTable->activeUsers().size()));
         return;
     }
     m_prefix->setText(i18n("Users:"));
-    foreach ( const QPointer<QInfinity::User>& user, activeUsers ) {
+    foreach ( const QPointer<QInfinity::User>& user, users ) {
         QString label((user->name() == ownUserName) ? i18nc("%1 is your name", "%1 (you)", user->name()) : user->name());
         addLabelForUser(user->name(), label);
     }
-    // call this again to adjust the new labels
-    setExpanded(m_isExpanded);
+    emit needSizeCheck();
 }
 
 int HorizontalUsersList::expandedSize() const
@@ -188,6 +218,7 @@ KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     layout()->addWidget(m_usersList);
     layout()->addWidget(m_connectionStatusLabel);
     QTimer::singleShot(0, this, SLOT(checkSize()));
+    connect(m_usersList, SIGNAL(needSizeCheck()), SLOT(checkSize()));
 }
 
 bool KobbyStatusBar::event(QEvent* e)
