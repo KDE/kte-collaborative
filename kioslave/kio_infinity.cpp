@@ -174,7 +174,8 @@ bool InfinityProtocol::doConnect(const Peer& peer)
 
     QTimer timeout;
     timeout.setSingleShot(true);
-    timeout.setInterval(connectTimeout() * 1000);
+    // Give it a bit more time for connecting than usual, our connection method is complicated sometimes
+    timeout.setInterval(connectTimeout() * 1000 * 3);
     connect(&timeout, SIGNAL(timeout()), &loop, SLOT(quit()));
     timeout.start();
     loop.exec();
