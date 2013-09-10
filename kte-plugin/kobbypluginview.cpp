@@ -100,12 +100,22 @@ UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
     , box(QSize(12, 12))
 {
     setLayout(new QHBoxLayout);
+    QColor saturated(color);
+    saturated.setHsv(color.hsvHue(), qMin(255, (int) (color.hsvSaturation() * 1.5)), color.value());
 
     // draw the pixmap with the users' color
     QLabel* colorBox = new QLabel();
     QPainter p(&box);
-    p.setBrush(QBrush(color));
+    p.setBrush(QBrush(saturated));
+    p.setPen(QPen(saturated));
     p.drawRect(0, 0, 12, 12);
+    // draw a nice shadow
+    p.setPen(QPen(saturated.darker(140)));
+    p.drawRect(0, 0, 11, 11);
+    p.setPen(QPen(saturated.darker(125)));
+    p.drawRect(1, 1, 9, 9);
+    p.setPen(QPen(saturated.darker(110)));
+    p.drawRect(2, 2, 7, 7);
     colorBox->setPixmap(box);
     layout()->addWidget(colorBox);
 
