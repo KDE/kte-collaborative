@@ -485,15 +485,19 @@ void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QSt
 
 void KobbyPluginView::enableUi()
 {
-    m_statusOverlay = new StatusOverlay(m_view);
-    m_statusOverlay->move(0, 0);
-    connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
-            m_statusOverlay, SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
-    connect(m_document, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
-            m_statusOverlay, SLOT(loadStateChanged(Document*,Document::LoadState)));
-    connect(m_document, SIGNAL(synchroinzationProgress(double)),
-            m_statusOverlay, SLOT(progress(double)));
-    m_statusOverlay->show();
+    Document::LoadState loadState = document()->infTextDocument() ? document()->infTextDocument()->loadState()
+                                                                  : Kobby::Document::Unloaded;
+    if ( loadState != Kobby::Document::Complete ) {
+        m_statusOverlay = new StatusOverlay(m_view);
+        m_statusOverlay->move(0, 0);
+        connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
+                m_statusOverlay, SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
+        connect(m_document, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
+                m_statusOverlay, SLOT(loadStateChanged(Document*,Document::LoadState)));
+        connect(m_document, SIGNAL(synchroinzationProgress(double)),
+                m_statusOverlay, SLOT(progress(double)));
+        m_statusOverlay->show();
+    }
 
     m_statusBar = new KobbyStatusBar(this);
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
@@ -512,6 +516,11 @@ void KobbyPluginView::enableUi()
             connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
                     this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
         }
+    }
+
+    if ( loadState == Kobby::Document::Complete ) {
+        statusBar()->sessionFullyReady();
+        statusBar()->usersChanged();
     }
 }
 
