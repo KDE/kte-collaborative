@@ -42,6 +42,7 @@
 #include <QAction>
 #include <QLineEdit>
 #include <QFormLayout>
+#include <QBoxLayout>
 #include <QCommandLinkButton>
 #include <QPaintEngine>
 #include <QMenu>
@@ -122,16 +123,22 @@ void HorizontalUsersList::clear()
     m_userLabels.clear();
 }
 
-void HorizontalUsersList::addLabelForUser(const QString& name, const QString& displayName)
+void HorizontalUsersList::addLabelForUser(const QString& name, bool online, const QString& displayName)
 {
+    if ( name == "Initial document contents" ) return; // TODO urgh
     const QColor& color = ColorHelper::colorForUsername(name, m_view->kteView(),
                                                         m_view->document()->changeTracker()->usedColors());
-    UserLabel* label = new UserLabel(displayName, color, this);
+    UserLabel* label = new UserLabel(displayName, color, online, this);
     m_userLabels.append(label);
-    layout()->addWidget(label);
+    if ( online ) {
+        qobject_cast<QBoxLayout*>(layout())->insertWidget(1, label);
+    }
+    else {
+        layout()->addWidget(label);
+    }
 }
 
-UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
+UserLabel::UserLabel(const QString& name, const QColor& color, bool online, QWidget* parent)
     : QWidget(parent)
     , box(QSize(12, 12))
 {
@@ -152,6 +159,16 @@ UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
     p.drawRect(1, 1, 9, 9);
     p.setPen(QPen(saturated.darker(110)));
     p.drawRect(2, 2, 7, 7);
+
+    if ( ! online ) {
+        // If the user is offline, draw an extra shadow mark.
+        QVector<QPoint> points;
+        points << QPoint(0, 12) << QPoint(12, 0) << QPoint(12, 12);
+        p.setPen(QPen(saturated.darker(160)));
+        p.setBrush(QBrush(saturated.darker(160)));
+        p.drawPolygon(points.data(), points.size());
+    }
+
     colorBox->setPixmap(box);
     layout()->addWidget(colorBox);
 
@@ -205,7 +222,8 @@ void HorizontalUsersList::userTableChanged()
             continue;
         }
         QString label((user->name() == ownUserName) ? i18nc("%1 is your name", "%1 (you)", user->name()) : user->name());
-        addLabelForUser(user->name(), label);
+        label = (user->status() == QInfinity::User::Active) ? label : i18nc("%1 is a name", "%1 (offline)", label);
+        addLabelForUser(user->name(), user->status() == QInfinity::User::Active, label);
     }
     emit needSizeCheck();
 }

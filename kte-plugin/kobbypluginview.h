@@ -58,7 +58,7 @@ class KobbyPluginView;
 class UserLabel : public QWidget {
 Q_OBJECT
 public:
-    UserLabel(const QString& name, const QColor& color, QWidget* parent);
+    UserLabel(const QString& name, const QColor& color, bool online, QWidget* parent);
 
     /**
      * @brief Gives the difference between the collapsed and expanded size (i.e. size of label + margins)
@@ -133,7 +133,7 @@ private:
      * @param name Name for the user. Color is determined from this.
      * @param displayName The name which is actually displayed.
      */
-    void addLabelForUser(const QString& name, const QString& displayName);
+    void addLabelForUser(const QString& name, bool online, const QString& displayName);
 
 private:
     QInfinity::UserTable* m_userTable;
