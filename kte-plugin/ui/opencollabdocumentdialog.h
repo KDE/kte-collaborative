@@ -23,10 +23,30 @@
 #define OPENCOLLABDOCUMENTDIALOG_H
 
 #include <KDialog>
+#include <QGroupBox>
 
 class KMessageWidget;
 class QFormLayout;
 class KLineEdit;
+
+class HostSelectionWidget : public QGroupBox {
+Q_OBJECT
+public:
+    HostSelectionWidget(QWidget* parent = 0);
+    KUrl selectedUrl() const;
+
+private slots:
+    void showTip();
+    void showAdvanced(bool);
+
+private:
+    KLineEdit* m_password;
+    KLineEdit* m_userName;
+    KLineEdit* m_port;
+    KLineEdit* m_host;
+    QFormLayout* m_advancedSettingsLayout;
+    KMessageWidget* m_tip;
+};
 
 class OpenCollabDocumentDialog : public KDialog
 {
@@ -46,21 +66,13 @@ signals:
 public slots:
     void connectionClicked(uint,QString);
     void acceptedWithManualConnection();
-    void showAdvanced(bool);
 
 private slots:
-    void showTip();
     void requestFileToOpen();
 
 private:
-    KLineEdit* m_password;
-    KLineEdit* m_userName;
-    KLineEdit* m_port;
-    KLineEdit* m_host;
-    QFormLayout* m_advancedSettingsLayout;
-    KMessageWidget* m_tip;
-
     QPair<unsigned int, QString> m_selectedConnection;
+    HostSelectionWidget* m_manualSelectionWidget;
 };
 
 #endif // OPENCOLLABDOCUMENTDIALOG_H

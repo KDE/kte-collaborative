@@ -33,12 +33,9 @@
 #include <KFileDialog>
 #include <KPushButton>
 
-OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFlags flags)
-    : KDialog(parent, flags)
+HostSelectionWidget::HostSelectionWidget(QWidget* parent)
+    : QGroupBox(i18n("Manually enter connection parameters"), parent)
 {
-    QWidget* widget = new QWidget(this);
-    widget->setLayout(new QVBoxLayout);
-
     // Construct the box for manually setting hostname etc.
     m_host = new KLineEdit();
     m_host->setClickMessage(i18nc("Examples for possible hostname formats", "e.g. 46.4.96.250, localhost, or mydomain.com"));
@@ -48,9 +45,8 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     m_password = new KLineEdit();
     m_password->setClickMessage(i18n("Leave blank if not required by the server"));
 
-    QGroupBox* manualGroup = new QGroupBox(i18n("Manually enter connection parameters"));
     m_advancedSettingsLayout = new QFormLayout();
-    manualGroup->setLayout(m_advancedSettingsLayout);
+    setLayout(m_advancedSettingsLayout);
     m_tip = new KMessageWidget();
     m_tip->setMessageType(KMessageWidget::Information);
     m_tip->setWordWrap(true);
@@ -68,6 +64,29 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     connect(advancedButton, SIGNAL(clicked(bool)), this, SLOT(showTip()));
     connect(m_host, SIGNAL(textChanged(QString)), this, SLOT(showTip()));
 
+    m_host->setFocus();
+}
+
+KUrl HostSelectionWidget::selectedUrl() const
+{
+    KUrl url;
+    url.setProtocol("inf");
+    url.setPath("/");
+    url.setHost(m_host->text());
+    url.setPort(m_port->text().toInt());
+    url.setUser(m_userName->text());
+    url.setPassword(m_password->text());
+    return url;
+}
+
+OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFlags flags)
+    : KDialog(parent, flags)
+{
+    QWidget* widget = new QWidget(this);
+    widget->setLayout(new QVBoxLayout);
+
+    m_manualSelectionWidget = new HostSelectionWidget(this);
+
     // Construct the box for selecting an existing connection
     QGroupBox* existingGroup = new QGroupBox(i18n("Choose an existing telepathy-based connection"));
     existingGroup->setLayout(new QHBoxLayout());
@@ -76,7 +95,7 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     existingGroup->layout()->addWidget(connections);
 
     // Put it all together
-    widget->layout()->addWidget(manualGroup);
+    widget->layout()->addWidget(m_manualSelectionWidget);
     widget->layout()->addWidget(existingGroup);
 
     connect(connections, SIGNAL(connectionClicked(uint,QString)),
@@ -87,15 +106,14 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     setMainWidget(widget);
 
     resize(600, 450);
-    m_host->setFocus();
 }
 
-void OpenCollabDocumentDialog::showTip()
+void HostSelectionWidget::showTip()
 {
     m_tip->setVisible(true);
 }
 
-void OpenCollabDocumentDialog::showAdvanced(bool)
+void HostSelectionWidget::showAdvanced(bool)
 {
     // Hide the "Advanced" button
     qobject_cast<QWidget*>(QObject::sender())->hide();
@@ -150,10 +168,7 @@ KUrl OpenCollabDocumentDialog::selectedBaseUrl() const
     }
     else {
         // read parameters from manual selection
-        url.setHost(m_host->text());
-        url.setPort(m_port->text().toInt());
-        url.setUser(m_userName->text());
-        url.setPassword(m_password->text());
+        url = m_manualSelectionWidget->selectedUrl();
     }
     return url;
 }
