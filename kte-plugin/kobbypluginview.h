@@ -121,8 +121,8 @@ public slots:
      * @brief Invoked when the user table changes, i.e. user name change, user joined/left
      */
     void userTableChanged();
-    void showAll();
-    void showOnline();
+    void showOffline(bool showOffline);
+    void showIncative(bool showInactive);
 
 signals:
     void needSizeCheck();
@@ -142,12 +142,8 @@ private:
     KobbyPluginView* m_view;
     QList<UserLabel*> m_userLabels;
     bool m_isExpanded;
-
-    enum ShowUserPolicy {
-        ShowAll,
-        ShowOnlyOnline
-    };
-    ShowUserPolicy m_listPolicy;
+    bool m_showInactive;
+    bool m_showOffline;
 };
 
 /**

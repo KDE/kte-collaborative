@@ -71,32 +71,42 @@ HorizontalUsersList::HorizontalUsersList(KobbyPluginView* view, QWidget* parent,
     , m_userTable(0)
     , m_prefix(new QPushButton(this))
     , m_view(view)
-    , m_listPolicy(ShowOnlyOnline)
+    , m_showInactive(true)
+    , m_showOffline(false)
 {
     setLayout(new QHBoxLayout);
     layout()->addWidget(m_prefix);
     m_prefix->setFlat(true);
     QMenu* menu = new QMenu(m_prefix);
-    QAction* showAllAction = new QAction(KIcon("im-user-away"), i18n("Show all users"), m_prefix);
-    QAction* showOnlineAction = new QAction(KIcon("im-user"), i18n("Show online users"), m_prefix);
-    menu->addAction(showAllAction);
-    menu->addAction(showOnlineAction);
+    QAction* showOfflineAction = new QAction(KIcon("im-user-away"), i18n("Show offline users"), m_prefix);
+    showOfflineAction->setCheckable(true);
+    showOfflineAction->setChecked(m_showOffline);
+    QAction* showInactiveAction = new QAction(KIcon("im-invisible-user"), i18n("Show users without contributions"), m_prefix);
+    showInactiveAction->setCheckable(true);
+    showInactiveAction->setChecked(m_showInactive);
+    menu->addAction(showOfflineAction);
+    menu->addAction(showInactiveAction);
     m_prefix->setMenu(menu);
 
-    connect(showAllAction, SIGNAL(triggered(bool)), this, SLOT(showAll()));
-    connect(showOnlineAction, SIGNAL(triggered(bool)), this, SLOT(showOnline()));
+    connect(showOfflineAction, SIGNAL(triggered(bool)), this, SLOT(showOffline(bool)));
+    connect(showInactiveAction, SIGNAL(triggered(bool)), this, SLOT(showIncative(bool)));
+
+    // Disable this option when background highlighting is turned off, since it doesn't make much sense.
+    // Also it's difficult to implement.
+    KConfig config("ktecollaborative");
+    showInactiveAction->setEnabled(config.group("notifications").readEntry("highlightBackground", true));
 }
 
-void HorizontalUsersList::showAll()
+void HorizontalUsersList::showOffline(bool showOffline)
 {
-    m_listPolicy = ShowAll;
+    m_showOffline = showOffline;
     userTableChanged();
     emit needSizeCheck();
 }
 
-void HorizontalUsersList::showOnline()
+void HorizontalUsersList::showIncative(bool showInactive)
 {
-    m_listPolicy = ShowOnlyOnline;
+    m_showInactive = showInactive;
     userTableChanged();
     emit needSizeCheck();
 }
@@ -171,19 +181,29 @@ void HorizontalUsersList::userTableChanged()
     const QString& ownUserName = m_view->document()->textBuffer()->user()->name();
     clear();
     QList< QPointer< QInfinity::User > > users = m_userTable->users();
+    const int activeUsers = m_view->document()->changeTracker()->usedColors().count();
     foreach ( const QPointer<QInfinity::User>& user, users ) {
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(userTableChanged()), Qt::UniqueConnection);
     }
-    if ( m_listPolicy == ShowOnlyOnline ) {
+    if ( ! m_showOffline ) {
         users = m_userTable->activeUsers();
     }
-    if ( users.length() > 25 ) {
-        m_prefix->setText(i18nc("tells how many users are online", "%1 users (<b>%2</b> online)",
+
+    // If more than 20 users would be displayed, just display how many it would be, for performance
+    // and size reasons.
+    if ( users.length() > 20 && ( m_showInactive || ( ! m_showInactive && activeUsers > 20 ) ) ) {
+        m_prefix->setText(i18nc("tells how many users are online", "%1 users (%2 online)",
                                 m_userTable->users().size(), m_userTable->activeUsers().size()));
         return;
     }
+
+    // Otherwise, generate the full table.
     m_prefix->setText(i18n("Users:"));
     foreach ( const QPointer<QInfinity::User>& user, users ) {
+        if ( ! m_showInactive && ! m_view->document()->changeTracker()->usedColors().contains(user->name()) ) {
+            // No color was generated for the user; that would have happened if he had wrote text.
+            continue;
+        }
         QString label((user->name() == ownUserName) ? i18nc("%1 is your name", "%1 (you)", user->name()) : user->name());
         addLabelForUser(user->name(), label);
     }
@@ -219,6 +239,8 @@ KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     layout()->addWidget(m_connectionStatusLabel);
     QTimer::singleShot(0, this, SLOT(checkSize()));
     connect(m_usersList, SIGNAL(needSizeCheck()), SLOT(checkSize()));
+    connect(m_view->document()->changeTracker(), SIGNAL(colorTableChanged()),
+            m_usersList, SLOT(userTableChanged()));
 }
 
 bool KobbyStatusBar::event(QEvent* e)
