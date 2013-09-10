@@ -78,6 +78,8 @@ HorizontalUsersList::HorizontalUsersList(KobbyPluginView* view, QWidget* parent,
     setLayout(new QHBoxLayout);
     layout()->addWidget(m_prefix);
     m_prefix->setFlat(true);
+
+    // Generate the dropdown menu for the "Users:" button
     QMenu* menu = new QMenu(m_prefix);
     QAction* showOfflineAction = new QAction(KIcon("im-user-away"), i18n("Show offline users"), m_prefix);
     showOfflineAction->setCheckable(true);
@@ -102,14 +104,12 @@ void HorizontalUsersList::showOffline(bool showOffline)
 {
     m_showOffline = showOffline;
     userTableChanged();
-    emit needSizeCheck();
 }
 
 void HorizontalUsersList::showIncative(bool showInactive)
 {
     m_showInactive = showInactive;
     userTableChanged();
-    emit needSizeCheck();
 }
 
 void HorizontalUsersList::setUserTable(QInfinity::UserTable* table)
@@ -131,6 +131,7 @@ void HorizontalUsersList::addLabelForUser(const QString& name, bool online, cons
     UserLabel* label = new UserLabel(displayName, color, online, this);
     m_userLabels.append(label);
     if ( online ) {
+        // Sort online users to the front
         qobject_cast<QBoxLayout*>(layout())->insertWidget(1, label);
     }
     else {
@@ -195,17 +196,18 @@ void HorizontalUsersList::userTableChanged()
     if ( ! m_userTable ) {
         return;
     }
-    const QString& ownUserName = m_view->document()->textBuffer()->user()->name();
     clear();
+
+    const QString& ownUserName = m_view->document()->textBuffer()->user()->name();
     QList< QPointer< QInfinity::User > > users = m_userTable->users();
     const int activeUsers = m_view->document()->changeTracker()->usedColors().count();
     foreach ( const QPointer<QInfinity::User>& user, users ) {
         connect(user.data(), SIGNAL(statusChanged()), this, SLOT(userTableChanged()), Qt::UniqueConnection);
     }
+
     if ( ! m_showOffline ) {
         users = m_userTable->activeUsers();
     }
-
     // If more than 20 users would be displayed, just display how many it would be, for performance
     // and size reasons.
     if ( users.length() > 20 && ( m_showInactive || ( ! m_showInactive && activeUsers > 20 ) ) ) {
@@ -230,6 +232,8 @@ void HorizontalUsersList::userTableChanged()
 
 int HorizontalUsersList::expandedSize() const
 {
+    // The size the widget would have if expanded is the current (small) size
+    // plus all the individual increments caused by displaying the user names.
     int increment = 0;
     foreach ( const UserLabel* label, m_userLabels ) {
         increment += label->expandedIncrement();

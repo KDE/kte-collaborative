@@ -111,7 +111,7 @@ public:
 
     /**
      * @brief Retrieve the size this widget would take if it was expanded.
-     * This is fast.
+     * This is fast. The return value is undefined if the widget is currently expanded.
      * @return int size (in pixels) of this widget in expanded mode.
      */
     int expandedSize() const;
@@ -121,6 +121,7 @@ public slots:
      * @brief Invoked when the user table changes, i.e. user name change, user joined/left
      */
     void userTableChanged();
+    /// Handlers for the button menu actions
     void showOffline(bool showOffline);
     void showIncative(bool showInactive);
 
