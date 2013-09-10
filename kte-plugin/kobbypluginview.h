@@ -81,7 +81,7 @@ private:
  * @brief A widget displaying a list of users next to each other.
  * It has three modes:
  *   - Expanded: User names and colors are displayed next to each other
- *   - Collapsed: Only the colors are displayed, names are provided by other means (not there yet)
+ *   - Collapsed: Only the colors are displayed, names are provided by tooltips
  *   - "too many users": For >25 users, just displays the amount of users.
  * The widget will automatically switch to the best of the first two modes, depending on how
  * much size is available. It uses the given view for these calculations. Switching occurs when the

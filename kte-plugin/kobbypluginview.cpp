@@ -126,6 +126,8 @@ UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
     // the difference between the old and the new size gives the increment which would
     // occur if the label was displayed.
     m_labelIncrement = sizeHint().width() - small;
+
+    colorBox->setToolTip(name);
 }
 
 void UserLabel::setExpanded(bool expanded)
