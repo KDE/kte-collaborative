@@ -43,6 +43,7 @@
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCommandLinkButton>
+#include <QPaintEngine>
 
 #include <KLocalizedString>
 #include <KActionCollection>
@@ -64,16 +65,138 @@ void setTextColor(QWidget* textWidget, KColorScheme::ForegroundRole colorRole) {
     textWidget->setPalette(p);
 }
 
+HorizontalUsersList::HorizontalUsersList(KobbyPluginView* view, QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
+    , m_userTable(0)
+    , m_prefix(new QLabel(this))
+    , m_view(view)
+{
+    setLayout(new QHBoxLayout);
+    layout()->addWidget(m_prefix);
+}
+
+void HorizontalUsersList::setUserTable(QInfinity::UserTable* table)
+{
+    m_userTable = table;
+}
+
+void HorizontalUsersList::clear()
+{
+    qDeleteAll(m_userLabels);
+    m_userLabels.clear();
+}
+
+void HorizontalUsersList::addLabelForUser(const QString& name, const QString& displayName)
+{
+    const QColor& color = ColorHelper::colorForUsername(name, m_view->kteView(),
+                                                        m_view->document()->changeTracker()->usedColors());
+    UserLabel* label = new UserLabel(displayName, color, this);
+    m_userLabels.append(label);
+    layout()->addWidget(label);
+}
+
+UserLabel::UserLabel(const QString& name, const QColor& color, QWidget* parent)
+    : QWidget(parent)
+    , box(QSize(12, 12))
+{
+    setLayout(new QHBoxLayout);
+
+    // draw the pixmap with the users' color
+    QLabel* colorBox = new QLabel();
+    QPainter p(&box);
+    p.setBrush(QBrush(color));
+    p.drawRect(0, 0, 12, 12);
+    colorBox->setPixmap(box);
+    layout()->addWidget(colorBox);
+
+    // remember the size before adding the label
+    const int small = sizeHint().width();
+    m_nameLabel = new QLabel(name);
+    layout()->addWidget(m_nameLabel);
+    // the difference between the old and the new size gives the increment which would
+    // occur if the label was displayed.
+    m_labelIncrement = sizeHint().width() - small;
+}
+
+void UserLabel::setExpanded(bool expanded)
+{
+    m_nameLabel->setVisible(expanded);
+}
+
+void HorizontalUsersList::userTableChanged()
+{
+    if ( ! m_userTable ) {
+        return;
+    }
+    const QString& ownUserName = m_view->document()->textBuffer()->user()->name();
+    clear();
+    QList< QPointer< QInfinity::User > > users = m_userTable->users();
+    foreach ( const QPointer<QInfinity::User>& user, users ) {
+        connect(user.data(), SIGNAL(statusChanged()), this, SLOT(userTableChanged()), Qt::UniqueConnection);
+    }
+    QList< QPointer< QInfinity::User > > activeUsers = m_userTable->activeUsers();
+    if ( activeUsers.length() > 25 ) {
+        m_prefix->setText(i18nc("tells how many users are online", "%1 users online in session", activeUsers.size() - 1));
+        return;
+    }
+    m_prefix->setText(i18n("Users:"));
+    foreach ( const QPointer<QInfinity::User>& user, activeUsers ) {
+        QString label((user->name() == ownUserName) ? i18nc("%1 is your name", "%1 (you)", user->name()) : user->name());
+        addLabelForUser(user->name(), label);
+    }
+}
+
+int HorizontalUsersList::expandedSize() const
+{
+    int increment = 0;
+    foreach ( const UserLabel* label, m_userLabels ) {
+        increment += label->expandedIncrement();
+    }
+    return sizeHint().width() + increment;
+}
+
+void HorizontalUsersList::setExpanded(bool expanded)
+{
+    if ( m_isExpanded == expanded ) {
+        return;
+    }
+    m_isExpanded = expanded;
+    foreach ( UserLabel* label, m_userLabels ) {
+        label->setExpanded(expanded);
+    }
+}
+
 KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
     , m_connectionStatusLabel(new QLabel(this))
-    , m_usersLabel(new QLabel(this))
     , m_view(parent)
+    , m_usersList(new HorizontalUsersList(m_view))
 {
     setLayout(new QHBoxLayout());
     layout()->setAlignment(Qt::AlignRight);
-    layout()->addWidget(m_usersLabel);
+    layout()->addWidget(m_usersList);
     layout()->addWidget(m_connectionStatusLabel);
+    QTimer::singleShot(0, this, SLOT(checkSize()));
+}
+
+bool KobbyStatusBar::event(QEvent* e)
+{
+    if ( e->type() == QEvent::Resize ) {
+        checkSize();
+    }
+    return QWidget::event(e);
+}
+
+void KobbyStatusBar::checkSize()
+{
+    int availableSize = m_view->kteView()->size().width() - m_connectionStatusLabel->size().width();
+    int actualSize = m_usersList->sizeHint().width();
+    if ( availableSize - actualSize < 25 ) {
+        m_usersList->setExpanded(false);
+    }
+    else if ( availableSize - m_usersList->expandedSize() > 35 ) {
+        m_usersList->setExpanded(true);
+    }
 }
 
 void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
@@ -85,7 +208,7 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
         // this will not display in the beginning, just on disconnect
         text = "<b>" + i18n("Disconnected from collaboration server.") + "</b>";
         role = KColorScheme::NegativeText;
-        m_usersLabel->setText(QString());
+        m_usersList->clear();
     }
     else if ( status == QInfinity::XmlConnection::Opening ) {
         text = i18n("Connecting...");
@@ -100,6 +223,16 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
     m_connectionStatusLabel->setText(text);
 }
 
+ManagedDocument* KobbyPluginView::document() const
+{
+    return m_document;
+}
+
+KTextEditor::View* KobbyPluginView::kteView() const
+{
+    return m_view;
+}
+
 void KobbyStatusBar::sessionFullyReady()
 {
     setTextColor(m_connectionStatusLabel, KColorScheme::PositiveText);
@@ -108,34 +241,9 @@ void KobbyStatusBar::sessionFullyReady()
 
 void KobbyStatusBar::usersChanged()
 {
-    if ( ! m_view->m_document->userTable() ) {
-        return;
-    }
-    QList< QPointer< QInfinity::User > > users = m_view->m_document->userTable()->users();
-    foreach ( const QPointer<QInfinity::User>& user, users ) {
-        connect(user.data(), SIGNAL(statusChanged()), this, SLOT(usersChanged()), Qt::UniqueConnection);
-    }
-    QList< QPointer< QInfinity::User > > activeUsers = m_view->m_document->userTable()->activeUsers();
-    if ( activeUsers.length() > 6 ) {
-        m_usersLabel->setText(i18n("Users: You and %1 others", activeUsers.size() - 1));
-    }
-    else {
-        QStringList usersList;
-        foreach ( const QPointer<QInfinity::User>& user, activeUsers ) {
-            if ( user->name() != m_view->m_document->textBuffer()->user()->name() ) {
-                usersList.append(user->name());
-            }
-        }
-        if ( usersList.length() == 1 ) {
-            m_usersLabel->setText(i18nc("As in Users: You and Fred", "Users: You and %1", usersList.first()));
-        }
-        else if ( usersList.length() > 1 ) {
-            m_usersLabel->setText(i18nc("As in Users: You, Fred, George", "Users: You, %1", usersList.join(", ")));
-        }
-        else {
-            m_usersLabel->setText(i18n("Users: only you"));
-        }
-    }
+    m_usersList->setUserTable(m_view->m_document->userTable());
+    m_usersList->userTableChanged();
+    checkSize();
 }
 
 KobbyStatusBar* KobbyPluginView::statusBar() const
