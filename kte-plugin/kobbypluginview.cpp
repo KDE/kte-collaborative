@@ -156,6 +156,8 @@ void HorizontalUsersList::userTableChanged()
         QString label((user->name() == ownUserName) ? i18nc("%1 is your name", "%1 (you)", user->name()) : user->name());
         addLabelForUser(user->name(), label);
     }
+    // call this again to adjust the new labels
+    setExpanded(m_isExpanded);
 }
 
 int HorizontalUsersList::expandedSize() const
@@ -169,9 +171,6 @@ int HorizontalUsersList::expandedSize() const
 
 void HorizontalUsersList::setExpanded(bool expanded)
 {
-    if ( m_isExpanded == expanded ) {
-        return;
-    }
     m_isExpanded = expanded;
     foreach ( UserLabel* label, m_userLabels ) {
         label->setExpanded(expanded);
