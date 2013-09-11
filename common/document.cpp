@@ -221,7 +221,12 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         if ( false ) { }
 #endif
         else {
-            kWarning() << "Text editor does not support the Buffer interface!";
+            kDebug() << "Text editor does not support the Buffer interface. Using workaround for tabs.";
+#ifdef ENABLE_TAB_HACK
+            // If we don't have the buffer iface and the tab hack is enabled, replace
+            // all tabs by 1 space. That won't break stuff, since it has the same length
+            str = str.replace("\t", " ");
+#endif
             kDocument()->blockSignals(true);
             kDocument()->insertText( startCursor, str );
             kDocument()->blockSignals(false);
@@ -261,7 +266,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
         if ( false ) { }
 #endif
         else {
-            kWarning() << "Text editor does not support the Buffer interface!";
             kDocument()->blockSignals(true);
             kDocument()->removeText( range );
             kDocument()->blockSignals(false);
@@ -276,6 +280,18 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 void KDocumentTextBuffer::checkConsistency()
 {
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
+#ifndef KTEXTEDITOR_HAS_BUFFER_IFACE
+    if ( false ) { }
+#else
+    if ( qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) { }
+#endif
+#ifdef ENABLE_TAB_HACK
+    else {
+        // In this case, it's allowed that the buffer and the document differ in tabs being
+        // replaced by spaces.
+        bufferContents = bufferContents.replace("\t", " ");
+    }
+#endif
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
         KUrl url = kDocument()->url();
