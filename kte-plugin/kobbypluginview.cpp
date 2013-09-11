@@ -193,7 +193,7 @@ void UserLabel::setExpanded(bool expanded)
 
 void HorizontalUsersList::userTableChanged()
 {
-    if ( ! m_userTable ) {
+    if ( ! m_userTable || ! m_view->document()->textBuffer()->user() ) {
         return;
     }
     clear();
