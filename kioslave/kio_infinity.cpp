@@ -119,11 +119,8 @@ void InfinityProtocol::stat(const KUrl& url)
         return;
     }
 
-    OrgKdeKDirNotifyInterface::emitEnteredDirectory(url.upUrl().url());
-
     bool ok = false;
     QInfinity::BrowserIter iter = iterForUrl(url, &ok);
-    Q_UNUSED(iter);
     if ( ! ok ) {
         error(KIO::ERR_COULD_NOT_STAT, i18n("Could not stat %1: No such file or directory.", url.url()));
         return;
