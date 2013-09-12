@@ -3,6 +3,8 @@ set(inftube_SRCS
     inftube.cpp
 )
 
+set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
+
 set(IS_KTP_INTERNAL_MODULE TRUE) # aw yeah
 find_package(TelepathyQt4 0.8.9 REQUIRED)
 find_package(KTp REQUIRED)
@@ -32,7 +34,7 @@ target_link_libraries(inftube
                       ${KTP_WIDGETS_LIBRARIES}
 )
 
-install(TARGETS inftube ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS inftube DESTINATION ${LIB_INSTALL_DIR}/ktecollaborative/)
 
 # the tube handlers
 kde4_add_executable(infinoteclienttubehandler clienttubehandler.cpp)
