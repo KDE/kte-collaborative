@@ -85,8 +85,38 @@ InfinoteNotifier::~InfinoteNotifier()
     m_browserModel.clear();
 }
 
+void InfinoteNotifier::cleanupConnectionList()
+{
+    const QList<QInfinity::XmlConnection*> items = m_connectionItemMap.keys();
+    foreach ( QInfinity::XmlConnection* conn, items ) {
+        if ( conn->status() != QInfinity::XmlConnection::Closed ) {
+            continue;
+        }
+        cleanupConnection(conn);
+    }
+}
+
+void InfinoteNotifier::cleanupConnection(QInfinity::XmlConnection* conn)
+{
+    QInfinity::ConnectionItem* item = m_connectionItemMap.take(conn);
+    const Host host = m_connectionHostMap.take(item);
+    m_browserModel->removeRows(item->index().row(), 1, QModelIndex());
+    kDebug() << "connection broken, cleaning up for host" << host.hostname << host.port;
+
+    // Delete connections belonging to this connection, too, so they will be re-added.
+    QSet<KUrl> keep;
+    foreach ( const KUrl& url, m_watchedUrls ) {
+        if ( hostForUrl(url) == host ) {
+            keep.insert(url);
+        }
+    }
+    m_watchedUrls = keep;
+}
+
 void InfinoteNotifier::ensureInWatchlist(const QString& url_)
 {
+    cleanupConnectionList();
+
     KUrl url(url_);
     if ( m_watchedUrls.contains(url) ) {
         return;

@@ -117,6 +117,12 @@ private:
     /// establishing the connection is the most costly thing.
     void ensureInWatchlist(const QString& url);
 
+    /// Clean all connections from the connections list which are broken,
+    /// and remove the watched URLs for those
+    void cleanupConnectionList();
+    /// Cleanup one particular connection.
+    void cleanupConnection(QInfinity::XmlConnection* conn);
+
 private:
     OrgKdeKDirNotifyInterface* m_notifyIface;
     /// List of watched URLs to receive notifications via KDirNotify
