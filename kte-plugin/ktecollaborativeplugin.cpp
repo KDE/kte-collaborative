@@ -59,7 +59,27 @@ K_PLUGIN_FACTORY_DEFINITION( KteCollaborativePluginFactory,
                              registerPlugin<KCMKTECollaborative>("ktexteditor_collaborative_config");
 )
 K_EXPORT_PLUGIN( KteCollaborativePluginFactory( KAboutData( "ktecollaborative", "kte-collaborative",
-                                                ki18n( "Collaborative Editing" ), KTECOLLAB_VERSION_STRING, ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
+                                                ki18n( "Collaborative Editing" ),
+                                                KTECOLLAB_VERSION_STRING,
+                                                ki18n( "Collaborative Editing" ),
+                                                KAboutData::License_GPL_V2 )
+                                              .addAuthor(
+                                                    ki18n("Sven Brauch"),
+                                                    ki18n("KTextEditor plugin, Telepathy integration, making stuff work"),
+                                                    "svenbrauch@gmail.com")
+                                              .addCredit(
+                                                    ki18n("Gregory Haynes"),
+                                                    ki18n("Original author of kobby, which this application is based off"),
+                                                    "greg@greghaynes.net")
+                                              .addCredit(
+                                                    ki18n("David Edmundson"),
+                                                    ki18n("Google Summer of Code mentor for this project"),
+                                                    "david@davidedmundson.co.uk" )
+                                              .addCredit(
+                                                    ki18n("Armin Burgmeier"),
+                                                    ki18n("Author of libinfinity"),
+                                                    "armin@arbur.net" )
+                                              ) )
 
 KteCollaborativePlugin::KteCollaborativePlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
