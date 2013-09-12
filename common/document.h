@@ -302,6 +302,8 @@ class KOBBYCOMMON_EXPORT InfTextDocument
         void slotCanUndo( bool enable );
         void slotCanRedo( bool enable );
         void joinSession(const QString& forceUserName = QString());
+        void newUserNameEntered();
+        void joinAborted();
     
     private:
         void synchronize();

@@ -671,24 +671,34 @@ void InfTextDocument::slotJoinFailed( GError *gerror )
 
 void InfTextDocument::retryJoin(const QString& message)
 {
-    KDialog dialog;
-    dialog.setButtons(KDialog::Ok | KDialog::Cancel);
-    dialog.button(KDialog::Ok)->setText(i18n("Retry"));
-    QWidget w;
-    dialog.setMainWidget(&w);
-    w.setLayout(new QVBoxLayout);
-    w.layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
-    w.layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
-    KLineEdit username;
-    username.setClickMessage(i18n("Enter your user name..."));
-    w.layout()->addWidget(&username);
-    username.setFocus();
-    if ( dialog.exec() ) {
-        joinSession(username.text());
-    }
-    else {
-        throwFatalError(QString());
-    }
+    KDialog* dialog = new KDialog;
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+    dialog->button(KDialog::Ok)->setText(i18n("Retry"));
+    QWidget* w = new QWidget();
+    dialog->setMainWidget(w);
+    w->setLayout(new QVBoxLayout);
+    w->layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
+    w->layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
+    KLineEdit* username = new KLineEdit;
+    username->setClickMessage(i18n("Enter your user name..."));
+    w->layout()->addWidget(username);
+    username->setFocus();
+    connect(dialog, SIGNAL(okClicked()), SLOT(newUserNameEntered()));
+    connect(dialog, SIGNAL(cancelClicked()), SLOT(joinAborted()));
+    dialog->show();
+}
+
+void InfTextDocument::joinAborted()
+{
+    throwFatalError(i18n("No acceptable user name was given."));
+}
+
+void InfTextDocument::newUserNameEntered()
+{
+    KDialog* dlg = qobject_cast<KDialog*>(QObject::sender());
+    KLineEdit* username = dlg->findChild<KLineEdit*>();
+    joinSession(username->text());
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
