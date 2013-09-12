@@ -32,6 +32,7 @@
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/usertable.h>
+#include <libqinfinity/noderequest.h>
 
 #include <KMessageBox>
 #include <KLocalizedString>
@@ -121,6 +122,8 @@ void ManagedDocument::unsubscribe()
         m_infDocument->leave();
         m_infDocument->deleteLater();
         m_infDocument = 0;
+    }
+    if ( m_textBuffer ) {
         m_textBuffer->shutdown();
         m_textBuffer = 0;
     }
@@ -242,6 +245,11 @@ void ManagedDocument::sessionStatusChanged()
     kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
 }
 
+void ManagedDocument::subscriptionFailed(GError* error)
+{
+    unrecoverableError(infTextDocument(), error->message);
+}
+
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 {
     // delete the lookup helper
@@ -253,7 +261,8 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8");
     kDebug() << "created text buffer";
     m_iterId = iter.id();
-    browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
+    NodeRequest* req = browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
+    connect(req, SIGNAL(failed(GError*)), this, SLOT(subscriptionFailed(GError*)));
 }
 
 #include "manageddocument.moc"

@@ -342,6 +342,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     , KXMLGUIClient(kteView)
     , m_view(kteView)
     , m_statusBar(0)
+    , m_statusOverlay(0)
     , m_document(document)
 {
     setComponentData(KobbyPluginFactory::componentData());
