@@ -47,7 +47,7 @@ using Kobby::Document;
 
 class KAction;
 class ManagedDocument;
-class KobbyPluginView;
+class KteCollaborativePluginView;
 
 /**
  * @brief Represents one pair of color box + user name, as used in the status bar.
@@ -91,7 +91,7 @@ private:
 class HorizontalUsersList : public QWidget {
 Q_OBJECT
 public:
-    HorizontalUsersList(KobbyPluginView* view, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    HorizontalUsersList(KteCollaborativePluginView* view, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     /**
      * @brief Provide the user table to the widget. It will not do anything before you call this.
@@ -140,7 +140,7 @@ private:
     QInfinity::UserTable* m_userTable;
     /// Text in front of the user list, e.g. "Users:"
     QPushButton* m_prefix;
-    KobbyPluginView* m_view;
+    KteCollaborativePluginView* m_view;
     QList<UserLabel*> m_userLabels;
     bool m_isExpanded;
     bool m_showInactive;
@@ -151,10 +151,10 @@ private:
  * @brief This class manages the status bar below a collaborative document.
  * It is responsible for updating the text in the status bar itself.
  */
-class KobbyStatusBar : public QWidget {
+class CollaborativeStatusBar : public QWidget {
 Q_OBJECT
 public:
-    explicit KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f = 0);
+    explicit CollaborativeStatusBar(KteCollaborativePluginView* parent, Qt::WindowFlags f = 0);
     virtual bool event(QEvent* );
 
 public slots:
@@ -170,14 +170,14 @@ public slots:
 
 private:
     QLabel* m_connectionStatusLabel;
-    KobbyPluginView* m_view;
+    KteCollaborativePluginView* m_view;
     HorizontalUsersList* m_usersList;
 };
 
 /**
  * @brief This class manages the UI for a collaborative document.
  */
-class KobbyPluginView
+class KteCollaborativePluginView
     : public QObject
     , public KXMLGUIClient
 {
@@ -189,13 +189,13 @@ public:
      * @param kteView The KTextEditor::View instance to add the UI to. Usually you get this from the plugin's addView() function.
      * @param document The ManagedDocument instance used for this view, needed for setting up connections.
      */
-    KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document);
-    virtual ~KobbyPluginView();
+    KteCollaborativePluginView(KTextEditor::View* kteView, ManagedDocument* document);
+    virtual ~KteCollaborativePluginView();
 
     /**
      * @brief Get the status bar instance used for this view
      */
-    KobbyStatusBar* statusBar() const;
+    CollaborativeStatusBar* statusBar() const;
 
     /**
      * @brief Get the document this view is for
@@ -235,7 +235,7 @@ public slots:
 
 private:
     KTextEditor::View* m_view;
-    KobbyStatusBar* m_statusBar;
+    CollaborativeStatusBar* m_statusBar;
     StatusOverlay* m_statusOverlay;
     ManagedDocument* m_document;
 
@@ -268,7 +268,7 @@ private:
      */
     void changeUserName(const QString& newUserName);
 
-    friend class KobbyStatusBar;
+    friend class CollaborativeStatusBar;
 };
 
 #endif // KOBBYPLUGINVIEW_H

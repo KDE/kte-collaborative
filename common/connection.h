@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 #include <libqinfinity/xmlconnection.h>
 
 #include <QObject>
@@ -48,7 +48,7 @@ struct Host {
 /**
  * @brief Ties connection/creation monitoring to simple interface.
  */
-class KOBBYCOMMON_EXPORT Connection
+class KTECOLLABORATIVECOMMON_EXPORT Connection
     : public QObject
 {
     Q_OBJECT

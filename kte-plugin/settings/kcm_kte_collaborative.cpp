@@ -20,7 +20,7 @@
  */
 
 #include "kcm_kte_collaborative.h"
-#include "kobbyplugin.h"
+#include "ktecollaborativeplugin.h"
 
 #include "common/selecteditorwidget.h"
 
@@ -35,7 +35,7 @@
 #include <QLabel>
 
 KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& args)
-    : KCModule(KobbyPluginFactory::componentData(), parent, args)
+    : KCModule(KteCollaborativePluginFactory::componentData(), parent, args)
 {
     kDebug() << "creating kte_collaborative kcmodule";
     // Set up config groups

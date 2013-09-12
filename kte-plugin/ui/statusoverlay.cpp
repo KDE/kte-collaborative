@@ -32,7 +32,7 @@
 #include <qdeclarativeitem.h>
 
 StatusOverlay::StatusOverlay(KTextEditor::View* parent)
-    : QDeclarativeView(QUrl(KStandardDirs().locate("data", "kte-kobby/ui/overlay.qml")), parent)
+    : QDeclarativeView(QUrl(KStandardDirs().locate("data", "ktecollaborative/ui/overlay.qml")), parent)
     , m_view(parent)
 {
     QPalette p = palette();
@@ -70,12 +70,14 @@ void StatusOverlay::progress(double percentage)
 
 void StatusOverlay::setProgressBar(double percentage)
 {
+    if ( ! rootObject() ) return;
     QObject* progressbar = rootObject()->findChild<QObject*>("progressBar");
     progressbar->setProperty("progress", percentage);
 }
 
 void StatusOverlay::loadStateChanged(Document* , Document::LoadState state)
 {
+    if ( ! rootObject() ) return;
     if ( state == Document::Joining ) {
         setProgressBar(1.0);
         displayText(i18n("Joining session..."));
@@ -100,6 +102,7 @@ void StatusOverlay::connectionStatusChanged(Connection* , QInfinity::XmlConnecti
 
 void StatusOverlay::displayText(const QString& text)
 {
+    if ( ! rootObject() ) return;
     QObject* textWidget = rootObject()->findChild<QObject*>("text");
     textWidget->setProperty("text", text);
 }

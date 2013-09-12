@@ -19,14 +19,14 @@
  *
  */
 
-#include "kobbyplugin.h"
+#include "ktecollaborativeplugin.h"
 #include "../version.h"
 
 #include "common/connection.h"
 #include "common/document.h"
 #include "common/itemfactory.h"
 #include "common/noteplugin.h"
-#include "kobbypluginview.h"
+#include "ktecollaborativepluginview.h"
 #include "settings/kcm_kte_collaborative.h"
 
 #include <KPluginFactory>
@@ -54,17 +54,17 @@
 // This is the default port for infinoted.
 static int defaultPort = 6523;
 
-K_PLUGIN_FACTORY_DEFINITION( KobbyPluginFactory,
-                             registerPlugin<KobbyPlugin>("ktexteditor_kobby");
-                             registerPlugin<KCMKTECollaborative>("ktexteditor_kobby_config");
+K_PLUGIN_FACTORY_DEFINITION( KteCollaborativePluginFactory,
+                             registerPlugin<KteCollaborativePlugin>("ktexteditor_collaborative");
+                             registerPlugin<KCMKTECollaborative>("ktexteditor_collaborative_config");
 )
-K_EXPORT_PLUGIN( KobbyPluginFactory( KAboutData( "ktexteditor_kobby", "kte-collaborative",
-                                          ki18n( "Collaborative Editing" ), KTECOLLAB_VERSION_STRING, ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
+K_EXPORT_PLUGIN( KteCollaborativePluginFactory( KAboutData( "ktecollaborative", "kte-collaborative",
+                                                ki18n( "Collaborative Editing" ), KTECOLLAB_VERSION_STRING, ki18n("Collaborative Editing"), KAboutData::License_GPL_V2 ) ) )
 
-KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
+KteCollaborativePlugin::KteCollaborativePlugin( QObject *parent, const QVariantList& )
   : KTextEditor::Plugin ( parent )
 {
-    kDebug() << "loading kobby plugin" << this;
+    kDebug() << "loading collaborative plugin" << this;
     QInfinity::init();
     // TODO this is for unit tests. I can't figure out how to get the plugin instance
     // from the KatePart we create there.
@@ -77,12 +77,12 @@ KobbyPlugin::KobbyPlugin( QObject *parent, const QVariantList& )
     kDebug() << "ok";
 }
 
-KobbyPlugin::~KobbyPlugin()
+KteCollaborativePlugin::~KteCollaborativePlugin()
 {
     qDeleteAll(m_managedDocuments);
 }
 
-void KobbyPlugin::connectionPrepared(Connection* connection)
+void KteCollaborativePlugin::connectionPrepared(Connection* connection)
 {
     kDebug() << "connection prepared, establishing connection";
     m_browserModel->addConnection(connection->xmppConnection(), connection->name());
@@ -93,13 +93,13 @@ void KobbyPlugin::connectionPrepared(Connection* connection)
     connection->open();
 }
 
-void KobbyPlugin::browserConnected(const QInfinity::Browser* /*browser*/)
+void KteCollaborativePlugin::browserConnected(const QInfinity::Browser* /*browser*/)
 {
     kDebug() << "browser connected, subscribing documents";
     subscribeNewDocuments();
 }
 
-void KobbyPlugin::subscribeNewDocuments()
+void KteCollaborativePlugin::subscribeNewDocuments()
 {
     kDebug() << "subscribing new documents";
     foreach ( ManagedDocument* document, m_managedDocuments ) {
@@ -113,7 +113,7 @@ void KobbyPlugin::subscribeNewDocuments()
     }
 }
 
-void KobbyPlugin::addDocument(KTextEditor::Document* document)
+void KteCollaborativePlugin::addDocument(KTextEditor::Document* document)
 {
     if ( property("kobbyPluginDisabled").toBool() ) {
         // unit tests
@@ -129,7 +129,7 @@ void KobbyPlugin::addDocument(KTextEditor::Document* document)
             this, SLOT(checkManageDocument(KTextEditor::Document*)));
 }
 
-void KobbyPlugin::removeDocument(KTextEditor::Document* document)
+void KteCollaborativePlugin::removeDocument(KTextEditor::Document* document)
 {
     kDebug() << "remove document:" << document->url().path();
     if ( m_managedDocuments.contains(document) ) {
@@ -141,7 +141,7 @@ void KobbyPlugin::removeDocument(KTextEditor::Document* document)
     }
 }
 
-void KobbyPlugin::checkManageDocument(KTextEditor::Document* document)
+void KteCollaborativePlugin::checkManageDocument(KTextEditor::Document* document)
 {
     bool isManaged = m_managedDocuments.contains(document);
     if ( document->url().protocol() != "inf" ) {
@@ -171,24 +171,24 @@ void KobbyPlugin::checkManageDocument(KTextEditor::Document* document)
     subscribeNewDocuments();
 }
 
-const ManagedDocumentList& KobbyPlugin::managedDocuments() const
+const ManagedDocumentList& KteCollaborativePlugin::managedDocuments() const
 {
     return m_managedDocuments;
 }
 
-const QString KobbyPlugin::connectionName(const KUrl& url)
+const QString KteCollaborativePlugin::connectionName(const KUrl& url)
 {
     int port = url.port();
     port = port == -1 ? defaultPort : port;
     return url.host() + ":" + QString::number(port);
 }
 
-short unsigned int KobbyPlugin::portForUrl(const KUrl& url)
+short unsigned int KteCollaborativePlugin::portForUrl(const KUrl& url)
 {
     return url.port() == -1 ? defaultPort : url.port();
 }
 
-Connection* KobbyPlugin::ensureConnection(const KUrl& documentUrl)
+Connection* KteCollaborativePlugin::ensureConnection(const KUrl& documentUrl)
 {
     int port = portForUrl(documentUrl);
     QString name = connectionName(documentUrl);
@@ -210,13 +210,13 @@ Connection* KobbyPlugin::ensureConnection(const KUrl& documentUrl)
     return m_connections[name];
 }
 
-void KobbyPlugin::connectionDisconnected(Connection* connection)
+void KteCollaborativePlugin::connectionDisconnected(Connection* connection)
 {
     kDebug() << "disconnected:" << connection;
     delete m_connections.take(connection->name());
 }
 
-void KobbyPlugin::addView(KTextEditor::View* view)
+void KteCollaborativePlugin::addView(KTextEditor::View* view)
 {
     ManagedDocument* doc = 0;
     if ( managedDocuments().contains(view->document()) ) {
@@ -227,7 +227,7 @@ void KobbyPlugin::addView(KTextEditor::View* view)
     // otherwise KXMLGuiClient will not register our actions correctly;
     // it must be present when kate displays the view.
     // A signal is used to actually display the GUI when a document becomes managed.
-    KobbyPluginView* kobbyView = new KobbyPluginView(view, doc);
+    KteCollaborativePluginView* kobbyView = new KteCollaborativePluginView(view, doc);
     m_views[view] = kobbyView;
     if ( ! doc ) {
         connect(this, SIGNAL(newManagedDocument(ManagedDocument*)),
@@ -237,7 +237,7 @@ void KobbyPlugin::addView(KTextEditor::View* view)
             kobbyView, SLOT(documentBecameUnmanaged(ManagedDocument*)));
 }
 
-void KobbyPlugin::removeView(KTextEditor::View* view)
+void KteCollaborativePlugin::removeView(KTextEditor::View* view)
 {
     kDebug() << "removing view" << view;
     if ( m_views.contains(view) ) {
@@ -246,12 +246,12 @@ void KobbyPlugin::removeView(KTextEditor::View* view)
 }
 
 // Just for debugging purposes, the real handling happens in Kobby::InfTextDocument
-void KobbyPlugin::textInserted(KTextEditor::Document* doc, KTextEditor::Range range)
+void KteCollaborativePlugin::textInserted(KTextEditor::Document* doc, KTextEditor::Range range)
 {
     kDebug() << "text inserted:" << range << doc->textLines(range) << doc;
 }
 
-void KobbyPlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range range)
+void KteCollaborativePlugin::textRemoved(KTextEditor::Document* doc, KTextEditor::Range range)
 {
     kDebug() << "text removed:" << range << doc->textLines(range) << doc;
 }

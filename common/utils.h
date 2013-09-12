@@ -18,7 +18,7 @@
 
 #ifndef KOBBY_UTILS_H
 #define KOBBY_UTILS_H
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 
 #include <QObject>
 #include <QStack>
@@ -39,11 +39,11 @@ class View;
   * @param url The URL to open
   * @return bool true if the command could be executed, false otherwise
   */
-KOBBYCOMMON_EXPORT bool tryOpenDocument(const KUrl& url);
-KOBBYCOMMON_EXPORT bool tryOpenDocumentWithDialog(const KUrl& url);
+KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocument(const KUrl& url);
+KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocumentWithDialog(const KUrl& url);
 
-KOBBYCOMMON_EXPORT bool ensureNotifierModuleLoaded();
-KOBBYCOMMON_EXPORT QString getUserName();
+KTECOLLABORATIVECOMMON_EXPORT bool ensureNotifierModuleLoaded();
+KTECOLLABORATIVECOMMON_EXPORT QString getUserName();
 
 
 // Helper class for finding the BrowserIter for a directory.
@@ -60,7 +60,7 @@ KOBBYCOMMON_EXPORT QString getUserName();
 // operation is fast when it has been done before for the given path (excluding
 // the last entry), and network-slow if it has not (might need to display
 // a busy indicator while it's running).
-class KOBBYCOMMON_EXPORT IterLookupHelper : public QObject {
+class KTECOLLABORATIVECOMMON_EXPORT IterLookupHelper : public QObject {
 Q_OBJECT
 public:
     IterLookupHelper(QString lookupPath, QInfinity::Browser* browser);
@@ -95,7 +95,7 @@ protected:
 };
 
 // Helper class for dealing with colors.
-class KOBBYCOMMON_EXPORT ColorHelper {
+class KTECOLLABORATIVECOMMON_EXPORT ColorHelper {
 public:
     /**
      * @brief YUV "Y" value of the given color, between 255 (very light) and 0 (very dark).

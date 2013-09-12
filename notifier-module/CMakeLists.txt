@@ -15,7 +15,7 @@ set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
 kde4_add_executable(infinotenotifier ${infinotenotifier_SRCS})
 
 target_link_libraries(infinotenotifier
-                      kobbycommon
+                      ktecollaborativecommon
                       ${KDE4_KIO_LIBS}
                       ${LIBQINFINITY_LIBRARIES}
 )

@@ -21,8 +21,6 @@
  */
 #include "collaborativeeditingtest.h"
 
-#include "kobbyplugin.h"
-
 #include <KTextEditor/Factory>
 #include <KTextEditor/TemplateInterface2>
 #include <KTextEditor/Document>
@@ -83,7 +81,7 @@ void CollaborativeEditingTest::initTestCase()
     // (we want to use the instances we create below)
     KTextEditor::Document* document = m_documentService->createInstance<KTextEditor::Document>(this);
     kDebug() << "got document from service:" << document;
-    KobbyPlugin* p = reinterpret_cast<KobbyPlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
+    KteCollaborativePlugin* p = reinterpret_cast<KteCollaborativePlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
     kDebug() << "auto-created instance:" << p;
     if ( p ) {
         p->setProperty("kobbyPluginDisabled", true);
@@ -92,10 +90,10 @@ void CollaborativeEditingTest::initTestCase()
     // TODO why do we use reinterpret_cast<> here? qobject_cast<> returns 0 for some reason,
     // although metaObject()->className() says "KobbyPlugin" and valgrind reports no errors
     // after accessing properties of the reinterpret_cast'ed object.
-    m_plugin_A = reinterpret_cast<KobbyPlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
+    m_plugin_A = reinterpret_cast<KteCollaborativePlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
     kDebug() << "got plugin A:" << plugin_A();
 
-    m_plugin_B = reinterpret_cast<KobbyPlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
+    m_plugin_B = reinterpret_cast<KteCollaborativePlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
     kDebug() << "got plugin B:" << plugin_B();
 }
 
@@ -134,7 +132,7 @@ KUrl CollaborativeEditingTest::urlForFileName(const QString& fileName) const
     return KUrl("inf://localhost:" + QString::number(port()) + "/" + fileName);
 }
 
-void CollaborativeEditingTest::waitForDocument(KTextEditor::Document* document, KobbyPlugin* onPlugin)
+void CollaborativeEditingTest::waitForDocument(KTextEditor::Document* document, KteCollaborativePlugin* onPlugin)
 {
     const ManagedDocumentList& docs = onPlugin->managedDocuments();
     bool ready = false;
@@ -153,7 +151,7 @@ void CollaborativeEditingTest::waitForDocument(KTextEditor::Document* document, 
 
 KTextEditor::Document* CollaborativeEditingTest::loadDocument(const QString& name, char whichPlugin)
 {
-    KobbyPlugin* p = plugin(whichPlugin);
+    KteCollaborativePlugin* p = plugin(whichPlugin);
     KTextEditor::Document* doc = createDocumentInstance();
     p->addDocument(doc);
     KUrl url = urlForFileName(name);

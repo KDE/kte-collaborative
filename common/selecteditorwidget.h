@@ -27,7 +27,7 @@
 #include <QMap>
 #include <KDialog>
 
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 
 class QButtonGroup;
 class QCheckBox;
@@ -35,7 +35,7 @@ class QCheckBox;
 /**
  * @brief Widget used in the KCM and the "Select editor" dialog to select the default application for collab documents.
  */
-class KOBBYCOMMON_EXPORT SelectEditorWidget : public QWidget
+class KTECOLLABORATIVECOMMON_EXPORT SelectEditorWidget : public QWidget
 {
 Q_OBJECT
 public:
@@ -63,7 +63,7 @@ private:
 /**
  * @brief Simple dialog containing the above widget.
  */
-class KOBBYCOMMON_EXPORT SelectEditorDialog : public KDialog
+class KTECOLLABORATIVECOMMON_EXPORT SelectEditorDialog : public KDialog
 {
 Q_OBJECT
 public:

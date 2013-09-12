@@ -13,10 +13,10 @@ add_subdirectory(ktpintegration)
 find_package(KDE4 4.5.0 REQUIRED)
 include(KDE4Defaults)
 
-set( kobby_PART_SRCS
+set( ktecollaborative_PART_SRCS
     documentchangetracker.cpp
-    kobbypluginview.cpp
-    kobbyplugin.cpp
+    ktecollaborativepluginview.cpp
+    ktecollaborativeplugin.cpp
     manageddocument.cpp
     ui/remotechangenotifier.cpp
     ui/sharedocumentdialog.cpp
@@ -26,9 +26,11 @@ set( kobby_PART_SRCS
 )
 
 add_definitions(-fPIC)
-automoc4(ktexteditor_kobby_objects kobby_PART_SRCS)
-add_library(ktexteditor_kobby_objects OBJECT ${kobby_PART_SRCS})
-kde4_add_plugin(ktexteditor_kobby $<TARGET_OBJECTS:ktexteditor_kobby_objects>)
+automoc4(ktecollaborative_objects ktecollaborative_PART_SRCS)
+add_library(ktecollaborative_objects OBJECT ${ktecollaborative_PART_SRCS})
+
+set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
+kde4_add_plugin(ktexteditor_collaborative $<TARGET_OBJECTS:ktecollaborative_objects>)
 
 include_directories(
     ${TELEPATHY_QT4_INCLUDE_DIR}
@@ -36,15 +38,11 @@ include_directories(
     ${KDE4_INCLUDES}
     ${LIBQINFINITY_INCLUDES}
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/kobby
-    ${CMAKE_SOURCE_DIR}/kobby/dialogs
-    ${CMAKE_SOURCE_DIR}/kobby/data
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/kobby
 )
 
-target_link_libraries( ktexteditor_kobby
-    kobbycommon
+target_link_libraries( ktexteditor_collaborative
+    ktecollaborativecommon
     inftube
     ${KDE4_KCMUTILS_LIBS}
     ${KDE4_KDEUI_LIBS}
@@ -63,7 +61,7 @@ target_link_libraries( ktexteditor_kobby
     ${KTP_WIDGETS_LIBRARIES}
 )
 
-install(TARGETS ktexteditor_kobby DESTINATION ${PLUGIN_INSTALL_DIR} )
-install(FILES ktexteditor_kobby.desktop settings/ktexteditor_kobby_config.desktop DESTINATION  ${SERVICES_INSTALL_DIR})
-install(FILES ktexteditor_kobbyui.rc  DESTINATION  ${DATA_INSTALL_DIR}/ktexteditor_kobby)
-install(FILES ui/notifywidget.qml ui/overlay.qml DESTINATION ${DATA_INSTALL_DIR}/kte-kobby/ui)
+install(TARGETS ktexteditor_collaborative DESTINATION ${PLUGIN_INSTALL_DIR} )
+install(FILES ktexteditor_collaborative.desktop settings/ktexteditor_collaborative_config.desktop DESTINATION  ${SERVICES_INSTALL_DIR})
+install(FILES ktexteditor_collaborativeui.rc  DESTINATION  ${DATA_INSTALL_DIR}/ktecollaborative/)
+install(FILES ui/notifywidget.qml ui/overlay.qml DESTINATION ${DATA_INSTALL_DIR}/ktecollaborative/ui)

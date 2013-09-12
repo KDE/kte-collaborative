@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 
 #include <libqinfinity/abstracttextbuffer.h>
 
@@ -70,7 +70,7 @@ int countUnicodeCharacters(const QString& str);
  * If using this class, you must monitor for fatalError, which
  * will notify of deletion of the Document.
  */
-class KOBBYCOMMON_EXPORT Document
+class KTECOLLABORATIVECOMMON_EXPORT Document
     : public QObject
 {
     Q_OBJECT
@@ -170,7 +170,7 @@ class KOBBYCOMMON_EXPORT Document
  * and removal operations.  It is also responsible for maintaining
  * undo/redo stats (insertionCount and undoCount).
  */
-class KOBBYCOMMON_EXPORT KDocumentTextBuffer
+class KTECOLLABORATIVECOMMON_EXPORT KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
 {
     Q_OBJECT
@@ -266,7 +266,7 @@ private:
  *
  * Ties local operations/acitons into QInfinity::Session operations.
  */
-class KOBBYCOMMON_EXPORT InfTextDocument
+class KTECOLLABORATIVECOMMON_EXPORT InfTextDocument
     : public Document
 {
     Q_OBJECT

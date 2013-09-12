@@ -19,9 +19,9 @@
  *
  */
 
-#include "kobbypluginview.h"
+#include "ktecollaborativepluginview.h"
 #include "manageddocument.h"
-#include "kobbyplugin.h"
+#include "ktecollaborativeplugin.h"
 #include "ui/remotechangenotifier.h"
 #include "ui/sharedocumentdialog.h"
 #include "ui/opencollabdocumentdialog.h"
@@ -67,7 +67,7 @@ void setTextColor(QWidget* textWidget, KColorScheme::ForegroundRole colorRole) {
     textWidget->setPalette(p);
 }
 
-HorizontalUsersList::HorizontalUsersList(KobbyPluginView* view, QWidget* parent, Qt::WindowFlags f)
+HorizontalUsersList::HorizontalUsersList(KteCollaborativePluginView* view, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , m_userTable(0)
     , m_prefix(new QPushButton(this))
@@ -249,7 +249,7 @@ void HorizontalUsersList::setExpanded(bool expanded)
     }
 }
 
-KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
+CollaborativeStatusBar::CollaborativeStatusBar(KteCollaborativePluginView* parent, Qt::WindowFlags f)
     : QWidget(parent->m_view, f)
     , m_connectionStatusLabel(new QLabel(this))
     , m_view(parent)
@@ -265,7 +265,7 @@ KobbyStatusBar::KobbyStatusBar(KobbyPluginView* parent, Qt::WindowFlags f)
             m_usersList, SLOT(userTableChanged()));
 }
 
-bool KobbyStatusBar::event(QEvent* e)
+bool CollaborativeStatusBar::event(QEvent* e)
 {
     if ( e->type() == QEvent::Resize ) {
         checkSize();
@@ -273,7 +273,7 @@ bool KobbyStatusBar::event(QEvent* e)
     return QWidget::event(e);
 }
 
-void KobbyStatusBar::checkSize()
+void CollaborativeStatusBar::checkSize()
 {
     int availableSize = m_view->kteView()->size().width() - m_connectionStatusLabel->size().width();
     int actualSize = m_usersList->sizeHint().width();
@@ -285,7 +285,7 @@ void KobbyStatusBar::checkSize()
     }
 }
 
-void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
+void CollaborativeStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlConnection::Status status)
 {
     QString text;
     KColorScheme::ForegroundRole role = KColorScheme::NormalText;
@@ -309,35 +309,35 @@ void KobbyStatusBar::connectionStatusChanged(Kobby::Connection*, QInfinity::XmlC
     m_connectionStatusLabel->setText(text);
 }
 
-ManagedDocument* KobbyPluginView::document() const
+ManagedDocument* KteCollaborativePluginView::document() const
 {
     return m_document;
 }
 
-KTextEditor::View* KobbyPluginView::kteView() const
+KTextEditor::View* KteCollaborativePluginView::kteView() const
 {
     return m_view;
 }
 
-void KobbyStatusBar::sessionFullyReady()
+void CollaborativeStatusBar::sessionFullyReady()
 {
     setTextColor(m_connectionStatusLabel, KColorScheme::PositiveText);
     m_connectionStatusLabel->setText( "<b>" + i18n("Connected to collaboration server.") + "</b>" );
 }
 
-void KobbyStatusBar::usersChanged()
+void CollaborativeStatusBar::usersChanged()
 {
     m_usersList->setUserTable(m_view->m_document->userTable());
     m_usersList->userTableChanged();
     checkSize();
 }
 
-KobbyStatusBar* KobbyPluginView::statusBar() const
+CollaborativeStatusBar* KteCollaborativePluginView::statusBar() const
 {
     return m_statusBar;
 }
 
-KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* document)
+KteCollaborativePluginView::KteCollaborativePluginView(KTextEditor::View* kteView, ManagedDocument* document)
     : QObject(kteView)
     , KXMLGUIClient(kteView)
     , m_view(kteView)
@@ -345,8 +345,8 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     , m_statusOverlay(0)
     , m_document(document)
 {
-    setComponentData(KobbyPluginFactory::componentData());
-    setXMLFile("ktexteditor_kobbyui.rc");
+    setComponentData(KteCollaborativePluginFactory::componentData());
+    setXMLFile("ktexteditor_collaborativeui.rc");
 
     // Set up the actions for the "Collaborative" menu
     m_openCollabDocumentAction = actionCollection()->addAction("kobby_open", this, SLOT(openActionClicked()));
@@ -409,7 +409,7 @@ KobbyPluginView::KobbyPluginView(KTextEditor::View* kteView, ManagedDocument* do
     }
 }
 
-void KobbyPluginView::openFileManagerActionClicked()
+void KteCollaborativePluginView::openFileManagerActionClicked()
 {
     if ( ! m_document || ! m_document->document()->url().isValid() ) {
         return;
@@ -422,21 +422,21 @@ void KobbyPluginView::openFileManagerActionClicked()
     KRun::runUrl(url.upUrl(), KMimeType::findByUrl(url.upUrl())->name(), m_view);
 }
 
-void KobbyPluginView::configureActionClicked()
+void KteCollaborativePluginView::configureActionClicked()
 {
     KCMultiDialog proxy;
     proxy.addModule("ktexteditor_kobby_config");
     proxy.exec();
 }
 
-void KobbyPluginView::clearHighlightActionClicked()
+void KteCollaborativePluginView::clearHighlightActionClicked()
 {
     if ( m_document && m_document->changeTracker() ) {
         m_document->changeTracker()->clearHighlight();
     }
 }
 
-void KobbyPluginView::disableActions()
+void KteCollaborativePluginView::disableActions()
 {
     foreach ( KAction* action, m_actionsRequiringConnection ) {
         action->setEnabled(false);
@@ -446,7 +446,7 @@ void KobbyPluginView::disableActions()
     }
 }
 
-void KobbyPluginView::enableActions()
+void KteCollaborativePluginView::enableActions()
 {
     foreach ( KAction* action, m_actionsRequiringConnection ) {
         action->setEnabled(true);
@@ -459,7 +459,7 @@ void KobbyPluginView::enableActions()
     }
 }
 
-void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
+void KteCollaborativePluginView::documentBecameManaged(ManagedDocument* document)
 {
     if ( document->document() != m_view->document() ) {
         return;
@@ -468,7 +468,7 @@ void KobbyPluginView::documentBecameManaged(ManagedDocument* document)
     enableUi();
 }
 
-void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
+void KteCollaborativePluginView::documentBecameUnmanaged(ManagedDocument* document)
 {
     if ( document != m_document || m_document == 0 ) {
         return;
@@ -479,12 +479,12 @@ void KobbyPluginView::documentBecameUnmanaged(ManagedDocument* document)
     disableActions();
 }
 
-void KobbyPluginView::textHintRequested(const KTextEditor::Cursor& position, QString& hint)
+void KteCollaborativePluginView::textHintRequested(const KTextEditor::Cursor& position, QString& hint)
 {
     hint = i18nc("%1 is a user name", "Written by: <b>%1</b>", m_document->changeTracker()->userForCursor(position));
 }
 
-void KobbyPluginView::enableUi()
+void KteCollaborativePluginView::enableUi()
 {
     Document::LoadState loadState = document()->infTextDocument() ? document()->infTextDocument()->loadState()
                                                                   : Kobby::Document::Unloaded;
@@ -500,7 +500,7 @@ void KobbyPluginView::enableUi()
         m_statusOverlay->show();
     }
 
-    m_statusBar = new KobbyStatusBar(this);
+    m_statusBar = new CollaborativeStatusBar(this);
     connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
             statusBar(), SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)), Qt::UniqueConnection);
     statusBar()->connectionStatusChanged(m_document->connection(), m_document->connection()->status());
@@ -525,7 +525,7 @@ void KobbyPluginView::enableUi()
     }
 }
 
-void KobbyPluginView::disableUi()
+void KteCollaborativePluginView::disableUi()
 {
     m_view->layout()->removeWidget(m_statusBar);
     delete m_statusBar;
@@ -541,12 +541,12 @@ void KobbyPluginView::disableUi()
     // Connections are disconnected automatically since m_document will be deleted
 }
 
-void KobbyPluginView::disconnectActionClicked()
+void KteCollaborativePluginView::disconnectActionClicked()
 {
     m_document->document()->saveAs(KUrl(QDir::tempPath() + m_document->document()->url().encodedPath()));
 }
 
-void KobbyPluginView::changeUserActionClicked()
+void KteCollaborativePluginView::changeUserActionClicked()
 {
     if ( ! m_document || ! m_document->textBuffer() || ! m_document->textBuffer()->user() ) {
         KMessageBox::error(m_view, i18n("You cannot change your user name for a document you are not subscribed to."));
@@ -570,7 +570,7 @@ void KobbyPluginView::changeUserActionClicked()
     }
 }
 
-void KobbyPluginView::changeUserName(const QString& newUserName)
+void KteCollaborativePluginView::changeUserName(const QString& newUserName)
 {
     kDebug() << "new user name" << newUserName;
     KUrl url = m_document->document()->url();
@@ -581,7 +581,7 @@ void KobbyPluginView::changeUserName(const QString& newUserName)
     document->openUrl(url);
 }
 
-void KobbyPluginView::openActionClicked()
+void KteCollaborativePluginView::openActionClicked()
 {
     OpenCollabDocumentDialog* dialog = new OpenCollabDocumentDialog();
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -590,7 +590,7 @@ void KobbyPluginView::openActionClicked()
     dialog->show();
 }
 
-void KobbyPluginView::saveCopyActionClicked()
+void KteCollaborativePluginView::saveCopyActionClicked()
 {
     if ( ! m_document ) {
         return;
@@ -612,7 +612,7 @@ void KobbyPluginView::saveCopyActionClicked()
     }
 }
 
-void KobbyPluginView::shareActionClicked()
+void KteCollaborativePluginView::shareActionClicked()
 {
     if ( ! m_view->document()->url().isValid() ) {
         const QString question = i18n("You must save the document before sharing it. Do you want to do that now?");
@@ -634,18 +634,18 @@ void KobbyPluginView::shareActionClicked()
     dialog.exec();
 }
 
-void KobbyPluginView::openFile(KUrl url)
+void KteCollaborativePluginView::openFile(KUrl url)
 {
     kDebug() << "opening file" << url;
     m_view->document()->setProperty("oldUrl", m_view->document()->url().url());
     m_view->document()->openUrl(url.url());
 }
 
-KobbyPluginView::~KobbyPluginView()
+KteCollaborativePluginView::~KteCollaborativePluginView()
 {
 }
 
-void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal)
+void KteCollaborativePluginView::remoteTextChanged(const KTextEditor::Range range, QInfinity::User* user, bool removal)
 {
     KConfig config("ktecollaborative");
     if ( config.group("notifications").readEntry("displayWidgets", true) ) {
@@ -655,7 +655,7 @@ void KobbyPluginView::remoteTextChanged(const KTextEditor::Range range, QInfinit
     }
 }
 
-void KobbyPluginView::documentReady(ManagedDocument* doc)
+void KteCollaborativePluginView::documentReady(ManagedDocument* doc)
 {
     Q_ASSERT(doc == m_document);
     connect(m_document->textBuffer(), SIGNAL(remoteChangedText(KTextEditor::Range,QInfinity::User*,bool)),
@@ -671,4 +671,4 @@ void KobbyPluginView::documentReady(ManagedDocument* doc)
     enableActions();
 }
 
-#include "kobbypluginview.moc"
+#include "ktecollaborativepluginview.moc"

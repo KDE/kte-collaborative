@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Service
 X-KDE-ServiceTypes=KCModule
-X-KDE-Library=ktexteditor_kobby
-X-KDE-PluginKeyword=ktexteditor_kobby_config
-X-KDE-ParentComponents=ktexteditor_kobby
+X-KDE-Library=ktexteditor_collaborative
+X-KDE-PluginKeyword=ktexteditor_collaborative_config
+X-KDE-ParentComponents=ktexteditor_collaborative
 Name=Configure collaborative editing
 Name[hu]=Együttműködő szerkesztés beállítása
 Name[nl]=Gezamenlijk bewerken instellen

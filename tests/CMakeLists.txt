@@ -2,7 +2,7 @@ automoc4(collaborativeeditingtest collaborativeeditingtest.cpp)
 kde4_add_unit_test(
     collaborativeeditingtest
     collaborativeeditingtest.cpp
-    $<TARGET_OBJECTS:ktexteditor_kobby_objects>
+    $<TARGET_OBJECTS:ktecollaborative_objects>
 )
 
 include_directories(
@@ -27,6 +27,6 @@ target_link_libraries( collaborativeeditingtest
     ${KDE4_KIO_LIBS}
     ${KTP_MODELS_LIBRARIES}
     ${KTP_WIDGETS_LIBRARIES}
-    kobbycommon
+    ktecollaborativecommon
     inftube
 )

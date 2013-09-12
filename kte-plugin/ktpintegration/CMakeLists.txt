@@ -25,7 +25,7 @@ set_target_properties( inftube
 )
 
 target_link_libraries(inftube
-                      kobbycommon
+                      ktecollaborativecommon
                       ${KDE4_KDEUI_LIBS}
                       ${TELEPATHY_QT4_LIBRARIES}
                       ${KTP_LIBRARIES}
