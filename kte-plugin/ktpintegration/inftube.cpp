@@ -311,7 +311,13 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
     }
     // set infinoted's socket as the local endpoint of the tube
     unsigned short port = -1;
-    startInfinoted(&port);
+    bool success = startInfinoted(&port);
+    if ( ! success ) {
+        KMessageBox::detailedError(0, i18n("Failed to start collaborative server, the session could not be initiated."),
+                                   i18nc("%1: directory", "Look at the log files in %1 for more information.", serverDirectory(port)));
+        channel->requestClose();
+        return;
+    }
 
     QVariantMap hints;
     hints = hints.unite(requestHints.allHints());
@@ -363,48 +369,53 @@ QString InfTubeServer::serverDirectory(unsigned short port) const
 
 bool InfTubeServer::startInfinoted(unsigned short* port)
 {
-    // Find a free port by letting the system choose one for a QTcpServer, then closing that
-    // server and using the port it was assigned. Arguably not optimal but close enough.
-    {
-        QTcpServer s;
-        s.listen(QHostAddress::LocalHost, 0);
-        *port = s.serverPort();
-        s.close();
-        usleep(200000);
-    }
-    // Ensure the server directory actually exists
-    QDir d(serverDirectory(*port));
-    if ( ! d.exists() ) {
-        d.mkpath(d.path());
-    }
-    QProcess* serverProcess = new QProcess;
-    m_serverProcesses << serverProcess;
-    serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
-    serverProcess->setStandardOutputFile(serverDirectory(*port) + "/infinoted.log");
-    serverProcess->setStandardErrorFile(serverDirectory(*port) + "/infinoted.errors");
-    serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
-                                           << "-r" << serverDirectory(*port) << "-p" << QString::number(*port));
-    serverProcess->waitForStarted(500);
-    int timeout = 30; // 30 retries at 100 ms -> 3s
-    for ( int i = 0; i < timeout; i ++ ) {
-        if ( serverProcess->state() != QProcess::Running ) {
-            kWarning() << "server did not start";
-            return false;
+    *port = 49152 + (QTime::currentTime().msec() + QTime::currentTime().second() * 1000) % (65535-49152);
+    bool running = false;
+    int retriesLeft = 15;
+    while ( ! running && retriesLeft >= 0 ) {
+        retriesLeft -= 1;
+        // Try next port
+        *port = *port >= 65535 ? 49152 : *port + 1;
+        kDebug() << "trying port" << *port;
+        // Ensure the server directory actually exists
+        QDir d(serverDirectory(*port));
+        if ( ! d.exists() ) {
+            d.mkpath(d.path());
         }
-        QTcpSocket s;
-        s.connectToHost("127.0.0.1", *port);
-        if ( s.waitForConnected(100) ) {
-            break;
+        QProcess* serverProcess = new QProcess;
+        m_serverProcesses << serverProcess;
+        serverProcess->setEnvironment(QStringList() << "LIBINFINITY_DEBUG_PRINT_TRAFFIC=1");
+        serverProcess->setStandardOutputFile(serverDirectory(*port) + "/infinoted.log");
+        serverProcess->setStandardErrorFile(serverDirectory(*port) + "/infinoted.errors");
+        serverProcess->start(QString(INFINOTED_PATH), QStringList() << "--security-policy=no-tls"
+                                            << "-r" << serverDirectory(*port) << "-p" << QString::number(*port));
+        serverProcess->waitForStarted(500);
+        int timeout = 30; // 30 retries at 100 ms -> 3s
+        for ( int i = 0; i < timeout; i ++ ) {
+            if ( serverProcess->state() != QProcess::Running ) {
+                kDebug() << "server did not start";
+                break;
+            }
+            QTcpSocket s;
+            s.connectToHost("127.0.0.1", *port);
+            if ( s.waitForConnected(50) ) {
+                running = true;
+                kDebug() << "successfully started infinioted on port" << *port
+                         << "( root dir" << serverDirectory(*port) << ")";
+                break;
+            }
+            usleep(50000);
         }
+        kDebug() << "failed, trying next port";
     }
     usleep(200000);
-    kDebug() << "successfully started infinioted on port" << *port << "( root dir" << serverDirectory(*port) << ")";
-    return true;
+    return running;
 }
 
 InfTubeServer::~InfTubeServer()
 {
     kDebug() << "DESTROYING SERVER";
+    qDeleteAll(m_serverProcesses);
 }
 
 QList<Tp::StreamTubeChannelPtr> InfTubeClient::getChannels() const {
