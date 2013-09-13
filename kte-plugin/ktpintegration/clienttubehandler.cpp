@@ -18,16 +18,14 @@
  ***************************************************************************/
 
 #include "inftube.h"
-#include <krun.h>
 #include <KDebug>
 #include <KCmdLineArgs>
 #include <KAboutData>
 #include <KApplication>
-#include <TelepathyQt/ClientRegistrar>
 
 // Proxy application which accepts a tube, then starts a handler application.
 int main(int argc, char** argv) {
-    KAboutData about("infinote-client", 0, ki18n("infinote-client"), "0.1", ki18n("..."),
+    KAboutData about("infinote-client", 0, ki18n("infinote-client"), "0.1", ki18n("Helper application for collaborative editing"),
                      KAboutData::License_GPL, ki18n("(C) 2013 Sven Brauch"), KLocalizedString(), 0, "svenbrauch@gmail.com");
     about.addAuthor( ki18n("Sven Brauch"), KLocalizedString(), "svenbrauch@gmail.com" );
     KCmdLineArgs::init(argc, argv, &about);
