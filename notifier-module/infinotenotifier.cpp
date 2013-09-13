@@ -219,9 +219,8 @@ void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser_)
     }
 }
 
-void InfinoteNotifier::itemAdded(BrowserIter iter)
+void InfinoteNotifier::handleItemChanged(BrowserIter iter, bool removal)
 {
-    kDebug() << "item added";
     QInfinity::BrowserIter copy(iter);
     if ( copy.parent() && infc_browser_iter_get_explore_request(copy.infBrowser(), copy.infBrowserIter()) ) {
         // the directory is just being explored, so the added signal is not a "real" one
@@ -245,7 +244,7 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
         if ( hostForUrl(url) == host ) {
             kDebug() << "queuing for update:" << url;
             QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
-            if ( ! iter.isDirectory() && ! haveAddedFile ) {
+            if ( ! iter.isDirectory() && ! haveAddedFile && ! removal ) {
                 // do not show notifications for creting directories, those are worthless
                 item->addedFiles.insert(iter.path());
                 haveAddedFile = true;
@@ -254,10 +253,16 @@ void InfinoteNotifier::itemAdded(BrowserIter iter)
     }
 }
 
+void InfinoteNotifier::itemAdded(BrowserIter iter)
+{
+    kDebug() << "item added";
+    handleItemChanged(iter, false);
+}
+
 void InfinoteNotifier::itemRemoved(BrowserIter iter)
 {
     kDebug() << "item removed";
-    itemAdded(iter);
+    handleItemChanged(iter, true);
 }
 
 void InfinoteNotifier::enteredDirectory(QString path)

@@ -123,6 +123,9 @@ private:
     /// Cleanup one particular connection.
     void cleanupConnection(QInfinity::XmlConnection* conn);
 
+    /// called by the itemAdded() / itemRemoved() handlers
+    void handleItemChanged(BrowserIter, bool removal=false);
+
 private:
     OrgKdeKDirNotifyInterface* m_notifyIface;
     /// List of watched URLs to receive notifications via KDirNotify
