@@ -204,7 +204,9 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
             // We must not use exec() here (so no KMessageBox!) or we will run into
             // nested-event-loop-network-code trouble.
             KDialog* dlg = new KDialog();
-            dlg->setMainWidget(new QLabel(i18n("Error opening document: %1", error)));
+            QLabel* message = new QLabel(error);
+            message->setWordWrap(true);
+            dlg->setMainWidget(message);
             dlg->setButtons(KDialog::Cancel);
             dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
             dlg->setAttribute(Qt::WA_DeleteOnClose);
@@ -243,6 +245,12 @@ void ManagedDocument::sessionStatusChanged()
 {
     m_sessionStatus = m_proxy->session()->status();
     kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
+    if ( m_sessionStatus == Session::Closed ) {
+        kDebug() << "Session was closed, disconnecting.";
+        unrecoverableError(infTextDocument(),
+                           i18n("The session for <br><b>%1</b><br> was closed by the remote host, "
+                                "possibly the file you were editing was deleted by someone.", document()->url().url()));
+    }
 }
 
 void ManagedDocument::subscriptionFailed(GError* error)
