@@ -299,6 +299,21 @@ void InfTubeServer::tubeClosed(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr
     }
 }
 
+void InfTubeServer::targetPresenceChanged(Tp::Presence presence)
+{
+    Tp::Contact* contact = qobject_cast<Tp::Contact*>(QObject::sender());
+    if ( presence == Tp::Presence::offline() ) {
+        // Close channels when the target goes offline
+        foreach ( Tp::StreamTubeChannelPtr channel, m_channels ) {
+            if ( channel->targetContact()->id() == contact->id() ) {
+                kDebug() << "closing channel" << channel;
+                channel->requestClose();
+                m_channels.removeAll(channel);
+            }
+        }
+    }
+}
+
 void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
 {
     kDebug() << "tube requested";
@@ -309,6 +324,10 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
         kDebug() << requestHints.allHints();
         return;
     }
+
+    connect(channel->targetContact().data(), SIGNAL(presenceChanged(Tp::Presence)),
+            this, SLOT(targetPresenceChanged(Tp::Presence)));
+
     // set infinoted's socket as the local endpoint of the tube
     unsigned short port = -1;
     bool success = startInfinoted(&port);
@@ -423,6 +442,21 @@ QList<Tp::StreamTubeChannelPtr> InfTubeClient::getChannels() const {
     return m_channels;
 };
 
+void InfTubeClient::targetPresenceChanged(Tp::Presence presence)
+{
+    Tp::Contact* contact = qobject_cast<Tp::Contact*>(QObject::sender());
+    if ( presence == Tp::Presence::offline() ) {
+        // Close channels when the target goes offline
+        foreach ( Tp::StreamTubeChannelPtr channel, m_channels ) {
+            if ( channel->targetContact()->id() == contact->id() ) {
+                kDebug() << "closing channel" << channel;
+                channel->requestClose();
+                m_channels.removeAll(channel);
+            }
+        }
+    }
+}
+
 void InfTubeClient::listen()
 {
     kDebug() << "listen called";
@@ -477,6 +511,9 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
     KUrl url = localUrl();
     setNicknameFromAccount(account);
     url.setUser(nickname());
+
+    connect(tube->targetContact().data(), SIGNAL(presenceChanged(Tp::Presence)),
+            this, SLOT(targetPresenceChanged(Tp::Presence)));
 
     // Handle opening the attached documents
     bool ok = false;

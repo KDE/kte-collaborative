@@ -145,6 +145,7 @@ public slots:
      */
     void tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr);
     void tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString);
+    void targetPresenceChanged(Tp::Presence);
 };
 
 // This class is for requesting a new tube
@@ -211,6 +212,7 @@ public:
 public slots:
     void tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints);
     void tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString);
+    void targetPresenceChanged(Tp::Presence);
 
 private:
     mutable QList<Tp::StreamTubeChannelPtr> m_channels;
