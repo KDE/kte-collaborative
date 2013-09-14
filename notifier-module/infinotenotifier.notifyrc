@@ -1,6 +1,7 @@
 [Global]
 IconName=accessories-text-editor
 Comment=Collaborative text editing
+Comment[de]=Gemeinsame Textbearbeitung
 Comment[nl]=Gezamenlijk tekstbewerken
 Comment[pt]=Edição de texto colaborativa
 Comment[pt_BR]=Edição de texto colaborativa
@@ -10,6 +11,7 @@ Comment[x-test]=xxCollaborative text editingxx
 
 [Context/filenotification]
 Name=FileNotification
+Name[de]=Datei-Benachrichtigung
 Name[nl]=Bestandsmelding
 Name[pt]=Notificação de Ficheiros
 Name[pt_BR]=Notificação de arquivos
