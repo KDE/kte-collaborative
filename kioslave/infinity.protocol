@@ -15,6 +15,7 @@ maxInstances=20
 maxInstancesPerHost=1
 Description=Infinity kioslave
 Description[bs]=Beskonačni KIOSlave
+Description[de]=Infinity-Ein-/Ausgabemodul
 Description[hu]=Infinity kioslave
 Description[nl]=Infinity kioslave
 Description[pl]=Infinity kioslave

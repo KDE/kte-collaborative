@@ -19,6 +19,7 @@ Name[sv]=Filunderrättelse
 Name[uk]=Сповіщення щодо файлів
 Name[x-test]=xxFileNotificationxx
 Comment=Used for file added or removed notifications
+Comment[de]=Benachrichtigungen über hinzugefügte oder entfernte Dateien
 Comment[nl]=Gebruikt voor meldingen van bestand toegevoegd of verwijderd
 Comment[pt]=Usado para as notificações de ficheiros adicionados ou removidos
 Comment[pt_BR]=Usado para notificações de arquivos adicionados ou removidos
@@ -28,6 +29,7 @@ Comment[x-test]=xxUsed for file added or removed notificationsxx
 
 [Event/fileShared]
 Name=File Shared
+Name[de]=Freigegebene Datei
 Name[nl]=Bestand gedeeld
 Name[pt]=Ficheiro Partilhado
 Name[pt_BR]=Arquivo compartilhado
@@ -35,6 +37,7 @@ Name[sv]=Fil delad
 Name[uk]=Оприлюднення файлів
 Name[x-test]=xxFile Sharedxx
 Comment=A new file was added to the collaboration server.
+Comment[de]=Eine neue Datei wurde zum Server zur gemeinsamen Bearbeitung hinzugefügt.
 Comment[nl]=Er is een nieuw bestand aan samenwerkingsserver toegevoegd.
 Comment[pt]=Foi adicionado um novo ficheiro ao servidor de colaboração.
 Comment[pt_BR]=Foi adicionado um novo arquivo ao servidor de colaboração.

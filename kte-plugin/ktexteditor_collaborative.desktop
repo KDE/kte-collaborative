@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Service
 Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
+Comment[de]=KTextEditor-Modul zur gemeinsamen Textbearbeitung auf der Basis des Infinity-Protokolls
 Comment[hu]=Együttműködő szerkesztés bővítmény a KTextEditorhoz az infinity protokollon alapulva
 Comment[nl]=Gezamenlijk bewerken plug-in voor KTextEditor, gebaseerd op het infinity protocol protocol
 Comment[pl]=Wtyczka kolaboracyjnego edytowania dla KTextEditor, opart o protokół infinity
