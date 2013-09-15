@@ -108,9 +108,11 @@ void IterLookupHelper::setDeleteOnFinish(bool deleteOnFinish)
 {
     if ( deleteOnFinish ) {
         connect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+        connect(this, SIGNAL(failed()), this, SLOT(deleteLater()));
     }
     else {
         disconnect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+        connect(this, SIGNAL(failed()), this, SLOT(deleteLater()));
     }
 }
 

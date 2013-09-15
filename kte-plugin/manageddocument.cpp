@@ -147,6 +147,7 @@ void ManagedDocument::subscribe()
             this, SLOT(finishSubscription(QInfinity::BrowserIter)));
     connect(helper, SIGNAL(failed()),
             this, SLOT(lookupFailed()));
+    helper->setDeleteOnFinish(true);
     helper->begin();
 }
 
@@ -262,8 +263,6 @@ void ManagedDocument::subscriptionFailed(GError* error)
 
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 {
-    // delete the lookup helper
-    QObject::sender()->deleteLater();
     kDebug() << "finishing subscription with iter " << iter.path();
     if ( iter.isDirectory() ) {
         unrecoverableError(infTextDocument(), i18n("The URL you tried to open is a directory, not a document."));
