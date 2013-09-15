@@ -40,6 +40,7 @@ struct Host {
     Host(const QString& hostname, int port) : hostname(hostname), port(port == -1 ? 6523 : port) { };
     Host() : port(0) { };
     bool operator==(const Host& other) const { return hostname == other.hostname && port == other.port; };
+    bool operator!=(const Host& other) const { return !operator==(other); };
     bool isValid() { return ! hostname.isNull() && port != 0; };
     QString hostname;
     int port;

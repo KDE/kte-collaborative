@@ -88,7 +88,7 @@ QString getUserName()
     return user;
 }
 
-IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
+IterLookupHelper::IterLookupHelper(QString lookupPath, const QInfinity::Browser* browser)
         : QObject()
         , m_browser(browser)
         , m_currentIter(*m_browser)

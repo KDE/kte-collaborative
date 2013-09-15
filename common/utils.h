@@ -63,7 +63,7 @@ KTECOLLABORATIVECOMMON_EXPORT QString getUserName();
 class KTECOLLABORATIVECOMMON_EXPORT IterLookupHelper : public QObject {
 Q_OBJECT
 public:
-    IterLookupHelper(QString lookupPath, QInfinity::Browser* browser);
+    IterLookupHelper(QString lookupPath, const QInfinity::Browser* browser);
 
     inline void beginLater() {
         QTimer::singleShot(0, this, SLOT(begin()));
@@ -89,7 +89,7 @@ protected:
     void explore(QInfinity::BrowserIter directory);
 
     QStack<QString> m_remainingComponents;
-    QInfinity::Browser* m_browser;
+    const QInfinity::Browser* m_browser;
     QInfinity::BrowserIter m_currentIter;
     bool m_wasSuccessful;
 };

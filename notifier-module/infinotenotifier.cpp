@@ -106,7 +106,7 @@ void InfinoteNotifier::cleanupConnection(QInfinity::XmlConnection* conn)
     // Delete connections belonging to this connection, too, so they will be re-added.
     QSet<KUrl> keep;
     foreach ( const KUrl& url, m_watchedUrls ) {
-        if ( hostForUrl(url) == host ) {
+        if ( hostForUrl(url) != host ) {
             keep.insert(url);
         }
     }
@@ -202,9 +202,8 @@ void InfinoteNotifier::connectionReady(Connection* conn)
             this, SLOT(itemRemoved(BrowserIter)), Qt::UniqueConnection);
 }
 
-void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser_)
+void InfinoteNotifier::connectionEstablished(const QInfinity::Browser* browser)
 {
-    QInfinity::Browser* browser = const_cast<QInfinity::Browser*>(browser_); // sorry
     // Ensure all wateched directories are explored
     foreach ( const KUrl& watched, m_watchedUrls ) {
         const Host host = hostForUrl(watched);
@@ -245,7 +244,7 @@ void InfinoteNotifier::handleItemChanged(BrowserIter iter, bool removal)
             kDebug() << "queuing for update:" << url;
             QueuedNotification* item = m_notifyQueue.insertOrUpdateUrl(url.url(), this);
             if ( ! iter.isDirectory() && ! haveAddedFile && ! removal ) {
-                // do not show notifications for creting directories, those are worthless
+                // do not show notifications for creating directories, those are worthless
                 item->addedFiles.insert(iter.path());
                 haveAddedFile = true;
             }
@@ -313,9 +312,8 @@ void InfinoteNotifier::notificationFired()
             // Use a folder icon
             typeString = "/";
         }
-        KIconLoader loader;
-        message->setPixmap(loader.loadMimeTypeIcon(KMimeType::findByPath(typeString)->iconName(),
-                                                   KIconLoader::Dialog));
+        message->setPixmap(KIconLoader::global()->loadMimeTypeIcon(KMimeType::findByPath(typeString)->iconName(),
+                                                                   KIconLoader::Dialog));
         message->setComponentData(KComponentData("infinotenotifier"));
         connect(message, SIGNAL(action1Activated()), SLOT(messageActionActivated()));
         message->sendEvent();
