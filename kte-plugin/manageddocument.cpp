@@ -33,6 +33,7 @@
 #include <libqinfinity/xmppconnection.h>
 #include <libqinfinity/usertable.h>
 #include <libqinfinity/noderequest.h>
+#include <libqinfinity/noteplugin.h>
 
 #include <KMessageBox>
 #include <KLocalizedString>
@@ -194,24 +195,25 @@ void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QI
 void ManagedDocument::unrecoverableError(Document* document, QString error)
 {
     Q_ASSERT(document == m_infDocument);
-    if ( document->kDocument() ) {
+    if ( m_document ) {
         QTemporaryFile file;
         file.setAutoRemove(false);
         file.open();
         file.close();
-        document->kDocument()->saveAs(KUrl(file.fileName()));
-        if ( ! error.isEmpty() ) {
-            // We must not use exec() here (so no KMessageBox!) or we will run into
-            // nested-event-loop-network-code trouble.
-            KDialog* dlg = new KDialog();
-            QLabel* message = new QLabel(error);
-            message->setWordWrap(true);
-            dlg->setMainWidget(message);
-            dlg->setButtons(KDialog::Cancel);
-            dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
-            dlg->setAttribute(Qt::WA_DeleteOnClose);
-            dlg->show();
-        }
+        m_document->saveAs(KUrl(file.fileName()));
+    }
+    if ( ! error.isEmpty() ) {
+        // We must not use exec() here (so no KMessageBox!) or we will run into
+        // nested-event-loop-network-code trouble.
+        KDialog* dlg = new KDialog();
+        dlg->setCaption(i18n("Collaborative text editing"));
+        QLabel* message = new QLabel(error);
+        message->setWordWrap(true);
+        dlg->setMainWidget(message);
+        dlg->setButtons(KDialog::Cancel);
+        dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->show();
     }
 }
 
@@ -263,6 +265,15 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     // delete the lookup helper
     QObject::sender()->deleteLater();
     kDebug() << "finishing subscription with iter " << iter.path();
+    if ( iter.isDirectory() ) {
+        unrecoverableError(infTextDocument(), i18n("The URL you tried to open is a directory, not a document."));
+        return;
+    }
+    if ( iter.noteType() != QString::fromAscii(m_notePlugin->infPlugin()->note_type) ) {
+        unrecoverableError(infTextDocument(), i18n("The document type \"%1\" is not supported by this program.",
+                                                   iter.noteType()));
+        return;
+    }
     QPointer< QInfinity::Browser > browser = iter.browser();
     QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
                      this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)), Qt::UniqueConnection);
