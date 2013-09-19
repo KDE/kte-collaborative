@@ -425,7 +425,7 @@ void KteCollaborativePluginView::openFileManagerActionClicked()
 void KteCollaborativePluginView::configureActionClicked()
 {
     KCMultiDialog proxy;
-    proxy.addModule("ktexteditor_kobby_config");
+    proxy.addModule("ktexteditor_collaborative_config");
     proxy.exec();
 }
 
