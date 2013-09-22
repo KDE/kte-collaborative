@@ -7,7 +7,7 @@ set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
 
 set(IS_KTP_INTERNAL_MODULE TRUE) # aw yeah
 find_package(TelepathyQt4 0.8.9 REQUIRED)
-find_package(KTp REQUIRED)
+find_package(KTp 0.6.80 REQUIRED)
 include_directories(
     ${QT_INCLUDES}
     ${KDE4_INCLUDES}
