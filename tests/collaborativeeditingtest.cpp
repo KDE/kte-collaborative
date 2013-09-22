@@ -75,7 +75,7 @@ void CollaborativeEditingTest::initTestCase()
 
     // get the service factory for documents and the plugin
     m_documentService = KService::serviceByDesktopPath("katepart.desktop");
-    KService::Ptr pluginService = KService::serviceByDesktopPath("ktexteditor_kobby.desktop");
+    KService::Ptr pluginService = KService::serviceByDesktopPath("ktexteditor_collaborative.desktop");
 
     // Instantiate a document. This loads an copy of the plugin, which we disable
     // (we want to use the instances we create below)
