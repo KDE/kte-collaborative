@@ -11,8 +11,6 @@ include_directories(
 set(kio_infinity_PART_SRCS
     kio_infinity.cpp
 )
-
-set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
 kde4_add_plugin(kio_infinity ${kio_infinity_PART_SRCS})
 
 target_link_libraries(kio_infinity

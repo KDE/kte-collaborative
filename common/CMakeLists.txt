@@ -42,4 +42,4 @@ target_link_libraries( ktecollaborativecommon
     ${LIBQINFINITY_LIBRARIES}
 )
 
-install(TARGETS ktecollaborativecommon DESTINATION ${LIB_INSTALL_DIR}/ktecollaborative)
+install(TARGETS ktecollaborativecommon DESTINATION ${INSTALL_TARGETS_DEFAULT_ARGS})
