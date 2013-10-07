@@ -2,6 +2,7 @@
 IconName=accessories-text-editor
 Comment=Collaborative text editing
 Comment[de]=Gemeinsame Textbearbeitung
+Comment[hu]=Együttműködő szövegszerkesztés
 Comment[nl]=Gezamenlijk tekstbewerken
 Comment[pt]=Edição de texto colaborativa
 Comment[pt_BR]=Edição de texto colaborativa
@@ -31,6 +32,7 @@ Comment[x-test]=xxUsed for file added or removed notificationsxx
 [Event/fileShared]
 Name=File Shared
 Name[de]=Freigegebene Datei
+Name[hu]=Fájl megosztva
 Name[nl]=Bestand gedeeld
 Name[pt]=Ficheiro Partilhado
 Name[pt_BR]=Arquivo compartilhado
@@ -40,6 +42,7 @@ Name[uk]=Оприлюднення файлів
 Name[x-test]=xxFile Sharedxx
 Comment=A new file was added to the collaboration server.
 Comment[de]=Eine neue Datei wurde zum Server zur gemeinsamen Bearbeitung hinzugefügt.
+Comment[hu]=Egy új fájlt adtak hozzá az együttműködő kiszolgálóhoz.
 Comment[nl]=Er is een nieuw bestand aan samenwerkingsserver toegevoegd.
 Comment[pt]=Foi adicionado um novo ficheiro ao servidor de colaboração.
 Comment[pt_BR]=Foi adicionado um novo arquivo ao servidor de colaboração.
