@@ -31,6 +31,7 @@ Comment[x-test]=xxUsed for file added or removed notificationsxx
 
 [Event/fileShared]
 Name=File Shared
+Name[cs]=Soubor byl sdílen
 Name[de]=Freigegebene Datei
 Name[hu]=Fájl megosztva
 Name[nl]=Bestand gedeeld

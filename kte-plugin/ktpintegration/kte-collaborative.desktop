@@ -3,6 +3,7 @@ Type=Service
 X-KDE-ServiceTypes=KTpApprover
 
 Name=KTE Collaborative
+Name[cs]=KTE Collaborative
 Name[de]=KTE Collaborative
 Name[hu]=KTE együttműködés
 Name[nl]=KTE samenwerking
