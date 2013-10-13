@@ -363,7 +363,7 @@ KteCollaborativePluginView::KteCollaborativePluginView(KTextEditor::View* kteVie
     m_saveCopyAction->setIcon(KIcon("document-save-as"));
 
     m_openFileManagerAction = actionCollection()->addAction("kobby_open_file_manager", this, SLOT(openFileManagerActionClicked()));
-    m_openFileManagerAction->setText(i18n("Open file manager"));
+    m_openFileManagerAction->setText(i18n("Show shared documents folder"));
     m_openFileManagerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+F")), KAction::DefaultShortcut);
     m_openFileManagerAction->setIcon(KIcon("system-file-manager"));
 
