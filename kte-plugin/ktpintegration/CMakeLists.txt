@@ -70,4 +70,4 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.i
               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinoteServer.service
         DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
 install(FILES KTp.infinote.client KTp.infinoteServer.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
-install(FILES kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services/ktp)
+install(FILES ktp_kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services)
