@@ -12,6 +12,7 @@ Name[pt]=KTE Collaborative
 Name[pt_BR]=KTE Collaborative
 Name[sk]=KTE Collaborative
 Name[sv]=KTE-samredigering
+Name[tr]=KTE Ortak
 Name[uk]=Співпраця у KTE
 Name[x-test]=xxKTE Collaborativexx
 Icon=kate
@@ -24,6 +25,7 @@ Comment[pt]=O utilizador %1 deseja colaborar consigo num documento
 Comment[pt_BR]=O usuário %1 quer colaborar com você em um documento
 Comment[sk]=Používateľ %1 chce spolupracovať na dokumente s vami
 Comment[sv]=Användare %1 vill samredigera ett dokument med dig
+Comment[tr]=%1 kullanıcısı bir belge üzerinde sizinle ortak çalışmak istiyor
 Comment[uk]=Користувач %1 хоче спільно з вами попрацювати над документом
 Comment[x-test]=xxUser %1 wants to collaborate on a document with youxx
 
