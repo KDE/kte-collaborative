@@ -40,8 +40,6 @@ else( LIBQINFINITY_LIBRARIES AND LIBQINFINITY_INCLUDES )
 			/usr/include
 			/usr/local/include
 			/opt/local/include
-		PATH_SUFFIXES
-			libqinfinity-1.0
 	)
 	
 	find_library( LIBQINFINITY_LIBRARY
