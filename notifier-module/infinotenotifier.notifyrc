@@ -15,6 +15,7 @@ Comment[x-test]=xxCollaborative text editingxx
 [Context/filenotification]
 Name=FileNotification
 Name[de]=Datei-Benachrichtigung
+Name[hu]=Fájl értesítés
 Name[nl]=Bestandsmelding
 Name[pt]=Notificação de Ficheiros
 Name[pt_BR]=Notificação de arquivos
@@ -25,6 +26,7 @@ Name[uk]=Сповіщення щодо файлів
 Name[x-test]=xxFileNotificationxx
 Comment=Used for file added or removed notifications
 Comment[de]=Benachrichtigungen über hinzugefügte oder entfernte Dateien
+Comment[hu]=Fájl hozzáadása vagy eltávolítása értesítésekhez használható
 Comment[nl]=Gebruikt voor meldingen van bestand toegevoegd of verwijderd
 Comment[pt]=Usado para as notificações de ficheiros adicionados ou removidos
 Comment[pt_BR]=Usado para notificações de arquivos adicionados ou removidos
