@@ -115,6 +115,15 @@ void InfinityProtocol::get(const KUrl& url )
 void InfinityProtocol::stat(const KUrl& url)
 {
     kDebug() << "STAT " << url.url();
+
+    if ( url.path().isEmpty() ) {
+        KUrl newUrl(url);
+        newUrl.setPath("/");
+        redirection(newUrl);
+        finished();
+        return;
+    }
+
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -134,7 +143,7 @@ void InfinityProtocol::stat(const KUrl& url)
     entry.insert(KIO::UDSEntry::UDS_SIZE, 0);
     entry.insert(KIO::UDSEntry::UDS_DISPLAY_NAME, iter.name());
     entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG);
-    entry.insert(KIO::UDSEntry::UDS_ACCESS, 0x777);
+    entry.insert(KIO::UDSEntry::UDS_ACCESS, 07777);
     statEntry(entry);
 
     finished();
@@ -384,7 +393,7 @@ void InfinityProtocol::listDir(const KUrl &url)
             UDSEntry entry;
             entry.insert( KIO::UDSEntry::UDS_NAME, iter.name() );
             entry.insert( KIO::UDSEntry::UDS_FILE_TYPE, iter.isDirectory() ? S_IFDIR : S_IFREG );
-            entry.insert( KIO::UDSEntry::UDS_ACCESS, 0x777 );
+            entry.insert( KIO::UDSEntry::UDS_ACCESS, 07777 );
             listEntry(entry, false);
         } while ( iter.next() );
     }
