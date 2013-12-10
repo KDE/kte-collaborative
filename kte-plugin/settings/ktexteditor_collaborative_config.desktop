@@ -6,6 +6,7 @@ X-KDE-PluginKeyword=ktexteditor_collaborative_config
 X-KDE-ParentComponents=ktexteditor_collaborative
 Name=Configure collaborative editing
 Name[de]=Gemeinsame Bearbeitung einrichten
+Name[es]=Configurar la edición colaborativa
 Name[hu]=Együttműködő szerkesztés beállítása
 Name[nl]=Gezamenlijk bewerken instellen
 Name[pl]=Konfiguruj kolaboracyjne edytowanie
