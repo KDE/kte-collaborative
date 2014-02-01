@@ -3,6 +3,7 @@ Type=Service
 X-KDE-ServiceTypes=KTpApprover
 
 Name=KTE Collaborative
+Name[bs]=KTE za saradnju
 Name[cs]=KTE Collaborative
 Name[de]=KTE Collaborative
 Name[es]=KTE Colaborativo
@@ -18,6 +19,7 @@ Name[uk]=Співпраця у KTE
 Name[x-test]=xxKTE Collaborativexx
 Icon=kate
 Comment=User %1 wants to collaborate on a document with you
+Comment[bs]=Korisnik% 1 želi sarađivati ​​na dokumentu s vama
 Comment[de]=Der Benutzer %1 möchte mit Ihnen gemeinsam an deinem Dokument arbeiten
 Comment[es]=El usuario %1 desea colaborar contigo en un documento
 Comment[hu]=A(z) %1 felhasználó szeretne együttműködni egy dokumentumon Önnel

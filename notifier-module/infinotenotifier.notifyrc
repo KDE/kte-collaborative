@@ -1,6 +1,7 @@
 [Global]
 IconName=accessories-text-editor
 Comment=Collaborative text editing
+Comment[bs]=Kolaborativno tekstualno uređivanje
 Comment[de]=Gemeinsame Textbearbeitung
 Comment[es]=Edición de texto colaborativa
 Comment[hu]=Együttműködő szövegszerkesztés
@@ -15,6 +16,7 @@ Comment[x-test]=xxCollaborative text editingxx
 
 [Context/filenotification]
 Name=FileNotification
+Name[bs]=FileNotification
 Name[de]=Datei-Benachrichtigung
 Name[es]=Notificación del archivo
 Name[hu]=Fájl értesítés
@@ -27,6 +29,7 @@ Name[tr]=DosyaBildirimi
 Name[uk]=Сповіщення щодо файлів
 Name[x-test]=xxFileNotificationxx
 Comment=Used for file added or removed notifications
+Comment[bs]=Korišteno za dodane ili uklonjene obavijesti datoteke
 Comment[de]=Benachrichtigungen über hinzugefügte oder entfernte Dateien
 Comment[es]=Se usa para las notificaciones de archivos añadidos o eliminados
 Comment[hu]=Fájl hozzáadása vagy eltávolítása értesítésekhez használható
@@ -41,6 +44,7 @@ Comment[x-test]=xxUsed for file added or removed notificationsxx
 
 [Event/fileShared]
 Name=File Shared
+Name[bs]=Podijeljena datoteka
 Name[cs]=Soubor byl sdílen
 Name[de]=Freigegebene Datei
 Name[es]=Archivo compartido
@@ -54,6 +58,7 @@ Name[tr]=Dosya Paylaşıldı
 Name[uk]=Оприлюднення файлів
 Name[x-test]=xxFile Sharedxx
 Comment=A new file was added to the collaboration server.
+Comment[bs]=Nova datoteka je dodana kolaboracijskom serveru.
 Comment[de]=Eine neue Datei wurde zum Server zur gemeinsamen Bearbeitung hinzugefügt.
 Comment[es]=Se ha añadido un nuevo archivo al servidor de colaboración.
 Comment[hu]=Egy új fájlt adtak hozzá az együttműködő kiszolgálóhoz.

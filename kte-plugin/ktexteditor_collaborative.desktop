@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Service
 Comment=Collaborative editing plugin for KTextEditor, based on the infinity protocol
+Comment[bs]=Dodatak za kolaborativno uređivanja KTextEditor-a na temelju protokola beskonačnosti.
 Comment[de]=KTextEditor-Modul zur gemeinsamen Textbearbeitung auf der Basis des Infinity-Protokolls
 Comment[es]=Complemento de edición colaborativa para KTextEditor, basado en el protocolo infinity
 Comment[hu]=Együttműködő szerkesztés bővítmény a KTextEditorhoz az infinity protokollon alapulva
@@ -14,6 +15,7 @@ Comment[tr]=Sonsuzluk protokolü tabanlı KTextEditor için ortak düzenleme ekl
 Comment[uk]=Додаток спільного редагування до KTextEditor, заснований на протоколі infinity
 Comment[x-test]=xxCollaborative editing plugin for KTextEditor, based on the infinity protocolxx
 Name=Collaborative text editing
+Name[bs]=Kolaborativno tekstualno uređivanje
 Name[cs]=Souběžná úprava textu
 Name[de]=Gemeinsame Textbearbeitung
 Name[es]=Edición de texto colaborativa
@@ -27,6 +29,7 @@ Name[tr]=Ortak metin düzenleme
 Name[uk]=Спільне редагування текстів
 Name[x-test]=xxCollaborative text editingxx
 GenericName=Collaborative text editing
+GenericName[bs]=Kolaborativno tekstualno uređivanje
 GenericName[cs]=Souběžná úprava textu
 GenericName[de]=Gemeinsame Textbearbeitung
 GenericName[es]=Edición de texto colaborativa
