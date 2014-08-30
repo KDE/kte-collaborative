@@ -296,7 +296,7 @@ class KOBBYCOMMON_EXPORT InfTextDocument
         void slotSynchronized();
         void slotSynchronizationFailed( GError *gerror );
         void slotJoinFinished( QPointer<QInfinity::User> );
-        void slotJoinFailed( GError *gerror );
+        void slotJoinFailed( const GError *gerror );
         void slotViewCreated( KTextEditor::Document *doc,
             KTextEditor::View *view );
         void slotCanUndo( bool enable );

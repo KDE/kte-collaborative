@@ -268,7 +268,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
                 m_notePlugin->infPlugin()->note_type,
                 0,
                 INF_SESSION(session),
-                true) );
+                true, 0, 0) );
         g_object_unref(session);
         g_object_unref(user_table);
         inf_session_set_user_status(INF_SESSION(session), user, INF_USER_UNAVAILABLE);

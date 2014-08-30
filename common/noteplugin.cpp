@@ -45,7 +45,7 @@ void NotePlugin::registerTextBuffer(const QString& path, KDocumentTextBuffer* te
 
 QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *commMgr,
     QInfinity::Session::Status sess_status,
-    QInfinity::CommunicationJoinedGroup *syncGroup,
+    QInfinity::CommunicationGroup *syncGroup,
     QInfinity::XmlConnection *syncConnection,
     const QString& path )
 {

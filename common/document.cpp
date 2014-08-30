@@ -389,6 +389,7 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
 
 void KDocumentTextBuffer::setUser( QPointer<QInfinity::User> user )
 {
+    qDebug() << "SET USER:" << m_user;
     m_user = user;
 }
 
@@ -605,7 +606,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     kDebug() << "in document" << kDocument()->url();
 }
 
-void InfTextDocument::slotJoinFailed( GError *gerror )
+void InfTextDocument::slotJoinFailed( const GError *gerror )
 {
     QString emsg = i18n( "Could not join session: " );
     if ( gerror ) {
@@ -729,8 +730,8 @@ void InfTextDocument::joinSession(const QString& forceUserName)
             ColorHelper::colorForUsername(userName).hue() / 360.0 );
         connect( req, SIGNAL(finished(QPointer<QInfinity::User>)),
             this, SLOT(slotJoinFinished(QPointer<QInfinity::User>)) );
-        connect( req, SIGNAL(failed(GError*)),
-            this, SLOT(slotJoinFailed(GError*)) );
+        connect( req, SIGNAL(failed(const GError*)),
+            this, SLOT(slotJoinFailed(const GError*)) );
     }
     else
         connect( m_session, SIGNAL(statusChanged()),

@@ -37,7 +37,7 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/Editor>
 
-#include <libqinfinity/communicationjoinedgroup.h>
+#include <libqinfinity/communicationgroup.h>
 #include <libqinfinity/init.h>
 #include <libqinfinity/user.h>
 #include <libqinfinity/browsermodel.h>
