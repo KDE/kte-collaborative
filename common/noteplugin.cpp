@@ -37,25 +37,25 @@ NotePlugin::NotePlugin( QObject *parent )
 {
 }
 
-void NotePlugin::registerTextBuffer(const QString& path, KDocumentTextBuffer* textBuffer)
+void NotePlugin::registerTextBuffer(const QString& /*path*/, KDocumentTextBuffer* /*textBuffer*/)
 {
-    Q_ASSERT( ! buffers.contains(path) );
-    buffers[path] = textBuffer;
+    // disabled until 0.7
+//     Q_ASSERT( ! buffers.contains(path) );
+//     buffers[path] = textBuffer;
 }
 
 QInfinity::Session *NotePlugin::createSession( QInfinity::CommunicationManager *commMgr,
     QInfinity::Session::Status sess_status,
     QInfinity::CommunicationGroup *syncGroup,
     QInfinity::XmlConnection *syncConnection,
-    const QString& path )
+    void* clientPluginUserData )
 {
-    Q_ASSERT(buffers.contains(path));
+    QInfinity::TextBuffer* buffer = static_cast<QInfinity::TextBuffer*>(clientPluginUserData);
     QInfinity::TextSession *session = new QInfinity::TextSession( *commMgr,
-        *buffers[path],
+        *buffer,
         sess_status,
         *syncGroup,
         *syncConnection );
-    buffers.remove(path);
     return session;
 }
 

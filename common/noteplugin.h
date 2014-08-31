@@ -45,7 +45,7 @@ class KOBBYCOMMON_EXPORT NotePlugin
             QInfinity::Session::Status sess_status,
             QInfinity::CommunicationGroup *syncGroup,
             QInfinity::XmlConnection *syncConnection,
-            const QString& path ) override;
+            void* clientPluginUserData = 0 );
 
     private:
         QHash<QString, KDocumentTextBuffer*> buffers;
