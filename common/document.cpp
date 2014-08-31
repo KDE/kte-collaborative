@@ -52,9 +52,7 @@
 #include <QFormLayout>
 #include <QLabel>
 
-#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
-#include <ktexteditor/bufferinterface.h>
-#endif
+#include <KTextEditor/ConfigInterface>
 
 namespace Kobby
 {
@@ -65,6 +63,8 @@ Document::Document( KTextEditor::Document* kDocument )
     , m_dirty( false )
 {
     m_kDocument->setParent( 0 );
+    KTextEditor::ConfigInterface* iface = qobject_cast<KTextEditor::ConfigInterface*>(m_kDocument);
+    iface->setConfigValue("replace-tabs", false);
     connect( m_kDocument, SIGNAL(textChanged( KTextEditor::Document* )),
         this, SLOT(textChanged( KTextEditor::Document* )) );
     connect( m_kDocument, SIGNAL(documentSavedOrUploaded( KTextEditor::Document*,
@@ -215,26 +215,10 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
         QString str = codec()->toUnicode( chunk.text() );
         ReadWriteTransaction transaction(kDocument());
-#ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
-        // The compile-time check just verifies that the interface is present.
-        // This does not guarantee that it is supported by the KTE implementation used here.
-        if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
-            iface->insertTextSilent(startCursor, str);
-        }
-#else
-        if ( false ) { }
-#endif
-        else {
-            kDebug() << "Text editor does not support the Buffer interface. Using workaround for tabs.";
-#ifdef ENABLE_TAB_HACK
-            // If we don't have the buffer iface and the tab hack is enabled, replace
-            // all tabs by 1 space. That won't break stuff, since it has the same length
-            str = str.replace("\t", " ");
-#endif
-            kDocument()->blockSignals(true);
-            kDocument()->insertText( startCursor, str );
-            kDocument()->blockSignals(false);
-        }
+        kDocument()->blockSignals(true);
+        kDocument()->insertText( startCursor, str );
+        kDocument()->blockSignals(false);
+        Q_ASSERT(!qobject_cast<KTextEditor::ConfigInterface*>(kDocument())->configValue("replace-tabs").toBool());
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_kte(offset+chunk.length())), user, false);
         checkConsistency();
     }
@@ -284,18 +268,6 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 void KDocumentTextBuffer::checkConsistency()
 {
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
-#ifndef KTEXTEDITOR_HAS_BUFFER_IFACE
-    if ( false ) { }
-#else
-    if ( qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) { }
-#endif
-#ifdef ENABLE_TAB_HACK
-    else {
-        // In this case, it's allowed that the buffer and the document differ in tabs being
-        // replaced by spaces.
-        bufferContents = bufferContents.replace("\t", " ");
-    }
-#endif
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
         KUrl url = kDocument()->url();
