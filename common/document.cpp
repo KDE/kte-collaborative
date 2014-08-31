@@ -210,7 +210,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
 
     if( !blockRemoteInsert )
     {
-        kDebug() << "REMOTE INSERT TEXT offset" << offset << chunk.text() << kDocument()
+        kDebug() << "REMOTE INSERT TEXT offset" << offset << kDocument()
                  << "(" << chunk.length() << " chars )" << kDocument()->url();
         KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
         QString str = codec()->toUnicode( chunk.text() );
@@ -219,20 +219,22 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
         // The compile-time check just verifies that the interface is present.
         // This does not guarantee that it is supported by the KTE implementation used here.
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
-            kDebug() << "buffer insert start vvvvvv";
             iface->insertTextSilent(startCursor, str);
-            kDebug() << "buffer insert end   ^^^^^^";
         }
 #else
         if ( false ) { }
 #endif
         else {
-            kWarning() << "Text editor does not support the Buffer interface!";
+            kDebug() << "Text editor does not support the Buffer interface. Using workaround for tabs.";
+#ifdef ENABLE_TAB_HACK
+            // If we don't have the buffer iface and the tab hack is enabled, replace
+            // all tabs by 1 space. That won't break stuff, since it has the same length
+            str = str.replace("\t", " ");
+#endif
             kDocument()->blockSignals(true);
             kDocument()->insertText( startCursor, str );
             kDocument()->blockSignals(false);
         }
-        kDebug() << "done inserting text";
         emit remoteChangedText(KTextEditor::Range(startCursor, offsetToCursor_kte(offset+chunk.length())), user, false);
         checkConsistency();
     }
@@ -262,20 +264,16 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 #ifdef KTEXTEDITOR_HAS_BUFFER_IFACE
         // see onInsertText
         if ( KTextEditor::BufferInterface* iface = qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) {
-            kDebug() << "buffer erase start vvvvvv";
             iface->removeTextSilent(KTextEditor::Range(startCursor, endCursor));
-            kDebug() << "buffer erase end   ^^^^^^";
         }
 #else
         if ( false ) { }
 #endif
         else {
-            kWarning() << "Text editor does not support the Buffer interface!";
             kDocument()->blockSignals(true);
             kDocument()->removeText( range );
             kDocument()->blockSignals(false);
         }
-        kDebug() << "done removing text";
         emit remoteChangedText(range, user, true);
         checkConsistency();
     }
@@ -286,6 +284,18 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 void KDocumentTextBuffer::checkConsistency()
 {
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
+#ifndef KTEXTEDITOR_HAS_BUFFER_IFACE
+    if ( false ) { }
+#else
+    if ( qobject_cast<KTextEditor::BufferInterface*>(kDocument()) ) { }
+#endif
+#ifdef ENABLE_TAB_HACK
+    else {
+        // In this case, it's allowed that the buffer and the document differ in tabs being
+        // replaced by spaces.
+        bufferContents = bufferContents.replace("\t", " ");
+    }
+#endif
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
         KUrl url = kDocument()->url();
@@ -494,6 +504,49 @@ void KDocumentTextBuffer::textOpPerformed()
     }
 }
 
+void KDocumentTextBuffer::checkLineEndings()
+{
+    QString bufferContents = kDocument()->text();
+    if ( bufferContents.contains("\r\n") || bufferContents.contains("\r") ) {
+        KDialog* dlg = new KDialog(kDocument()->activeView());
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->setButtons(KDialog::Ok | KDialog::Cancel);
+        dlg->button(KDialog::Ok)->setText(i18n("Continue"));
+        QLabel* l = new QLabel(i18n("The document you opened contains non-standard line endings. "
+                                    "Do you want to convert them to the standard \"\\n\" format?<br><br>"
+                                    "<i>Note: This change will be synchronized to the server.</i>"), dlg);
+        l->setWordWrap(true);
+        dlg->setMainWidget(l);
+        connect(dlg, SIGNAL(okClicked()), this, SLOT(replaceLineEndings()));
+        dlg->show();
+    }
+}
+
+void KDocumentTextBuffer::replaceLineEndings()
+{
+    const QStringList lines = kDocument()->textLines( KTextEditor::Range(
+        KTextEditor::Cursor::start(),
+        KTextEditor::Cursor(kDocument()->lines(), kDocument()->lineLength(kDocument()->lines() - 1) )) );
+    for ( int i = lines.count() - 1; i >= 0; i-- ) {
+        QString line = lines[i];
+        int offset = 0;
+        while ( ( offset = line.lastIndexOf('\r') ) != -1 ) {
+            int replaceLen = 1;
+            if ( offset - 1 < line.length() ) {
+                // check if this \r is part of a \r\n
+                if ( line[offset+1] == '\n' ) {
+                    replaceLen = 2;
+                }
+            }
+            KTextEditor::Cursor replaceStart(i, offset);
+            KTextEditor::Cursor replaceEnd(i, offset+replaceLen);
+            KTextEditor::Range replaceRange = KTextEditor::Range(replaceStart, replaceEnd);
+            kDocument()->replaceText(replaceRange, "\n");
+            line.replace(offset, replaceLen, '\n');
+        }
+    }
+}
+
 /* Accepting the session and buffer as parameters, although we
    could obtain them from the session proxy, ensures some type
    safety. */
@@ -577,6 +630,7 @@ void InfTextDocument::slotSynchronized()
     setLoadState( Document::SynchronizationComplete );
     joinSession();
     m_buffer->resetUndoRedo();
+    kDocument()->setModified(false);
 }
 
 void InfTextDocument::slotSynchronizationFailed( GError *gerror )
@@ -602,6 +656,7 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     m_user = QInfinity::AdoptedUser::wrap(INF_ADOPTED_USER(user->gobject()));
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
+    m_buffer->checkLineEndings();
     kDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
     kDebug() << "in document" << kDocument()->url();
 }
@@ -621,24 +676,34 @@ void InfTextDocument::slotJoinFailed( const GError *gerror )
 
 void InfTextDocument::retryJoin(const QString& message)
 {
-    KDialog dialog;
-    dialog.setButtons(KDialog::Ok | KDialog::Cancel);
-    dialog.button(KDialog::Ok)->setText(i18n("Retry"));
-    QWidget w;
-    dialog.setMainWidget(&w);
-    w.setLayout(new QVBoxLayout);
-    w.layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
-    w.layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
-    KLineEdit username;
-    username.setClickMessage(i18n("Enter your user name..."));
-    w.layout()->addWidget(&username);
-    username.setFocus();
-    if ( dialog.exec() ) {
-        joinSession(username.text());
-    }
-    else {
-        throwFatalError(QString());
-    }
+    KDialog* dialog = new KDialog;
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+    dialog->button(KDialog::Ok)->setText(i18n("Retry"));
+    QWidget* w = new QWidget();
+    dialog->setMainWidget(w);
+    w->setLayout(new QVBoxLayout);
+    w->layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
+    w->layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
+    KLineEdit* username = new KLineEdit;
+    username->setClickMessage(i18n("Enter your user name..."));
+    w->layout()->addWidget(username);
+    username->setFocus();
+    connect(dialog, SIGNAL(okClicked()), SLOT(newUserNameEntered()));
+    connect(dialog, SIGNAL(cancelClicked()), SLOT(joinAborted()));
+    dialog->show();
+}
+
+void InfTextDocument::joinAborted()
+{
+    throwFatalError(i18n("No acceptable user name was given."));
+}
+
+void InfTextDocument::newUserNameEntered()
+{
+    KDialog* dlg = qobject_cast<KDialog*>(QObject::sender());
+    KLineEdit* username = dlg->findChild<KLineEdit*>();
+    joinSession(username->text());
 }
 
 void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
@@ -720,8 +785,7 @@ void InfTextDocument::joinSession(const QString& forceUserName)
             userName = kDocument()->url().userName();
         }
         else {
-            userName = "UnnamedUser_" + QString::number(qHash(QString::number(QTime::currentTime().second())
-                                                        + QString::number(QTime::currentTime().msec())));
+            userName = getUserName();
         }
         kDebug() << "requesting join of user" << userName << ColorHelper::colorForUsername(userName).hue();
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,

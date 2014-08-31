@@ -23,13 +23,12 @@
 #include <ktexteditor/configinterface.h>
 
 #include <QStringList>
-#include <QDBusInterface>
-#include <QDBusReply>
 #include <KTextEditor/View>
 #include <KConfigGroup>
 #include <KConfig>
 #include <KStandardDirs>
 #include <KRun>
+#include <KToolInvocation>
 
 using QInfinity::ExploreRequest;
 
@@ -68,16 +67,28 @@ bool tryOpenDocumentWithDialog(const KUrl& url)
     return true;
 }
 
-bool ensureKdedModuleLoaded()
+bool ensureNotifierModuleLoaded()
 {
-    // Make sure the notification kded module is loaded
-    QDBusInterface iface("org.kde.kded", "/kded", "org.kde.kded");
-    QDBusReply<bool> result = iface.call("loadModule", "infinotenotifier");
-    kDebug() << "trying to load kded module; success:" << result.value();
-    return result.value();
+    KStandardDirs d;
+    QString desktopPath = d.findResource("services", "infinotenotifier.desktop");
+    return KToolInvocation::startServiceByDesktopPath(desktopPath) == 0;
 }
 
-IterLookupHelper::IterLookupHelper(QString lookupPath, QInfinity::Browser* browser)
+QString getUserName()
+{
+    QString user;
+#ifdef Q_OS_WIN
+    user = qgetenv("USERNAME");
+#else
+    user = qgetenv("USER");
+#endif
+    if ( user.length() > 0 ) {
+        user[0] = user[0].toUpper();
+    }
+    return user;
+}
+
+IterLookupHelper::IterLookupHelper(QString lookupPath, const QInfinity::Browser* browser)
         : QObject()
         , m_browser(browser)
         , m_currentIter(*m_browser)
@@ -97,9 +108,11 @@ void IterLookupHelper::setDeleteOnFinish(bool deleteOnFinish)
 {
     if ( deleteOnFinish ) {
         connect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+        connect(this, SIGNAL(failed()), this, SLOT(deleteLater()));
     }
     else {
         disconnect(this, SIGNAL(done(QInfinity::BrowserIter)), this, SLOT(deleteLater()));
+        connect(this, SIGNAL(failed()), this, SLOT(deleteLater()));
     }
 }
 

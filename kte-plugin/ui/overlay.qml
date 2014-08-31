@@ -23,6 +23,9 @@ Rectangle {
     width: 800; height: 600 // just for debugging purposes
     id: root
     color: "#99222222"
+    Behavior on opacity {
+        NumberAnimation { duration: 400 }
+    }
 
     Text {
         objectName: "text"
@@ -31,6 +34,15 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         anchors.centerIn: parent
         anchors.verticalCenterOffset: -20
+    }
+
+    Text {
+        objectName: "subtitle"
+        color: "#AAAAAA"
+        horizontalAlignment: Text.AlignHCenter
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: 40
+        text: "<no text>"
     }
 
     ListView {
@@ -67,8 +79,10 @@ Rectangle {
         }
     }
     gradient: Gradient {
-         GradientStop { position: 0.0; color: "#99222222" }
-         GradientStop { position: 0.5; color: "#B5222222" }
-         GradientStop { position: 1.0; color: "#99222222" }
+         GradientStop { position: 0.0; color: "#AA222222" }
+         GradientStop { position: 0.4; color: "#D5222222" }
+         GradientStop { position: 0.5; color: "#DF222222" }
+         GradientStop { position: 0.6; color: "#D5222222" }
+         GradientStop { position: 1.0; color: "#AA222222" }
      }
 }

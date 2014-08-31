@@ -7,9 +7,10 @@ cmake_minimum_required(VERSION 2.6)
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules )
 
 set(KTECOLLAB_VERSION_MAJOR 0)
-set(KTECOLLAB_VERSION_MINOR 0)
-set(KTECOLLAB_VERSION_PATCH 95)
+set(KTECOLLAB_VERSION_MINOR 2)
+set(KTECOLLAB_VERSION_PATCH 0)
 set(KTECOLLAB_VERSION_STRING ${KTECOLLAB_VERSION_MAJOR}.${KTECOLLAB_VERSION_MINOR}.${KTECOLLAB_VERSION_PATCH})
+set(LIBINFINITY_VERSION 0.5) # TODO use this for finding libinfinity
 
 configure_file(version.h.in version.h)
 
@@ -29,4 +30,4 @@ add_subdirectory(kte-plugin)
 add_subdirectory(kioslave)
 add_subdirectory(common)
 add_subdirectory(tests)
-add_subdirectory(kded-module)
+add_subdirectory(notifier-module)

@@ -19,6 +19,8 @@
  *
  */
 #include "statusoverlay.h"
+#include "version.h"
+
 #include <libqinfinity/session.h>
 
 #include <KStandardDirs>
@@ -30,7 +32,7 @@
 #include <qdeclarativeitem.h>
 
 StatusOverlay::StatusOverlay(KTextEditor::View* parent)
-    : QDeclarativeView(QUrl(KStandardDirs().locate("data", "kte-kobby/ui/overlay.qml")), parent)
+    : QDeclarativeView(QUrl(KStandardDirs().locate("data", "ktecollaborative/ui/overlay.qml")), parent)
     , m_view(parent)
 {
     QPalette p = palette();
@@ -47,30 +49,44 @@ StatusOverlay::StatusOverlay(KTextEditor::View* parent)
     m_view->installEventFilter(this);
     resizeToView();
     displayText(i18n("Initializing..."));
+
+    QObject* textWidget = rootObject()->findChild<QObject*>("subtitle");
+    QString subtitle = i18n("KTextEditor collaborative editing plugin version %1",
+                            QString(KTECOLLAB_VERSION_STRING)) + "<br>" +
+                       i18n("using libinfinity version %1", QString(LIBINFINITY_VERSION));
+    textWidget->setProperty("text", subtitle);
+    m_maxUpdateRateTimer.start();
 }
 
 void StatusOverlay::progress(double percentage)
 {
-    setProgressBar(percentage);
-    displayText(i18nc("%1 is a progress percentage", "Synchronizing document... %1%", static_cast<int>(percentage*100)));
-    repaint();
+    if ( m_maxUpdateRateTimer.elapsed() > 100 ) {
+        setProgressBar(percentage);
+        displayText(i18nc("%1 is a progress percentage", "Synchronizing document... %1%", static_cast<int>(percentage*100)));
+        repaint();
+        m_maxUpdateRateTimer.restart();
+    }
 }
 
 void StatusOverlay::setProgressBar(double percentage)
 {
+    if ( ! rootObject() ) return;
     QObject* progressbar = rootObject()->findChild<QObject*>("progressBar");
     progressbar->setProperty("progress", percentage);
 }
 
 void StatusOverlay::loadStateChanged(Document* , Document::LoadState state)
 {
+    if ( ! rootObject() ) return;
     if ( state == Document::Joining ) {
         setProgressBar(1.0);
         displayText(i18n("Joining session..."));
     }
     if ( state == Document::Complete ) {
         displayText(i18n("Done."));
-        hide();
+        rootObject()->setProperty("opacity", 0.0);
+        QTimer::singleShot(400, this, SLOT(hide()));
+        QTimer::singleShot(400, this, SLOT(deleteLater()));
     }
 }
 
@@ -80,12 +96,13 @@ void StatusOverlay::connectionStatusChanged(Connection* , QInfinity::XmlConnecti
         displayText(i18n("Connecting..."));
     }
     if ( status == QInfinity::XmlConnection::Open ) {
-        displayText(i18n("Synchronizing document..."));
+        displayText(i18n("Initiating synchronization..."));
     }
 }
 
 void StatusOverlay::displayText(const QString& text)
 {
+    if ( ! rootObject() ) return;
     QObject* textWidget = rootObject()->findChild<QObject*>("text");
     textWidget->setProperty("text", text);
 }

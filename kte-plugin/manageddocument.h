@@ -171,6 +171,11 @@ public slots:
      */
     bool isReady() const;
 
+    /*
+     * @brief Invoked when a subscription request fails.
+     */
+    void subscriptionFailed(GError*);
+
 signals:
     /**
      * @brief Emitted when a document is completely synchronized and ready to be used (user can start typing etc).

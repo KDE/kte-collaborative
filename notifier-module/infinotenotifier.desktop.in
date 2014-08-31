@@ -2,8 +2,7 @@
 Type=Service
 Name=Infinote Notifier
 Comment=Notifier service for the infinote collaborative editing protocol
-X-KDE-ServiceTypes=KDEDModule
-X-KDE-Library=infinotenotifier
+Exec=@LIBEXEC_INSTALL_DIR@/infinotenotifier
+X-DBUS-StartupType=Unique
+X-KDE-StartupNotify=false
 X-KDE-DBus-ModuleName=infinotenotifier
-X-KDE-Kded-autoload=false
-X-KDE-Kded-load-on-demand=true

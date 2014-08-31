@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 
 #include <libqinfinity/abstracttextbuffer.h>
 
@@ -71,7 +71,7 @@ int countUnicodeCharacters(const QString& str);
  * If using this class, you must monitor for fatalError, which
  * will notify of deletion of the Document.
  */
-class KOBBYCOMMON_EXPORT Document
+class KTECOLLABORATIVECOMMON_EXPORT Document
     : public QObject
 {
     Q_OBJECT
@@ -171,7 +171,7 @@ class KOBBYCOMMON_EXPORT Document
  * and removal operations.  It is also responsible for maintaining
  * undo/redo stats (insertionCount and undoCount).
  */
-class KOBBYCOMMON_EXPORT KDocumentTextBuffer
+class KTECOLLABORATIVECOMMON_EXPORT KDocumentTextBuffer
     : public QInfinity::AbstractTextBuffer
 {
     Q_OBJECT
@@ -198,6 +198,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
         void updateUndoRedoActions();
 
         void checkConsistency();
+        void checkLineEndings();
         void shutdown();
 
     Q_SIGNALS:
@@ -217,6 +218,7 @@ class KOBBYCOMMON_EXPORT KDocumentTextBuffer
             const KTextEditor::Range &range );
         void localTextRemoved( KTextEditor::Document *document,
             const KTextEditor::Range &range, const QString& oldText );
+        void replaceLineEndings();
 
     private:
         // All offsets are in unicode code points, all cursors are in utf-16 surrogates.
@@ -266,7 +268,7 @@ private:
  *
  * Ties local operations/acitons into QInfinity::Session operations.
  */
-class KOBBYCOMMON_EXPORT InfTextDocument
+class KTECOLLABORATIVECOMMON_EXPORT InfTextDocument
     : public Document
 {
     Q_OBJECT
@@ -302,6 +304,8 @@ class KOBBYCOMMON_EXPORT InfTextDocument
         void slotCanUndo( bool enable );
         void slotCanRedo( bool enable );
         void joinSession(const QString& forceUserName = QString());
+        void newUserNameEntered();
+        void joinAborted();
     
     private:
         void synchronize();

@@ -14,7 +14,7 @@ set(kio_infinity_PART_SRCS
 kde4_add_plugin(kio_infinity ${kio_infinity_PART_SRCS})
 
 target_link_libraries(kio_infinity
-    kobbycommon
+    ktecollaborativecommon
     ${KDE4_KIO_LIBS}
     ${LIBQINFINITY_LIBRARIES}
     ${KDE4_KTEXTEDITOR_LIBS}

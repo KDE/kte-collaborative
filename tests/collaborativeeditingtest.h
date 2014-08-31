@@ -31,7 +31,7 @@
 
 #include <KTextEditor/Editor>
 
-#include "kobbyplugin.h"
+#include "ktecollaborativeplugin.h"
 
 #define NEED_SYNC_CYCLES 30
 
@@ -133,13 +133,13 @@ private slots:
     void testSnippets();
 
 private:
-    inline KobbyPlugin* plugin_A() {
+    inline KteCollaborativePlugin* plugin_A() {
         return m_plugin_A;
     };
-    inline KobbyPlugin* plugin_B() {
+    inline KteCollaborativePlugin* plugin_B() {
         return m_plugin_B;
     };
-    inline KobbyPlugin* plugin(char whichPlugin) {
+    inline KteCollaborativePlugin* plugin(char whichPlugin) {
         return whichPlugin == 'A' ? plugin_A() : plugin_B();
     };
     KTextEditor::Document* newDocument(const QString& name, char whichPlugin);
@@ -159,7 +159,7 @@ private:
     KTextEditor::Document* createDocumentInstance();
     QString userNameForPlugin(char whichPlugin) const;
     KUrl urlForFileName(const QString& fileName) const;
-    void waitForDocument(KTextEditor::Document* document, KobbyPlugin* onPlugin);
+    void waitForDocument(KTextEditor::Document* document, KteCollaborativePlugin* onPlugin);
     void waitForDocument_A(KTextEditor::Document* document) {
         return waitForDocument(document, plugin_A());
     }
@@ -175,8 +175,8 @@ private:
     };
     void compareTextBuffers(KTextEditor::Document* docA, KTextEditor::Document* docB);
     void verifyTextBuffers(KTextEditor::Document* docA, KTextEditor::Document* docB);
-    KobbyPlugin* m_plugin_A;
-    KobbyPlugin* m_plugin_B;
+    KteCollaborativePlugin* m_plugin_A;
+    KteCollaborativePlugin* m_plugin_B;
     KService::Ptr m_documentService;
     QString makeFileName();
     QProcess* m_serverProcess;

@@ -26,7 +26,6 @@
 #include <QSet>
 #include <QSharedPointer>
 
-#include <kdedmodule.h>
 #include <common/connection.h>
 
 class QTimer;
@@ -76,7 +75,7 @@ signals:
 };
 
 /**
- * @brief KDED module for updating infinity directory views and sending notifications.
+ * @brief Notification daemon for updating infinity directory views and sending notifications.
  * The infinity protocol sends push notifications when files are added or removed. The main
  * task of this kded module is to keep track of what directories are being displayed in a file
  * manager or other file view (e.g. kate "File system" side bar) and emit signals on the
@@ -84,13 +83,12 @@ signals:
  * As a secondary task, it can also display popup notifications for the user, to tell that
  * someone has shared a new file.
  */
-class InfinoteNotifier : public KDEDModule, QDBusContext
+class InfinoteNotifier : public QObject
 {
-    Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.kde.InfinoteNotifier")
+Q_OBJECT
 
 public:
-    InfinoteNotifier(QObject *parent, const QVariantList &);
+    InfinoteNotifier(QObject *parent = 0);
     virtual ~InfinoteNotifier();
 
 private slots:
@@ -118,6 +116,15 @@ private:
     /// Items are only removed from the watchlist when a connection breaks, since
     /// establishing the connection is the most costly thing.
     void ensureInWatchlist(const QString& url);
+
+    /// Clean all connections from the connections list which are broken,
+    /// and remove the watched URLs for those
+    void cleanupConnectionList();
+    /// Cleanup one particular connection.
+    void cleanupConnection(QInfinity::XmlConnection* conn);
+
+    /// called by the itemAdded() / itemRemoved() handlers
+    void handleItemChanged(BrowserIter, bool removal=false);
 
 private:
     OrgKdeKDirNotifyInterface* m_notifyIface;

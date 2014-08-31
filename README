@@ -24,7 +24,7 @@ The program consists of 4 main components:
       code (dialogs etc.) for creating channel requests, and two small programs (the server- and client tube
       handler) which handle channels on the offering and receiving end, respectively.
       The way this works is quite complicated, and will require a separate document to be explained.
-    - The kded module: This is a small module which runs in the background, and is responsible for updating
+    - The notifier module: This is a small module which runs in the background, and is responsible for updating
       the file views in e.g. dolphin. It also displays "A collaborative document was added" notifications
       in the tray.
 
@@ -33,7 +33,7 @@ And now, the other way round; which directory contains what?
                         That is mostly the connection stuff, the text buffer sync stuff (needed for the KIO),
                         the document tree related things ("browsers", representations of files/folders on a server),
                         and various smaller utility functions.
-    kded-module/        The kded module, as described above.
+    notifier-module/    The notification module, as described above.
     kioslave/           The KIO slave, as described above.
     kte-plugin/         The KTextEditor plugin itself.
         ui/             Dialogs and widgets used in the KTE plugin.

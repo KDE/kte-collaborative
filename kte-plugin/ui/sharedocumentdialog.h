@@ -27,6 +27,7 @@
 class InfTubeRequester;
 class ServerManager;
 class KJob;
+class HostSelectionWidget;
 
 namespace KTextEditor {
     class View;
@@ -44,6 +45,7 @@ private slots:
     void shareWithChatRoom();
     void shareWithExistingConnection(uint, QString);
     void jobFinished(KJob* job);
+    void putOnExistingServer();
 
 signals:
     void shouldOpenDocument(const KUrl& url);
@@ -51,6 +53,7 @@ signals:
 private:
     KTextEditor::View* m_view;
     InfTubeRequester* m_tubeServer;
+    HostSelectionWidget* m_hostSelectionWidget;
 };
 
 #endif // SHAREDOCUMENTDIALOG_H

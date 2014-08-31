@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 #include <libqinfinity/xmlconnection.h>
 
 #include <QObject>
@@ -40,6 +40,7 @@ struct Host {
     Host(const QString& hostname, int port) : hostname(hostname), port(port == -1 ? 6523 : port) { };
     Host() : port(0) { };
     bool operator==(const Host& other) const { return hostname == other.hostname && port == other.port; };
+    bool operator!=(const Host& other) const { return !operator==(other); };
     bool isValid() { return ! hostname.isNull() && port != 0; };
     QString hostname;
     int port;
@@ -48,7 +49,7 @@ struct Host {
 /**
  * @brief Ties connection/creation monitoring to simple interface.
  */
-class KOBBYCOMMON_EXPORT Connection
+class KTECOLLABORATIVECOMMON_EXPORT Connection
     : public QObject
 {
     Q_OBJECT

@@ -21,7 +21,7 @@
 
 #include "remotechangenotifier.h"
 
-#include "kobbypluginview.h"
+#include "ktecollaborativepluginview.h"
 #include "common/utils.h"
 
 #include <libqinfinity/user.h>
@@ -66,7 +66,7 @@ void RemoteChangeNotifier::addNotificationWidget(KTextEditor::View* view, KTextE
     }
     QWidget* useWidget = 0;
     KStandardDirs d;
-    QUrl src = QUrl(d.locate("data", "kte-kobby/ui/notifywidget.qml"));
+    QUrl src = QUrl(d.locate("data", "ktecollaborative/ui/notifywidget.qml"));
 
     QPair< KTextEditor::View*, QString > key = QPair<KTextEditor::View*, QString>(view, user->name());
     if ( existingWidgets.contains(key) ) {
@@ -137,7 +137,7 @@ void NotifierWidget::moveWidget(KTextEditor::View* view)
             if ( topLeft.line() < m_position.line() ) {
                 // position is below the view
                 int bottom = view->height() - height();
-                if ( QWidget* statusBar = view->findChild<KobbyStatusBar*>() ) {
+                if ( QWidget* statusBar = view->findChild<CollaborativeStatusBar*>() ) {
                     bottom -= statusBar->height();
                 }
                 move(0, bottom);

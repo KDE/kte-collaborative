@@ -18,7 +18,7 @@
 #ifndef KOBBY_ITEMFACTORY_H
 #define KOBBY_ITEMFACTORY_H
 
-#include "kobbycommon_export.h"
+#include "ktecollaborative_export.h"
 
 #include <libqinfinity/browseritemfactory.h>
 
@@ -41,7 +41,7 @@ class Connection;
 /**
  * Subclass so we can store connections with their item
  */
-class KOBBYCOMMON_EXPORT ConnectionItem
+class KTECOLLABORATIVECOMMON_EXPORT ConnectionItem
     : public QInfinity::ConnectionItem
 {
 
@@ -61,7 +61,7 @@ class KOBBYCOMMON_EXPORT ConnectionItem
 
 
 
-class KOBBYCOMMON_EXPORT ItemFactory
+class KTECOLLABORATIVECOMMON_EXPORT ItemFactory
     : public QInfinity::BrowserItemFactory
 {
 

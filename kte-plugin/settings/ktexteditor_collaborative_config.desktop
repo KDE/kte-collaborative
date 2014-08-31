@@ -1,15 +1,20 @@
 [Desktop Entry]
 Type=Service
 X-KDE-ServiceTypes=KCModule
-X-KDE-Library=ktexteditor_kobby
-X-KDE-PluginKeyword=ktexteditor_kobby_config
-X-KDE-ParentComponents=ktexteditor_kobby
+X-KDE-Library=ktexteditor_collaborative
+X-KDE-PluginKeyword=ktexteditor_collaborative_config
+X-KDE-ParentComponents=ktexteditor_collaborative
 Name=Configure collaborative editing
+Name[bs]=Konfigurisati uređenje za saradnju
+Name[de]=Gemeinsame Bearbeitung einrichten
+Name[es]=Configurar la edición colaborativa
 Name[hu]=Együttműködő szerkesztés beállítása
 Name[nl]=Gezamenlijk bewerken instellen
+Name[pl]=Konfiguruj kolaboracyjne edytowanie
 Name[pt]=Configurar a edição colaborativa
 Name[pt_BR]=Configurar a edição colaborativa
 Name[sk]=Nastaviť spoločné editovanie
 Name[sv]=Anpassa samredigering
+Name[tr]=Ortak düzenlemeyi yapılandır
 Name[uk]=Налаштовування спільного редагування
 Name[x-test]=xxConfigure collaborative editingxx

@@ -5,7 +5,7 @@ set(inftube_SRCS
 
 set(IS_KTP_INTERNAL_MODULE TRUE) # aw yeah
 find_package(TelepathyQt4 0.8.9 REQUIRED)
-find_package(KTp REQUIRED)
+find_package(KTp 0.6.80 REQUIRED)
 include_directories(
     ${QT_INCLUDES}
     ${KDE4_INCLUDES}
@@ -23,7 +23,7 @@ set_target_properties( inftube
 )
 
 target_link_libraries(inftube
-                      kobbycommon
+                      ktecollaborativecommon
                       ${KDE4_KDEUI_LIBS}
                       ${TELEPATHY_QT4_LIBRARIES}
                       ${KTP_LIBRARIES}
@@ -70,4 +70,4 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.i
               ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.Telepathy.Client.KTp.infinoteServer.service
         DESTINATION ${DBUS_SERVICES_INSTALL_DIR})
 install(FILES KTp.infinote.client KTp.infinoteServer.client DESTINATION ${SHARE_INSTALL_PREFIX}/telepathy/clients/)
-install(FILES kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services/ktp)
+install(FILES ktp_kte-collaborative.desktop DESTINATION ${SHARE_INSTALL_PREFIX}/kde4/services)
