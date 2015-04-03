@@ -47,6 +47,7 @@ Comment[x-test]=xxUsed for file added or removed notificationsxx
 
 [Event/fileShared]
 Name=File Shared
+Name[ast]=Ficheru compartíu
 Name[bs]=Podijeljena datoteka
 Name[cs]=Soubor byl sdílen
 Name[de]=Freigegebene Datei
