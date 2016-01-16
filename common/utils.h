@@ -18,13 +18,14 @@
 
 #ifndef KOBBY_UTILS_H
 #define KOBBY_UTILS_H
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 
 #include <QObject>
 #include <QStack>
 #include <QTimer>
 #include <QColor>
-#include <KDebug>
+#include <QDebug>
+#include <QMap>
 
 #include <libqinfinity/browser.h>
 #include <libqinfinity/browseriter.h>
@@ -39,8 +40,8 @@ class View;
   * @param url The URL to open
   * @return bool true if the command could be executed, false otherwise
   */
-KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocument(const KUrl& url);
-KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocumentWithDialog(const KUrl& url);
+KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocument(const QUrl& url);
+KTECOLLABORATIVECOMMON_EXPORT bool tryOpenDocumentWithDialog(const QUrl& url);
 
 KTECOLLABORATIVECOMMON_EXPORT bool ensureNotifierModuleLoaded();
 KTECOLLABORATIVECOMMON_EXPORT QString getUserName();
@@ -79,7 +80,7 @@ signals:
 
 public slots:
     void begin() {
-        kDebug() << "beginning explore";
+        qDebug() << "beginning explore";
         explore(m_currentIter);
     };
     void directoryExplored();
@@ -107,7 +108,7 @@ public:
      * This is used for example for the background colors, and the popup widgets.
      * TODO: Cache this.
      * @param username The username. The same username will always yield the same color.
-     * @param saturation Hint on how saturated the color should be; 255 = very colorful, 0 = black+white
+     * @param sat Hint on how saturated the color should be; 255 = very colorful, 0 = black+white
      * @param brightness Hint on how bright the color should be; 255 = white, 0 = black
      * @return QColor The resulting color.
      */

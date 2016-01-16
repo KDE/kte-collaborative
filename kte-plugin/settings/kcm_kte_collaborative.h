@@ -23,7 +23,6 @@
 #define KCM_KTE_COLLABORATIVE_H
 
 #include <KCModule>
-#include <KComponentData>
 #include <KConfigGroup>
 
 class QCheckBox;

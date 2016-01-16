@@ -38,10 +38,8 @@
 #include <KTextEditor/View>
 #include <KLocalizedString>
 #include <KMessageBox>
-#include <KDebug>
-#include <KDialog>
+#include <QDialog>
 #include <KLineEdit>
-#include <KPushButton>
 
 #include <QString>
 #include <QTextCodec>
@@ -51,8 +49,13 @@
 #include <QAction>
 #include <QFormLayout>
 #include <QLabel>
+#include <QDebug>
 
 #include <KTextEditor/ConfigInterface>
+#include <KConfigGroup>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 namespace Kobby
 {
@@ -147,7 +150,7 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
     , m_aboutToClose( false )
 {
     plugin->registerTextBuffer(kDocument->url().path(), this);
-    kDebug() << "new text buffer for document" << kDocument;
+    qDebug() << "new text buffer for document" << kDocument;
     connect( kDocument, SIGNAL(textInserted(KTextEditor::Document*, const KTextEditor::Range&)),
         this, SLOT(localTextInserted(KTextEditor::Document*, const KTextEditor::Range&)) );
     connect( kDocument, SIGNAL(textRemoved(KTextEditor::Document*, const KTextEditor::Range&, const QString&)),
@@ -160,7 +163,7 @@ KDocumentTextBuffer::KDocumentTextBuffer( KTextEditor::Document* kDocument,
 
 void KDocumentTextBuffer::nextUndoStep()
 {
-    kDebug() << "starting undo group";
+    qDebug() << "starting undo group";
     if ( m_undoGrouping->hasOpenGroup() ) {
         m_undoGrouping->endGroup();
     }
@@ -210,7 +213,7 @@ void KDocumentTextBuffer::onInsertText( unsigned int offset,
 
     if( !blockRemoteInsert )
     {
-        kDebug() << "REMOTE INSERT TEXT offset" << offset << kDocument()
+        qDebug() << "REMOTE INSERT TEXT offset" << offset << kDocument()
                  << "(" << chunk.length() << " chars )" << kDocument()->url();
         KTextEditor::Cursor startCursor = offsetToCursor_kte( offset );
         QString str = codec()->toUnicode( chunk.text() );
@@ -240,7 +243,7 @@ void KDocumentTextBuffer::onEraseText( unsigned int offset,
 
     if( !blockRemoteRemove )
     {
-        kDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset << kDocument()->url();
+        qDebug() << "REMOTE ERASE TEXT len" << length << "offset" << offset << kDocument()->url();
         KTextEditor::Cursor startCursor = offsetRelativeTo_kte(KTextEditor::Cursor(0, 0), offset);
         KTextEditor::Cursor endCursor = offsetRelativeTo_kte(startCursor, length);
         KTextEditor::Range range = KTextEditor::Range(startCursor, endCursor);
@@ -270,7 +273,7 @@ void KDocumentTextBuffer::checkConsistency()
     QString bufferContents = codec()->toUnicode( slice(0, length())->text() );
     QString documentContents = kDocument()->text();
     if ( bufferContents != documentContents ) {
-        KUrl url = kDocument()->url();
+        auto url = kDocument()->url();
         kDocument()->setModified(false);
         kDocument()->setReadWrite(false);
         m_aboutToClose = true;
@@ -279,14 +282,25 @@ void KDocumentTextBuffer::checkConsistency()
         f.open();
         f.close();
         kDocument()->saveAs(f.fileName());
-        KDialog* dialog = new KDialog;
-        dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+        QDialog* dialog = new QDialog;
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
+        QWidget* mainWidget = new QWidget(dialog);
+        QVBoxLayout *mainLayout = new QVBoxLayout;
+        dialog->setLayout(mainLayout);
+        mainLayout->addWidget(mainWidget);
+        QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+        okButton->setDefault(true);
+        okButton->setShortcut(Qt::CTRL | Qt::Key_Return);
+        dialog->connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+        dialog->connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+        //PORTING SCRIPT: WARNING mainLayout->addWidget(buttonBox) must be last item in layout. Please move it.
+        mainLayout->addWidget(buttonBox);
         QLabel* label = new QLabel(i18n("Sorry, an internal error occurred in the text synchronization component.<br>"
                                         "You can try to reload the document or disconnect."));
         label->setWordWrap(true);
-        dialog->setMainWidget(label);
-        dialog->button(KDialog::Ok)->setText(i18n("Reload document"));
-        dialog->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+        mainLayout->addWidget(label);
+        buttonBox->button(QDialogButtonBox::Ok)->setText(i18n("Reload document"));
+        buttonBox->button(QDialogButtonBox::Cancel)->setText(i18n("Disconnect"));
         DocumentReopenHelper* helper = new DocumentReopenHelper(url, kDocument());
         connect(dialog, SIGNAL(accepted()), helper, SLOT(reopen()));
         // We must not use exec() here, since that will create a nested event loop,
@@ -305,11 +319,11 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 
     textOpPerformed();
     if( m_user.isNull() ) {
-        kDebug() << "Could not insert text: No local user set.";
+        qDebug() << "Could not insert text: No local user set.";
         return;
     }
     unsigned int offset = cursorToOffset_kte(range.start());
-    kDebug() << "local text inserted" << kDocument() << "( range" << range << ")" << m_user << "offset:" << offset;
+    qDebug() << "local text inserted" << kDocument() << "( range" << range << ")" << m_user << "offset:" << offset;
     QInfinity::TextChunk chunk(encoding());
     QString text = kDocument()->text(range);
 #ifdef ENABLE_TAB_HACK
@@ -322,20 +336,20 @@ void KDocumentTextBuffer::localTextInserted( KTextEditor::Document *document,
 #endif
     Q_ASSERT(encoder());
     if ( text.isEmpty() ) {
-        kDebug() << "Skipping empty insert.";
+        qDebug() << "Skipping empty insert.";
         return;
     }
     QByteArray encodedText = codec()->fromUnicode( text );
     if ( encodedText.size() == 0 ) {
-        kDebug() << "Got empty encoded text from non empty string "
+        qDebug() << "Got empty encoded text from non empty string "
                     "Skipping insertion";
     }
     else {
         chunk.insertText( 0, encodedText, countUnicodeCharacters(text), m_user->id() );
         blockRemoteInsert = true;
-        kDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
+        qDebug() << "inserting chunk of size" << chunk.length() << "into local buffer" << kDocument()->url();
         insertChunk( offset, chunk, m_user );
-        kDebug() << "done inserting chunk";
+        qDebug() << "done inserting chunk";
         checkConsistency();
     }
 }
@@ -345,7 +359,7 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
 {
     if ( m_aboutToClose ) return;
 
-    kDebug() << "local text removed:" << kDocument() << range;
+    qDebug() << "local text removed:" << kDocument() << range;
     emit localChangedText(range, user(), true);
 
     Q_UNUSED(document)
@@ -356,16 +370,16 @@ void KDocumentTextBuffer::localTextRemoved( KTextEditor::Document *document,
         unsigned int offset = cursorToOffset_kte( range.start() );
         unsigned int len = countUnicodeCharacters(oldText);
         blockRemoteRemove = true;
-        kDebug() << "ERASING TEXT" << oldText << "with len" << len << "offset" << offset << "range" << range;
-        kDebug() << offset << len << length();
+        qDebug() << "ERASING TEXT" << oldText << "with len" << len << "offset" << offset << "range" << range;
+        qDebug() << offset << len << length();
         if( len > 0 )
             eraseText( offset, len, m_user );
         else
-            kDebug() << "0 legth delete operation. Skipping.";
+            qDebug() << "0 legth delete operation. Skipping.";
         checkConsistency();
     }
     else
-        kDebug() << "Could not remove text: No local user set.";
+        qDebug() << "Could not remove text: No local user set.";
 
 }
 
@@ -470,7 +484,7 @@ void KDocumentTextBuffer::textOpPerformed()
         return;
     }
     else {
-        kDebug() << "starting undo timer";
+        qDebug() << "starting undo timer";
         m_undoTimer.start();
         updateUndoRedoActions();
     }
@@ -480,16 +494,23 @@ void KDocumentTextBuffer::checkLineEndings()
 {
     QString bufferContents = kDocument()->text();
     if ( bufferContents.contains("\r\n") || bufferContents.contains("\r") ) {
-        KDialog* dlg = new KDialog(kDocument()->activeView());
+        QDialog* dlg = new QDialog(nullptr);
+        QHBoxLayout* layout = new QHBoxLayout(dlg);
+        dlg->setLayout(layout);
         dlg->setAttribute(Qt::WA_DeleteOnClose);
-        dlg->setButtons(KDialog::Ok | KDialog::Cancel);
-        dlg->button(KDialog::Ok)->setText(i18n("Continue"));
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
+        QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+        okButton->setDefault(true);
+        okButton->setText(i18n("Continue"));
+        dlg->connect(buttonBox, SIGNAL(accepted()), dlg, SLOT(accept()));
+        dlg->connect(buttonBox, SIGNAL(rejected()), dlg, SLOT(reject()));
         QLabel* l = new QLabel(i18n("The document you opened contains non-standard line endings. "
                                     "Do you want to convert them to the standard \"\\n\" format?<br><br>"
                                     "<i>Note: This change will be synchronized to the server.</i>"), dlg);
         l->setWordWrap(true);
-        dlg->setMainWidget(l);
-        connect(dlg, SIGNAL(okClicked()), this, SLOT(replaceLineEndings()));
+        layout->addWidget(l);
+        layout->addWidget(buttonBox);
+        connect(dlg, SIGNAL(clicked()), this, SLOT(replaceLineEndings()));
         dlg->show();
     }
 }
@@ -533,7 +554,7 @@ InfTextDocument::InfTextDocument( QInfinity::SessionProxy* proxy,
     , m_user( 0 )
     , m_name( name )
 {
-    kDebug() << "new infTextDocument for url" << kDocument()->url();
+    qDebug() << "new infTextDocument for url" << kDocument()->url();
     m_session->setParent( this );
     m_sessionProxy->setParent( this );
     connect( kDocument(), SIGNAL(viewCreated( KTextEditor::Document*, KTextEditor::View* )),
@@ -581,7 +602,7 @@ void InfTextDocument::leave()
 
 void InfTextDocument::undo()
 {
-    kDebug() << "UNDO" << m_user;
+    qDebug() << "UNDO" << m_user;
     if( m_user ) {
         m_session->undo( *m_user, m_buffer->m_undoGrouping->undoSize() );
     }
@@ -590,7 +611,7 @@ void InfTextDocument::undo()
 
 void InfTextDocument::redo()
 {
-    kDebug() << "REDO";
+    qDebug() << "REDO";
     if( m_user ) {
         m_session->redo( *m_user, m_buffer->m_undoGrouping->redoSize() );
     }
@@ -615,7 +636,7 @@ void InfTextDocument::slotSynchronizationFailed( GError *gerror )
 bool KDocumentTextBuffer::hasUser() const
 {
     if ( m_user) {
-        kDebug() << "user" << m_user->name() << "status:" << m_user->status();
+        qDebug() << "user" << m_user->name() << "status:" << m_user->status();
     }
     return m_user != 0;
 }
@@ -629,8 +650,8 @@ void InfTextDocument::slotJoinFinished( QPointer<QInfinity::User> user )
     setLoadState( Document::JoiningComplete );
     setLoadState( Document::Complete );
     m_buffer->checkLineEndings();
-    kDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
-    kDebug() << "in document" << kDocument()->url();
+    qDebug() << "Join successful, user" << user->name() << "now online" << m_user << INF_ADOPTED_USER(user->gobject());
+    qDebug() << "in document" << kDocument()->url();
 }
 
 void InfTextDocument::slotJoinFailed( const GError *gerror )
@@ -642,27 +663,35 @@ void InfTextDocument::slotJoinFailed( const GError *gerror )
     else {
         emsg.append("Unknown error");
     }
-    kDebug() << "Join failed: " << emsg;
+    qDebug() << "Join failed: " << emsg;
     retryJoin(emsg);
 }
 
 void InfTextDocument::retryJoin(const QString& message)
 {
-    KDialog* dialog = new KDialog;
+    QDialog* dialog = new QDialog;
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
-    dialog->button(KDialog::Ok)->setText(i18n("Retry"));
+    QHBoxLayout* layout = new QHBoxLayout(dialog);
+    dialog->setLayout(layout);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
+    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+    okButton->setDefault(true);
+    okButton->setShortcut(Qt::CTRL | Qt::Key_Return);
+    dialog->connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    dialog->connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    okButton->setText(i18n("Retry"));
     QWidget* w = new QWidget();
-    dialog->setMainWidget(w);
+    layout->addWidget(w);
+    layout->addWidget(buttonBox);
     w->setLayout(new QVBoxLayout);
     w->layout()->addWidget(new QLabel(i18n("Failed to join editing session: %1", message)));
     w->layout()->addWidget(new QLabel(i18n("You can try joining again with a different user name:")));
     KLineEdit* username = new KLineEdit;
-    username->setClickMessage(i18n("Enter your user name..."));
+    username->setPlaceholderText(i18n("Enter your user name..."));
     w->layout()->addWidget(username);
     username->setFocus();
-    connect(dialog, SIGNAL(okClicked()), SLOT(newUserNameEntered()));
-    connect(dialog, SIGNAL(cancelClicked()), SLOT(joinAborted()));
+    connect(dialog, SIGNAL(clicked()), SLOT(newUserNameEntered()));
+    connect(dialog, SIGNAL(clicked()), SLOT(joinAborted()));
     dialog->show();
 }
 
@@ -673,7 +702,7 @@ void InfTextDocument::joinAborted()
 
 void InfTextDocument::newUserNameEntered()
 {
-    KDialog* dlg = qobject_cast<KDialog*>(QObject::sender());
+    QDialog* dlg = qobject_cast<QDialog*>(QObject::sender());
     KLineEdit* username = dlg->findChild<KLineEdit*>();
     joinSession(username->text());
 }
@@ -703,7 +732,7 @@ void InfTextDocument::slotViewCreated( KTextEditor::Document *doc,
 
 void InfTextDocument::slotCanUndo( bool enable )
 {
-    kDebug() << "SET UNDO:" << enable;
+    qDebug() << "SET UNDO:" << enable;
     QAction *act;
     foreach( act, undoActions )
     {
@@ -713,7 +742,7 @@ void InfTextDocument::slotCanUndo( bool enable )
 
 void InfTextDocument::slotCanRedo( bool enable )
 {
-    kDebug() << "SET REDO:" << enable;
+    qDebug() << "SET REDO:" << enable;
     QAction *act;
     foreach( act, redoActions )
     {
@@ -723,7 +752,7 @@ void InfTextDocument::slotCanRedo( bool enable )
 
 void InfTextDocument::synchronize()
 {
-    kDebug() << "synchronizing document";
+    qDebug() << "synchronizing document";
     if( m_session->status() == QInfinity::Session::Running )
         slotSynchronized();
     else if( m_session->status() == QInfinity::Session::Synchronizing )
@@ -732,7 +761,7 @@ void InfTextDocument::synchronize()
             ReadWriteTransaction t(kDocument());
             kDocument()->clear();
         }
-        kDebug() << "document contents at sync begin:" << kDocument()->text();
+        qDebug() << "document contents at sync begin:" << kDocument()->text();
         setLoadState( Document::Synchronizing );
         connect( m_session, SIGNAL(synchronizationComplete()),
             this, SLOT(slotSynchronized()) );
@@ -759,7 +788,7 @@ void InfTextDocument::joinSession(const QString& forceUserName)
         else {
             userName = getUserName();
         }
-        kDebug() << "requesting join of user" << userName << ColorHelper::colorForUsername(userName).hue();
+        qDebug() << "requesting join of user" << userName << ColorHelper::colorForUsername(userName).hue();
         QInfinity::UserRequest *req = QInfinity::TextSession::joinUser( m_sessionProxy,
             *m_session,
             userName,

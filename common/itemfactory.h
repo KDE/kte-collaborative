@@ -18,7 +18,7 @@
 #ifndef KOBBY_ITEMFACTORY_H
 #define KOBBY_ITEMFACTORY_H
 
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 
 #include <libqinfinity/browseritemfactory.h>
 
@@ -48,7 +48,7 @@ class KTECOLLABORATIVECOMMON_EXPORT ConnectionItem
     public:
         ConnectionItem( QInfinity::XmlConnection &conn,
             QInfinity::Browser &browser,
-            const KIcon &icon,
+            const QIcon &icon,
             const QString &text );
         ~ConnectionItem();
 

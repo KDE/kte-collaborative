@@ -51,12 +51,12 @@ void ConnectionsModel::onAccountManagerReady(Tp::PendingOperation* )
         m_connections = channels;
         endInsertRows();
     }
-    kDebug() << "channels:" << m_connections;
+    qDebug() << "channels:" << m_connections;
     foreach ( const QVariantMap& channelData, m_connections ) {
-        kDebug() << "constructing tube for channel" << channelData;
-        kDebug() << "accounts:" << m_accountManager->allAccounts();
+        qDebug() << "constructing tube for channel" << channelData;
+        qDebug() << "accounts:" << m_accountManager->allAccounts();
         foreach ( const Tp::AccountPtr account,  m_accountManager->allAccounts() ) {
-            kDebug() << account->objectPath();
+            qDebug() << account->objectPath();
         }
         Tp::AccountPtr account = m_accountManager->accountForPath(channelData["accountPath"].toString());
         Tp::StreamTubeChannelPtr channel = Tp::StreamTubeChannel::create(account->connection(),
@@ -71,13 +71,13 @@ void ConnectionsModel::onAccountManagerReady(Tp::PendingOperation* )
 
 void ConnectionsModel::onChannelReady(Tp::PendingOperation* operation)
 {
-    kDebug() << "channel ready" << rowCount() << "channels total";
+    qDebug() << "channel ready" << rowCount() << "channels total";
     Tp::StreamTubeChannelPtr channel;
     channel = Tp::StreamTubeChannelPtr::qObjectCast(qobject_cast<Tp::PendingReady*>(operation)->proxy());
     int i = -1;
     for ( ChannelList::iterator it = m_connections.begin(); it != m_connections.end(); it++ ) {
         i += 1;
-        kDebug() << "correct id:" << ((*it)["channelIdentifier"].toString() == channel->objectPath());
+        qDebug() << "correct id:" << ((*it)["channelIdentifier"].toString() == channel->objectPath());
         if ( (*it)["channelIdentifier"].toString() != channel->objectPath() ) {
             continue;
         }
@@ -119,7 +119,7 @@ QVariant ConnectionsModel::data(const QModelIndex& index, int role) const
             case 2: {
                 const QVariantMap& channel = m_connections.at(index.row());
                 int type = channel["targetHandleType"].toInt();
-                kDebug() << channel;
+                qDebug() << channel;
                 if ( type == Tp::HandleTypeContact ) {
                     return QIcon(channel["icon"].toString());
                 }
@@ -174,7 +174,7 @@ void ConnectionsWidget::setHelpMessage(const QString& message)
 ConnectionsWidget::ConnectionsWidget(QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
-    kDebug() << "creating connections widget";
+    qDebug() << "creating connections widget";
 
     // Build the widget for table + help message, if applicable
     QWidget* tableWidget = new QWidget();

@@ -22,7 +22,7 @@
 #ifndef SHAREDOCUMENTDIALOG_H
 #define SHAREDOCUMENTDIALOG_H
 
-#include <kdialog.h>
+#include <QDialog>
 
 class InfTubeRequester;
 class ServerManager;
@@ -33,7 +33,7 @@ namespace KTextEditor {
     class View;
 }
 
-class ShareDocumentDialog : public KDialog
+class ShareDocumentDialog : public QDialog
 {
 Q_OBJECT
 public:
@@ -41,14 +41,14 @@ public:
     const InfTubeRequester* server() const;
 
 private slots:
-    void shareWithContact();
-    void shareWithChatRoom();
+//     void shareWithContact();
+//     void shareWithChatRoom();
     void shareWithExistingConnection(uint, QString);
     void jobFinished(KJob* job);
     void putOnExistingServer();
 
 signals:
-    void shouldOpenDocument(const KUrl& url);
+    void shouldOpenDocument(const QUrl& url);
 
 private:
     KTextEditor::View* m_view;

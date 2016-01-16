@@ -26,7 +26,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <KTextEditor/View>
-#include <KUrl>
+#include <QUrl>
 
 #include <libqinfinity/xmlconnection.h>
 #include <libqinfinity/usertable.h>
@@ -45,7 +45,7 @@ namespace QInfinity {
 using Kobby::Connection;
 using Kobby::Document;
 
-class KAction;
+class QAction;
 class ManagedDocument;
 class KteCollaborativePluginView;
 
@@ -229,31 +229,31 @@ public slots:
     void configureActionClicked();
     void openFileManagerActionClicked();
 
-    void openFile(KUrl);
+    void openFile(QUrl);
 
     void textHintRequested(const KTextEditor::Cursor& position, QString& hint);
 
 private:
     KTextEditor::View* m_view;
     CollaborativeStatusBar* m_statusBar;
-    StatusOverlay* m_statusOverlay;
+//     StatusOverlay* m_statusOverlay;
     ManagedDocument* m_document;
 
     // actions from the "Collaborative" menu
-    KAction* m_openCollabDocumentAction;
-    KAction* m_saveCopyAction;
-    KAction* m_shareWithContactAction;
-    KAction* m_changeUserNameAction;
-    KAction* m_disconnectAction;
-    KAction* m_configureAction;
-    KAction* m_openFileManagerAction;
+    QAction* m_openCollabDocumentAction;
+    QAction* m_saveCopyAction;
+    QAction* m_shareWithContactAction;
+    QAction* m_changeUserNameAction;
+    QAction* m_disconnectAction;
+    QAction* m_configureAction;
+    QAction* m_openFileManagerAction;
 
     // actions from the popup menu
-    KAction* m_clearHighlightAction;
+    QAction* m_clearHighlightAction;
 
     // list of actions which should only be enabled when a document
     // is a connected collaborative document
-    QList<KAction*> m_actionsRequiringConnection;
+    QList<QAction*> m_actionsRequiringConnection;
 
     // Enables or disables the actions in m_actionsRequiringConnection
     void enableActions();

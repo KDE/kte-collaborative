@@ -1,5 +1,5 @@
 # Copyright (c) 2008 Gregory Haynes <greg@greghaynes.net>
-# Copyright (c) 2013 Sven Brauch <svenbrauch@gmail.com>
+# Copyright (c) 2013-2016 Sven Brauch <svenbrauch@gmail.com>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
@@ -8,42 +8,42 @@
 cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory(settings)
-add_subdirectory(ktpintegration)
-
-find_package(KDE4 4.5.0 REQUIRED)
-include(KDE4Defaults)
+# add_subdirectory(ktpintegration) # disabled, not ported
 
 set( ktecollaborative_PART_SRCS
     documentchangetracker.cpp
     ktecollaborativepluginview.cpp
     ktecollaborativeplugin.cpp
     manageddocument.cpp
-    ui/remotechangenotifier.cpp
+#     ui/remotechangenotifier.cpp
     ui/sharedocumentdialog.cpp
     ui/opencollabdocumentdialog.cpp
-    ui/statusoverlay.cpp
+#     ui/statusoverlay.cpp
     settings/kcm_kte_collaborative.cpp
+    ../kte_collab_debug.cpp
 )
 
 add_definitions(-fPIC)
-automoc4(ktecollaborative_objects ktecollaborative_PART_SRCS)
 add_library(ktecollaborative_objects OBJECT ${ktecollaborative_PART_SRCS})
 
 set(CMAKE_INSTALL_RPATH ${LIB_INSTALL_DIR}/ktecollaborative/)
-kde4_add_plugin(ktexteditor_collaborative $<TARGET_OBJECTS:ktecollaborative_objects>)
+add_library(ktexteditor_collaborative $<TARGET_OBJECTS:ktecollaborative_objects>)
 
 include_directories(
-    ${TELEPATHY_QT4_INCLUDE_DIR}
-    ${KTP_INCLUDE_DIR}
-    ${KDE4_INCLUDES}
     ${LIBQINFINITY_INCLUDES}
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/common/
+    KF5::TextEditor
 )
 
 target_link_libraries( ktexteditor_collaborative
     ktecollaborativecommon
     inftube
+    Qt5::Core
+    Qt5::Widgets
+    KF5::TextEditor
+    KF5::Parts
     ${KDE4_KCMUTILS_LIBS}
     ${KDE4_KDEUI_LIBS}
     ${KDE4_KIO_LIBS}

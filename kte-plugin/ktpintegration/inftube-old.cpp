@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include <KIO/Job>
 #include <KRun>
-#include <KDebug>
+#include <QDebug>
 #include <KMessageBox>
 #include <KLocalizedString>
 #include <krun.h>
@@ -127,7 +127,7 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const Tp::ContactPtr contact, 
 
 bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, const DocumentList& documents)
 {
-    kDebug() << "starting infinoted";
+    qDebug() << "starting infinoted";
     if ( ! startInfinoted() ) {
         // TODO user-visible error handling
         kWarning() << "Failed to start infinoted. Check settings and installation.";
@@ -170,8 +170,8 @@ bool InfTubeServer::offer(Tp::AccountPtr account, const ContactList& contacts, c
 
 void InfTubeServer::onCreateTubeFinished(Tp::PendingOperation* operation)
 {
-    kDebug() << "create tube finished; is error:" << operation->isError();
-    kDebug() << "error message:" << operation->errorMessage();
+    qDebug() << "create tube finished; is error:" << operation->isError();
+    qDebug() << "error message:" << operation->errorMessage();
     if ( operation->isError() ) {
         KMessageBox::error(0, i18n("Failed to establish a connection to the selected contact. Error message was: \"%1\"",
                                    operation->errorMessage()));
@@ -213,7 +213,7 @@ bool InfTubeServer::startInfinoted()
             break;
         }
     }
-    kDebug() << "successfully started infinioted on port" << m_port << "( root dir" << serverDirectory() << ")";
+    qDebug() << "successfully started infinioted on port" << m_port << "( root dir" << serverDirectory() << ")";
     return true;
 }
 
@@ -229,20 +229,20 @@ InfTubeServer::~InfTubeServer()
 
 void InfTubeClient::listen()
 {
-    kDebug() << "listen called";
+    qDebug() << "listen called";
     m_tubeClient = Tp::StreamTubeClient::create(ConnectionManager::instance()->accountManager, QStringList() << "infinity",
                                                 QStringList(), QLatin1String("KTp.infinity"), true, true);
-    kDebug() << "tube client: listening";
+    qDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),
             this, SLOT(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)));
-    kDebug() << m_tubeClient->tubes();
+    qDebug() << m_tubeClient->tubes();
 }
 
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress address, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
-    kDebug() << "Tube accepted as Tcp, port:" << port;
-    kDebug() << "parameters:" << tube->parameters();
+    qDebug() << "Tube accepted as Tcp, port:" << port;
+    qDebug() << "parameters:" << tube->parameters();
     // TODO error handling
     // TODO proper selection of application(s) to run
     m_port = port;

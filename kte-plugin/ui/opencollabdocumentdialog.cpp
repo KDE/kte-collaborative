@@ -20,7 +20,8 @@
  */
 
 #include "opencollabdocumentdialog.h"
-#include <ktpintegration/connectionswidget.h>
+#include <QLineEdit>
+// #include <ktpintegration/connectionswidget.h>
 
 #include <QFormLayout>
 #include <QLabel>
@@ -29,21 +30,22 @@
 
 #include <KLocalizedString>
 #include <KMessageWidget>
-#include <KLineEdit>
-#include <KFileDialog>
-#include <KPushButton>
+#include <QFileDialog>
+#include <KConfigGroup>
+#include <QLineEdit>
+#include <QPushButton>
 
 HostSelectionWidget::HostSelectionWidget(QWidget* parent)
     : QGroupBox(i18n("Manually enter connection parameters"), parent)
 {
     // Construct the box for manually setting hostname etc.
-    m_host = new KLineEdit();
-    m_host->setClickMessage(i18nc("Examples for possible hostname formats", "e.g. 46.4.96.250, localhost, or mydomain.com"));
-    m_port = new KLineEdit("6523");
-    m_userName = new KLineEdit();
-    m_userName->setClickMessage(i18n("The name you want to appear with in the session"));
-    m_password = new KLineEdit();
-    m_password->setClickMessage(i18n("Leave blank if not required by the server"));
+    m_host = new QLineEdit();
+    m_host->setPlaceholderText(i18nc("Examples for possible hostname formats", "e.g. 46.4.96.250, localhost, or mydomain.com"));
+    m_port = new QLineEdit("6523");
+    m_userName = new QLineEdit();
+    m_userName->setPlaceholderText(i18n("The name you want to appear with in the session"));
+    m_password = new QLineEdit();
+    m_password->setPlaceholderText(i18n("Leave blank if not required by the server"));
 
     m_advancedSettingsLayout = new QFormLayout();
     setLayout(m_advancedSettingsLayout);
@@ -67,20 +69,20 @@ HostSelectionWidget::HostSelectionWidget(QWidget* parent)
     m_host->setFocus();
 }
 
-KUrl HostSelectionWidget::selectedUrl() const
+QUrl HostSelectionWidget::selectedUrl() const
 {
-    KUrl url;
-    url.setProtocol("inf");
+    QUrl url;
+    url.setScheme("inf");
     url.setPath("/");
     url.setHost(m_host->text());
     url.setPort(m_port->text().toInt());
-    url.setUser(m_userName->text());
+    url.setUserName(m_userName->text());
     url.setPassword(m_password->text());
     return url;
 }
 
 OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFlags flags)
-    : KDialog(parent, flags)
+    : QDialog(parent, flags)
 {
     QWidget* widget = new QWidget(this);
     widget->setLayout(new QVBoxLayout);
@@ -88,22 +90,25 @@ OpenCollabDocumentDialog::OpenCollabDocumentDialog(QWidget* parent, Qt::WindowFl
     m_manualSelectionWidget = new HostSelectionWidget(this);
 
     // Construct the box for selecting an existing connection
-    QGroupBox* existingGroup = new QGroupBox(i18n("Choose an existing telepathy-based connection"));
-    existingGroup->setLayout(new QHBoxLayout());
-    ConnectionsWidget* connections = new ConnectionsWidget();
-    connections->setHelpMessage(i18n("Click a connection to open a document from there."));
-    existingGroup->layout()->addWidget(connections);
+//     QGroupBox* existingGroup = new QGroupBox(i18n("Choose an existing telepathy-based connection"));
+//     existingGroup->setLayout(new QHBoxLayout());
+//     ConnectionsWidget* connections = new ConnectionsWidget();
+//     connections->setHelpMessage(i18n("Click a connection to open a document from there."));
+//     existingGroup->layout()->addWidget(connections);
 
     // Put it all together
     widget->layout()->addWidget(m_manualSelectionWidget);
-    widget->layout()->addWidget(existingGroup);
+//     widget->layout()->addWidget(existingGroup);
 
-    connect(connections, SIGNAL(connectionClicked(uint,QString)),
-            this, SLOT(connectionClicked(uint,QString)));
+//     connect(connections, SIGNAL(connectionClicked(uint,QString)),
+//             this, SLOT(connectionClicked(uint,QString)));
 
-    connect(button(KDialog::Ok), SIGNAL(clicked(bool)), SLOT(acceptedWithManualConnection()));
+#warning TODO
+//     connect(button(QDialog::Ok), SIGNAL(clicked(bool)), SLOT(acceptedWithManualConnection()));
 
-    setMainWidget(widget);
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    setLayout(mainLayout);
+    mainLayout->addWidget(widget);
 
     resize(600, 450);
 }
@@ -137,9 +142,9 @@ void OpenCollabDocumentDialog::acceptedWithManualConnection()
 void OpenCollabDocumentDialog::requestFileToOpen()
 {
     // request URL to open
-    KUrl result = KFileDialog::getOpenUrl(selectedBaseUrl());
-    if ( result.isValid() ) {
-        emit shouldOpenDocument(result);
+    auto result = QFileDialog::getOpenFileName(nullptr, {}, selectedBaseUrl().path());
+    if ( ! result.isEmpty() ) {
+        emit shouldOpenDocument(QUrl(result));
         QDialog::accept();
     }
     else {
@@ -155,16 +160,16 @@ void OpenCollabDocumentDialog::accept()
     }
 }
 
-KUrl OpenCollabDocumentDialog::selectedBaseUrl() const
+QUrl OpenCollabDocumentDialog::selectedBaseUrl() const
 {
-    KUrl url;
-    url.setProtocol("inf");
+    QUrl url;
+    url.setScheme("inf");
     url.setPath(QLatin1String("/"));
     if ( m_selectedConnection.first != 0 ) {
         // read parameters from clicked connection
         url.setHost("127.0.0.1");
         url.setPort(m_selectedConnection.first);
-        url.setUser(m_selectedConnection.second);
+        url.setUserName(m_selectedConnection.second);
     }
     else {
         // read parameters from manual selection

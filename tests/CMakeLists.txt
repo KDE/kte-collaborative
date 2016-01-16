@@ -1,9 +1,11 @@
-automoc4(collaborativeeditingtest collaborativeeditingtest.cpp)
-kde4_add_unit_test(
+include(ECMMarkAsTest)
+
+add_executable(
     collaborativeeditingtest
     collaborativeeditingtest.cpp
     $<TARGET_OBJECTS:ktecollaborative_objects>
 )
+ecm_mark_as_test(collabtest)
 
 include_directories(
     ${KDE4_INCLUDES}

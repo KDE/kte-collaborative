@@ -21,14 +21,14 @@
 #include <libqinfinity/browseriter.h>
 #include <libqinfinity/browser.h>
 
-#include <KIcon>
+#include <QIcon>
 
 namespace Kobby
 {
 
 ConnectionItem::ConnectionItem( QInfinity::XmlConnection &conn,
     QInfinity::Browser &browser,
-    const KIcon &icon,
+    const QIcon &icon,
     const QString &text )
     : QInfinity::ConnectionItem( conn, browser, icon, text )
     , m_conn( 0 )
@@ -54,7 +54,7 @@ ItemFactory::ItemFactory( QObject *parent )
 QInfinity::NodeItem *ItemFactory::createRootNodeItem( const QInfinity::BrowserIter &iter )
 {
     QInfinity::NodeItem *item;
-    item = new QInfinity::NodeItem( iter, KIcon("folder.png"), "/" );
+    item = new QInfinity::NodeItem( iter, QIcon::fromTheme("folder.png"), "/" );
     return item;
 }
 
@@ -64,9 +64,9 @@ QInfinity::NodeItem *ItemFactory::createNodeItem( const QInfinity::BrowserIter &
 
     QInfinity::NodeItem *item;
     if( localItr.isDirectory() )
-        item = new QInfinity::NodeItem( localItr, KIcon("folder.png") );
+        item = new QInfinity::NodeItem( localItr, QIcon::fromTheme("folder.png") );
     else
-        item = new QInfinity::NodeItem( localItr, KIcon("text-x-generic.png") );
+        item = new QInfinity::NodeItem( localItr, QIcon::fromTheme("text-x-generic.png") );
     return item;
 }
 
@@ -74,7 +74,7 @@ QInfinity::ConnectionItem *ItemFactory::createConnectionItem( QInfinity::XmlConn
     QInfinity::Browser &browser,
     const QString &name )
 {
-    return new Kobby::ConnectionItem( conn, browser, KIcon("network-connect.png"), name );
+    return new Kobby::ConnectionItem( conn, browser, QIcon::fromTheme("network-connect.png"), name );
 }
 
 }

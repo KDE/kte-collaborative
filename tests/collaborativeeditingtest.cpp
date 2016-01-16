@@ -48,7 +48,7 @@ using KTextEditor::Range;
 
 void CollaborativeEditingTest::initTestCase()
 {
-    kDebug() << "initializing test case";
+    qDebug() << "initializing test case";
 
     // register types to use in data functions
     qRegisterMetaType< QList<Operation*> >("QList<Operation*>");
@@ -72,7 +72,7 @@ void CollaborativeEditingTest::initTestCase()
         }
         QTest::qWait(50);
     }
-    kDebug() << "successfully started infinioted";
+    qDebug() << "successfully started infinioted";
 
     // get the service factory for documents and the plugin
     m_documentService = KService::serviceByDesktopPath("katepart.desktop");
@@ -81,9 +81,9 @@ void CollaborativeEditingTest::initTestCase()
     // Instantiate a document. This loads an copy of the plugin, which we disable
     // (we want to use the instances we create below)
     KTextEditor::Document* document = m_documentService->createInstance<KTextEditor::Document>(this);
-    kDebug() << "got document from service:" << document;
+    qDebug() << "got document from service:" << document;
     KteCollaborativePlugin* p = reinterpret_cast<KteCollaborativePlugin*>(QApplication::instance()->property("KobbyPluginInstance").toLongLong());
-    kDebug() << "auto-created instance:" << p;
+    qDebug() << "auto-created instance:" << p;
     if ( p ) {
         p->setProperty("kobbyPluginDisabled", true);
     }
@@ -92,15 +92,15 @@ void CollaborativeEditingTest::initTestCase()
     // although metaObject()->className() says "KobbyPlugin" and valgrind reports no errors
     // after accessing properties of the reinterpret_cast'ed object.
     m_plugin_A = reinterpret_cast<KteCollaborativePlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
-    kDebug() << "got plugin A:" << plugin_A();
+    qDebug() << "got plugin A:" << plugin_A();
 
     m_plugin_B = reinterpret_cast<KteCollaborativePlugin*>(pluginService->createInstance<KTextEditor::Plugin>(0));
-    kDebug() << "got plugin B:" << plugin_B();
+    qDebug() << "got plugin B:" << plugin_B();
 }
 
 void CollaborativeEditingTest::cleanupTestCase()
 {
-    kDebug() << "cleaning up";
+    qDebug() << "cleaning up";
     QProcess kill;
     m_serverProcess->kill();
     // TODO this doesn't work, must clear the temporary files first
@@ -138,13 +138,13 @@ void CollaborativeEditingTest::waitForDocument(KTextEditor::Document* document, 
     const ManagedDocumentList& docs = onPlugin->managedDocuments();
     bool ready = false;
     while ( ! ready ) {
-        kDebug() << "waiting for document to become ready" << docs.contains(document) << document->url();
+        qDebug() << "waiting for document to become ready" << docs.contains(document) << document->url();
         QTest::qWait(1);
         QApplication::processEvents();
         if ( docs.contains(document) ) {
             ManagedDocument* managed = docs[document];
             ready = managed->sessionStatus() == QInfinity::Session::Running;
-            kDebug() << managed->sessionStatus() << managed->textBuffer();
+            qDebug() << managed->sessionStatus() << managed->textBuffer();
             ready = ready && managed->textBuffer()->hasUser();
         }
     }
@@ -262,7 +262,7 @@ void CollaborativeEditingTest::compareTextBuffers(KTextEditor::Document* docA, K
     QByteArray buf2text = buf2->slice(0, buf2->length())->text();
     // This checks that the correct text is in the infinity buffer
     QCOMPARE(buf1text, buf2text);
-    kDebug() << "buffers ok! content:" << buf1text;
+    qDebug() << "buffers ok! content:" << buf1text;
 }
 
 
@@ -275,7 +275,7 @@ void CollaborativeEditingTest::verifyTextBuffers(KTextEditor::Document* docA, KT
     // This checks that the correct text is in the infinity buffer
     QCOMPARE(buf1text, docA->text().toAscii());
     QCOMPARE(buf2text, docB->text().toAscii());
-    kDebug() << "buffers synced! content:" << buf1text;
+    qDebug() << "buffers synced! content:" << buf1text;
 }
 
 void CollaborativeEditingTest::testInsertionConsistency()

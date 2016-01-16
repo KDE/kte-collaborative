@@ -36,7 +36,7 @@
 
 #include <KJob>
 #include <KUrl>
-#include <KDebug>
+#include <QDebug>
 #include <QTcpSocket>
 
 #include "inftube_export.h"

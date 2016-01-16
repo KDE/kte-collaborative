@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_DOCUMENT_H
 #define KOBBY_DOCUMENT_H
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 
 #include <libqinfinity/abstracttextbuffer.h>
 
@@ -25,7 +25,7 @@
 #include <QPointer>
 #include <QStack>
 #include <QTimer>
-#include <KUrl>
+#include <QUrl>
 #include <KTextEditor/Document>
 
 typedef struct _GError GError;
@@ -247,7 +247,7 @@ class KTECOLLABORATIVECOMMON_EXPORT KDocumentTextBuffer
 class DocumentReopenHelper : public QObject {
 Q_OBJECT
 public:
-    DocumentReopenHelper(KUrl url, KTextEditor::Document* document)
+    DocumentReopenHelper(QUrl url, KTextEditor::Document* document)
         : QObject()
         , oldUrl(url)
         , document(document) {};
@@ -259,7 +259,7 @@ public slots:
     };
 
 private:
-    KUrl oldUrl;
+    QUrl oldUrl;
     KTextEditor::Document* document;
 };
 

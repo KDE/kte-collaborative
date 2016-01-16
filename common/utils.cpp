@@ -26,15 +26,16 @@
 #include <KTextEditor/View>
 #include <KConfigGroup>
 #include <KConfig>
-#include <KStandardDirs>
+
 #include <KRun>
 #include <KToolInvocation>
 
 using QInfinity::ExploreRequest;
 
-bool tryOpenDocument(const KUrl& url)
+bool tryOpenDocument(const QUrl &url)
 {
-    KUrl dir = url.upUrl();
+#warning TODO %d thingy
+//     QUrl dir = url.upUrl();
     KConfig config("ktecollaborative");
     KConfigGroup group = config.group("applications");
     // We do not set a default value here, so the dialog is always
@@ -45,18 +46,18 @@ bool tryOpenDocument(const KUrl& url)
     }
 
     command = command.replace("%u", url.url());
-    command = command.replace("%d", dir.url());
+//     command = command.replace("%d", dir.url());
     command = command.replace("%h", url.host() + ( url.port() ? (":" + QString::number(url.port())) : QString()));
     QString executable = command.split(' ').first();
     QString arguments = QStringList(command.split(' ').mid(1, -1)).join(" ");
-    QString executablePath = KStandardDirs::findExe(executable);
+    QString executablePath = QStandardPaths::findExecutable(executable);
     if ( executablePath.isEmpty() ) {
         return false;
     }
     return KRun::runCommand(executablePath + " " + arguments, 0);
 }
 
-bool tryOpenDocumentWithDialog(const KUrl& url)
+bool tryOpenDocumentWithDialog(const QUrl &url)
 {
     while ( ! tryOpenDocument(url) ) {
         SelectEditorDialog dlg;
@@ -69,8 +70,7 @@ bool tryOpenDocumentWithDialog(const KUrl& url)
 
 bool ensureNotifierModuleLoaded()
 {
-    KStandardDirs d;
-    QString desktopPath = d.findResource("services", "infinotenotifier.desktop");
+    QString desktopPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "services/infinotenotifier.desktop");
     return KToolInvocation::startServiceByDesktopPath(desktopPath) == 0;
 }
 
@@ -101,7 +101,7 @@ IterLookupHelper::IterLookupHelper(QString lookupPath, const QInfinity::Browser*
     foreach ( const QString& component, lookupPath.split('/').toVector() ) {
         m_remainingComponents.prepend(component);
     }
-    kDebug() << "finding iter for" << m_remainingComponents;
+    qDebug() << "finding iter for" << m_remainingComponents;
 };
 
 void IterLookupHelper::setDeleteOnFinish(bool deleteOnFinish)
@@ -124,7 +124,7 @@ bool IterLookupHelper::success() const
 void IterLookupHelper::explore(QInfinity::BrowserIter directory)
 {
     if ( ! directory.isExplored() ) {
-        kDebug() << "exploring iter";
+        qDebug() << "exploring iter";
         ExploreRequest* request = directory.explore();
         m_currentIter = directory;
         connect(request, SIGNAL(finished(ExploreRequest*)), this, SLOT(directoryExplored()));
@@ -158,9 +158,9 @@ void IterLookupHelper::exploreIfDirectory(QInfinity::BrowserIter iter)
 
 void IterLookupHelper::directoryExplored()
 {
-    kDebug() << "directory explored";
+    qDebug() << "directory explored";
     QString findEntry = m_remainingComponents.pop();
-    kDebug() << "finding:" << findEntry << " -- remaining:" << m_remainingComponents;
+    qDebug() << "finding:" << findEntry << " -- remaining:" << m_remainingComponents;
     if ( findEntry.isEmpty() ) {
         // the path is a directory; return the directory iter instead of a child
         m_wasSuccessful = true;
@@ -175,7 +175,7 @@ void IterLookupHelper::directoryExplored()
 
     bool found = false;
     do {
-        kDebug() << m_currentIter.name();
+        qDebug() << m_currentIter.name();
         if ( m_currentIter.name() == findEntry ) {
             found = true;
             break;
@@ -195,7 +195,7 @@ void IterLookupHelper::directoryExplored()
     else if ( found ) {
         return explore(m_currentIter);
     }
-    kWarning() << "explore failed!";
+    qWarning() << "explore failed!";
     emit failed();
 };
 

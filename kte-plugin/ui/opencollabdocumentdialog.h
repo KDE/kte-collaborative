@@ -22,33 +22,33 @@
 #ifndef OPENCOLLABDOCUMENTDIALOG_H
 #define OPENCOLLABDOCUMENTDIALOG_H
 
-#include <KDialog>
+#include <QDialog>
 #include <QGroupBox>
 
 class KMessageWidget;
 class QFormLayout;
-class KLineEdit;
+class QLineEdit;
 
 class HostSelectionWidget : public QGroupBox {
 Q_OBJECT
 public:
     HostSelectionWidget(QWidget* parent = 0);
-    KUrl selectedUrl() const;
+    QUrl selectedUrl() const;
 
 private slots:
     void showTip();
     void showAdvanced(bool);
 
 private:
-    KLineEdit* m_password;
-    KLineEdit* m_userName;
-    KLineEdit* m_port;
-    KLineEdit* m_host;
+    QLineEdit* m_password;
+    QLineEdit* m_userName;
+    QLineEdit* m_port;
+    QLineEdit* m_host;
     QFormLayout* m_advancedSettingsLayout;
     KMessageWidget* m_tip;
 };
 
-class OpenCollabDocumentDialog : public KDialog
+class OpenCollabDocumentDialog : public QDialog
 {
 Q_OBJECT
 public:
@@ -57,11 +57,11 @@ public:
     /**
      * @brief The URL the user has selected to open a document from. Only valid after the dialog was accepted.
      */
-    KUrl selectedBaseUrl() const;
+    QUrl selectedBaseUrl() const;
     virtual void accept();
 
 signals:
-    void shouldOpenDocument(const KUrl&);
+    void shouldOpenDocument(const QUrl&);
 
 public slots:
     void connectionClicked(uint,QString);

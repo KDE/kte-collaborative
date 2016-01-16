@@ -39,7 +39,7 @@
 #include <TelepathyQt/ContactManager>
 #include <KIO/Job>
 #include <KRun>
-#include <KDebug>
+#include <QDebug>
 #include <KMessageBox>
 #include <KLocalizedString>
 #include <KStandardDirs>
@@ -206,10 +206,10 @@ void InfTubeRequester::jobFinished(KJob* job)
 
 void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* operation)
 {
-    kDebug() << "TUBE REQUEST FINISHED";
+    qDebug() << "TUBE REQUEST FINISHED";
     Tp::ChannelRequestPtr req = qobject_cast<Tp::PendingChannelRequest*>(operation)->channelRequest();
     Tp::StreamTubeChannel* channel = qobject_cast<Tp::StreamTubeChannel*>(req->channel().data());
-    kDebug() << "got ST channel" << channel;
+    qDebug() << "got ST channel" << channel;
     if ( ! channel ) {
         KMessageBox::error(0, i18n("Did not get a valid channel object from Telepathy. Check your installation.<br>"
                                    "Error message was: <b>%1</b>", operation->errorMessage()));
@@ -221,12 +221,12 @@ void InfTubeRequester::onTubeRequestReady(Tp::PendingOperation* operation)
 
 void InfTubeRequester::onTubeReady(Tp::PendingOperation* operation)
 {
-    kDebug() << "Tube ready:" << operation;
+    qDebug() << "Tube ready:" << operation;
     Tp::PendingReady* ready = qobject_cast<Tp::PendingReady*>(operation);
     Q_ASSERT(ready);
     Tp::StreamTubeChannelPtr channel = Tp::StreamTubeChannelPtr::qObjectCast(ready->proxy());
     Q_ASSERT(channel);
-    kDebug() << "parameters:" << channel->parameters();
+    qDebug() << "parameters:" << channel->parameters();
     if ( ! channel->parameters().contains("localSocket") ) {
         kWarning() << "Got a tube without local socket set -- cannot continue";
         return;
@@ -279,12 +279,12 @@ InfTubeServer::InfTubeServer(QObject* parent)
 
 void InfTubeServer::registerHandler()
 {
-    kDebug() << "registering handler";
+    qDebug() << "registering handler";
     m_tubeServer = Tp::StreamTubeServer::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
                                                 QStringList("infinote"), "KTp.infinoteServer", true);
     m_tubeServer->exportTcpSocket(QHostAddress::LocalHost, 1);
-    kDebug() << m_tubeServer->clientName();
-    kDebug() << m_tubeServer->isRegistered();
+    qDebug() << m_tubeServer->clientName();
+    qDebug() << m_tubeServer->isRegistered();
     connect(m_tubeServer.data(), SIGNAL(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)),
             this, SLOT(tubeRequested(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QDateTime,Tp::ChannelRequestHints)));
     connect(m_tubeServer.data(), SIGNAL(tubeClosed(Tp::AccountPtr,Tp::OutgoingStreamTubeChannelPtr,QString,QString)),
@@ -293,7 +293,7 @@ void InfTubeServer::registerHandler()
 
 void InfTubeServer::tubeClosed(Tp::AccountPtr , Tp::OutgoingStreamTubeChannelPtr channel, QString , QString )
 {
-    kDebug() << "tube closed" << channel;
+    qDebug() << "tube closed" << channel;
     if ( m_channels.contains(channel) ) {
         m_channels.removeAll(channel);
     }
@@ -306,7 +306,7 @@ void InfTubeServer::targetPresenceChanged(Tp::Presence presence)
         // Close channels when the target goes offline
         foreach ( Tp::StreamTubeChannelPtr channel, m_channels ) {
             if ( channel->targetContact()->id() == contact->id() ) {
-                kDebug() << "closing channel" << channel;
+                qDebug() << "closing channel" << channel;
                 channel->requestClose();
                 m_channels.removeAll(channel);
             }
@@ -316,12 +316,12 @@ void InfTubeServer::targetPresenceChanged(Tp::Presence presence)
 
 void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTubeChannelPtr channel, QDateTime , Tp::ChannelRequestHints requestHints)
 {
-    kDebug() << "tube requested";
-    kDebug() << "is connected:" << channel->state();
+    qDebug() << "tube requested";
+    qDebug() << "is connected:" << channel->state();
     if ( channel->state() == Tp::TubeChannelStateOpen ) {
         // nothing to do
-        kDebug() << channel->ipAddress();
-        kDebug() << requestHints.allHints();
+        qDebug() << channel->ipAddress();
+        qDebug() << requestHints.allHints();
         return;
     }
 
@@ -360,7 +360,7 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
             const KUrl source = sources.at(i);
             if ( source.isValid() ) {
                 // TODO waiting?
-                kDebug() << "copying file" << source;
+                qDebug() << "copying file" << source;
                 KIO::file_copy(source, localUrl, KIO::HideProgressInfo);
             }
         }
@@ -377,7 +377,7 @@ void InfTubeServer::tubeRequested(Tp::AccountPtr account, Tp::OutgoingStreamTube
 
     ensureNotifierModuleLoaded();
     localUrl.setPath("/");
-    kDebug() << "emitting entered URL" << localUrl;
+    qDebug() << "emitting entered URL" << localUrl;
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(localUrl.url());
 }
 
@@ -395,7 +395,7 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
         retriesLeft -= 1;
         // Try next port
         *port = *port >= 65535 ? 49152 : *port + 1;
-        kDebug() << "trying port" << *port;
+        qDebug() << "trying port" << *port;
         // Ensure the server directory actually exists
         QDir d(serverDirectory(*port));
         if ( ! d.exists() ) {
@@ -412,20 +412,20 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
         int timeout = 30; // 30 retries at 100 ms -> 3s
         for ( int i = 0; i < timeout; i ++ ) {
             if ( serverProcess->state() != QProcess::Running ) {
-                kDebug() << "server did not start";
+                qDebug() << "server did not start";
                 break;
             }
             QTcpSocket s;
             s.connectToHost("127.0.0.1", *port);
             if ( s.waitForConnected(50) ) {
                 running = true;
-                kDebug() << "successfully started infinioted on port" << *port
+                qDebug() << "successfully started infinioted on port" << *port
                          << "( root dir" << serverDirectory(*port) << ")";
                 break;
             }
             usleep(50000);
         }
-        kDebug() << "failed, trying next port";
+        qDebug() << "failed, trying next port";
     }
     usleep(200000);
     return running;
@@ -433,7 +433,7 @@ bool InfTubeServer::startInfinoted(unsigned short* port)
 
 InfTubeServer::~InfTubeServer()
 {
-    kDebug() << "DESTROYING SERVER";
+    qDebug() << "DESTROYING SERVER";
     qDeleteAll(m_serverProcesses);
 }
 
@@ -449,7 +449,7 @@ void InfTubeClient::targetPresenceChanged(Tp::Presence presence)
         // Close channels when the target goes offline
         foreach ( Tp::StreamTubeChannelPtr channel, m_channels ) {
             if ( channel->targetContact()->id() == contact->id() ) {
-                kDebug() << "closing channel" << channel;
+                qDebug() << "closing channel" << channel;
                 channel->requestClose();
                 m_channels.removeAll(channel);
             }
@@ -459,21 +459,21 @@ void InfTubeClient::targetPresenceChanged(Tp::Presence presence)
 
 void InfTubeClient::listen()
 {
-    kDebug() << "listen called";
+    qDebug() << "listen called";
     m_tubeClient = Tp::StreamTubeClient::create(ServerManager::instance()->accountManager, QStringList() << "infinote",
                                                 QStringList("infinote"), QLatin1String("KTp.infinote"), true, false);
-    kDebug() << "tube client: listening";
+    qDebug() << "tube client: listening";
     m_tubeClient->setToAcceptAsTcp();
     connect(m_tubeClient.data(), SIGNAL(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)),
             this, SLOT(tubeAcceptedAsTcp(QHostAddress,quint16,QHostAddress,quint16,Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr)));
     connect(m_tubeClient.data(), SIGNAL(tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString)),
             this, SLOT(tubeClosed(Tp::AccountPtr,Tp::IncomingStreamTubeChannelPtr,QString,QString)));
-    kDebug() << m_tubeClient->tubes();
+    qDebug() << m_tubeClient->tubes();
 }
 
 void InfTubeClient::tubeClosed(Tp::AccountPtr , Tp::IncomingStreamTubeChannelPtr channel, QString , QString )
 {
-    kDebug() << "tube closed";
+    qDebug() << "tube closed";
     if ( m_channels.contains(channel) ) {
         m_channels.removeAll(channel);
     }
@@ -504,8 +504,8 @@ QVector<QString> documentsListFromParameters(const QVariantMap& parameters, bool
 
 void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QHostAddress , quint16 , Tp::AccountPtr account, Tp::IncomingStreamTubeChannelPtr tube)
 {
-    kDebug() << "Tube accepted as Tcp, port:" << port;
-    kDebug() << "parameters:" << tube->parameters();
+    qDebug() << "Tube accepted as Tcp, port:" << port;
+    qDebug() << "parameters:" << tube->parameters();
     // TODO error handling
     m_port = port;
     KUrl url = localUrl();
@@ -536,7 +536,7 @@ void InfTubeClient::tubeAcceptedAsTcp(QHostAddress /*address*/, quint16 port, QH
     // Notify that we should now watch this directory, for when files are added later on
     ensureNotifierModuleLoaded();
     url.setPath("/");
-    kDebug() << "emitting entered URL" << url;
+    qDebug() << "emitting entered URL" << url;
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(url.url());
 }
 

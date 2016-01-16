@@ -20,6 +20,7 @@
  */
 
 #include "manageddocument.h"
+#include <QMessageBox>
 
 #include "documentchangetracker.h"
 #include "common/connection.h"
@@ -36,16 +37,14 @@
 #include <libqinfinity/noderequest.h>
 #include <libqinfinity/noteplugin.h>
 
-#include <KMessageBox>
 #include <KLocalizedString>
 #include <KIO/Job>
-#include <KDialog>
-#include <KPushButton>
 
 #include <QTimer>
 #include <QFile>
 #include <QTemporaryFile>
 #include <QLabel>
+#include <QDialog>
 
 using namespace QInfinity;
 
@@ -65,7 +64,7 @@ ManagedDocument::ManagedDocument(KTextEditor::Document* document, BrowserModel* 
     , m_changeTracker(new DocumentChangeTracker(this))
     , m_connectionRetries(0)
 {
-    kDebug() << "now managing document" << document << document->url();
+    qDebug() << "now managing document" << document << document->url();
     // A document must not be edited before it is connected, since changes done will
     // not be synchronized with the server; this causes inconsistency.
     document->setReadWrite(false);
@@ -81,18 +80,18 @@ ManagedDocument::~ManagedDocument()
 bool ManagedDocument::saveCopy() const
 {
     if ( localSavePath().isEmpty() ) {
-        kDebug() << "invalid save url";
+        qDebug() << "invalid save url";
         return false;
     }
     QFile f(localSavePath());
     // TODO can we do this less manually?
     QByteArray contents = m_document->text().toUtf8();
     if ( ! f.open(QIODevice::WriteOnly) ) {
-        kDebug() << "failed to open" << localSavePath() << "for writing";
+        qDebug() << "failed to open" << localSavePath() << "for writing";
         return false;
     }
     if ( f.write(contents) != contents.size() ) {
-        kDebug() << "failed to write" << contents.size() << "bytes to" << localSavePath();
+        qDebug() << "failed to write" << contents.size() << "bytes to" << localSavePath();
         return false;
     }
     m_document->setModified(false);
@@ -120,7 +119,7 @@ Kobby::Connection* ManagedDocument::connection() const
 
 void ManagedDocument::unsubscribe()
 {
-    kDebug() << "should unsubscribe document";
+    qDebug() << "should unsubscribe document";
     m_ready = false;
     if ( m_infDocument ) {
         m_infDocument->leave();
@@ -140,12 +139,12 @@ bool ManagedDocument::isSubscribed() const
 
 void ManagedDocument::subscribe()
 {
-    if ( m_document->url().protocol() != "inf" ) {
+    if ( m_document->url().scheme() != "inf" ) {
         return;
     }
     m_subscribed = true;
-    kDebug() << "beginning subscription for" << m_document->url();
-    IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(KUrl::RemoveTrailingSlash), browser());
+    qDebug() << "beginning subscription for" << m_document->url();
+    IterLookupHelper* helper = new IterLookupHelper(m_document->url().path(), browser());
     connect(helper, SIGNAL(done(QInfinity::BrowserIter)),
             this, SLOT(finishSubscription(QInfinity::BrowserIter)));
     connect(helper, SIGNAL(failed()),
@@ -164,8 +163,9 @@ void ManagedDocument::lookupFailed()
     }
     else {
         unsubscribe();
-        KMessageBox::error(document()->widget(),
-                           i18n("Failed to open file %1, make sure it exists.", document()->url().url()));
+#warning TODO
+//         QMessageBox::critical(document()->widget(),
+//                               i18n("Failed to open file %1, make sure it exists.", document()->url().url()));
         document()->closeUrl();
     }
     m_connectionRetries += 1;
@@ -174,10 +174,10 @@ void ManagedDocument::lookupFailed()
 void ManagedDocument::subscriptionDone(QInfinity::BrowserIter iter, QPointer< QInfinity::SessionProxy > proxy)
 {
     if ( iter.id() != m_iterId ) {
-        kDebug() << "subscription done, but not for this document";
+        qDebug() << "subscription done, but not for this document";
         return;
     }
-    kDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
+    qDebug() << "subscription done, waiting for sync" << proxy->session()->status() << QInfinity::Session::Running;
     m_proxy = proxy;
     QObject::connect(proxy->session(), SIGNAL(statusChanged()),
                      this, SLOT(sessionStatusChanged()));
@@ -204,18 +204,19 @@ void ManagedDocument::unrecoverableError(Document* document, QString error)
         file.setAutoRemove(false);
         file.open();
         file.close();
-        m_document->saveAs(KUrl(file.fileName()));
+        m_document->saveAs(QUrl(file.fileName()));
     }
     if ( ! error.isEmpty() ) {
         // We must not use exec() here (so no KMessageBox!) or we will run into
         // nested-event-loop-network-code trouble.
-        KDialog* dlg = new KDialog();
-        dlg->setCaption(i18n("Collaborative text editing"));
+        QDialog* dlg = new QDialog();
+        dlg->setWindowTitle(i18n("Collaborative text editing"));
         QLabel* message = new QLabel(error);
         message->setWordWrap(true);
-        dlg->setMainWidget(message);
-        dlg->setButtons(KDialog::Cancel);
-        dlg->button(KDialog::Cancel)->setText(i18n("Disconnect"));
+#warning TODO
+//         dlg->setMainWidget(message);
+//         dlg->setButtons(QDialog::Cancel);
+//         dlg->button(QDialog::Cancel)->setText(i18n("Disconnect"));
         dlg->setAttribute(Qt::WA_DeleteOnClose);
         dlg->show();
     }
@@ -257,9 +258,9 @@ Session::Status ManagedDocument::sessionStatus() const
 void ManagedDocument::sessionStatusChanged()
 {
     m_sessionStatus = m_proxy->session()->status();
-    kDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
+    qDebug() << "session status changed to " << m_proxy->session()->status() << "on" << document()->url();
     if ( m_sessionStatus == Session::Closed ) {
-        kDebug() << "Session was closed, disconnecting.";
+        qDebug() << "Session was closed, disconnecting.";
         unrecoverableError(infTextDocument(),
                            i18n("The session for <br><b>%1</b><br> was closed by the remote host, "
                                 "possibly the file you were editing was deleted by someone.", document()->url().url()));
@@ -273,12 +274,12 @@ void ManagedDocument::subscriptionFailed(GError* error)
 
 void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
 {
-    kDebug() << "finishing subscription with iter " << iter.path();
+    qDebug() << "finishing subscription with iter " << iter.path();
     if ( iter.isDirectory() ) {
         unrecoverableError(infTextDocument(), i18n("The URL you tried to open is a directory, not a document."));
         return;
     }
-    if ( iter.noteType() != QString::fromAscii(m_notePlugin->infPlugin()->note_type) ) {
+    if ( iter.noteType() != QString::fromUtf8(m_notePlugin->infPlugin()->note_type) ) {
         unrecoverableError(infTextDocument(), i18n("The document type \"%1\" is not supported by this program.",
                                                    iter.noteType()));
         return;
@@ -287,7 +288,7 @@ void ManagedDocument::finishSubscription(QInfinity::BrowserIter iter)
     QObject::connect(browser.data(), SIGNAL(subscribeSession(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)),
                      this, SLOT(subscriptionDone(QInfinity::BrowserIter,QPointer<QInfinity::SessionProxy>)), Qt::UniqueConnection);
     m_textBuffer = new Kobby::KDocumentTextBuffer(document(), "utf-8", static_cast<Kobby::NotePlugin*>(m_notePlugin));
-    kDebug() << "created text buffer";
+    qDebug() << "created text buffer";
     m_iterId = iter.id();
     NodeRequest* req = browser->subscribeSession(iter, m_notePlugin, m_textBuffer);
     connect(req, SIGNAL(failed(GError*)), this, SLOT(subscriptionFailed(GError*)));

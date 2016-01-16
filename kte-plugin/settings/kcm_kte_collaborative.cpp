@@ -20,11 +20,12 @@
  */
 
 #include "kcm_kte_collaborative.h"
+#include <KLocalizedString>
 #include "ktecollaborativeplugin.h"
 
 #include "common/selecteditorwidget.h"
 
-#include <KDebug>
+#include <QDebug>
 #include <KMessageWidget>
 #include <QHBoxLayout>
 #include <QLayout>
@@ -34,10 +35,12 @@
 #include <QSlider>
 #include <QLabel>
 
+#include <KConfig>
+
 KCMKTECollaborative::KCMKTECollaborative(QWidget* parent, const QVariantList& args)
-    : KCModule(KteCollaborativePluginFactory::componentData(), parent, args)
+    : KCModule(parent, args)
 {
-    kDebug() << "creating kte_collaborative kcmodule";
+    qDebug() << "creating kte_collaborative kcmodule";
     // Set up config groups
     KConfig* config = new KConfig("ktecollaborative");
     m_colorsGroup = config->group("colors");

@@ -22,22 +22,21 @@
 #include "ktecollaborativepluginview.h"
 #include "manageddocument.h"
 #include "ktecollaborativeplugin.h"
-#include "ui/remotechangenotifier.h"
+// #include "ui/remotechangenotifier.h"
 #include "ui/sharedocumentdialog.h"
 #include "ui/opencollabdocumentdialog.h"
-#include "ui/statusoverlay.h"
+// #include "ui/statusoverlay.h"
 #include "documentchangetracker.h"
 #include "settings/kcm_kte_collaborative.h"
-#include "ktpintegration/inftube.h"
+// #include "ktpintegration/inftube.h"
 #include "common/utils.h"
 
 #include <libqinfinity/user.h>
 #include <libqinfinity/usertable.h>
-#include <KTp/Widgets/contact-grid-dialog.h>
-#include <KTp/Widgets/join-chat-room-dialog.h>
+// #include <KTp/Widgets/contact-grid-dialog.h>
+// #include <KTp/Widgets/join-chat-room-dialog.h>
 #include <ktexteditor/texthintinterface.h>
 #include <ktexteditor/containerinterface.h>
-#include <ktexteditor/editorchooser.h>
 
 #include <QLayout>
 #include <QLabel>
@@ -48,18 +47,19 @@
 #include <QCommandLinkButton>
 #include <QPaintEngine>
 #include <QMenu>
+#include <QShortcut>
 
 #include <KLocalizedString>
 #include <KActionCollection>
-#include <KIcon>
-#include <KAction>
-#include <KDialog>
+#include <QIcon>
+#include <QDialog>
 #include <KMessageBox>
 #include <KColorScheme>
 #include <KTextEditor/Editor>
-#include <KFileDialog>
+#include <QFileDialog>
 #include <KCMultiDialog>
 #include <KRun>
+#include <KConfigGroup>
 
 void setTextColor(QWidget* textWidget, KColorScheme::ForegroundRole colorRole) {
     QPalette p = textWidget->palette();
@@ -83,10 +83,10 @@ HorizontalUsersList::HorizontalUsersList(KteCollaborativePluginView* view, QWidg
 
     // Generate the dropdown menu for the "Users:" button
     QMenu* menu = new QMenu(m_prefix);
-    QAction* showOfflineAction = new QAction(KIcon("im-user-away"), i18n("Show offline users"), m_prefix);
+    QAction* showOfflineAction = new QAction(QIcon::fromTheme("im-user-away"), i18n("Show offline users"), m_prefix);
     showOfflineAction->setCheckable(true);
     showOfflineAction->setChecked(m_showOffline);
-    QAction* showInactiveAction = new QAction(KIcon("im-invisible-user"), i18n("Show users without contributions"), m_prefix);
+    QAction* showInactiveAction = new QAction(QIcon::fromTheme("im-invisible-user"), i18n("Show users without contributions"), m_prefix);
     showInactiveAction->setCheckable(true);
     showInactiveAction->setChecked(m_showInactive);
     menu->addAction(showOfflineAction);
@@ -344,61 +344,62 @@ KteCollaborativePluginView::KteCollaborativePluginView(KTextEditor::View* kteVie
     , KXMLGUIClient(kteView)
     , m_view(kteView)
     , m_statusBar(0)
-    , m_statusOverlay(0)
+//     , m_statusOverlay(0)
     , m_document(document)
 {
-    setComponentData(KteCollaborativePluginFactory::componentData());
+#warning component data
+//     setComponentData(KteCollaborativePluginFactory::componentData());
     setXMLFile("ktexteditor_collaborativeui.rc");
 
     // Set up the actions for the "Collaborative" menu
     m_openCollabDocumentAction = actionCollection()->addAction("kobby_open", this, SLOT(openActionClicked()));
     m_openCollabDocumentAction->setText(i18n("Open collaborative document..."));
     m_openCollabDocumentAction->setToolTip(i18n("Open a collaborative document from a manually specified server"));
-    m_openCollabDocumentAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+O")), KAction::DefaultShortcut);
-    m_openCollabDocumentAction->setIcon(KIcon("document-open"));
+    m_openCollabDocumentAction->setShortcut(QKeySequence("Ctrl+Meta+O"));
+    m_openCollabDocumentAction->setIcon(QIcon::fromTheme("document-open"));
 
     m_saveCopyAction = actionCollection()->addAction("kobby_save_copy", this, SLOT(saveCopyActionClicked()));
     m_saveCopyAction->setText(i18n("Save a local copy..."));
-    m_saveCopyAction->setHelpText(i18n("Save a local copy of the current document, but continue "
+    m_saveCopyAction->setStatusTip(i18n("Save a local copy of the current document, but continue "
                                        "synchronizing changes"));
-    m_saveCopyAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+S")), KAction::DefaultShortcut);
-    m_saveCopyAction->setIcon(KIcon("document-save-as"));
+    m_saveCopyAction->setShortcut(QKeySequence("Ctrl+Meta+S"));
+    m_saveCopyAction->setIcon(QIcon::fromTheme("document-save-as"));
 
     m_openFileManagerAction = actionCollection()->addAction("kobby_open_file_manager", this, SLOT(openFileManagerActionClicked()));
     m_openFileManagerAction->setText(i18n("Show shared documents folder"));
-    m_openFileManagerAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+F")), KAction::DefaultShortcut);
-    m_openFileManagerAction->setIcon(KIcon("system-file-manager"));
+    m_openFileManagerAction->setShortcut(QKeySequence("Ctrl+Meta+F"));
+    m_openFileManagerAction->setIcon(QIcon::fromTheme("system-file-manager"));
 
     m_shareWithContactAction = actionCollection()->addAction("kobby_share_with_contact", this, SLOT(shareActionClicked()));
     m_shareWithContactAction->setText(i18n("Share document..."));
-    m_shareWithContactAction->setHelpText(i18n("Collaboratively edit the current document with an "
+    m_shareWithContactAction->setStatusTip(i18n("Collaboratively edit the current document with an "
                                                "instant messenger contact"));
-    m_shareWithContactAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+E")), KAction::DefaultShortcut);
-    m_shareWithContactAction->setIcon(KIcon("document-share"));
-    m_shareWithContactAction->setEnabled(m_view->document()->url().protocol() != "inf");
+    m_shareWithContactAction->setShortcut(QKeySequence("Ctrl+Meta+E"));
+    m_shareWithContactAction->setIcon(QIcon::fromTheme("document-share"));
+    m_shareWithContactAction->setEnabled(m_view->document()->url().authority() != "inf");
 
     m_changeUserNameAction = actionCollection()->addAction("kobby_change_user_name", this, SLOT(changeUserActionClicked()));
     m_changeUserNameAction->setText(i18n("Change user name..."));
-    m_changeUserNameAction->setHelpText(i18n("Change your user name for the current document"));
-    m_changeUserNameAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+U")), KAction::DefaultShortcut);
-    m_changeUserNameAction->setIcon(KIcon("system-users"));
+    m_changeUserNameAction->setStatusTip(i18n("Change your user name for the current document"));
+    m_changeUserNameAction->setShortcut(QKeySequence("Ctrl+Meta+U"));
+    m_changeUserNameAction->setIcon(QIcon::fromTheme("system-users"));
 
     m_disconnectAction = actionCollection()->addAction("kobby_disconnect", this, SLOT(disconnectActionClicked()));
     m_disconnectAction->setText(i18n("Disconnect"));
-    m_disconnectAction->setHelpText(i18n("Disconnect from the collaborative server, and stop "
+    m_disconnectAction->setStatusTip(i18n("Disconnect from the collaborative server, and stop "
                                          "synchronizing changes to the document"));
-    m_disconnectAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+W")), KAction::DefaultShortcut);
-    m_disconnectAction->setIcon(KIcon("network-disconnect"));
+    m_disconnectAction->setShortcut(QKeySequence("Ctrl+Meta+W"));
+    m_disconnectAction->setIcon(QIcon::fromTheme("network-disconnect"));
 
     // TODO: disable this for non-collab documents
     m_clearHighlightAction = actionCollection()->addAction("kobby_clear_highlight", this, SLOT(clearHighlightActionClicked()));
     m_clearHighlightAction->setText(i18n("Clear user highlights"));
-    m_clearHighlightAction->setShortcut(KShortcut(QKeySequence("Ctrl+Meta+C")), KAction::DefaultShortcut);
-    m_clearHighlightAction->setIcon(KIcon("edit-clear"));
+    m_clearHighlightAction->setShortcut(QKeySequence("Ctrl+Meta+C"));
+    m_clearHighlightAction->setIcon(QIcon::fromTheme("edit-clear"));
 
     m_configureAction = actionCollection()->addAction("kobby_configure", this, SLOT(configureActionClicked()));
     m_configureAction->setText(i18n("Configure..."));
-    m_configureAction->setIcon(KIcon("configure"));
+    m_configureAction->setIcon(QIcon::fromTheme("configure"));
 
     m_actionsRequiringConnection << m_saveCopyAction << m_changeUserNameAction
                                  << m_disconnectAction << m_clearHighlightAction
@@ -416,12 +417,13 @@ void KteCollaborativePluginView::openFileManagerActionClicked()
     if ( ! m_document || ! m_document->document()->url().isValid() ) {
         return;
     }
-    KUrl url = m_document->document()->url();
-    if ( url.protocol() != "inf" ) {
+    QUrl url = m_document->document()->url();
+    if ( url.scheme() != "inf" ) {
         return;
     }
     // TODO: make sure to use a KDE file manager, since others don't use KIO?
-    KRun::runUrl(url.upUrl(), KMimeType::findByUrl(url.upUrl())->name(), m_view);
+#warning TODO
+//     KRun::runUrl(url.upUrl(), KMimeType::findByUrl(url.upUrl())->name(), m_view);
 }
 
 void KteCollaborativePluginView::configureActionClicked()
@@ -440,7 +442,7 @@ void KteCollaborativePluginView::clearHighlightActionClicked()
 
 void KteCollaborativePluginView::disableActions()
 {
-    foreach ( KAction* action, m_actionsRequiringConnection ) {
+    foreach ( auto action, m_actionsRequiringConnection ) {
         action->setEnabled(false);
     }
     if ( QAction* save = m_view->action("file_save") ) {
@@ -450,7 +452,7 @@ void KteCollaborativePluginView::disableActions()
 
 void KteCollaborativePluginView::enableActions()
 {
-    foreach ( KAction* action, m_actionsRequiringConnection ) {
+    foreach ( auto action, m_actionsRequiringConnection ) {
         action->setEnabled(true);
     }
     // When enabling the collaborative actions,
@@ -491,15 +493,16 @@ void KteCollaborativePluginView::enableUi()
     Document::LoadState loadState = document()->infTextDocument() ? document()->infTextDocument()->loadState()
                                                                   : Kobby::Document::Unloaded;
     if ( loadState != Kobby::Document::Complete ) {
-        m_statusOverlay = new StatusOverlay(m_view);
-        m_statusOverlay->move(0, 0);
-        connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
-                m_statusOverlay, SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
-        connect(m_document, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
-                m_statusOverlay, SLOT(loadStateChanged(Document*,Document::LoadState)));
-        connect(m_document, SIGNAL(synchroinzationProgress(double)),
-                m_statusOverlay, SLOT(progress(double)));
-        m_statusOverlay->show();
+#warning TODO status overlay
+//         m_statusOverlay = new StatusOverlay(m_view);
+//         m_statusOverlay->move(0, 0);
+//         connect(m_document->connection(), SIGNAL(statusChanged(Connection*,QInfinity::XmlConnection::Status)),
+//                 m_statusOverlay, SLOT(connectionStatusChanged(Connection*,QInfinity::XmlConnection::Status)));
+//         connect(m_document, SIGNAL(loadStateChanged(Document*,Document::LoadState)),
+//                 m_statusOverlay, SLOT(loadStateChanged(Document*,Document::LoadState)));
+//         connect(m_document, SIGNAL(synchroinzationProgress(double)),
+//                 m_statusOverlay, SLOT(progress(double)));
+//         m_statusOverlay->show();
     }
 
     m_statusBar = new CollaborativeStatusBar(this);
@@ -521,11 +524,12 @@ void KteCollaborativePluginView::enableUi()
     KConfig config("ktecollaborative");
     KConfigGroup group = config.group("notifications");
     if ( group.readEntry("enableTextHints", true) ) {
-        if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
-            iface->enableTextHints(300);
-            connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
-                    this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
-        }
+#warning TODO
+//         if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
+//             iface->enableTextHints(300);
+//             connect(m_view, SIGNAL(needTextHint(const KTextEditor::Cursor&,QString&)),
+//                     this, SLOT(textHintRequested(KTextEditor::Cursor,QString&)));
+//         }
     }
 
     if ( loadState == Kobby::Document::Complete ) {
@@ -540,50 +544,51 @@ void KteCollaborativePluginView::disableUi()
     delete m_statusBar;
     m_statusBar = 0;
 
-    delete m_statusOverlay;
-    m_statusOverlay = 0;
+//     delete m_statusOverlay;
+//     m_statusOverlay = 0;
 
     m_shareWithContactAction->setEnabled(true);
-    if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
-        iface->disableTextHints();
-    }
+#warning TODO
+//     if ( KTextEditor::TextHintInterface* iface = qobject_cast<KTextEditor::TextHintInterface*>(m_view) ) {
+//         iface->disableTextHints();
+//     }
     // Connections are disconnected automatically since m_document will be deleted
 }
 
 void KteCollaborativePluginView::disconnectActionClicked()
 {
-    m_document->document()->saveAs(KUrl(QDir::tempPath() + m_document->document()->url().encodedPath()));
+    m_document->document()->saveAs(QUrl(QDir::tempPath() + m_document->document()->url().path()));
 }
 
 void KteCollaborativePluginView::changeUserActionClicked()
 {
     if ( ! m_document || ! m_document->textBuffer() || ! m_document->textBuffer()->user() ) {
-        KMessageBox::error(m_view, i18n("You cannot change your user name for a document you are not subscribed to."));
+#warning TODO
+//         QMessageBox::error(m_view, i18n("You cannot change your user name for a document you are not subscribed to."));
         return;
     }
-    KDialog dialog(m_view);
-    dialog.setCaption(i18n("Change user name"));
-    dialog.setButtons(KDialog::Ok | KDialog::Cancel);
-    dialog.setDefaultButton(KDialog::Ok);
-    QWidget* widget = new QWidget(&dialog);
-    widget->setLayout(new QVBoxLayout);
-    widget->layout()->addWidget(new QLabel(i18n("Enter your new user name:")));
+    QDialog dialog(m_view);
+    dialog.setWindowTitle(i18n("Change user name"));
+    QDialogButtonBox buttons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    auto layout = new QVBoxLayout;
+    layout->addWidget(new QLabel(i18n("Enter your new user name:")));
     QLineEdit* lineEdit = new QLineEdit();
     lineEdit->setText(m_document->textBuffer()->user()->name());
-    widget->layout()->addWidget(lineEdit);
-    dialog.setMainWidget(widget);
+    layout->addWidget(lineEdit);
+    layout->addWidget(&buttons);
+    dialog.setLayout(layout);
     lineEdit->setFocus();
     lineEdit->selectAll();
-    if ( dialog.exec() == KDialog::Accepted ) {
+    if ( dialog.exec() == QDialog::Accepted ) {
         changeUserName(lineEdit->text());
     }
 }
 
 void KteCollaborativePluginView::changeUserName(const QString& newUserName)
 {
-    kDebug() << "new user name" << newUserName;
-    KUrl url = m_document->document()->url();
-    url.setUser(newUserName);
+    qDebug() << "new user name" << newUserName;
+    QUrl url = m_document->document()->url();
+    url.setUserName(newUserName);
     KTextEditor::Document* document = m_document->document();
     document->setModified(false);
     document->closeUrl();
@@ -594,8 +599,8 @@ void KteCollaborativePluginView::openActionClicked()
 {
     OpenCollabDocumentDialog* dialog = new OpenCollabDocumentDialog();
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    connect(dialog, SIGNAL(shouldOpenDocument(KUrl)),
-            this, SLOT(openFile(KUrl)));
+    connect(dialog, SIGNAL(shouldOpenDocument(QUrl)),
+            this, SLOT(openFile(QUrl)));
     dialog->show();
 }
 
@@ -606,10 +611,10 @@ void KteCollaborativePluginView::saveCopyActionClicked()
     }
     // Suggest the original URL of the document in the save dialog.
     // Not necessarily valid, but that doesn't hurt.
-    KUrl suggestedUrl(m_document->document()->property("oldUrl").toString());
+    QUrl suggestedUrl(m_document->document()->property("oldUrl").toString());
     if ( m_document->localSavePath().isEmpty() ) {
-        const QString saveUrl = KFileDialog::getSaveFileName(suggestedUrl);
-        kDebug() << "saving to url" << saveUrl;
+        const QString saveUrl = QFileDialog::getSaveFileName(nullptr, i18n("Save as"), suggestedUrl.path());
+        qDebug() << "saving to url" << saveUrl;
         if ( saveUrl.isEmpty() ) {
             return;
         }
@@ -628,7 +633,7 @@ void KteCollaborativePluginView::shareActionClicked()
         if ( KMessageBox::questionYesNo(m_view, question) != KMessageBox::Yes ) {
             return;
         }
-        QString saveName = KFileDialog::getSaveFileName();
+        QString saveName = QFileDialog::getSaveFileName();
         if ( saveName.isEmpty() ) {
             return;
         }
@@ -636,17 +641,17 @@ void KteCollaborativePluginView::shareActionClicked()
             return;
         }
     }
-    Tp::registerTypes();
+//     Tp::registerTypes();
     ShareDocumentDialog dialog(m_view);
-    connect(&dialog, SIGNAL(shouldOpenDocument(KUrl)),
-            m_view->document(), SLOT(openUrl(KUrl)));
+    connect(&dialog, SIGNAL(shouldOpenDocument(QUrl)),
+            m_view->document(), SLOT(openUrl(QUrl)));
     dialog.exec();
 }
 
-void KteCollaborativePluginView::openFile(KUrl url)
+void KteCollaborativePluginView::openFile(QUrl url)
 {
-    kDebug() << "opening file" << url;
-    KTextEditor::Editor* editor = KTextEditor::EditorChooser::editor();
+    qDebug() << "opening file" << url;
+    KTextEditor::Editor* editor = KTextEditor::Editor::instance();
     KTextEditor::ContainerInterface* iface = qobject_cast<KTextEditor::ContainerInterface*>(editor);
     KTextEditor::Document* document = 0;
     if ( iface ) {
@@ -673,8 +678,8 @@ void KteCollaborativePluginView::remoteTextChanged(const KTextEditor::Range rang
     KConfig config("ktecollaborative");
     if ( config.group("notifications").readEntry("displayWidgets", true) ) {
         const QColor color = ColorHelper::colorForUsername(user->name(), m_view, m_document->changeTracker()->usedColors());
-        RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(),
-                                                    user, color);
+//         RemoteChangeNotifier::addNotificationWidget(m_view, removal ? range.start() : range.end(),
+//                                                     user, color);
     }
 }
 
@@ -689,7 +694,7 @@ void KteCollaborativePluginView::documentReady(ManagedDocument* doc)
             statusBar(), SLOT(usersChanged()));
     m_statusBar->usersChanged();
     statusBar()->sessionFullyReady();
-    m_statusOverlay = 0; // will delete itself
+//     m_statusOverlay = 0; // will delete itself
 
     enableActions();
 }

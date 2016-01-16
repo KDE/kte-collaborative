@@ -28,12 +28,11 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 #include <QVariant>
+#include <QStandardPaths>
 
 #include <KLocalizedString>
-#include <KDebug>
-#include <KPushButton>
 #include <kconfig.h>
-#include <kstandarddirs.h>
+#include <KConfigGroup>
 
 SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f)
@@ -61,7 +60,7 @@ SelectEditorWidget::SelectEditorWidget(const QString& selectedEntry, QWidget* pa
         buttonsWidget->layout()->addWidget(radio);
 
         const QString appname = choice.split(' ').first();
-        if ( KStandardDirs::findExe(appname).isEmpty() ) {
+        if ( QStandardPaths::findExecutable(appname).isEmpty() ) {
             // The application is not actually installed, forbid selecting it
             radio->setChecked(false);
             radio->setEnabled(false);
@@ -106,11 +105,13 @@ SelectEditorWidget::EditorEntry SelectEditorWidget::selectedEntry() const
 }
 
 SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
-    : KDialog(parent, flags)
+    : QDialog(parent, flags)
 {
     QWidget* main = new QWidget();
     main->setLayout(new QVBoxLayout);
-    setMainWidget(main);
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    setLayout(mainLayout);
+    mainLayout->addWidget(main);
     QLabel* text = new QLabel(i18n("It seems you are trying to open a collaborative document for the first time."));
     text->setWordWrap(true);
     main->layout()->addWidget(text);
@@ -118,8 +119,9 @@ SelectEditorDialog::SelectEditorDialog(QWidget* parent, Qt::WindowFlags flags)
     m_selectWidget = new SelectEditorWidget();
     main->layout()->addWidget(m_selectWidget);
 
-    button(KDialog::Ok)->setText(i18n("Continue"));
-    button(KDialog::Cancel)->setText(i18n("Cancel and reject document"));
+#warning TODO
+//     okButton->setText(i18n("Continue"));
+//     button(QDialog::Cancel)->setText(i18n("Cancel and reject document"));
 }
 
 SelectEditorWidget::EditorEntry SelectEditorDialog::selectedEntry() const
@@ -132,7 +134,7 @@ void SelectEditorDialog::accept()
     KConfig config("ktecollaborative");
     KConfigGroup group(config.group("applications"));
     group.writeEntry("editor", m_selectWidget->selectedEntry().command);
-    KDialog::accept();
+    QDialog::accept();
 }
 
 #include "selecteditorwidget.moc"

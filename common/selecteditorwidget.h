@@ -25,9 +25,9 @@
 
 #include <QWidget>
 #include <QMap>
-#include <KDialog>
+#include <QDialog>
 
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 
 class QButtonGroup;
 class QCheckBox;
@@ -63,7 +63,7 @@ private:
 /**
  * @brief Simple dialog containing the above widget.
  */
-class KTECOLLABORATIVECOMMON_EXPORT SelectEditorDialog : public KDialog
+class KTECOLLABORATIVECOMMON_EXPORT SelectEditorDialog : public QDialog
 {
 Q_OBJECT
 public:

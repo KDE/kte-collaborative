@@ -60,7 +60,7 @@ int KDE_EXPORT kdemain( int argc, char **argv )
     QCoreApplication app(argc, argv);
     KComponentData componentData("infinity", "kio_infinity");
 
-    kDebug() << "starting infinity kioslave";
+    qDebug() << "starting infinity kioslave";
     if (argc != 4) {
         kWarning() << "wrong arguments count";
         exit(-1);
@@ -73,7 +73,7 @@ int KDE_EXPORT kdemain( int argc, char **argv )
     InfinityProtocol slave(argv[2], argv[3]);
     slave.dispatchLoop();
 
-    kDebug() << "slave exiting";
+    qDebug() << "slave exiting";
     return app.exec();
 }
 
@@ -84,13 +84,13 @@ InfinityProtocol::InfinityProtocol(const QByteArray& pool_socket, const QByteArr
     , SlaveBase("inf", pool_socket, app_socket)
     , m_notePlugin(0)
 {
-    kDebug() << "constructing infinity kioslave";
+    qDebug() << "constructing infinity kioslave";
     connect(this, SIGNAL(requestError(GError*)), this, SLOT(slotRequestError(GError*)));
 }
 
 void InfinityProtocol::get(const KUrl& url )
 {
-    kDebug() << "GET " << url.url();
+    qDebug() << "GET " << url.url();
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -114,7 +114,7 @@ void InfinityProtocol::get(const KUrl& url )
 
 void InfinityProtocol::stat(const KUrl& url)
 {
-    kDebug() << "STAT " << url.url();
+    qDebug() << "STAT " << url.url();
 
     if ( url.path().isEmpty() ) {
         KUrl newUrl(url);
@@ -188,7 +188,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
     timeout.start();
     loop.exec();
     if ( ! timeout.isActive() || ! m_connection->xmppConnection() ) {
-        kDebug() << "failed to look up hostname";
+        qDebug() << "failed to look up hostname";
         error(KIO::ERR_UNKNOWN_HOST, peer.hostname);
         return false;
     }
@@ -201,7 +201,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
             &loop, SLOT(quit()));
     loop.exec();
     if ( ! timeout.isActive() || browser()->connectionStatus() != INF_BROWSER_OPEN ) {
-        kDebug() << "failed to connect";
+        qDebug() << "failed to connect";
         error(KIO::ERR_COULD_NOT_CONNECT, QString("%1:%2").arg(peer.hostname, QString::number(peer.port)));
         return false;
     }
@@ -213,7 +213,7 @@ bool InfinityProtocol::doConnect(const Peer& peer)
 
 void InfinityProtocol::mimetype(const KUrl & url)
 {
-    kDebug() << "MIMETYPE" << url;
+    qDebug() << "MIMETYPE" << url;
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -223,7 +223,7 @@ void InfinityProtocol::mimetype(const KUrl & url)
 
 void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flags*/)
 {
-    kDebug() << "PUT" << url;
+    qDebug() << "PUT" << url;
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -237,7 +237,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
         bytesRead = readData(buffer);
         initialContents.append(buffer);
         size += bytesRead;
-        kDebug() << "read" << bytesRead << "bytes";
+        qDebug() << "read" << bytesRead << "bytes";
     }
 #ifdef ENABLE_TAB_HACK
     initialContents = initialContents.replace('\t', "    ");
@@ -248,7 +248,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
     }
     QInfinity::BrowserIter iter = iterForUrl(url.upUrl());
     QInfinity::NodeRequest* req = 0;
-    kDebug() << "adding note with content:" << size << "bytes";
+    qDebug() << "adding note with content:" << size << "bytes";
     if ( size > 0 ) {
         // There is actually data to add to the node
         InfUser* user = INF_USER(g_object_new(
@@ -302,7 +302,7 @@ void InfinityProtocol::put(const KUrl& url, int /*permissions*/, JobFlags /*flag
 
 void InfinityProtocol::del(const KUrl& url, bool /*isfile*/)
 {
-    kDebug() << "DELETE" << url;
+    qDebug() << "DELETE" << url;
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -323,7 +323,7 @@ void InfinityProtocol::del(const KUrl& url, bool /*isfile*/)
 
 void InfinityProtocol::mkdir(const KUrl& url, int /*permissions*/)
 {
-    kDebug() << "MKDIR" << url;
+    qDebug() << "MKDIR" << url;
     if ( ! doConnect(Peer(url)) ) {
         return;
     }
@@ -364,7 +364,7 @@ QInfinity::BrowserIter InfinityProtocol::iterForUrl(const KUrl& url, bool* ok)
 
 void InfinityProtocol::listDir(const KUrl &url)
 {
-    kDebug() << "LIST DIR" << url;
+    qDebug() << "LIST DIR" << url;
 
     OrgKdeKDirNotifyInterface::emitEnteredDirectory(url.url());
 

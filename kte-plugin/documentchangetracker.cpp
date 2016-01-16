@@ -34,7 +34,7 @@ DocumentChangeTracker::DocumentChangeTracker(ManagedDocument* const document)
     , m_document(document)
     , m_iface(qobject_cast<KTextEditor::MovingInterface*>(document->document()))
 {
-    kDebug() << "change tracker created for" << document->document()->url() << "moving interface:" << m_iface;
+    qDebug() << "change tracker created for" << document->document()->url() << "moving interface:" << m_iface;
     connect(m_document, SIGNAL(synchronizationBegins(ManagedDocument*)),
             this, SLOT(setupSignals()));
     m_existingColors[QLatin1String("Initial document contents")] = QColor(Qt::transparent);
@@ -119,10 +119,10 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
             KTextEditor::Range newlineRange(line, m_document->document()->lineLength(line), line + 1, 0);
             if ( KTextEditor::MovingRange* existing = rangeAt(newlineRange) ) {
                 if ( existing->contains(newlineRange) ) {
-                    kDebug() << "splitting range" << *existing << newlineRange;
+                    qDebug() << "splitting range" << *existing << newlineRange;
                     KTextEditor::Range newRange(KTextEditor::Cursor(existing->end().line(), 0),
                                                 KTextEditor::Cursor(existing->end().line(), existing->end().column()));
-                    kDebug() << newRange;
+                    qDebug() << newRange;
                     addHighlightedRange(QString(), newRange,
                                         existing->attribute()->background().color());
                     existing->setRange(existing->start(),
@@ -154,8 +154,10 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
         return;
     }
 
-    const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView(),
-                                                            m_existingColors);
+#warning TODO color
+//     const QColor& userColor = ColorHelper::colorForUsername(user->name(), m_document->document()->activeView(),
+//                                                             m_existingColors);
+    const QColor userColor(Qt::red);
 
     KTextEditor::MovingRange* existing = rangeAt(range);
 
@@ -177,7 +179,7 @@ void DocumentChangeTracker::userChangedText(const KTextEditor::Range& range, QIn
                 return;
             }
             // Should not reach here, if I have understood the interface correctly :)
-            kWarning() << "whops, strange things are happening -- fix me";
+            qWarning() << "whops, strange things are happening -- fix me";
     //             Q_ASSERT(false);
         }
         else if ( existing->contains(range) ) {

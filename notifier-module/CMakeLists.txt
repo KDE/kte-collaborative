@@ -11,7 +11,7 @@ set(infinotenotifier_SRCS
    infinotenotifier.cpp
 )
 
-kde4_add_executable(infinotenotifier ${infinotenotifier_SRCS})
+add_executable(infinotenotifier ${infinotenotifier_SRCS})
 
 target_link_libraries(infinotenotifier
                       ktecollaborativecommon

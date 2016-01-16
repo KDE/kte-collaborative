@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_NOTEPLUGIN_H
 #define KOBBY_NOTEPLUGIN_H
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 
 #include <libqinfinity/session.h>
 #include <libqinfinity/noteplugin.h>

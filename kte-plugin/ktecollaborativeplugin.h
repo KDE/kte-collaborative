@@ -28,8 +28,6 @@
 #include <KTextEditor/Plugin>
 #include <KTextEditor/View>
 
-#include <KJob>
-#include <KUrl>
 #include <KIO/Job>
 #include <KPluginFactory>
 
@@ -109,17 +107,17 @@ private:
      * @param documentUrl The URL to get a connection for. Hostname and port are read from it.
      * @return Kobby::Connection* The connection. Not necessarily established, but never null.
      */
-    Connection* ensureConnection(const KUrl& documentUrl);
+    Connection* ensureConnection(const QUrl& documentUrl);
 
     /**
      * @brief Returns a unique name for a connection to the host of the given URL
      */
-    const QString connectionName(const KUrl& url);
+    const QString connectionName(const QUrl& url);
 
     /**
      * @brief Returns the URLs port, or the default infinity port (6523) if none is set
      */
-    unsigned short portForUrl(const KUrl& url);
+    unsigned short portForUrl(const QUrl& url);
 
 public slots:
     /**
@@ -202,8 +200,6 @@ private:
     // Maps KTextEditor::View instances to KobbyPluginView instances.
     QMap<KTextEditor::View*, KteCollaborativePluginView*> m_views;
 };
-
-K_PLUGIN_FACTORY_DECLARATION(KteCollaborativePluginFactory)
 
 #endif // _KOBBY_PLUGIN_H_
 

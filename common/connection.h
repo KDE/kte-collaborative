@@ -17,7 +17,7 @@
 
 #ifndef KOBBY_CONNECTION_H
 #define KOBBY_CONNECTION_H
-#include "ktecollaborative_export.h"
+#include "ktecollaborativecommon_export.h"
 #include <libqinfinity/xmlconnection.h>
 
 #include <QObject>

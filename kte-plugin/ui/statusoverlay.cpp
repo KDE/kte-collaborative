@@ -24,7 +24,7 @@
 #include <libqinfinity/session.h>
 
 #include <KStandardDirs>
-#include <KDebug>
+#include <QDebug>
 #include <KTextEditor/View>
 #include <KTextEditor/Document>
 #include <KLocalizedString>
@@ -45,7 +45,7 @@ StatusOverlay::StatusOverlay(KTextEditor::View* parent)
         kWarning() << "error creating overlay";
         return;
     }
-    kDebug() << "view size:" << m_view->size();
+    qDebug() << "view size:" << m_view->size();
     m_view->installEventFilter(this);
     resizeToView();
     displayText(i18n("Initializing..."));

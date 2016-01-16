@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 #include "inftube.h"
-#include <KDebug>
+#include <QDebug>
 #include <KCmdLineArgs>
 #include <KAboutData>
 #include <KApplication>
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
                      KAboutData::License_GPL, ki18n("(C) 2013 Sven Brauch"), KLocalizedString(), 0, "svenbrauch@gmail.com");
     about.addAuthor( ki18n("Sven Brauch"), KLocalizedString(), "svenbrauch@gmail.com" );
     KCmdLineArgs::init(argc, argv, &about);
-    kDebug() << "Starting tube acceptor";
+    qDebug() << "Starting tube acceptor";
 
     qRegisterMetaType< ChannelList >("ChannelList");
     qDBusRegisterMetaType< ChannelList >();
